@@ -52,6 +52,9 @@ public static class TourLogic
                 e.ShowCloseButton,
             });
 
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommandMList((TourStepEntity ts) => ts.CssSteps, Database.MListQuery((TourStepEntity ts) => ts.CssSteps).Where(mle => mle.Element.Property.Is(property)));
+
         SymbolLogic<TourTriggerSymbol>.Start(sb, () => RegisteredTourTriggers.ToHashSet());
 
         ToursByTrigger = sb.GlobalLazy(() =>

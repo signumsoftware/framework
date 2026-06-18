@@ -75,24 +75,40 @@ export namespace DashboardClient {
 
     Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
+    AppContext.clearSettingsActions.push(DashboardClient.clearDashboardPageActions);
+
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
     Navigator.addSettings(new EntitySettings(CustomPartEntity, e => import('./Admin/CustomPart')));
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
-    Navigator.addSettings(new EntitySettings(ToolbarMenuPartEntity, e => import('./Admin/ToolbarMenuPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
     Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
     Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
 
+    if (ToolbarMenuPartEntity.tryTypeInfo()) {
+      Navigator.addSettings(new EntitySettings(ToolbarMenuPartEntity, e => import('./Admin/ToolbarMenuPart')));
+      var tm = Navigator.getSettings(ToolbarMenuEntity);
+      if (tm == null)
+        throw new Error("Call ToolbarClient before DasboardClient");
+      tm.overrideView(rm => rm.insertAfterElement(SearchValueLine, scl => (scl.props.findOptions as FindOptions)?.queryName == ToolbarSwitcherEntity, scl => [
+        <SearchValueLine ctx={scl.props.ctx} findOptions={{
+          queryName: DashboardEntity,
+          filterOptions: [
+            { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: rm.ctx.value },
+          ]
+        }} />
+      ]));
+
+      registerRenderer(ToolbarMenuPartEntity, {
+        component: () => import('./View/ToolbarMenuPart').then(a => a.default),
+        icon: () => ({ icon: "list", iconColor: "#B9770E" })
+      });
+    }
+
     ToolbarClient.registerConfig(new DashboardToolbarConfig());
     OmniboxClient.registerProvider(new DashboardOmniboxProvider());
 
-    if (ToolbarMenuPartEntity.tryTypeInfo())
-      Navigator.getSettings(ToolbarMenuEntity)?.overrideView(vr => {
-        vr.insertAfterElement(SearchValueLine, a => (a.props.findOptions as FindOptions).queryName === ToolbarSwitcherEntity, a => [<SearchValueLine ctx={vr.ctx.subCtx({ labelColumns: 4 })}
-          findOptions={{ queryName: DashboardEntity, filterOptions: [{ token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: vr.ctx.value }] }} />]);
-      });
 
     Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
       isVisible: () => false,
@@ -115,10 +131,7 @@ export namespace DashboardClient {
       withPanel: () => false,
     });
 
-    registerRenderer(ToolbarMenuPartEntity, {
-      component: () => import('./View/ToolbarMenuPart').then(a => a.default),
-      icon: () => ({ icon: "list", iconColor: "#B9770E" })
-    });
+
 
     registerRenderer(ImagePartEntity, {
       component: () => import('./View/ImagePartView').then(a => a.default),
@@ -299,6 +312,10 @@ export namespace DashboardClient {
   }
 
   export const onDashboardPageActions: Array<(dashboard: DashboardEntity) => React.ReactElement | undefined> = [];
+
+  export function clearDashboardPageActions(): void {
+    onDashboardPageActions.clear();
+  }
 
   export namespace Options {
 

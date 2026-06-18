@@ -34,58 +34,35 @@ public class TourEntity : Entity, IUserAssetEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
-        string forEntityName;
-        string? forUserAssetGuid = null;
-
-        if (Trigger.Entity is TypeEntity)
-        {
-            forEntityName = ((Lite<TypeEntity>)(object)Trigger).RetrieveFromCache().CleanName;
-        }
-        else if (Trigger.Entity is TourTriggerSymbol symbol)
-        {
-            forEntityName = symbol.Key;
-        }
-        else if (Trigger.Entity is IUserAssetEntity userAsset)
-        {
-            forEntityName = TypeLogic.GetCleanName(Trigger.EntityType);
-            forUserAssetGuid = ctx.Include(userAsset).ToString();
-        }
-        else
-        {
-            forEntityName = Trigger.ToString()!;
-        }
+        var triggerValue =
+            Trigger is Lite<TypeEntity> typeEntity ? typeEntity.RetrieveFromCache().CleanName :
+            Trigger is Lite<TourTriggerSymbol> symbol ? ctx.RetrieveLite(symbol).Key :
+            Trigger is Lite<IUserAssetEntity> userAsset ? TypeLogic.GetCleanName(Trigger.EntityType) + "|" + ctx.RetrieveLite(userAsset).Guid :
+            Trigger.ToString()!;
 
         return new XElement("Tour",
             new XAttribute("Guid", Guid),
-            new XElement("ForEntity", forEntityName),
-            forUserAssetGuid == null ? null! : new XElement("ForUserAssetGuid", forUserAssetGuid),
-            new XElement("Steps", Steps.Select(s => s.ToXml(ctx))),
-            new XElement("ShowProgress", ShowProgress),
-            new XElement("Animate", Animate),
-            new XElement("ShowCloseButton", ShowCloseButton));
+            new XAttribute("Trigger", triggerValue),
+            new XAttribute("ShowProgress", ShowProgress),
+            new XAttribute("Animate", Animate),
+            new XAttribute("ShowCloseButton", ShowCloseButton),
+            Steps.Select(s => s.ToXml(ctx)));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        var forEntityKey = element.Element("ForEntity")!.Value;
-        var forUserAssetGuid = element.Element("ForUserAssetGuid")?.Value;
+        var triggerValue = element.Attribute("Trigger")!.Value;
 
-        if (forUserAssetGuid != null)
-        {
-            Trigger = ((Entity)ctx.GetEntity(Guid.Parse(forUserAssetGuid))).ToLite();
-        }
-        else
-        {
-            Trigger =
-                (Lite<Entity>)ctx.GetTypeLite(forEntityKey) ??
-                ctx.GetSymbol<TourTriggerSymbol>(forEntityKey)?.ToLite() ??
-                throw new InvalidOperationException($"ForEntity '{forEntityKey}' not found");
-        }
+        Trigger = triggerValue.Contains('|')
+            ? ctx.RetrieveUserAssetLite(ctx.GetType(triggerValue.Before('|')).ToType(), Guid.Parse(triggerValue.After('|')))
+            : (Lite<Entity>?)ctx.TryGetTypeLite(triggerValue)
+              ?? ctx.TryGetSymbol<TourTriggerSymbol>(triggerValue)?.ToLite()
+              ?? throw new InvalidOperationException($"Trigger '{triggerValue}' not found");
 
-        Steps.Synchronize(element.Element("Steps")!.Elements().ToList(), (s, x) => s.FromXml(x, ctx, this));
-        ShowProgress = bool.Parse(element.Element("ShowProgress")!.Value);
-        Animate = element.Element("Animate") != null ? bool.Parse(element.Element("Animate")!.Value) : true;
-        ShowCloseButton = element.Element("ShowCloseButton") != null ? bool.Parse(element.Element("ShowCloseButton")!.Value) : true;
+        Steps.Synchronize(element.Elements("TourStep").ToList(), (s, x) => s.FromXml(x, ctx, this));
+        ShowProgress = bool.Parse(element.Attribute("ShowProgress")!.Value);
+        Animate = element.Attribute("Animate")?.Value.Let(bool.Parse) ?? true;
+        ShowCloseButton = element.Attribute("ShowCloseButton")?.Value.Let(bool.Parse) ?? true;
     }
 }
 
@@ -138,22 +115,22 @@ public class TourStepEntity : Entity, ICanBeOrdered
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("TourStep",
-            new XElement("CssSteps", CssSteps.Select(s => s.ToXml(ctx))),
-            Title == null ? null! : new XElement("Title", Title),
+            Title == null ? null! : new XAttribute("Title", Title),
+            Side == null ? null! : new XAttribute("Side", Side.ToString()!),
+            Align == null ? null! : new XAttribute("Align", Align.ToString()!),
+            Click == null ? null! : new XAttribute("Click", Click.ToString()!),
             Description == null ? null! : new XElement("Description", Description),
-            Side == null ? null! : new XElement("Side", Side.ToString()),
-            Align == null ? null! : new XElement("Align", Align.ToString()),
-            Click == null ? null! : new XElement("Click", Click.ToString()));
+            CssSteps.Select(s => s.ToXml(ctx)));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx, TourEntity tour)
     {
-        CssSteps.Synchronize(element.Element("CssSteps")?.Elements().ToList() ?? new List<XElement>(), (s, x) => s.FromXml(x, ctx, tour));
-        Title = element.Element("Title")!.Value;
+        Title = element.Attribute("Title")!.Value;
+        Side = element.Attribute("Side")?.Value.ToEnum<PopoverSide>();
+        Align = element.Attribute("Align")?.Value.ToEnum<PopoverAlign>();
+        Click = element.Attribute("Click")?.Value.ToEnum<ClickTrigger>();
         Description = element.Element("Description")!.Value;
-        Side = element.Element("Side") != null ? element.Element("Side")!.Value.ToEnum<PopoverSide>() : null;
-        Align = element.Element("Align") != null ? element.Element("Align")!.Value.ToEnum<PopoverAlign>() : null;
-        Click = element.Element("Click") != null ? element.Element("Click")!.Value.ToEnum<ClickTrigger>() : null;
+        CssSteps.Synchronize(element.Elements("CssStep").ToList(), (s, x) => s.FromXml(x, ctx, tour));
     }
 }
 
@@ -217,31 +194,36 @@ public class CssStepEmbedded : EmbeddedEntity
 
     public XElement ToXml(IToXmlContext ctx)
     {
+        var toolbarContent =
+            ToolbarContent is Lite<QueryEntity> query ? ctx.RetrieveLite(query).Key :
+            ToolbarContent is Lite<PermissionSymbol> perm ? ctx.RetrieveLite(perm).Key :
+            ToolbarContent != null ? TypeLogic.GetCleanName(ToolbarContent.EntityType) + "|" + ((IUserAssetEntity)ToolbarContent.Retrieve()).Guid :
+            null;
+
         return new XElement("CssStep",
-            new XElement("Type", Type.ToString()),
-            CssSelector == null ? null! : new XElement("CssSelector", CssSelector),
-            Property == null ? null! : new XElement("Property", Property),
-            ToolbarContent == null ? null! : new XElement("ToolbarContent", ctx.RetrieveLite(ToolbarContent)),
-            DashboardPart == null ? null! : new XElement("DashboardPart", DashboardPart),
-            TableColumn == null ? null! : new XElement("TableColumn", TableColumn)
-            );
+            new XAttribute("Type", Type.ToString()),
+            CssSelector == null ? null! : new XAttribute("CssSelector", CssSelector),
+            Property == null ? null! : new XAttribute("Property", Property.ToString()),
+            toolbarContent == null ? null! : new XAttribute("ToolbarContent", toolbarContent),
+            DashboardPart == null ? null! : new XAttribute("DashboardPart", DashboardPart),
+            TableColumn == null ? null! : new XAttribute("TableColumn", TableColumn));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx, TourEntity userAsset)
     {
-        Type = element.Element("Type")!.Value.ToEnum<CssStepType>();
-        CssSelector = element.Element("CssSelector")?.Value;
-        Property = element.Element("Property")?.Let(e => userAsset.Trigger is Lite<TypeEntity> typeEntity
-            ? ctx.GetPropertyRoute(typeEntity.RetrieveFromCache(), e.Value)
+        Type = element.Attribute("Type")!.Value.ToEnum<CssStepType>();
+        CssSelector = element.Attribute("CssSelector")?.Value;
+        Property = element.Attribute("Property")?.Let(a => userAsset.Trigger is Lite<TypeEntity> typeEntity
+            ? ctx.GetPropertyRoute(typeEntity.RetrieveFromCache(), a.Value)
             : null);
-        var content = element.Element("Content")?.Value;
+        var content = element.Attribute("ToolbarContent")?.Value;
         ToolbarContent = !content.HasText() ? null :
+           content.Contains('|') ? ctx.RetrieveUserAssetLite(ctx.GetType(content.Before('|')).ToType(), Guid.Parse(content.After('|'))) :
            (Lite<Entity>?)ctx.TryGetQuery(content)?.ToLite() ??
            (Lite<Entity>?)SymbolLogic<PermissionSymbol>.TryToSymbol(content)?.ToLite() ??
-           (Lite<Entity>?)ctx.ParseLite(content, userAsset, PropertyRoute.Construct((TourStepEntity e) => e.CssSteps.First().ToolbarContent)) ??
-           throw new InvalidOperationException($"Content '{content}' not found");
-        DashboardPart = element.Element("DashboardPart")?.Value.Let(v => Guid.Parse(v));
-        TableColumn = element.Element("TableColumn")?.Value;
+           throw new InvalidOperationException($"ToolbarContent '{content}' not found");
+        DashboardPart = element.Attribute("DashboardPart")?.Value.Let(Guid.Parse);
+        TableColumn = element.Attribute("TableColumn")?.Value;
     }
 }
 

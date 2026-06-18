@@ -56,9 +56,20 @@ public static class QueryTokenSynchronizer
 
     public static FixTokenResult FixToken(TokenSyncContext ctx, string original, out QueryToken? token, QueryDescription qd, SubTokensOptions options, string? remainingText, bool allowRemoveToken, bool allowReGenerate, bool forceChange = false)
     {
-        if (TryParseRememberToken(ctx, original, qd, options, out QueryToken? current))
+        if (TryParseRememberToken(ctx, original, qd, options, allowRemoveToken, out QueryToken? current))
         {
-            if (current!.FullKey() != original)
+            if (current == null)
+            {
+                // Previously recorded as removed (only reachable when allowRemoveToken = true).
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
+                SafeConsole.WriteColor(ConsoleColor.DarkRed, " (token removed)");
+                Console.WriteLine(remainingText);
+                token = null;
+                return FixTokenResult.RemoveToken;
+            }
+
+            if (current.FullKey() != original)
             {
                 SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
                 Console.Write(" -> ");
@@ -100,6 +111,8 @@ public static class QueryTokenSynchronizer
                     if (!allowRemoveToken)
                         throw new InvalidOperationException("Unexpected RemoveToken");
 
+                    RecordTokenRename(ctx.Recording!, QueryUtils.GetKey(qd.QueryName), isQuery: true, old: original, @new: "");
+
                     Console.SetCursorPosition(0, Console.CursorTop - 1);
                     SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
                     SafeConsole.WriteColor(ConsoleColor.DarkRed, " (token removed)");
@@ -123,22 +136,22 @@ public static class QueryTokenSynchronizer
         }
     }
 
-    public static FixTokenResult FixValue(TokenSyncContext ctx, string queryKey, string tokenString, Type targetType, ref string? valueString, bool allowRemoveToken, bool isList, bool fixInstead, Type? currentEntityType)
+    public static FixTokenResult FixValue(TokenSyncContext ctx, string queryKey, string tokenString, Type targetType, ref string? valueString, bool allowRemoveToken, bool isListOrPair, bool fixInstead, Type? currentEntityType)
     {
-        var res = FilterValueConverter.IsValidExpression(valueString, targetType, isList, currentEntityType);
+        var res = FilterValueConverter.IsValidExpression(valueString, targetType, isListOrPair, currentEntityType);
         if (res is Result<Type>.Success)
             return FixTokenResult.Nothing;
 
         DelayedConsole.Flush();
 
         // List values: split on '|', recurse per item, recompose.
-        if (isList && valueString!.Contains('|'))
+        if (isListOrPair && valueString!.Contains('|'))
         {
             var changes = new List<string?>();
             foreach (var str in valueString.Split('|'))
             {
                 string? s = str;
-                var inner = FixValue(ctx, queryKey, tokenString, targetType, ref s, allowRemoveToken, isList: false, fixInstead, currentEntityType);
+                var inner = FixValue(ctx, queryKey, tokenString, targetType, ref s, allowRemoveToken, isListOrPair: false, fixInstead, currentEntityType);
 
                 if (inner == FixTokenResult.DeleteEntity ||
                     inner == FixTokenResult.SkipEntity ||
@@ -257,13 +270,23 @@ public static class QueryTokenSynchronizer
     /// <see cref="RenameBucket.TokensColumn"/> keyed by query; inner positions consult
     /// <see cref="RenameBucket.TokensType"/> keyed by the current type's FullName. Each lookup is a
     /// fresh chain-composed dict so V1: A→B + V2: B→C resolves to A→C in one hop.
+    /// When a <see cref="StringOrArray"/> entry has multiple candidates they are tried in order;
+    /// the first that fully resolves against the live schema wins.
     /// </summary>
-    static bool TryParseRememberToken(TokenSyncContext ctx, string tokenString, QueryDescription qd, SubTokensOptions options, out QueryToken? result)
+    static bool TryParseRememberToken(TokenSyncContext ctx, string tokenString, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken, out QueryToken? result)
     {
-        string[] parts = QueryUtils.SplitRegex.Split(tokenString);
-
         result = null;
-        for (int i = 0; i < parts.Length; i++)
+        return TryResolveParts(ctx, QueryUtils.SplitRegex.Split(tokenString), 0, ref result, qd, options, allowRemoveToken);
+    }
+
+    /// <summary>
+    /// Resolves <paramref name="parts"/>[<paramref name="start"/>..] against history and the live
+    /// schema, updating <paramref name="result"/> to the final token. Recursed into for each
+    /// multi-candidate branch so the first fully-resolvable candidate wins.
+    /// </summary>
+    static bool TryResolveParts(TokenSyncContext ctx, string[] parts, int start, ref QueryToken? result, QueryDescription qd, SubTokensOptions options, bool allowRemoveToken)
+    {
+        for (int i = start; i < parts.Length; i++)
         {
             string part = parts[i];
 
@@ -279,6 +302,12 @@ public static class QueryTokenSynchronizer
                 ? QueryUtils.GetKey(qd.QueryName)
                 : CleanTypeName(result.Type);
             var eraSubKeys = ctx.ComputeEraSubKeys(liveSubKey);
+
+            // Track the first file that contributes multiple candidates so we can branch after the
+            // chain-compose loop finishes.
+            string? multiOld = null;
+            string[]? multiValues = null;
+            string remainingBeforeMulti = remaining;
 
             for (int fi = 0; fi < ctx.HistoryAndRecordingsCount; fi++)
             {
@@ -298,7 +327,27 @@ public static class QueryTokenSynchronizer
                 if (consumedOriginalParts == 0)
                     consumedOriginalParts = oldPartsCount;
 
-                var newKey = dic[old];
+                var value = dic[old];
+
+                // "" means "remove token". Strip it when not at the query root (removal only
+                // makes sense in TokensByQuery) or when the caller does not allow removal.
+                var effectiveValues = (result != null || !allowRemoveToken)
+                    ? value.Values.Where(v => v != "").ToArray()
+                    : value.Values;
+
+                if (effectiveValues.Length == 0)
+                    continue;
+
+                // Capture multi-candidates from the first file that offers them (for branching below).
+                if (effectiveValues.Length > 1 && multiOld == null)
+                {
+                    multiOld = old;
+                    multiValues = effectiveValues;
+                    remainingBeforeMulti = remaining;
+                }
+
+                // Chain-compose using the first (or only) candidate so subsequent files can chain on it.
+                var newKey = effectiveValues[0];
                 if (remaining == old)
                     remaining = newKey;
                 else
@@ -309,6 +358,37 @@ public static class QueryTokenSynchronizer
 
             if (remaining != originalRemaining)
             {
+                if (multiValues != null)
+                {
+                    // Try each candidate in order; recurse so trailing original parts and further
+                    // history files are also resolved correctly for each branch.
+                    int trailingCount = parts.Length - i - consumedOriginalParts;
+                    string[] trailingParts = parts.Skip(parts.Length - trailingCount).ToArray();
+
+                    foreach (var candidate in multiValues)
+                    {
+                        string candRemaining = remainingBeforeMulti == multiOld
+                            ? candidate
+                            : candidate.HasText()
+                                ? candidate + remainingBeforeMulti.Substring(multiOld!.Length)
+                                : remainingBeforeMulti.Substring(multiOld!.Length + 1);
+
+                        string[] candParts = candRemaining.HasText()
+                            ? QueryUtils.SplitRegex.Split(candRemaining)
+                            : Array.Empty<string>();
+
+                        string[] suffix = [..candParts, ..trailingParts];
+                        QueryToken? tryResult = result;
+                        if (TryResolveParts(ctx, suffix, 0, ref tryResult, qd, options, allowRemoveToken))
+                        {
+                            result = tryResult;
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                // Single-candidate path: original behaviour.
                 var subParts = remaining.HasText() ? QueryUtils.SplitRegex.Split(remaining) : Array.Empty<string>();
 
                 int trailingOriginalParts = parts.Length - i - consumedOriginalParts;
@@ -334,7 +414,8 @@ public static class QueryTokenSynchronizer
                 continue;
             }
 
-            if (i == 0)
+            // Entity prefix fallback — only valid at the query root (result == null).
+            if (result == null)
             {
                 var entity = QueryUtils.SubToken(result, qd, options, "Entity");
                 QueryToken? newSubResult = QueryUtils.SubToken(entity, qd, options, part);
@@ -379,6 +460,8 @@ public static class QueryTokenSynchronizer
     /// Persists a user-confirmed rename into <paramref name="recording"/>. Routes to
     /// <see cref="RenameBucket.TokensColumn"/> when the rename starts at the query root, or
     /// <see cref="RenameBucket.TokensType"/> when it's at a sub-path within a type.
+    /// Appends to any existing candidates rather than overwriting, so context-specific solutions
+    /// (e.g. filter-only vs. WordTemplate-safe) accumulate across sessions.
     /// </summary>
     static void Remember(TokenMigrationFile recording, string oldTokenString, QueryToken newToken, QueryDescription qd, SubTokensOptions options)
     {
@@ -423,7 +506,28 @@ public static class QueryTokenSynchronizer
             (recording.TokensByQuery ??= new()).GetOrCreate(QueryUtils.GetKey(tokenList[0].QueryName)) :
             (recording.TokensByType ??= new()).GetOrCreate(CleanTypeName(tokenList[pos].Type));
 
-        recTokenDic[oldPartsList.ToString(".")] = newPartsList.ToString(".");
+        RecordTokenRename(recTokenDic, oldPartsList.ToString("."), newPartsList.ToString("."));
+    }
+
+    /// <summary>
+    /// Appends <paramref name="newValue"/> to the candidates for <paramref name="old"/> in the given
+    /// token dict. Creates a new entry when absent; appends when the entry already exists (so
+    /// context-specific solutions accumulate without overwriting each other).
+    /// </summary>
+    static void RecordTokenRename(Dictionary<string, StringOrArray> dict, string old, string @new)
+    {
+        dict[old] = dict.TryGetValue(old, out var existing)
+            ? existing.Append(@new)
+            : new StringOrArray(@new);
+    }
+
+    /// <summary>Convenience overload that looks up or creates the inner dict by query key.</summary>
+    static void RecordTokenRename(TokenMigrationFile recording, string queryKey, bool isQuery, string old, string @new)
+    {
+        var dict = isQuery
+            ? (recording.TokensByQuery ??= new()).GetOrCreate(queryKey)
+            : (recording.TokensByType ??= new()).GetOrCreate(queryKey);
+        RecordTokenRename(dict, old, @new);
     }
 
     /// <summary>

@@ -44,6 +44,7 @@
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="ShowTitleAsBreadcrumb" Description="Titel als Breadcrumb anzeigen" />
     <Member Name="TitleColor" Description="Titel Farbe" />
     <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
@@ -63,8 +64,10 @@
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
+    <Member Name="IncompatibleEntityType" Description="Inkompatibler Entitätstyp" />
     <Member Name="InteractiveDashboard" Description="Interaktives Dashboard" />
     <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
+    <Member Name="NotFilteringBy0" Description="Nicht filtern nach {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
     <Member Name="Part0OverlapsWith1" Description="Teil {0} überschneidet sich mit {1}" />
     <Member Name="Preview" Description="Vorschau" />

@@ -95,7 +95,7 @@ export interface FilterGroupOption {
   pinned?: PinnedFilter;
   frozen?: boolean;
   dashboardBehaviour?: DashboardBehaviour;
-  value?: string; /*For search in multiple columns*/
+  value?: any; /*For search in multiple columns*/
 }
 
 export interface PinnedFilter {
@@ -117,7 +117,7 @@ export function isActive(fo: FilterOptionParsed | FilterOption): boolean {
     (fo.pinned.active == "Checkbox_Unchecked" ||
       fo.pinned.active == "NotCheckbox_Unchecked" ||
       fo.pinned.active == "WhenHasValue" && fo.value == null ||
-      fo.pinned.splitValue && !fo.value));
+      fo.pinned.splitValue && (fo.value == null || fo.value === "" || Array.isArray(fo.value) && fo.value.length == 0)));
 }
 
 export function isCheckBox(active: PinnedFilterActive | undefined): boolean {
@@ -164,7 +164,7 @@ export interface FilterGroupOptionParsed {
   filters: FilterOptionParsed[];
   pinned?: PinnedFilterParsed;
   dashboardBehaviour?: DashboardBehaviour;
-  value?: string; /*For search in multiple columns*/
+  value?: any; /*For search in multiple columns*/
 }
 
 export interface OrderOption {
@@ -402,6 +402,16 @@ export function isList(fo: FilterOperation): boolean {
     fo == "IsNotIn";
 }
 
+export function isPair(fo: FilterOperation): boolean {
+  return fo == "Between" || fo == "BetweenNoEnd";
+}
+
+export function isGroupList(fo: Pick<FilterGroupOption | FilterGroupOptionParsed, 'filters'>): boolean {
+  return fo.filters.some(f => f != null && isFilterCondition(f as FilterOptionParsed) &&
+    (f as FilterConditionOptionParsed).operation != null &&
+    isList((f as FilterConditionOptionParsed).operation!));
+}
+
 
 
 export function getFilterOperations(qt: QueryToken): FilterOperation[] {
@@ -462,6 +472,8 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
     "GreaterThanOrEqual",
     "LessThan",
     "LessThanOrEqual",
+    "Between",
+    "BetweenNoEnd",
     "IsIn",
     "IsNotIn"
   ],

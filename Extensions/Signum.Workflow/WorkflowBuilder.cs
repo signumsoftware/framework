@@ -363,6 +363,7 @@ public partial class WorkflowBuilder
             Events = this.pools.SelectMany(p => p.Value.GetLanes().SelectMany(l => l.GetEvents())).Select(a => a.Entity).ToDictionary(a => a.ToLite()),
             Gateways = this.pools.SelectMany(p => p.Value.GetLanes().SelectMany(l => l.GetGateways())).Select(a => a.Entity).ToDictionary(a => a.ToLite()),
             Connections = this.GetAllConnections().Select(a => a.Entity).ToDictionary(a => a.ToLite()),
+            Lanes = this.pools.SelectMany(p => p.Value.GetLanes()).Select(l => l.lane.Entity).ToList()
         };
         
         wg.FillGraphs();

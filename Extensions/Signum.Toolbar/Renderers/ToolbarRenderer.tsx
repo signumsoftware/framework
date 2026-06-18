@@ -478,17 +478,6 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     [entityType, selEntityRef.current && liteKey(selEntityRef.current)]
   );
 
-  function applyEntityFilter(elements: ToolbarResponse<any>[]): ToolbarResponse<any>[] {
-    if (!hiddenGuids || hiddenGuids.size == 0)
-      return elements;
-
-    return elements
-      .filter(el => !el.guid || !hiddenGuids!.has(el.guid))
-      .map(el => el.elements
-        ? { ...el, elements: applyEntityFilter(el.elements) }
-        : el);
-  }
-
   return (
     <>
       {entityType && (
@@ -502,22 +491,25 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
         </Nav.Item>
       )}
       {selEntityRef.current ?
-        applyEntityFilter(simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current)).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
+        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current, hiddenGuids ?? undefined).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
         p.response.elements!.filter(sr => !sr.withEntity).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))
       }
     </>
   );
 }
 
-function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>): ToolbarResponse<any>[] {
+function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, hiddenGuids?: Set<string>): ToolbarResponse<any>[] {
   var result = resp
     .map(tr => {
+
+      if (hiddenGuids && tr.guid && hiddenGuids.has(tr.guid))
+        return null;
 
       if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {
-        const inner = simplifyForEntity(tr.elements, selectedEntity);
+        const inner = simplifyForEntity(tr.elements, selectedEntity, hiddenGuids);
         if (inner.length == 0)
           return null;
 
@@ -525,7 +517,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
       }
 
       if (tr.extraIcons && tr.extraIcons.length > 0) {
-        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity);
+        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity, hiddenGuids);
 
         tr = { ...tr, extraIcons };
       }

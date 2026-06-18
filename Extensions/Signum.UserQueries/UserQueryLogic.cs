@@ -503,7 +503,7 @@ public static class UserQueryLogic
                 {
                 retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
+                    switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
@@ -542,7 +542,7 @@ public static class UserQueryLogic
                     {
                     retryStart:
                         var date = uq.SystemTime.StartDate;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.StartDate", typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.StartDate", typeof(DateTime), ref date, allowRemoveToken: false, isListOrPair: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.Fix: uq.SystemTime.StartDate = date; entityTouched = true; goto retryStart;
@@ -557,7 +557,7 @@ public static class UserQueryLogic
                     {
                     retryEnd:
                         var date = uq.SystemTime.EndDate;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.EndDate", typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.EndDate", typeof(DateTime), ref date, allowRemoveToken: false, isListOrPair: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.Fix: uq.SystemTime.EndDate = date; entityTouched = true; goto retryEnd;

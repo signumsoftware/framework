@@ -8,6 +8,10 @@
     <Member Name="Always" Description="Immer" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
   </Type>
+  <Type Name="SubPageMessage">
+    <Member Name="No0FoundIn1" Description="Kein {0} in {1} gefunden" />
+    <Member Name="NotAllowedToCreate0In1" Description="Es ist nicht erlaubt, {0} in {1} zu erstellen" />
+  </Type>
   <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="Content" Description="Inhalt" />

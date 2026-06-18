@@ -65,7 +65,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
           }
         }
 
-        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create! || p.createOnFind!, p.showType);
       }
       if (p.iconStart == undefined && p.vertical)
         p.iconStart = true;

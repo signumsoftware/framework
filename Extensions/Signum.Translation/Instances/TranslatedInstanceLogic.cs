@@ -36,6 +36,10 @@ public static class TranslatedInstanceLogic
                 e.TranslatedText,
                 e.OriginalText,
             });
+
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommand(Database.Query<TranslatedInstanceEntity>().Where(ti => ti.PropertyRoute.Is(property)));
+
         getDefaultCulture = defaultCulture ?? throw new ArgumentNullException(nameof(defaultCulture));
 
         LocalizationCache = sb.GlobalLazy(() =>

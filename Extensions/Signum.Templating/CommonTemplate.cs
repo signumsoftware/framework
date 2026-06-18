@@ -372,7 +372,7 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested | SubTokensOptions.CanToArray, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:

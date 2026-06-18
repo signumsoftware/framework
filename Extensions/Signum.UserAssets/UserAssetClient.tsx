@@ -96,6 +96,7 @@ export namespace UserAssetClient {
           filters: fr.filters!.map(f => toFilterOption(f)),
           pinned: fr.pinned,
           dashboardBehaviour: fr.dashboardBehaviour,
+          value: fr.value,
         } as FilterGroupOption);
       else
         return ({

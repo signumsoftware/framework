@@ -53,6 +53,14 @@ public static class WorkflowLogic
         return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowGatewayEntity>();
     }
 
+
+    public static bool CurrentUserInLaneOf<T>() where T : ICaseMainEntity
+    {
+        var type = typeof(T).ToTypeEntity();
+        var user = UserEntity.Current;
+        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes.Any(l => l.Actors.Contains(user)));
+    }
+
     [AutoExpressionField]
     public static IQueryable<WorkflowConnectionEntity> WorkflowConnections(this WorkflowEntity e) =>
         As.Expression(() => Database.Query<WorkflowConnectionEntity>().Where(a => a.From.Lane.Pool.Workflow.Is(e) && a.To.Lane.Pool.Workflow.Is(e)));

@@ -535,8 +535,8 @@ export namespace LiteMessage {
 }
 
 export namespace MarkdownMessage {
-  export const _0IsCurrentlyEditable: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyEditable");
-  export const _0IsCurrentlyViewableOnly: MessageKey = new MessageKey("MarkdownMessage", "_0IsCurrentlyViewableOnly");
+  export const Edit0: MessageKey = new MessageKey("MarkdownMessage", "Edit0");
+  export const Preview0: MessageKey = new MessageKey("MarkdownMessage", "Preview0");
 }
 
 export interface ModelEntity extends ModifiableEntity {
@@ -785,6 +785,8 @@ export namespace SearchMessage {
   export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
   export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
   export const Enter: MessageKey = new MessageKey("SearchMessage", "Enter");
+  export const Error: MessageKey = new MessageKey("SearchMessage", "Error");
+  export const FilterGroupInvalidMixedOperations: MessageKey = new MessageKey("SearchMessage", "FilterGroupInvalidMixedOperations");
 }
 
 export namespace SelectorMessage {

@@ -9,6 +9,7 @@ import { TourButton } from './TourComponent';
 import { DashboardClient } from '../Signum.Dashboard/DashboardClient';
 import '../Signum.UserQueries/UserQueryClient'; // augments SearchControlLoaded with getCurrentUserQuery
 import { Finder } from '@framework/Finder';
+import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 
 export namespace TourClient {
 
@@ -23,6 +24,9 @@ export namespace TourClient {
 
       return <TourButton trigger={wc.ctx.value.Type} />;
     });
+
+    UserAssetClient.start({ routes: options.routes });
+    UserAssetClient.registerExportAssertLink(TourEntity);
 
     DashboardClient.onDashboardPageActions.push(dashboard =>
       dashboard.id != null ? <TourButton trigger={toLite(dashboard)} /> : undefined);

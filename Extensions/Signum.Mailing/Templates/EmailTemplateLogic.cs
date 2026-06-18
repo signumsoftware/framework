@@ -545,7 +545,7 @@ public static class EmailTemplateLogic
                     {
                     retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, et.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, modelType))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, et.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, modelType))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.RemoveToken: et.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;

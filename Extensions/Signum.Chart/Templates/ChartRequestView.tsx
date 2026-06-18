@@ -186,6 +186,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
             lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFiltersOptionsButton={true} /> :
           <AutoFocus>
             <PinnedFilterBuilder
+              queryDescription={qd}
               filterOptions={cr.filterOptions}
               onFiltersChanged={handlePinnedFilterChanged} />
           </AutoFocus>
@@ -229,12 +230,12 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           </Tab>
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (
-            <span
-              className={maxRowsReached ? "text-danger fw-bold" : undefined}
-              title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
+              <span
+                className={maxRowsReached ? "text-danger fw-bold" : undefined}
+                title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
                 {(result.chartResult.resultTable.rows.length)}
               </span>
-            )
+              )
             </span> as any}>
               <ChartTableComponent chartRequest={cr} lastChartRequest={result.lastChartRequest} resultTable={result.chartResult.resultTable}
                 onOrderChanged={() => handleOnDrawClick()} />

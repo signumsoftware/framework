@@ -181,6 +181,11 @@ public static class UserAssetsImporter
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
         }
 
+        public Lite<TypeEntity>? TryGetTypeLite(string cleanName)
+        {
+            return TypeLogic.TryGetType(cleanName)?.ToTypeEntity().ToLite();
+        }
+
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
@@ -213,6 +218,12 @@ public static class UserAssetsImporter
                where T : Symbol
         {
             return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public T? TryGetSymbol<T>(string value)
+               where T : Symbol
+        {
+            return SymbolLogic<T>.TryToSymbol(value);
         }
 
         public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
@@ -316,6 +327,11 @@ public static class UserAssetsImporter
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
         }
 
+        public Lite<TypeEntity>? TryGetTypeLite(string cleanName)
+        {
+            return TypeLogic.TryGetType(cleanName)?.ToTypeEntity().ToLite();
+        }
+
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
@@ -340,6 +356,12 @@ public static class UserAssetsImporter
              where T : Symbol
         {
             return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public T? TryGetSymbol<T>(string value)
+             where T : Symbol
+        {
+            return SymbolLogic<T>.TryToSymbol(value);
         }
 
         public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
@@ -451,6 +473,18 @@ public static class UserAssetsImporter
             return result;
 
         return new T { Guid = guid };
+    }
+
+    static readonly GenericInvoker<Func<Guid, Lite<Entity>>> giRetrieveUserAssetLite = new(
+        guid => RetrieveUserAssetLite<FakeEntity>(guid));
+    static Lite<Entity> RetrieveUserAssetLite<T>(Guid guid) where T : Entity, IUserAssetEntity
+    {
+        return Database.Query<T>().Where(a => a.Guid == guid).Select(a => a.ToLite()).SingleEx();
+    }
+
+    public static Lite<Entity> RetrieveUserAssetLite(Type type, Guid guid)
+    {
+        return giRetrieveUserAssetLite.GetInvoker(type)(guid);
     }
 
     public class FakeEntity : Entity, IUserAssetEntity

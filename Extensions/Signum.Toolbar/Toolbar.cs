@@ -299,3 +299,12 @@ public enum LayoutMessage
     [Description("Select a {0}")]
     SelectA0_G,
 }
+
+[AllowUnauthenticated]
+public enum SubPageMessage
+{
+    [Description("No {0} found in {1}")]
+    No0FoundIn1,
+    [Description("Not allowed to create {0} in {1}")]
+    NotAllowedToCreate0In1,
+}

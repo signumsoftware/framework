@@ -36,6 +36,7 @@ public static class WindowsADTask
     public static readonly SimpleTaskSymbol DeactivateUsers;
 }
 
+[AllowUnauthenticatedAttribute]
 public enum WindowsADMessage
 {
     [Description("The user {0} is connected to Active Directory and can not have a local password set")]

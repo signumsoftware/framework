@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="OpenIDConfigurationEmbedded" Description="Open-ID-Konfiguration">
+    <Member Name="Authority" Description="&#x9;Authority" />
+    <Member Name="AvoidSSLVerify" Description="SSL-Verifizierung vermeiden" />
+    <Member Name="ClientId" Description="Client Id" />
+    <Member Name="ClientSecret" Description="Client secret" />
+    <Member Name="Enabled" Description="Aktiviert" />
+    <Member Name="RoleClaimPath" Description="Role claim path" />
+    <Member Name="Scopes" Description="Scopes" />
+  </Type>
+  <Type Name="OpenIDMessage">
+    <Member Name="SignInWithOpenID" Description="Anmeldung mit OpenID" />
+  </Type>
+</Translations>

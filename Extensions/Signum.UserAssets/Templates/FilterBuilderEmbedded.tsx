@@ -8,8 +8,8 @@ import { Finder } from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import {
   QueryDescription, FilterConditionOptionParsed,
-  isList, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
-  getFilterGroupUnifiedFilterType, isFilterGroup,
+  isList, isPair, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
+  getFilterGroupUnifiedFilterType, isFilterGroup, isFilterCondition, isGroupList,
   FilterType
 } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey, liteKeyLong } from "@framework/Signum.Entities";
@@ -21,7 +21,7 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 import { HeaderType } from '@framework/Lines/GroupHeader'
-import { getFilterType, SubTokensOptions } from '@framework/QueryToken'
+import { getFilterType, QueryToken, SubTokensOptions } from '@framework/QueryToken'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
 interface FilterBuilderEmbeddedProps {
@@ -46,9 +46,18 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
 
     ctx.value.clear();
 
+    function stringifyValue(v: any, token: QueryToken) : string {
+      return v == null || v == "" ? "" :
+        token.filterType == "Embedded" || token.filterType == "Lite" ? liteKeyLong(v) :
+          toStringValue(v, token.filterType)!;
+    }
 
     function pushFilter(fo: FilterOptionParsed, indent: number) {
       if (isFilterGroup(fo)) {
+        if (Array.isArray(fo.value) && fo.token) {
+          fo.value = fo.value.map(v => stringifyValue(v, fo.token!))
+            .join("|");
+        }
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           isGroup: true,
           indentation: indent,
@@ -66,9 +75,7 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
       } else {
 
         if (Array.isArray(fo.value) && fo.token) {
-          fo.value = fo.value.map(v => v == null || v == "" ? "" :
-            fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKeyLong(v) :
-              toStringValue(v, fo.token!.filterType))
+          fo.value = fo.value.map(v => stringifyValue(v, fo.token!))
             .join("|");
         }
 
@@ -119,6 +126,13 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
       if (f.filters.some(a => !a.token))
         return <AutoLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
 
+      if (isGroupList(f)) {
+        const firstCond = f.filters.find(sf => isFilterCondition(sf)) as FilterConditionOptionParsed | undefined;
+        const fcWithCondToken = { ...fc, filter: firstCond ?? fc.filter };
+        return <MultiLineOrExpression ctx={ctx} onChange={fc.handleValueChange}
+          onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fcWithCondToken, onChange, true)} />;
+      }
+
       if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
         ctx.value = undefined;
 
@@ -139,6 +153,9 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
 
       if (isList(f.operation!))
         return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange, true)} onChange={fc.handleValueChange} />;
+
+      if (isPair(f.operation!))
+        return <PairValueOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange, false)} onChange={fc.handleValueChange} />;
 
       return handleCreateAppropiateControl(ctx, fc, fc.handleValueChange, false);
     }
@@ -244,6 +261,44 @@ export namespace FilterBuilderEmbedded {
 }
 
 export default FilterBuilderEmbedded;
+
+interface PairValueOrExpressionProps {
+  ctx: TypeContext<string | null | undefined>;
+  onChange: () => void;
+  onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
+}
+
+export function PairValueOrExpression(p: PairValueOrExpressionProps): React.JSX.Element {
+
+  const [parts, setParts] = React.useState<string[]>(["", ""]);
+
+  React.useEffect(() => {
+    const vals = (p.ctx.value ?? "").split("|");
+    setParts([vals[0] ?? "", vals[1] ?? ""]);
+  }, [p.ctx.value]);
+
+  const handleChange = () => {
+    p.ctx.value = parts.join("|");
+    p.onChange();
+  };
+
+  const minCtx = new TypeContext<any>(undefined,
+    { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" },
+    undefined as any,
+    new Binding<any>(parts, 0));
+
+  const maxCtx = new TypeContext<any>(undefined,
+    { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" },
+    undefined as any,
+    new Binding<any>(parts, 1));
+
+  return (
+    <div className="d-flex flex-column gap-1">
+      {p.onRenderItem(minCtx, handleChange)}
+      {p.onRenderItem(maxCtx, handleChange)}
+    </div>
+  );
+}
 
 interface MultiLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;

@@ -38,11 +38,11 @@ public class TokenMigrationFile
 {
     /// <summary>Query-rooted token renames (first segment of a token path). Outer key = queryKey.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, Dictionary<string, string>>? TokensByQuery { get; set; }
+    public Dictionary<string, Dictionary<string, StringOrArray>>? TokensByQuery { get; set; }
 
     /// <summary>Type-rooted token renames (later segments inside a Type). Outer key = type FullName.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, Dictionary<string, string>>? TokensByType { get; set; }
+    public Dictionary<string, Dictionary<string, StringOrArray>>? TokensByType { get; set; }
 
     /// <summary>Filter-value renames. Outer key = "queryKey|tokenString"; inner dict = oldValue → newValue.</summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
@@ -79,7 +79,7 @@ public class TokenMigrationFile
     public static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
-        Converters = { new JsonStringEnumConverter() },
+        Converters = { new JsonStringEnumConverter(), new StringOrArrayConverter() },
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
     };
 
@@ -145,6 +145,59 @@ public class TokenMigrationFile
     internal void LoadTypes(Replacements rep)
     {
         Types = rep.TryGetC(QueryLogic.QueriesKey);
+    }
+}
+
+/// <summary>
+/// A token-rename value that holds one or more candidate replacements, tried in order at resolution
+/// time. Serializes as a plain JSON string when there is exactly one candidate (backwards-compatible
+/// with existing migration files), and as a JSON array when there are multiple.
+/// </summary>
+[JsonConverter(typeof(StringOrArrayConverter))]
+public readonly struct StringOrArray
+{
+    public readonly string[] Values;
+
+    public StringOrArray(string single) => Values = [single];
+    public StringOrArray(string[] many)  => Values = many;
+
+    public bool IsEmpty => Values is null or { Length: 0 };
+
+    /// <summary>Returns a new <see cref="StringOrArray"/> with <paramref name="newValue"/> appended
+    /// unless it is already present.</summary>
+    public StringOrArray Append(string newValue)
+    {
+        if (Values != null && Array.IndexOf(Values, newValue) >= 0)
+            return this;
+
+        return new StringOrArray(Values == null ? [newValue] : [..Values, newValue]);
+    }
+}
+
+public class StringOrArrayConverter : JsonConverter<StringOrArray>
+{
+    public override StringOrArray Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+            return new StringOrArray(reader.GetString()!);
+
+        return new StringOrArray(JsonSerializer.Deserialize<string[]>(ref reader, options)!);
+    }
+
+    public override void Write(Utf8JsonWriter writer, StringOrArray value, JsonSerializerOptions options)
+    {
+        if (value.Values == null || value.Values.Length == 0)
+        {
+            writer.WriteStringValue("");
+        }
+        else if (value.Values.Length == 1)
+        {
+            writer.WriteStringValue(value.Values[0]);
+        }
+        else
+        {
+            JsonSerializer.Serialize(writer, value.Values, options);
+        }
     }
 }
 

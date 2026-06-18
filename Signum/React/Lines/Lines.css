@@ -81,6 +81,37 @@ span.sf-holiday {
     padding: inherit;
 }
 
+/* Date range highlight — fills the full calendar cell */
+span.sf-range-start,
+span.sf-range-end,
+span.sf-range-between {
+    display: block;
+    margin: -6px -6px;
+    padding: 6px 8px;
+    background-color: color-mix(in srgb, var(--rw-cell-select-bg) 20%, var(--rw-widget-bg));
+}
+
+span.sf-range-start {
+    border-radius: 50% 0 0 50% !important;
+}
+
+span.sf-range-end {
+    border-radius: 0 50% 50% 0 !important;
+}
+
+span.sf-range-start.sf-range-end {
+    border-radius: 50% !important;
+}
+
+.rw-state-selected span.sf-range-start,
+.rw-state-selected span.sf-range-end,
+.rw-state-selected span.sf-range-between {
+    background-color: inherit;
+    margin: inherit;
+    padding: inherit;
+    border-radius: inherit;
+}
+
 .sf-entity-line-entity,
 .sf-entity-line-entity:focus {
     background-color: var(--bs-secondary-bg);
@@ -793,6 +824,7 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     --rw-input-disabled-bg: var(--bs-secondary-bg);
     --rw-input-disabled-border-color: var(--bs-border-color);
     --rw-bg: var(--bs-body-bg);
+    --rw-widget-bg: var(--bs-body-bg);
     --rw-multiselect-tag-bg: var(--bs-body-bg);
     --rw-multiselect-tag-border-color: var(--bs-border-color);
     /*repeat*/

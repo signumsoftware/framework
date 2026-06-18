@@ -272,7 +272,7 @@ function internalRadioGroup<V extends string | number | boolean | null>(c: EnumL
           {optionItems.map((oi, i) =>
             <label key={i} htmlFor={baseId + "-" + i} {...c.props.valueHtmlAttributes} className={classes("sf-radio-element", c.getErrorClass())}>
               <input id={baseId + "-" + i} type="radio" value={oi.value} checked={p.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={p.ctx.readOnly} />
-              {" " + oi.label}
+              {c.props.onRenderDropDownListItem ? <>{" "}{c.props.onRenderDropDownListItem(oi)}</> : (" " + oi.label)}
             </label>)}
         </div>
       </>}
