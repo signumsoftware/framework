@@ -1,5 +1,6 @@
 using Signum.Utilities;
 using System;
+using System.Reflection.Metadata;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -40,17 +41,29 @@ class Upgrade_20260617_StrictExecutionOrderAndNugets : CodeUpgradeBase
                 """);
         });
 
+        uctx.ChangeCodeFile("Southwind.sln", file =>
+        {
+            file.Solution_AddProject(@"Framework\Extensions\Signum.Markdown\Signum.Markdown.csproj", "2.Extensions");
+        });
+
+        uctx.ChangeCodeFile("Southwind/tsconfig.json", file =>
+        {
+            file.InsertAfterFirstLine(a => a.Contains("Signum.HtmlEditor"), """
+                { "path": "../Framework/Extensions/Signum.HtmlEditor" },
+                """);
+        });
+
         uctx.ChangeCodeFile(@"Southwind/MainAdmin.tsx", file =>
         {
             if (!file.Content.Contains("Signum.HtmlEditor/HtmlEditorClient"))
-                file.InsertAfterFirstLine(a => a.Contains("Signum.Eval/EvalClient"),
+                file.InsertAfterFirstLine(a => a.Contains("Signum.Dashboard/DashboardClient"),
                     """
                     import { HtmlEditorClient } from "@extensions/Signum.HtmlEditor/HtmlEditorClient"
                     import { MarkdownClient } from "@extensions/Signum.Markdown/MarkdownClient"
                     """);
 
             if (!file.Content.Contains("HtmlEditorClient.start("))
-                file.InsertAfterFirstLine(a => a.Contains("EvalClient.start("),
+                file.InsertAfterFirstLine(a => a.Contains("DashboardClient.start("),
                     """
                     HtmlEditorClient.start();
                     MarkdownClient.start();
