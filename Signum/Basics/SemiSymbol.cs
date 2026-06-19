@@ -125,14 +125,15 @@ public abstract class SemiSymbol : Entity
         }
     }
 
-    private void SetId(PrimaryKey id)
+    protected internal override bool IsPropertyReadonly(PropertyInfo pi)
     {
-        this.id = id;
-        this.IsNew = false;
-        this.ToStr = this.Key;
-        if (this.Modified != ModifiedState.Sealed)
-            this.Modified = ModifiedState.Sealed;
+        if (pi.Name == nameof(Name) && Key.HasText())
+            return true;
+
+        return base.IsPropertyReadonly(pi);
     }
+
+  
 
     internal static Dictionary<string, SemiSymbol> GetFromDatabase(Type type)
     {
