@@ -49,7 +49,7 @@ class Upgrade_20260617_StrictExecutionOrderAndNugets : CodeUpgradeBase
         uctx.ChangeCodeFile("Southwind/tsconfig.json", file =>
         {
             file.InsertAfterFirstLine(a => a.Contains("Signum.HtmlEditor"), """
-                { "path": "../Framework/Extensions/Signum.HtmlEditor" },
+                { "path": "../Framework/Extensions/Signum.Markdown" },
                 """);
         });
 
