@@ -16,7 +16,10 @@ public class DateTimeLineProxy : BaseLineProxy
     }
 
     public ILocator InputLocator => this.Element.Locator("div.rw-date-picker input[type=text]");
-    public ILocator InputReadonlyLocator => this.Element.Locator("input.sf-readonly-date");
+    public ILocator ReadonlyInputLocator => this.Element.Locator("input.sf-readonly-date");
+    public ILocator ReadonlyDivLocator => this.Element.Locator("div.sf-readonly-date");
+    public ILocator AnyReadonlyLocator => ReadonlyInputLocator.Or(ReadonlyDivLocator);
+    public ILocator AnyInputLocator => ReadonlyInputLocator.Or(InputLocator);
 
     public async Task SetValueAsync(IFormattable? value, string? format = null)
     {
@@ -29,11 +32,7 @@ public class DateTimeLineProxy : BaseLineProxy
 
     public async Task<IFormattable?> GetValueAsync()
     {
-        var readonlyVisible = await InputReadonlyLocator.CountAsync() > 0;
-
-        var locator = readonlyVisible ? InputReadonlyLocator : InputLocator;
-
-        var strValue = await locator.InputValueAsync();
+        var strValue = await AnyInputLocator.First.InputValueAsync();
 
         return strValue == null ? null :
             (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
@@ -43,5 +42,18 @@ public class DateTimeLineProxy : BaseLineProxy
     public override async Task SetValueUntypedAsync(object? value) => await SetValueAsync((IFormattable?)value);
 
     public override async Task<bool> IsReadonlyAsync()
-        => await InputReadonlyLocator.CountAsync() > 0;
+        => await AnyReadonlyLocator.CountAsync() > 0;
+
+    public async Task AssertValueAsync(string expectedValue)
+    {
+        if (!string.IsNullOrEmpty(expectedValue))
+        {
+            await Assertions.Expect(AnyInputLocator.First).ToHaveValueAsync(expectedValue);
+            return;
+        }
+
+        await (await IsReadonlyAsync()
+            ? Assertions.Expect(ReadonlyDivLocator).ToHaveTextAsync("")
+            : Assertions.Expect(AnyInputLocator.First).ToHaveValueAsync(""));
+    }
 }
