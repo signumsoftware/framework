@@ -130,9 +130,7 @@ public static class VirtualMList
                 var query = Database.Query<L>()
                     .Where(line => backReference.Evaluate(line).Is(e.ToLite()));
 
-                MList<L> newList = preserveOrder ?
-                    query.ToVirtualMListWithOrder() :
-                    query.ToVirtualMList();
+                MList<L> newList = query.ToVirtualMList(l => l.Id, preserveOrder ? l => ((ICanBeOrdered)l).Order : (Func<L, int>?)null);
 
                 ((IMListPrivate<L>)mlist).AssignAndPostRetrieving(newList, ctx);
             };
@@ -142,27 +140,19 @@ public static class VirtualMList
             Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() :
             Database.Query<L>().DisableQueryFilter();
 
-        if (preserveOrder)
-        {
-            sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mlistProperty,
-                 shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                 valueExpression: () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder(),
-                 valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
-                 Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
-                 Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
-
-            );
-        }
-        else
-        {
-            sb.Schema.EntityEvents<T>().RegisterBinding(mlistProperty,
-                shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                valueExpression: () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(),
-                valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
-                Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
-                Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList()
-            );
-        }
+        sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mlistProperty,
+            shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
+            // The order selector must stay inline (not a captured Func) so QueryBinder can read the
+            // Order column, hence the two literals chosen by preserveOrder rather than one with a
+            // conditional argument.
+            valueExpression: preserveOrder ?
+                () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(l => l.Id, l => ((ICanBeOrdered)l).Order) :
+                () => (e, rowId) => baseQuery.Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(l => l.Id),
+            valueFunction: (e, rowId, retriever) => (Schema.Current.CacheController<L>()!.Enabled ?
+                (IEnumerable<L>)Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()) :
+                Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy))
+                .ToVirtualMList(l => l.Id, preserveOrder ? l => ((ICanBeOrdered)l).Order : (Func<L, int>?)null)
+        );
 
         sb.Schema.EntityEvents<T>().PreSaving += (T e, PreSavingContext ctx) =>
         {
@@ -294,7 +284,7 @@ public static class VirtualMList
 
         sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
             shouldSet: () => false,
-            valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
+            valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(l => l.Id, l => ((ICanBeOrdered)l).Order)
             );
 
         sb.Schema.EntityEvents<T>().Saving += (T e) =>
@@ -427,22 +417,12 @@ public static class VirtualMList
         }
     }
 
-    public static MList<T> ToVirtualMListWithOrder<T>(this IEnumerable<T> elements)
-        where T : Entity
+    // Builds a virtual MList from a query, taking explicit rowId and optional order selectors.
+    // Works for any element type (entities, lites, or projected EmbeddedEntities) and is the form
+    // recognized by QueryBinder.BindAdditionalField so it can be inlined into the retrieve query.
+    public static MList<T> ToVirtualMList<T>(this IEnumerable<T> elements, Func<T, PrimaryKey> rowId, Func<T, int>? order = null)
     {
-        return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, ((ICanBeOrdered)line).Order)));
-    }
-
-    public static MList<T> ToVirtualMList<T>(this IEnumerable<T> elements)
-        where T : Entity
-    {
-        return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, line.Id, null)));
-    }
-
-    public static MList<Lite<T>> ToVirtualMList<T>(this IEnumerable<Lite<T>> elements)
-        where T : Entity
-    {
-        return new MList<Lite<T>>(elements.Select(line => new MList<Lite<T>>.RowIdElement(line, line.Id, null)));
+        return new MList<T>(elements.Select(line => new MList<T>.RowIdElement(line, rowId(line), order == null ? (int?)null : order(line))));
     }
 }
 

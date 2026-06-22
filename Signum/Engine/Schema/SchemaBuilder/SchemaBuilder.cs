@@ -544,7 +544,10 @@ public class SchemaBuilder
                         throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".FormatWith(fi.Name, type.TypeName()));
 
 
-                    var ef = new EntityField(type, fi, field);
+                    var ef = new EntityField(type, fi, field)
+                    {
+                        AvoidSave = Settings.FieldAttribute<AvoidSaveAttribute>(route) != null,
+                    };
 
                     if (field is FieldMList fml)
                         fml.TableMList.PropertyRoute = route;
