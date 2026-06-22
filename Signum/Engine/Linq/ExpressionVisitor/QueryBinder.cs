@@ -1247,7 +1247,9 @@ internal class QueryBinder : ExpressionVisitor
         Expression outerKeyExpr = MapVisitExpand(outerKey, outerProj);
         Expression innerKeyExpr = MapVisitExpand(innerKey, innerProj);
 
-        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr))!;
+        // safeNull: false -> plain equality for the join key. A join matches only on TRUE, so the three-valued
+        // CASE is pointless here, and it would make the condition non-hash/merge-joinable (breaks Postgres FULL JOIN).
+        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(outerKeyExpr, innerKeyExpr, safeNull: false))!;
 
         JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                       rightOuter ? JoinType.RightOuterJoin :
