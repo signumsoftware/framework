@@ -31,10 +31,21 @@ public class DateTimeLineProxy : BaseLineProxy
     }
 
     public async Task<IFormattable?> GetValueAsync()
-    {
-        var strValue = await AnyInputLocator.First.InputValueAsync();
+        => await ExtractValueAsync(AnyInputLocator.First);
 
-        return strValue == null ? null :
+    public async Task<IFormattable?> GetValueReadonlyAsync()
+        => await ExtractValueAsync(AnyReadonlyLocator.First);
+
+    private async Task<IFormattable?> ExtractValueAsync(ILocator locator)
+    {
+        await locator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached });
+
+        var tagName = await locator.EvaluateAsync<string>("e => e.tagName");
+        var strValue = tagName == "DIV"
+            ? await locator.InnerTextAsync()
+            : await locator.InputValueAsync();
+
+        return string.IsNullOrWhiteSpace(strValue) ? null :
             (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }
 
