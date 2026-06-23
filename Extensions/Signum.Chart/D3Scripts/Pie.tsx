@@ -106,7 +106,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
                   fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                   value={((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : concatValuePercent(pValue == 'OnLabel' ? valueText : undefined, pPercent == "OnLabel" ? percentText : undefined)}
                   onClick={e => onDrillDown(slice.data, e)}>
-                  {((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : keyColumn.getValueNiceName(slice.data)}
+                  {((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : ((keyColumn.getValueNiceName(slice.data) || "-null-") + ":\u00A0")}
                 </TextValueRectangle>}
               </g>
             </g>
@@ -198,7 +198,7 @@ export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidt
     <g transform={atts.transform} {...accessibilityPropsOnClick}>
       <rect ref={rect} {...rectangleAtts} height={20} transform={translate(0, 0)} />
       <text ref={txt} {...atts} transform={translate(!isRight && valWidth ? -valWidth : 0, 0)} >
-        {children ?? ""}
+        {(children  ?? "")}
       </text>
       <text ref={val} {...atts} transform={translate(isRight && txtWidth ? txtWidth : 0, 0)} >
         {value ?? ""}
@@ -213,11 +213,11 @@ function getString(children: React.ReactNode) {
 
 function concatValuePercent(value?: string, percent?: string) {
   if (value && percent)
-    return `, ${value}, ${percent}`;
+    return `${value}, ${percent}`;
   if(value)
-    return `, ${value}`;
+    return `${value}`;
   if (percent)
-    return `, ${percent}`;
+    return `${percent}`;
   return '';
 }
 
