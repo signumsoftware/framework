@@ -334,7 +334,7 @@ public class TemplateSynchronizationContext
         HasChanges = false;
     }
 
-    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange)
+    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange, bool canAny)
     {
         if (parsedToken.QueryToken != null)
             return;
@@ -372,7 +372,12 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested | SubTokensOptions.CanToArray, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
+        var st = SubTokensOptions.CanElement 
+            | (canAny ? SubTokensOptions.CanAnyAll : 0)
+            | SubTokensOptions.CanNested 
+            | SubTokensOptions.CanToArray;
+
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, st, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:
