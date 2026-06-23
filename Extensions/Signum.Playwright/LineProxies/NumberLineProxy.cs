@@ -14,7 +14,11 @@ public class NumberLineProxy : BaseLineProxy
     {
     }
 
-    public ILocator InputLocator => Element.Locator("input.numeric");
+    public ILocator InputLocator => Element.Locator("input[type=text].numeric");
+    public ILocator ReadonlyInputLocator => Element.Locator("input.numeric[readonly]");
+    public ILocator ReadonlyDivLocator => Element.Locator("div.readonly.numeric");
+    public ILocator AnyReadonlyLocator => ReadonlyInputLocator.Or(ReadonlyDivLocator);
+    public ILocator AnyInputLocator => ReadonlyInputLocator.Or(InputLocator);
 
     public override async Task<object?> GetValueUntypedAsync()
         => await GetValueAsync();
@@ -24,15 +28,17 @@ public class NumberLineProxy : BaseLineProxy
 
     public override async Task<bool> IsReadonlyAsync()
     {
+        if (await AnyReadonlyLocator.CountAsync() > 0)
+            return true;
+
         var input = InputLocator;
-
-        await input.WaitForAsync(new LocatorWaitForOptions
+        if (await input.CountAsync() > 0)
         {
-            State = WaitForSelectorState.Attached
-        });
+            return await input.IsDisabledAsync() ||
+                   await input.EvaluateAsync<bool>("e => e.hasAttribute('readonly')");
+        }
 
-        return await input.IsDisabledAsync() ||
-               await input.EvaluateAsync<bool>("e => e.hasAttribute('readonly')");
+        return false;
     }
 
     public async Task SetValueAsync(IFormattable? value, string? format = null)
@@ -72,5 +78,18 @@ public class NumberLineProxy : BaseLineProxy
         return string.IsNullOrWhiteSpace(strValue)
             ? null
             : (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
+    }
+
+    public async Task AssertValueAsync(string expectedValue)
+    {
+        if (!string.IsNullOrEmpty(expectedValue))
+        {
+            await Assertions.Expect(AnyInputLocator.First).ToHaveValueAsync(expectedValue);
+            return;
+        }
+
+        await (await IsReadonlyAsync() && await ReadonlyDivLocator.CountAsync() > 0
+            ? Assertions.Expect(ReadonlyDivLocator).ToHaveTextAsync("")
+            : Assertions.Expect(AnyInputLocator.First).ToHaveValueAsync(""));
     }
 }
