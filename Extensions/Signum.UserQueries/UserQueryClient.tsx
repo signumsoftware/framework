@@ -114,7 +114,7 @@ export namespace UserQueryClient {
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
-      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) || !AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ? undefined :
         (c, e, cdRef, ev) => {
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
