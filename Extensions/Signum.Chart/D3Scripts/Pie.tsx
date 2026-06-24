@@ -106,7 +106,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
                   fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                   value={((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : concatValuePercent(pValue == 'OnLabel' ? valueText : undefined, pPercent == "OnLabel" ? percentText : undefined)}
                   onClick={e => onDrillDown(slice.data, e)}>
-                  {((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : ((keyColumn.getValueNiceName(slice.data) || "-null-") + ":\u00A0")}
+                  {((slice.endAngle - slice.startAngle) < (Math.PI / 64)) ? '' : ((keyColumn.getValueNiceName(slice.data)) + ":\u00A0")}
                 </TextValueRectangle>}
               </g>
             </g>
