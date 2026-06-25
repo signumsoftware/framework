@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { TourEntity } from '../Signum.Tour'
+import { CssStepEmbedded, TourEntity, TourStepEntity } from '../Signum.Tour'
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { AutoLine, CheckboxLine, EntityAccordion, TypeContext } from '@framework/Lines';
 import TourStep from './TourStep';
@@ -26,10 +26,11 @@ export default function Tour(p: { ctx: TypeContext<TourEntity> }): React.ReactEl
       <AutoLine ctx={ctx.subCtx(a => a.trigger)} onChange={forceUpdate} />
 
       <EntityAccordion ctx={ctx.subCtx(a => a.steps)} avoidFieldSet="h4"
+        onCreate={() => TourStepEntity.New({ side: "Bottom" }) }
         getComponent={ctx => <TourStep ctx={ctx} invalidate={forceUpdate} type={type} dashboard={dashboard} userQuery={userQuery} />}
         getTitle={ctx => ctx.value.title || ""} />
 
-      <div className="row">
+      <div className="row mt-4">
         <div className="col-sm-4">
           <CheckboxLine ctx={ctx.subCtx(a => a.showProgress)} inlineCheckbox={true} />
         </div>

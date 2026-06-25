@@ -16,12 +16,13 @@ import { Entity,
   liteKey,
   toLite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCompass } from "@fortawesome/free-solid-svg-icons";
+import { faRoute } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
   PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
 import { Navigator } from "@framework/Navigator";
+import * as AppContext from "@framework/AppContext";
 import { JSX } from "react/jsx-runtime";
 import { micromark } from "micromark";
 
@@ -74,7 +75,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
     if (!triggerLite || !Navigator.isCreable(TourEntity, { isSearch: true }))
       return null;
 
-    const handleCreate = () => Navigator.view(TourEntity.New({ trigger: triggerLite }));
+    const handleCreate = () => Navigator.createInNewTab({ entity: TourEntity.New({ trigger: triggerLite }), canExecute: {} });
 
     return (
       <LinkButton
@@ -83,23 +84,37 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
         title={TourMessage.CreateTour.niceToString()}
       >
         <span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon aria-hidden={true} icon={faCompass} transform="left-2" color="var(--bs-secondary)" />
-          <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-4 up-5 right-5" color="var(--bs-success)" />
+          <FontAwesomeIcon aria-hidden={true} icon={faRoute}  transform="flip-h" color="var(--bs-secondary)" />
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-5 up-6 right-6" color="var(--bs-success)" />
         </span>
       </LinkButton>
     );
   }
 
+  const canEdit = !Navigator.isReadOnly(TourEntity);
+  const handleEdit = () => window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(tour.tour)));
+
   return (
     <>
+      <span className="d-inline-flex">
       <LinkButton
-        className={'sf-pointer nav-link'}
+        className={'sf-pointer'}
         onClick={handleClick}
         title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
       >
 
-        <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
+        <FontAwesomeIcon icon={faRoute} transform="flip-h" className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
+      {canEdit && (
+        <LinkButton
+          className={'sf-line-button sf-find px-1'}
+          onClick={handleEdit}
+          title={TourMessage.EditTour.niceToString()}
+        >
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "pen-to-square"]} transform="shrink-3" color="var(--bs-secondary)" />
+        </LinkButton>
+        )}
+</span>
       {tourRunId > 0 && <TourComponent key={tourRunId} tour={tour} autoStart={true} ref={driverRef} />}
     </>
   );

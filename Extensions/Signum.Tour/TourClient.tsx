@@ -12,6 +12,10 @@ import { DashboardClient } from '../Signum.Dashboard/DashboardClient';
 import '../Signum.UserQueries/UserQueryClient'; // augments SearchControlLoaded with getCurrentUserQuery
 import { Finder } from '@framework/Finder';
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
+import SearchPage from '@framework/SearchControl/SearchPage';
+
+// Tags of the full-page search controls that show the tour button in their title instead of the toolbar.
+const titlePageTags = ["SearchPage", "UserQueryPage"];
 
 export namespace TourClient {
 
@@ -41,6 +45,11 @@ export namespace TourClient {
       const uq = ctx.searchControl.getCurrentUserQuery?.();
       if (uq == null)
         return undefined;
+
+      // On full-page search controls the tour button is shown in the title (see onTitleElements below).
+      if (titlePageTags.includes(ctx.searchControl.props.tag as string))
+        return undefined;
+
       return {
         button: (
           <span className="d-inline-flex align-items-center mx-2">
@@ -48,6 +57,12 @@ export namespace TourClient {
           </span>
         ),
       };
+    });
+
+    // On SearchPage / UserQueryPage, render the user query tour button in the page title.
+    SearchPage.onTitleElements.push(scl => {
+      const uq = scl.getCurrentUserQuery?.();
+      return uq != null ? <TourButton trigger={uq} /> : null;
     });
   }
 
@@ -71,6 +86,7 @@ export namespace TourClient {
 }
 
 export interface TourDTO {
+  tour: Lite<TourEntity>;
   forEntity: Lite<Entity>;
   steps: TourStepDTO[];
   showProgress: boolean;

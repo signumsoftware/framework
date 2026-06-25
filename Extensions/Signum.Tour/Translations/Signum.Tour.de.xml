@@ -42,6 +42,7 @@
     <Member Name="Close" Description="Schließen" />
     <Member Name="CreateTour" Description="Tour erstellen" />
     <Member Name="Done" Description="Fertig" />
+    <Member Name="EditTour" Description="Tour bearbeiten" />
     <Member Name="Next" Description="Weiter" />
     <Member Name="Previous" Description="Vorherige" />
     <Member Name="ReplayTour" Description="Wiederholungstour" />

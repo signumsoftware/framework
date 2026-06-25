@@ -56,6 +56,7 @@ public class TourController : ControllerBase
     {
         return new TourDTO
         {
+            Tour = tour.ToLite(),
             ForEntity = tour.Trigger,
             Animate = tour.Animate,
             ShowCloseButton = tour.ShowCloseButton,

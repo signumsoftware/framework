@@ -67,12 +67,13 @@ export default function UserQueryPage(): React.JSX.Element | null {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h1 className="display-6 sf-query-title h3">
+      <h1 className="display-6 sf-query-title h3 d-flex align-items-center">
         <span>{getQueryNiceName(fo.queryName)}</span>
         {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
           <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
         </>
         }
+        {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
 
       {currentUserQuery && <SearchControl ref={sc => {

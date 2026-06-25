@@ -65,6 +65,7 @@ export namespace TourMessage {
   export const ReplayTour: MessageKey = new MessageKey("TourMessage", "ReplayTour");
   export const StartTour: MessageKey = new MessageKey("TourMessage", "StartTour");
   export const CreateTour: MessageKey = new MessageKey("TourMessage", "CreateTour");
+  export const EditTour: MessageKey = new MessageKey("TourMessage", "EditTour");
 }
 
 export namespace TourOperation {

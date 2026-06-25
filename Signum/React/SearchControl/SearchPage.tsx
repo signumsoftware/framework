@@ -5,6 +5,7 @@ import { FindOptions, QueryDescription } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
+import SearchControlLoaded from './SearchControlLoaded'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
@@ -74,12 +75,13 @@ function SearchPage(): React.ReactElement {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h1 tabIndex={0} className="display-6 sf-query-title h3">
+      <h1 tabIndex={0} className="display-6 sf-query-title h3 d-flex align-items-center">
         <span>{getQueryNiceName(fo.queryName)}</span>
         {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
           <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
         </>
         }
+        {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
@@ -117,6 +119,22 @@ namespace SearchPage {
     minHeight: 600,
     showFilters: () => false
   };
+
+  /** Extension point to render extra elements (e.g. a TourButton) on the right of the search page title.
+   * Used by both SearchPage and UserQueryPage. */
+  export const onTitleElements: ((scl: SearchControlLoaded) => React.ReactNode)[] = [];
+
+  export function renderTitleElements(scl: SearchControlLoaded): React.ReactNode {
+    const elements = onTitleElements.map(f => f(scl)).filter(e => e != null);
+    if (elements.length == 0)
+      return null;
+
+    return (
+      <span className="ms-auto d-inline-flex align-items-center fs-6 fw-normal">
+        {elements.map((e, i) => <React.Fragment key={i}>{e}</React.Fragment>)}
+      </span>
+    );
+  }
 }
 
 export default SearchPage;

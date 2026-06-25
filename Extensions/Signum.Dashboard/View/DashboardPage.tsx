@@ -83,6 +83,7 @@ export default function DashboardPage(): React.JSX.Element {
                 <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
               </Link>
             }
+            {DashboardClient.onDashboardPageActions.map((fn, i) => <React.Fragment key={i}>{fn(dashboard)}</React.Fragment>)}
           </div>
         </div>}
 
