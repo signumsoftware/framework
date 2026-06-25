@@ -28,12 +28,12 @@ public class TourController : ControllerBase
         return tour == null ? null : ToDTO(tour);
     }
 
-    [HttpGet("api/tour/triggerType/{symbolKey}")]
-    public Lite<TypeEntity>? GetTriggerType(string symbolKey)
+    [HttpGet("api/tour/triggerType")]
+    public Lite<TypeEntity>? GetTriggerType([FromQuery] string liteKey)
     {
-        var symbol = SymbolLogic<TourTriggerSymbol>.ToSymbol(symbolKey);
+        var lite = (Lite<TourTriggerSymbol>)Lite.Parse(liteKey);
 
-        var type = TourTriggerLogic.GetTriggerType(symbol);
+        var type = TourTriggerLogic.GetTriggerType(lite.RetrieveAndRemember());
 
         return type?.ToTypeEntity().ToLite();
     }

@@ -4,7 +4,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator';
 import { ajaxGet } from '@framework/Services';
 import { ClickTrigger, TourEntity, TourStepEntity } from './Signum.Tour'
 import { Entity, Lite, ModifiableEntity, toLite, liteKey } from '@framework/Signum.Entities';
-import { TypeEntity } from '@framework/Signum.Basics';
+import { TypeEntity, TourTriggerSymbol } from '@framework/Signum.Basics';
 import { onWidgets } from '@framework/Frames/Widgets';
 import { TourButton } from './TourComponent';
 import { TourButtonHolder } from '@framework/TourButton';
@@ -64,8 +64,8 @@ export namespace TourClient {
       return ajaxGet({ url: `/api/tour/byLite?liteKey=${encodeURIComponent(liteKey(lite))}` });
     }
 
-    export function getTriggerType(symbolKey: string): Promise<Lite<TypeEntity> | null> {
-      return ajaxGet({ url: `/api/tour/triggerType/${symbolKey}` });
+    export function getTriggerType(lite: Lite<TourTriggerSymbol>): Promise<Lite<TypeEntity> | null> {
+      return ajaxGet({ url: `/api/tour/triggerType?liteKey=${encodeURIComponent(liteKey(lite))}` });
     }
   }
 }

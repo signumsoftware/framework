@@ -4,7 +4,6 @@ import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { AutoLine, CheckboxLine, EntityAccordion, TypeContext } from '@framework/Lines';
 import TourStep from './TourStep';
 import { Navigator } from '@framework/Navigator';
-import { getToString } from '@framework/Signum.Entities';
 import { TypeEntity, TourTriggerSymbol } from '@framework/Signum.Basics';
 import { DashboardEntity } from '../../Signum.Dashboard/Signum.Dashboard';
 import { UserQueryEntity } from '../../Signum.UserQueries/Signum.UserQueries';
@@ -16,7 +15,7 @@ export default function Tour(p: { ctx: TypeContext<TourEntity> }): React.ReactEl
   // For a TourTriggerSymbol trigger associated with an entity type, resolve that type so
   // its properties become available as "Property" CSS steps (like a Lite<TypeEntity> trigger).
   const symbolTypeLite = useAPI(() =>
-    TourTriggerSymbol.isLite(p.ctx.value.trigger) ? TourClient.API.getTriggerType(getToString(p.ctx.value.trigger)) : Promise.resolve(null),
+    TourTriggerSymbol.isLite(p.ctx.value.trigger) ? TourClient.API.getTriggerType(p.ctx.value.trigger) : Promise.resolve(null),
     [p.ctx.value.trigger]);
   const type = Navigator.useFetchInState(
     TypeEntity.isLite(p.ctx.value.trigger) ? p.ctx.value.trigger : (symbolTypeLite ?? null));
