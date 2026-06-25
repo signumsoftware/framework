@@ -145,11 +145,6 @@ export interface PermissionSymbol extends Symbol {
   Type: "Permission";
 }
 
-export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
-export interface TourTriggerSymbol extends Symbol {
-  Type: "TourTrigger";
-}
-
 export const PropertyRouteEntity: Type<PropertyRouteEntity> = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
@@ -191,6 +186,11 @@ export interface SystemEventLogEntity extends Entities.Entity {
   user: Entities.Lite<Security.IUserEntity> | null;
   eventType: string;
   exception: Entities.Lite<ExceptionEntity> | null;
+}
+
+export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
+export interface TourTriggerSymbol extends Symbol {
+  Type: "TourTrigger";
 }
 
 export const TranslatableRouteType: EnumType<TranslatableRouteType> = new EnumType<TranslatableRouteType>("TranslatableRouteType");

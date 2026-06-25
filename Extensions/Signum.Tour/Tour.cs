@@ -205,7 +205,7 @@ public class CssStepEmbedded : EmbeddedEntity
         {
             var typeEntity =
                 userAsset.Trigger is Lite<TypeEntity> te ? te.RetrieveFromCache() :
-                userAsset.Trigger is Lite<TourTriggerSymbol> sym ? TourTriggerLogic.GetTriggerType(sym.RetrieveFromCache())?.ToTypeEntity() :
+                userAsset.Trigger is Lite<TourTriggerSymbol> sym ? TourTriggerLogic.GetTriggerType(SymbolLogic<TourTriggerSymbol>.ToSymbol(sym.ToString()!))?.ToTypeEntity() :
                 null;
 
             return typeEntity == null ? null : ctx.GetPropertyRoute(typeEntity, a.Value);
