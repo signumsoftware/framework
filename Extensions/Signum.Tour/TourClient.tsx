@@ -4,8 +4,10 @@ import { Navigator, EntitySettings } from '@framework/Navigator';
 import { ajaxGet } from '@framework/Services';
 import { ClickTrigger, TourEntity, TourStepEntity } from './Signum.Tour'
 import { Entity, Lite, ModifiableEntity, toLite, liteKey } from '@framework/Signum.Entities';
+import { TypeEntity } from '@framework/Signum.Basics';
 import { onWidgets } from '@framework/Frames/Widgets';
 import { TourButton } from './TourComponent';
+import { TourButtonHolder } from '@framework/TourButton';
 import { DashboardClient } from '../Signum.Dashboard/DashboardClient';
 import '../Signum.UserQueries/UserQueryClient'; // augments SearchControlLoaded with getCurrentUserQuery
 import { Finder } from '@framework/Finder';
@@ -14,6 +16,10 @@ import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 export namespace TourClient {
 
   export function start(options: { routes: RouteObject[] }): void {
+
+    // Implement the framework-level TourButton extension point. Modules render <TourButton> from
+    // @framework without depending on this extension; tours only appear when Signum.Tour is started.
+    TourButtonHolder.renderer = trigger => <TourButton trigger={trigger as any} />;
 
     Navigator.addSettings(new EntitySettings(TourEntity, a => import('./Templates/Tour')));
     Navigator.addSettings(new EntitySettings(TourStepEntity, a => import('./Templates/TourStep')));
@@ -56,6 +62,10 @@ export namespace TourClient {
 
     export function getTourByLite(lite: Lite<Entity>): Promise<TourDTO | null> {
       return ajaxGet({ url: `/api/tour/byLite?liteKey=${encodeURIComponent(liteKey(lite))}` });
+    }
+
+    export function getTriggerType(symbolKey: string): Promise<Lite<TypeEntity> | null> {
+      return ajaxGet({ url: `/api/tour/triggerType/${symbolKey}` });
     }
   }
 }

@@ -73,18 +73,6 @@ public static class TourOperation
     public static readonly DeleteSymbol<TourEntity> Delete;
 }
 
-[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true)]
-public class TourTriggerSymbol : Symbol
-{
-    private TourTriggerSymbol() { }
-
-    public TourTriggerSymbol(Type declaringType, string fieldName) :
-        base(declaringType, fieldName)
-    {
-    }
-}
-
-
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class TourStepEntity : Entity, ICanBeOrdered
 {
@@ -213,9 +201,15 @@ public class CssStepEmbedded : EmbeddedEntity
     {
         Type = element.Attribute("Type")!.Value.ToEnum<CssStepType>();
         CssSelector = element.Attribute("CssSelector")?.Value;
-        Property = element.Attribute("Property")?.Let(a => userAsset.Trigger is Lite<TypeEntity> typeEntity
-            ? ctx.GetPropertyRoute(typeEntity.RetrieveFromCache(), a.Value)
-            : null);
+        Property = element.Attribute("Property")?.Let(a =>
+        {
+            var typeEntity =
+                userAsset.Trigger is Lite<TypeEntity> te ? te.RetrieveFromCache() :
+                userAsset.Trigger is Lite<TourTriggerSymbol> sym ? TourTriggerLogic.GetTriggerType(sym.RetrieveFromCache())?.ToTypeEntity() :
+                null;
+
+            return typeEntity == null ? null : ctx.GetPropertyRoute(typeEntity, a.Value);
+        });
         var content = element.Attribute("ToolbarContent")?.Value;
         ToolbarContent = !content.HasText() ? null :
            content.Contains('|') ? ctx.RetrieveUserAssetLite(ctx.GetType(content.Before('|')).ToType(), Guid.Parse(content.After('|'))) :

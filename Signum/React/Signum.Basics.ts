@@ -145,6 +145,11 @@ export interface PermissionSymbol extends Symbol {
   Type: "Permission";
 }
 
+export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
+export interface TourTriggerSymbol extends Symbol {
+  Type: "TourTrigger";
+}
+
 export const PropertyRouteEntity: Type<PropertyRouteEntity> = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";

@@ -6,19 +6,22 @@ import {
   DriveStep,
   Side } from "driver.js";
 import "driver.js/dist/driver.css";
-import { TourEntity, TourMessage, TourTriggerSymbol } from "./Signum.Tour";
+import { TourEntity, TourMessage } from "./Signum.Tour";
+import { TourTriggerSymbol } from "@framework/Signum.Basics";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
   Lite,
   isLite,
-  liteKey } from "@framework/Signum.Entities";
+  liteKey,
+  toLite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
   PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
+import { Navigator } from "@framework/Navigator";
 import { JSX } from "react/jsx-runtime";
 import { micromark } from "micromark";
 
@@ -56,8 +59,33 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
     setStartTour(prev => !prev);
   };
 
-  if (!tour) {
-    return null;
+  if (tour === undefined) {
+    return null; // still loading
+  }
+
+  if (tour === null) {
+    // No tour exists yet. Let an authorized user author one from here.
+    const triggerLite: Lite<Entity> | undefined =
+      isLite(p.trigger) ? p.trigger :
+      TourTriggerSymbol.isInstance(p.trigger) && p.trigger.id != undefined ? toLite(p.trigger) :
+      undefined;
+
+    // No tour yet: only offer authoring it to users that can create a TourEntity.
+    if (!triggerLite || !Navigator.isCreable(TourEntity))
+      return null;
+
+    const handleCreate = () => Navigator.view(TourEntity.New({ trigger: triggerLite }));
+
+    return (
+      <LinkButton
+        className={'sf-pointer nav-link'}
+        onClick={handleCreate}
+        title={TourMessage.CreateTour.niceToString()}
+      >
+        {/* Middle state: more prominent than a viewed tour (plain), less than an unseen one (warning + beat). */}
+        <FontAwesomeIcon icon={faCompass} className="text-info" />
+      </LinkButton>
+    );
   }
 
   return (

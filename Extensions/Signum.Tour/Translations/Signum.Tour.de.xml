@@ -40,6 +40,7 @@
   </Type>
   <Type Name="TourMessage">
     <Member Name="Close" Description="Schließen" />
+    <Member Name="CreateTour" Description="Tour erstellen" />
     <Member Name="Done" Description="Fertig" />
     <Member Name="Next" Description="Weiter" />
     <Member Name="Previous" Description="Vorherige" />

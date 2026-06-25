@@ -21,13 +21,21 @@ public class TourController : ControllerBase
     [HttpGet("api/tour/bySymbol/{symbolKey}")]
     public TourDTO? GetTourBySymbol(string symbolKey)
     {
-        var symbol = SymbolLogic<TourTriggerSymbol>.Symbols.SingleOrDefault(s => s.Key == symbolKey);
-        if (symbol == null)
-            return null;
+        var symbol = SymbolLogic<TourTriggerSymbol>.ToSymbol(symbolKey);
 
         var tour = TourLogic.ToursByTrigger.Value.TryGetC(symbol.ToLite());
 
         return tour == null ? null : ToDTO(tour);
+    }
+
+    [HttpGet("api/tour/triggerType/{symbolKey}")]
+    public Lite<TypeEntity>? GetTriggerType(string symbolKey)
+    {
+        var symbol = SymbolLogic<TourTriggerSymbol>.ToSymbol(symbolKey);
+
+        var type = TourTriggerLogic.GetTriggerType(symbol);
+
+        return type?.ToTypeEntity().ToLite();
     }
 
     [HttpGet("api/tour/byLite")]

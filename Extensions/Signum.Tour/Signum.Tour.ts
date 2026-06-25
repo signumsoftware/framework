@@ -64,6 +64,7 @@ export namespace TourMessage {
   export const Done: MessageKey = new MessageKey("TourMessage", "Done");
   export const ReplayTour: MessageKey = new MessageKey("TourMessage", "ReplayTour");
   export const StartTour: MessageKey = new MessageKey("TourMessage", "StartTour");
+  export const CreateTour: MessageKey = new MessageKey("TourMessage", "CreateTour");
 }
 
 export namespace TourOperation {
@@ -84,8 +85,4 @@ export interface TourStepEntity extends Entities.Entity {
   order: number;
 }
 
-export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
-export interface TourTriggerSymbol extends Basics.Symbol {
-  Type: "TourTrigger";
-}
 
