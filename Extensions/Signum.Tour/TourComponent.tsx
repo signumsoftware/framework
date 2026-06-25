@@ -71,7 +71,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
       undefined;
 
     // No tour yet: only offer authoring it to users that can create a TourEntity.
-    if (!triggerLite || !Navigator.isCreable(TourEntity))
+    if (!triggerLite || !Navigator.isCreable(TourEntity, { isSearch: true }))
       return null;
 
     const handleCreate = () => Navigator.view(TourEntity.New({ trigger: triggerLite }));
@@ -82,8 +82,10 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
         onClick={handleCreate}
         title={TourMessage.CreateTour.niceToString()}
       >
-        {/* Middle state: more prominent than a viewed tour (plain), less than an unseen one (warning + beat). */}
-        <FontAwesomeIcon icon={faCompass} className="text-info" />
+        <span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon aria-hidden={true} icon={faCompass} transform="left-2" color="var(--bs-secondary)" />
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-4 up-5 right-5" color="var(--bs-success)" />
+        </span>
       </LinkButton>
     );
   }
@@ -95,6 +97,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
         onClick={handleClick}
         title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
       >
+
         <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
       {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
