@@ -175,7 +175,7 @@ public class BrowserProxy
     /// </summary>
     public virtual async Task<string?> GetCurrentUserAsync()
     {
-        var loginDropdown = Page.Locator(".sf-login-dropdown, .sf-login");
+        var loginDropdown = Page.Locator(".sf-login-dropdown, .sf-login").First;
         
         if (!await loginDropdown.IsPresentAsync())
             return null;
@@ -224,7 +224,7 @@ public class BrowserProxy
         await Page.Locator("#login").ClickAsync();
 
         await Page.Locator("#login").WaitNotPresentAsync();
-        await Page.Locator(".sf-login-dropdown").WaitVisibleAsync();
+        await Page.Locator(".sf-login-dropdown").First.WaitVisibleAsync();
 
     }
 
