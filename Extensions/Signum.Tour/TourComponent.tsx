@@ -35,7 +35,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
     return localStorage.getItem(storageKey) === "true";
   });
 
-  const [startTour, setStartTour] = React.useState(false);
+  const [tourRunId, setTourRunId] = React.useState(0);
 
   const tour = useAPI(() => {
     if (isLite(p.trigger)) {
@@ -55,8 +55,8 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
       setHasViewed(true);
     }
 
-    // Toggle startTour to force recreation and auto-start
-    setStartTour(prev => !prev);
+    // Increment to force remount (new key) and auto-start on every click
+    setTourRunId(prev => prev + 1);
   };
 
   if (tour === undefined) {
@@ -100,7 +100,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
 
         <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
-      {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
+      {tourRunId > 0 && <TourComponent key={tourRunId} tour={tour} autoStart={true} ref={driverRef} />}
     </>
   );
 }
