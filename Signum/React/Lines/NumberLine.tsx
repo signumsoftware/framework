@@ -61,7 +61,7 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
+          <FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} className={classes("numeric", c.mandatoryClass)} innerRef={c.setRefs}>
             {p.ctx.value == null ? "" : numberFormat.format(p.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>

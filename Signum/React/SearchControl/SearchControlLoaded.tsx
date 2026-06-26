@@ -183,7 +183,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
   static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
-  pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
   getMobileOptions(fop: FindOptionsParsed): SearchControlMobileOptions {

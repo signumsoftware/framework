@@ -20,7 +20,13 @@ export namespace SubsClient {
   } = {};
 
   export function registerSubAuto<P extends Entity, S extends Entity>(parentType: Type<P>, subType: Type<S>, lambdaToProperty: (v: S) => P | Lite<P> | null | undefined): void {
-    const member = subType.memberInfo(lambdaToProperty);
+    if (parentType.tryTypeInfo() == null || subType.tryTypeInfo() == null)
+      return;
+
+    const member = subType.tryMemberInfo(lambdaToProperty);
+    if (member == null)
+      return;
+
     registerSub(parentType, subType, parent => {
       return Finder.fetchLites({
         queryName: subType,
@@ -44,7 +50,6 @@ export namespace SubsClient {
           return undefined;
         }
 
-        debugger;
         return Constructor.constructPack(subType, { [member.name.firstLower()]: parent } as Partial<S>);
       });
     });

@@ -48,27 +48,33 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
   function setCurrentEntity(entity: Lite<Entity> | undefined) {
     setCurrentEntityInternal(entity);
     p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
+    p.searchControl.getCurrentEntity = () => entity;
+    p.searchControl.props.onPageTitleChanged?.();
+
+    if (entity != null && entity.model == null)
+      Navigator.API.fillLiteModels(entity).then(() => {
+        if (is(p.searchControl.getCurrentEntity?.(), entity))
+          p.searchControl.props.onPageTitleChanged?.();
+        forceUpdate();
+      });
   }
 
-  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, subTitle: string | undefined) {
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
 
     p.searchControl.getCurrentUserQuery = () => uq;
     setCurrentUserQueryInternal(uq);
 
-    p.searchControl.pageSubTitle = subTitle;
     p.searchControl.props.onPageTitleChanged?.();
-    if (uq != null && subTitle == null)
+    if (uq != null)
       UserQueryClient.API.translated(uq).then(model => {
         uq.model = model;
-        if (p.searchControl.getCurrentUserQuery?.() == uq) {
-          p.searchControl.pageSubTitle = model.displayName;
+        if (is(p.searchControl.getCurrentUserQuery?.(), uq))
           p.searchControl.props.onPageTitleChanged?.();
-        }
         forceUpdate();
       });
   }
-  
+
   React.useEffect(() => {
     const query = p.searchControl.props.tag == "SearchPage" ? QueryString.parse(location.search) : null;
 
@@ -78,11 +84,11 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
     const uq = query ? tryParseLite(query["userQuery"]) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
-      if (!is(p.searchControl.getCurrentUserQuery?.(), uq) || !p.searchControl.pageSubTitle)
-        setCurrentUserQuery(uq, undefined);
+      if (!is(p.searchControl.getCurrentUserQuery?.(), uq))
+        setCurrentUserQuery(uq);
     }
     else
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
 
     const entity = query ? tryParseLite(query["entity"]) : p.searchControl.props.extraOptions?.entity;
     p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
@@ -129,7 +135,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.handleChangeFiltermode('Simple');
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
-        setCurrentUserQuery(undefined, undefined);
+        setCurrentUserQuery(undefined);
         setCurrentEntity(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -146,7 +152,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
-          setCurrentUserQuery(uq, translated(userQuery, a => a.displayName));
+          setCurrentUserQuery(uq);
           //setCurrentEntity(undefined);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -167,7 +173,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
     else {
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
       setCurrentEntity(undefined);
     }
   }
@@ -215,7 +221,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
     else {
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
       setCurrentEntity(undefined);
     }
   }

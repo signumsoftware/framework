@@ -6,19 +6,23 @@ import {
   DriveStep,
   Side } from "driver.js";
 import "driver.js/dist/driver.css";
-import { TourEntity, TourMessage, TourTriggerSymbol } from "./Signum.Tour";
+import { TourEntity, TourMessage } from "./Signum.Tour";
+import { TourTriggerSymbol } from "@framework/Signum.Basics";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
   Lite,
   isLite,
-  liteKey } from "@framework/Signum.Entities";
+  liteKey,
+  toLite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCompass } from "@fortawesome/free-solid-svg-icons";
+import { faBiking } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
   PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
+import { Navigator } from "@framework/Navigator";
+import * as AppContext from "@framework/AppContext";
 import { JSX } from "react/jsx-runtime";
 import { micromark } from "micromark";
 
@@ -32,7 +36,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
     return localStorage.getItem(storageKey) === "true";
   });
 
-  const [startTour, setStartTour] = React.useState(false);
+  const [tourRunId, setTourRunId] = React.useState(0);
 
   const tour = useAPI(() => {
     if (isLite(p.trigger)) {
@@ -52,24 +56,66 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
       setHasViewed(true);
     }
 
-    // Toggle startTour to force recreation and auto-start
-    setStartTour(prev => !prev);
+    // Increment to force remount (new key) and auto-start on every click
+    setTourRunId(prev => prev + 1);
   };
 
-  if (!tour) {
-    return null;
+  if (tour === undefined) {
+    return null; // still loading
   }
+
+  if (tour === null) {
+    // No tour exists yet. Let an authorized user author one from here.
+    const triggerLite: Lite<Entity> | undefined =
+      isLite(p.trigger) ? p.trigger :
+      TourTriggerSymbol.isInstance(p.trigger) && p.trigger.id != undefined ? toLite(p.trigger) :
+      undefined;
+
+    // No tour yet: only offer authoring it to users that can create a TourEntity.
+    if (!triggerLite || !Navigator.isCreable(TourEntity, { isSearch: true }))
+      return null;
+
+    const handleCreate = () => Navigator.createInNewTab({ entity: TourEntity.New({ trigger: triggerLite }), canExecute: {} });
+
+    return (
+      <LinkButton
+        className={'sf-pointer nav-link'}
+        onClick={handleCreate}
+        title={TourMessage.CreateTour.niceToString()}
+      >
+        <span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon aria-hidden={true} icon={faBiking}  transform="flip-h" color="var(--bs-secondary)" />
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "circle-plus"]} transform="shrink-7 down-4 left-6" color="var(--bs-success)" />
+        </span>
+      </LinkButton>
+    );
+  }
+
+  const canEdit = !Navigator.isReadOnly(TourEntity);
+  const handleEdit = () => window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(tour.tour)));
 
   return (
     <>
+      <span className="d-inline-flex">
       <LinkButton
-        className={'sf-pointer nav-link'}
+        className={'sf-pointer'}
         onClick={handleClick}
         title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
       >
-        <FontAwesomeIcon icon={faCompass} className={classes(!hasViewed && 'text-warning fa-beat')} />
+
+          <FontAwesomeIcon icon={faBiking} transform="flip-h" className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
-      {startTour && <TourComponent key={startTour.toString()} tour={tour} autoStart={true} ref={driverRef} />}
+      {canEdit && (
+        <LinkButton
+          className={'sf-line-button sf-find px-1'}
+          onClick={handleEdit}
+          title={TourMessage.EditTour.niceToString()}
+        >
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "pen-to-square"]} transform="shrink-3" color="var(--bs-secondary)" />
+        </LinkButton>
+        )}
+</span>
+      {tourRunId > 0 && <TourComponent key={tourRunId} tour={tour} autoStart={true} ref={driverRef} />}
     </>
   );
 }

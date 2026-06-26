@@ -15,7 +15,6 @@
     "strict": true,
     "noImplicitOverride": true,
     "declarationMap": true,
-    "disableSourceOfProjectReferenceRedirect": true,
     "noUncheckedSideEffectImports": false,
     "lib": [
       "ESNext",

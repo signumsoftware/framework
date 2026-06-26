@@ -17,6 +17,8 @@ import { DashboardClient, CreateNewButton } from '../Signum.Dashboard/DashboardC
 import { ImportComponent } from '@framework/ImportComponent'
 import { ContextualItemsContext, MenuItemBlock, onContextualItems, ContextualMenuItem } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
+import SearchPage from '@framework/SearchControl/SearchPage';
+import { EntityLink } from '@framework/Search';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 import { UserQueryPartHandler } from './Dashboard/View/UserQueryPart';
@@ -39,6 +41,33 @@ export namespace UserQueryClient {
     OmniboxClient.registerProvider(new UserQueryOmniboxProvider());
   
     options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
+
+    // On SearchPage / UserQueryPage, render the user query title either as a breadcrumb (entity > query)
+    // when configured, or as "query - userQueryName" otherwise.
+    SearchPage.onRenderTitle.push((scl, defaultTitle) => {
+      const uq = scl.getCurrentUserQuery?.();
+      const model = uq?.model as UserQueryLiteModel | undefined;
+      const entity = scl.getCurrentEntity?.();
+
+      if (model == null)
+        return undefined;
+
+      if (model.showTitleAsBreadcrumb && entity != null)
+        return (
+          <span className="sf-breadcrumb-title d-inline-flex align-items-center">
+            <EntityLink lite={entity} inPlaceNavigation />
+            <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+            {defaultTitle}
+          </span>
+        );
+
+      return (
+        <>
+          {defaultTitle}
+          <small className="sf-type-nice-name text-muted"> - {getToString(uq)}</small>
+        </>
+      );
+    });
   
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
   
@@ -114,7 +143,7 @@ export namespace UserQueryClient {
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
-      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) || !AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ? undefined :
         (c, e, cdRef, ev) => {
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
@@ -422,5 +451,6 @@ declare module '@framework/SearchControl/SearchControlLoaded' {
 
   export interface SearchControlLoaded {
     getCurrentUserQuery?: () => Lite<UserQueryEntity> | undefined;
+    getCurrentEntity?: () => Lite<Entity> | undefined;
   }
 }

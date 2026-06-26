@@ -64,7 +64,10 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 {p.ctx.value.entityType && <br />}
                 {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
                 {p.ctx.value.entityType && <br />}
-                {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+                {p.ctx.value.entityType && <div className="d-flex gap-3">
+                  <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
+                  <CheckboxLine ctx={ctx.subCtx(e => e.showTitleAsBreadcrumb)} inlineCheckbox />
+                </div>}
               </div>
             } />
         <div className="row"> 

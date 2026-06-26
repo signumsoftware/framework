@@ -7,5 +7,7 @@ public enum TourMessage
     Close,
     Done,
     ReplayTour,
-    StartTour
+    StartTour,
+    CreateTour,
+    EditTour
 }
