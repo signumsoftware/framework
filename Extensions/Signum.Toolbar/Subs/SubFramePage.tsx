@@ -23,6 +23,8 @@ import { classes } from '@framework/Globals'
 import FramePage from '../../../Signum/React/Frames/FramePage'
 import { SubsClient } from './SubsClient'
 import MessageModal from '@framework/Modals/MessageModal'
+import { EntityLink } from '@framework/Search'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
@@ -50,6 +52,9 @@ export default function SubFramePage(): React.ReactElement {
   const settings = Navigator.getSettings(cti);
   const childType = cti.name;
   const parentType = pti.name;
+
+  const parentLite = React.useMemo(() => newLite(pti.name, params.parentid!), [pti.name, params.parentid]);
+  Navigator.useFillToString(parentLite);
 
   if (state && state.pack.entity.Type != childType)
     state = undefined;
@@ -246,19 +251,18 @@ export default function SubFramePage(): React.ReactElement {
   function renderTitle() {
 
     if (!state)
-      return <h1 className="display-6 sf-entity-title h3">{JavascriptMessage.loading.niceToString()}</h1>;
+      return <h1 className="sf-breadcrumb-title">{JavascriptMessage.loading.niceToString()}</h1>;
 
     const entity = state.pack.entity;
-    const title = Navigator.renderEntity(entity); 
+    const title = Navigator.renderEntity(entity);
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
-        {title && <>
-          <span className="sf-entity-title">{title}</span>&nbsp;
-        </>
-        }
+      <h1 className={classes("border-bottom pb-3 mb-2 sf-breadcrumb-title", settings?.stickyHeader && "sf-sticky-header")} >
+        <EntityLink lite={parentLite} inPlaceNavigation />
+        <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+        {title}
         {(subTitle || widgets) &&
           <div className="sf-entity-sub-title mt-2">
             {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}

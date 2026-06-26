@@ -54,7 +54,7 @@ export namespace UserQueryClient {
 
       if (model.showTitleAsBreadcrumb && entity != null)
         return (
-          <span className="d-inline-flex align-items-center fs-5">
+          <span className="sf-breadcrumb-title d-inline-flex align-items-center">
             <EntityLink lite={entity} inPlaceNavigation />
             <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
             {defaultTitle}
