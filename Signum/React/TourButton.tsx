@@ -12,10 +12,10 @@ import { Symbol } from './Signum.Basics'
  * Signum.Tour registers the actual implementation in `TourClient.start` (see TourClient.tsx).
  * If the application does not start Signum.Tour, the button simply renders nothing.
  */
-export namespace TourButtonHolder {
-  export let renderer: ((trigger: PseudoType | Symbol | Lite<Entity>) => React.ReactNode) | null = null;
-}
+export const TourButtonOptions = {
+  renderer: null as ((trigger: PseudoType | Symbol | Lite<Entity>) => React.ReactNode) | null
+};
 
 export function TourButton(p: { trigger: PseudoType | Symbol | Lite<Entity> }): React.ReactNode {
-  return TourButtonHolder.renderer ? TourButtonHolder.renderer(p.trigger) : null;
+  return TourButtonOptions.renderer ? TourButtonOptions.renderer(p.trigger) : null;
 }

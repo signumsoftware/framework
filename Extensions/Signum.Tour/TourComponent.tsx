@@ -16,7 +16,7 @@ import { Entity,
   liteKey,
   toLite } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRoute } from "@fortawesome/free-solid-svg-icons";
+import { faBiking } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
   PseudoType } from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
@@ -84,8 +84,8 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
         title={TourMessage.CreateTour.niceToString()}
       >
         <span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon aria-hidden={true} icon={faRoute}  transform="flip-h" color="var(--bs-secondary)" />
-          <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-plus"]} transform="shrink-5 up-6 right-6" color="var(--bs-success)" />
+          <FontAwesomeIcon aria-hidden={true} icon={faBiking}  transform="flip-h" color="var(--bs-secondary)" />
+          <FontAwesomeIcon aria-hidden={true} icon={["fas", "circle-plus"]} transform="shrink-7 down-4 left-6" color="var(--bs-success)" />
         </span>
       </LinkButton>
     );
@@ -103,7 +103,7 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
         title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
       >
 
-        <FontAwesomeIcon icon={faRoute} transform="flip-h" className={classes(!hasViewed && 'text-warning fa-beat')} />
+          <FontAwesomeIcon icon={faBiking} transform="flip-h" className={classes(!hasViewed && 'text-warning fa-beat')} />
       </LinkButton>
       {canEdit && (
         <LinkButton

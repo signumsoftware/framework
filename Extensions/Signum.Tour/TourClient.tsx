@@ -7,7 +7,7 @@ import { Entity, Lite, ModifiableEntity, toLite, liteKey } from '@framework/Sign
 import { TypeEntity, TourTriggerSymbol } from '@framework/Signum.Basics';
 import { onWidgets } from '@framework/Frames/Widgets';
 import { TourButton } from './TourComponent';
-import { TourButtonHolder } from '@framework/TourButton';
+import { TourButtonOptions } from '@framework/TourButton';
 import { DashboardClient } from '../Signum.Dashboard/DashboardClient';
 import '../Signum.UserQueries/UserQueryClient'; // augments SearchControlLoaded with getCurrentUserQuery
 import { Finder } from '@framework/Finder';
@@ -23,7 +23,7 @@ export namespace TourClient {
 
     // Implement the framework-level TourButton extension point. Modules render <TourButton> from
     // @framework without depending on this extension; tours only appear when Signum.Tour is started.
-    TourButtonHolder.renderer = trigger => <TourButton trigger={trigger as any} />;
+    TourButtonOptions.renderer = trigger => <TourButton trigger={trigger as any} />;
 
     Navigator.addSettings(new EntitySettings(TourEntity, a => import('./Templates/Tour')));
     Navigator.addSettings(new EntitySettings(TourStepEntity, a => import('./Templates/TourStep')));
