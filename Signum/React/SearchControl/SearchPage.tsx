@@ -44,9 +44,7 @@ function SearchPage(): React.ReactElement {
 
   const searchControl = React.useRef<SearchControlHandler | null | undefined>(undefined);
 
-  const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
-
-  useTitle(getQueryNiceName(params.queryName!) + (subTitle ? (" - " + subTitle) : ""));
+  useTitle(getQueryNiceName(params.queryName!));
 
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
@@ -76,11 +74,7 @@ function SearchPage(): React.ReactElement {
   return (
     <div id="divSearchPage" className="sf-search-page">
       <h1 tabIndex={0} className="display-6 sf-query-title h3 d-flex align-items-center">
-        <span>{getQueryNiceName(fo.queryName)}</span>
-        {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
-          <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
-        </>
-        }
+        {SearchPage.renderTitle(searchControl.current?.searchControlLoaded, <span>{getQueryNiceName(fo.queryName)}</span>)}
         {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
       {qd && <SearchControl ref={setSearchControl}
@@ -102,7 +96,7 @@ function SearchPage(): React.ReactElement {
         enableAutoFocus={true}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
-        onPageSubTitleChanged={forceUpdate}
+        onPageTitleChanged={forceUpdate}
       />
       }
     </div>
@@ -119,6 +113,23 @@ namespace SearchPage {
     minHeight: 600,
     showFilters: () => false
   };
+
+  /** Extension point to override the leading content of the search page title (e.g. render it as a
+   * breadcrumb). Receives the SearchControlLoaded and the default title node; the first non-null
+   * result wins, otherwise the default title is used. Used by both SearchPage and UserQueryPage. */
+  export const onRenderTitle: ((scl: SearchControlLoaded, defaultTitle: React.ReactNode) => React.ReactNode | undefined)[] = [];
+
+  export function renderTitle(scl: SearchControlLoaded | null | undefined, defaultTitle: React.ReactNode): React.ReactNode {
+    if (scl != null) {
+      for (const f of onRenderTitle) {
+        const node = f(scl, defaultTitle);
+        if (node != null)
+          return node;
+      }
+    }
+
+    return defaultTitle;
+  }
 
   /** Extension point to render extra elements (e.g. a TourButton) on the right of the search page title.
    * Used by both SearchPage and UserQueryPage. */

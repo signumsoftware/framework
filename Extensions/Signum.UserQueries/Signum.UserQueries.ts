@@ -64,6 +64,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   groupResults: boolean;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   hideQuickLink: boolean;
+  showTitleAsBreadcrumb: boolean;
   includeDefaultFilters: boolean | null;
   owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
@@ -87,6 +88,7 @@ export interface UserQueryLiteModel extends Entities.ModelEntity {
   displayName: string;
   query: Basics.QueryEntity;
   hideQuickLink: boolean;
+  showTitleAsBreadcrumb: boolean;
 }
 
 export namespace UserQueryMessage {
