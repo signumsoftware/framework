@@ -11,7 +11,10 @@ public class TourController : ControllerBase
     [HttpGet("api/tour/byEntity/{typeName}")]
     public TourDTO? GetTourByEntity(string typeName)
     {
-        var type = TypeLogic.GetType(typeName);
+        var type = TypeLogic.TryGetType(typeName);
+        if (type == null)
+            return null;
+
         var typeEntity = type.ToTypeEntity().ToLite();
         var tour = TourLogic.ToursByTrigger.Value.TryGetC(typeEntity);
 
