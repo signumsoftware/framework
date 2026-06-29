@@ -44,7 +44,7 @@ export namespace UserQueryClient {
 
     // On SearchPage / UserQueryPage, render the user query title either as a breadcrumb (entity > query)
     // when configured, or as "query - userQueryName" otherwise.
-    SearchPage.onRenderTitle.push((scl, defaultTitle) => {
+    Finder.Options.onSearchPageRenderTitle.push((scl, defaultTitle) => {
       const uq = scl.getCurrentUserQuery?.();
       const model = uq?.model as UserQueryLiteModel | undefined;
       const entity = scl.getCurrentEntity?.();

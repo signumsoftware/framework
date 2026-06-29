@@ -63,7 +63,7 @@ export namespace TourClient {
     });
 
     // On SearchPage / UserQueryPage, render the user query tour button in the page title.
-    SearchPage.onTitleElements.push(scl => {
+    Finder.Options.onSearchPageTitleElements.push(scl => {
       const uq = scl.getCurrentUserQuery?.();
       return uq != null ? <TourButton trigger={uq} /> : null;
     });

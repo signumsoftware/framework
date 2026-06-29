@@ -114,14 +114,11 @@ namespace SearchPage {
     showFilters: () => false
   };
 
-  /** Extension point to override the leading content of the search page title (e.g. render it as a
-   * breadcrumb). Receives the SearchControlLoaded and the default title node; the first non-null
-   * result wins, otherwise the default title is used. Used by both SearchPage and UserQueryPage. */
-  export const onRenderTitle: ((scl: SearchControlLoaded, defaultTitle: React.ReactNode) => React.ReactNode | undefined)[] = [];
+
 
   export function renderTitle(scl: SearchControlLoaded | null | undefined, defaultTitle: React.ReactNode): React.ReactNode {
     if (scl != null) {
-      for (const f of onRenderTitle) {
+      for (const f of Finder.Options.onSearchPageRenderTitle) {
         const node = f(scl, defaultTitle);
         if (node != null)
           return node;
@@ -131,12 +128,8 @@ namespace SearchPage {
     return defaultTitle;
   }
 
-  /** Extension point to render extra elements (e.g. a TourButton) on the right of the search page title.
-   * Used by both SearchPage and UserQueryPage. */
-  export const onTitleElements: ((scl: SearchControlLoaded) => React.ReactNode)[] = [];
-
   export function renderTitleElements(scl: SearchControlLoaded): React.ReactNode {
-    const elements = onTitleElements.map(f => f(scl)).filter(e => e != null);
+    const elements = Finder.Options.onSearchPageTitleElements.map(f => f(scl)).filter(e => e != null);
     if (elements.length == 0)
       return null;
 
