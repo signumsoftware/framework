@@ -23,13 +23,16 @@ export namespace TourClient {
 
     // Implement the framework-level TourButton extension point. Modules render <TourButton> from
     // @framework without depending on this extension; tours only appear when Signum.Tour is started.
-    TourButtonOptions.renderer = trigger => <TourButton trigger={trigger as any} />;
+    TourButtonOptions.renderer = (trigger, className) => <TourButton trigger={trigger as any} className={className} />;
 
     Navigator.addSettings(new EntitySettings(TourEntity, a => import('./Templates/Tour')));
     Navigator.addSettings(new EntitySettings(TourStepEntity, a => import('./Templates/TourStep')));
 
     onWidgets.push(wc => {
-      if (!wc.frame.pack.hasTour)
+      if (!Navigator.isViewable(TourEntity))
+        return undefined;
+
+      if (wc.frame.pack.hasTour == false && Navigator.isReadOnly(TourEntity))
         return undefined;
 
       return <TourButton trigger={wc.ctx.value.Type} />;

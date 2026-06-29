@@ -1,7 +1,19 @@
 import * as React from 'react'
 import { PseudoType } from './Reflection'
 import { Entity, Lite } from './Signum.Entities'
-import { Symbol } from './Signum.Basics'
+import { Symbol, TourTriggerSymbol } from './Signum.Basics'
+
+
+export function TourButton(p: { trigger: PseudoType | Symbol | Lite<Entity>; className?: string }): React.ReactNode {
+
+  if (!TourButtonOptions.renderer)
+    return null;
+
+  if (TourTriggerSymbol.isInstance(p.trigger) && p.trigger.id == null)
+    return null;
+
+  return  TourButtonOptions.renderer(p.trigger, p.className);
+}
 
 /**
  * Framework-level extension point for tour buttons.
@@ -13,9 +25,5 @@ import { Symbol } from './Signum.Basics'
  * If the application does not start Signum.Tour, the button simply renders nothing.
  */
 export const TourButtonOptions = {
-  renderer: null as ((trigger: PseudoType | Symbol | Lite<Entity>) => React.ReactNode) | null
+  renderer: null as ((trigger: PseudoType | Symbol | Lite<Entity>, className?: string) => React.ReactNode) | null
 };
-
-export function TourButton(p: { trigger: PseudoType | Symbol | Lite<Entity> }): React.ReactNode {
-  return TourButtonOptions.renderer ? TourButtonOptions.renderer(p.trigger) : null;
-}

@@ -18,7 +18,8 @@ import { Entity,
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBiking } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
-  PseudoType } from "@framework/Reflection";
+  PseudoType, 
+  tryGetTypeInfo} from "@framework/Reflection";
 import { LinkButton } from "@framework/Basics/LinkButton";
 import { classes } from "@framework/Globals";
 import { Navigator } from "@framework/Navigator";
@@ -26,7 +27,7 @@ import * as AppContext from "@framework/AppContext";
 import { JSX } from "react/jsx-runtime";
 import { micromark } from "micromark";
 
-export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<Entity> }): JSX.Element | null {
+export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<Entity>; className?: string }): JSX.Element | null {
   const storageKey =
     isLite(p.trigger) ? `tour-viewed-${liteKey(p.trigger)}` :
     TourTriggerSymbol.isInstance(p.trigger) ? `tour-viewed-${p.trigger.key}` :
@@ -66,20 +67,25 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
 
   if (tour === null) {
     // No tour exists yet. Let an authorized user author one from here.
-    const triggerLite: Lite<Entity> | undefined =
-      isLite(p.trigger) ? p.trigger :
-      TourTriggerSymbol.isInstance(p.trigger) && p.trigger.id != undefined ? toLite(p.trigger) :
-      undefined;
+
 
     // No tour yet: only offer authoring it to users that can create a TourEntity.
-    if (!triggerLite || !Navigator.isCreable(TourEntity, { isSearch: true }))
+    if (!Navigator.isCreable(TourEntity, { isSearch: true }))
       return null;
 
-    const handleCreate = () => Navigator.createInNewTab({ entity: TourEntity.New({ trigger: triggerLite }), canExecute: {} });
+    async function handleCreate() {
+    
+      const triggerLite: Lite<Entity> =
+        isLite(p.trigger) ? p.trigger :
+          TourTriggerSymbol.isInstance(p.trigger) ? toLite(p.trigger) :
+            toLite((await Navigator.API.getType(getTypeName(p.trigger)))!);
+
+      await Navigator.createInNewTab({ entity: TourEntity.New({ trigger: triggerLite }), canExecute: {} });
+    }
 
     return (
       <LinkButton
-        className={'sf-pointer nav-link'}
+        className={classes('sf-pointer nav-link', p.className)}
         onClick={handleCreate}
         title={TourMessage.CreateTour.niceToString()}
       >
@@ -94,27 +100,29 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<E
   const canEdit = !Navigator.isReadOnly(TourEntity);
   const handleEdit = () => window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(tour.tour)));
 
+  const handleClickOrEdit = (e: React.MouseEvent) => {
+    if (canEdit && (e.ctrlKey || e.altKey)) {
+      handleEdit();
+    } else {
+      handleClick();
+    }
+  };
+
+  const editHint = canEdit ? ` (${TourMessage.EditTour.niceToString()}: Ctrl/Alt+Click)` : "";
+  const title = (hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()) + editHint;
+
   return (
     <>
-      <span className="d-inline-flex">
       <LinkButton
-        className={'sf-pointer'}
-        onClick={handleClick}
-        title={hasViewed ? TourMessage.ReplayTour.niceToString() : TourMessage.StartTour.niceToString()}
+        className={classes('sf-pointer nav-link', p.className)}
+        onClick={handleClickOrEdit}
+        title={title}
       >
-
-          <FontAwesomeIcon icon={faBiking} transform="flip-h" className={classes(!hasViewed && 'text-warning fa-beat')} />
+        <span className={classes("fa-layers fa-fw icon", !hasViewed && "fa-beat")}>
+          <FontAwesomeIcon icon={faBiking} transform="flip-h" />
+          {canEdit && <FontAwesomeIcon aria-hidden={true} icon={["fas", "circle-arrow-right"]} transform="shrink-7 down-4 left-6" color="var(--bs-info)"  />}
+        </span>
       </LinkButton>
-      {canEdit && (
-        <LinkButton
-          className={'sf-line-button sf-find px-1'}
-          onClick={handleEdit}
-          title={TourMessage.EditTour.niceToString()}
-        >
-          <FontAwesomeIcon aria-hidden={true} icon={["fas", "pen-to-square"]} transform="shrink-3" color="var(--bs-secondary)" />
-        </LinkButton>
-        )}
-</span>
       {tourRunId > 0 && <TourComponent key={tourRunId} tour={tour} autoStart={true} ref={driverRef} />}
     </>
   );

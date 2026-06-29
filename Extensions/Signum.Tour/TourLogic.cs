@@ -50,8 +50,7 @@ public static class TourLogic
             EntityPackTS.AddExtension += pack =>
             {
                 var tour = ToursByTrigger.Value.TryGetC(pack.entity.GetType().ToTypeEntity().ToLite());
-                if (tour != null)
-                    pack.extension.Add("hasTour", true);
+                pack.extension.Add("hasTour", tour != null);
             };
         }
 
