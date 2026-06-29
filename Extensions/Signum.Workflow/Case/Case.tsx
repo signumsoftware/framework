@@ -96,10 +96,9 @@ export default function CaseComponent(p: CaseComponentProps): React.JSX.Element 
                   { token: CaseActivityEntity.token(e => e.doneBy) },
                   { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
                 ],
-                orderOptions: [{
-                  token: CaseActivityEntity.token(e => e.startDate),
-                  orderType: "Ascending",
-                }],
+                orderOptions: [
+                  { token: CaseActivityEntity.token(e => e.startDate), orderType: "Ascending" },
+                ],
               }}
               extraButtons={sc => [
                 { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },
