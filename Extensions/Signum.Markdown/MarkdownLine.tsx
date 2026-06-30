@@ -12,8 +12,10 @@ export interface MarkdownLineProps extends TextAreaLineProps {
   markdownOption?: Options;
 }
 
-export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAttributes, ...p }: MarkdownLineProps): React.JSX.Element {
+export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAttributes, helpTextOnTop, ...p }: MarkdownLineProps): React.JSX.Element {
   const [preview, setPreview] = React.useState(ctx.readOnly);
+
+  const helpTextOnTopResolved: React.ReactNode = typeof helpTextOnTop == "function" ? undefined : helpTextOnTop;
 
   React.useEffect(() => {
     setPreview(ctx.readOnly);
@@ -56,7 +58,7 @@ export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAt
 
   return (
     <ErrorBoundary>
-      <FormGroup ctx={ctx} label={<>{markdownHelp}{label ?? ctx.niceName()}</>} labelIcon={toggle}>
+      <FormGroup ctx={ctx} label={<>{markdownHelp}{label ?? ctx.niceName()}</>} labelIcon={toggle} helpTextOnTop={helpTextOnTopResolved}>
         {inputId => preview ? <div className='form-control form-control-sm'><Markdown>{ctx.value}</Markdown></div> :
           <TextAreaLine
             ctx={ctx.subCtx({ formGroupStyle: 'None' })}
