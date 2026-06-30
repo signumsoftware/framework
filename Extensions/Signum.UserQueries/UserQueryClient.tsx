@@ -157,7 +157,9 @@ export namespace UserQueryClient {
         if (!c.createNew)
           return null;
   
-        return <CreateNewButton queryKey={c.userQuery.query.key} onClick={(tis, qd) => {
+        return <CreateNewButton queryKey={c.userQuery.query.key}
+          getFindOptions={() => UserQueryClient.Converter.toFindOptions(c.userQuery, entity)}
+          onClick={(tis, qd) => {
           const handler = cdRef.current as UserQueryPartHandler;
           return Finder.parseFilterOptions(handler.findOptions.filterOptions ?? [], handler.findOptions.groupResults ?? false, qd!)
             .then(fop => SelectorModal.chooseType(tis!)
