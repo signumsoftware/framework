@@ -51,12 +51,14 @@
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="RefreshMode" Description="Aktualisierungsmodus" />
+    <Member Name="ShowTitleAsBreadcrumb" Description="Titel als Breadcrumb anzeigen" />
     <Member Name="SystemTime" Description="Systemzeit" />
   </Type>
   <Type Name="UserQueryLiteModel" Description="Benutzerabfrage lite">
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="Query" Description="Abfrage" />
+    <Member Name="ShowTitleAsBreadcrumb" Description="Titel als Breadcrumb anzeigen" />
   </Type>
   <Type Name="UserQueryMessage">
     <Member Name="_0CountOf1Is2Than3" Description="{0} Anzahl der {1} ist {2} als {3}" />

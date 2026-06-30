@@ -5,6 +5,7 @@ import { FindOptions, QueryDescription } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
+import SearchControlLoaded from './SearchControlLoaded'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
 import { useAPI, useForceUpdate } from '../Hooks'
@@ -43,9 +44,7 @@ function SearchPage(): React.ReactElement {
 
   const searchControl = React.useRef<SearchControlHandler | null | undefined>(undefined);
 
-  const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
-
-  useTitle(getQueryNiceName(params.queryName!) + (subTitle ? (" - " + subTitle) : ""));
+  useTitle(getQueryNiceName(params.queryName!));
 
   function changeUrl() {
     const scl = searchControl.current!.searchControlLoaded!;
@@ -74,12 +73,9 @@ function SearchPage(): React.ReactElement {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h1 tabIndex={0} className="display-6 sf-query-title h3">
-        <span>{getQueryNiceName(fo.queryName)}</span>
-        {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
-          <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
-        </>
-        }
+      <h1 tabIndex={0} className="display-6 sf-query-title h3 d-flex align-items-center">
+        {SearchPage.renderTitle(searchControl.current?.searchControlLoaded, <span>{getQueryNiceName(fo.queryName)}</span>)}
+        {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
@@ -100,7 +96,7 @@ function SearchPage(): React.ReactElement {
         enableAutoFocus={true}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
-        onPageSubTitleChanged={forceUpdate}
+        onPageTitleChanged={forceUpdate}
       />
       }
     </div>
@@ -117,6 +113,32 @@ namespace SearchPage {
     minHeight: 600,
     showFilters: () => false
   };
+
+
+
+  export function renderTitle(scl: SearchControlLoaded | null | undefined, defaultTitle: React.ReactNode): React.ReactNode {
+    if (scl != null) {
+      for (const f of Finder.Options.onSearchPageRenderTitle) {
+        const node = f(scl, defaultTitle);
+        if (node != null)
+          return node;
+      }
+    }
+
+    return defaultTitle;
+  }
+
+  export function renderTitleElements(scl: SearchControlLoaded): React.ReactNode {
+    const elements = Finder.Options.onSearchPageTitleElements.map(f => f(scl)).filter(e => e != null);
+    if (elements.length == 0)
+      return null;
+
+    return (
+      <span className="ms-auto d-inline-flex align-items-center fs-6 fw-normal">
+        {elements.map((e, i) => <React.Fragment key={i}>{e}</React.Fragment>)}
+      </span>
+    );
+  }
 }
 
 export default SearchPage;

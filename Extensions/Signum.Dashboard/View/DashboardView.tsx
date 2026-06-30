@@ -96,15 +96,12 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   return (
     <div className={p.embedded ? "sf-dashboard-view-embedded" : undefined}>
       {p.hideEditButton != true &&
-        <div className="d-flex flex-row-reverse m-1">
+        <div className="d-flex flex-row-reverse align-items-center m-1">
+          {DashboardClient.onDashboardPageActions.map((fn, i) => <React.Fragment key={i}>{fn(p.dashboard)}</React.Fragment>)}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)} title={DashboardMessage.Edit.niceToString()}>
               <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
             </Link>}
-        </div>}
-      {DashboardClient.onDashboardPageActions.length > 0 &&
-        <div className="d-flex justify-content-end m-1">
-          {DashboardClient.onDashboardPageActions.map((fn, i) => <React.Fragment key={i}>{fn(p.dashboard)}</React.Fragment>)}
         </div>}
       <div>
         {Array.from(dashboardController.pinnedFilters.values())

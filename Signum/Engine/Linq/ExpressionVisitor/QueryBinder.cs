@@ -1247,7 +1247,9 @@ internal class QueryBinder : ExpressionVisitor
         Expression outerKeyExpr = MapVisitExpand(outerKey, outerProj);
         Expression innerKeyExpr = MapVisitExpand(innerKey, innerProj);
 
-        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr))!;
+        // safeNull: false -> plain equality for the join key. A join matches only on TRUE, so the three-valued
+        // CASE is pointless here, and it would make the condition non-hash/merge-joinable (breaks Postgres FULL JOIN).
+        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(outerKeyExpr, innerKeyExpr, safeNull: false))!;
 
         JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                       rightOuter ? JoinType.RightOuterJoin :
@@ -3488,61 +3490,78 @@ internal class QueryBinder : ExpressionVisitor
 
         var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
-        Expression expression;
+        
         using (SetCurrentSource(null!))
         {
             map[cleanLambda.Parameters[0]] = parentEntity;
             map[cleanLambda.Parameters[1]] = af.MListRowId ?? NullId(typeof(int?));
-            expression = Visit(cleanLambda.Body);
-            map.Remove(cleanLambda.Parameters[1]);
-            map.Remove(cleanLambda.Parameters[0]);
-        }
-
-        if (expression is MethodCallExpression mce)
-        {
-            if (mce.Method.DeclaringType == typeof(VirtualMList) && (
-                mce.Method.Name == nameof(VirtualMList.ToVirtualMList) ||
-                mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder)))
+            try
             {
-                var proj = (ProjectionExpression)mce.Arguments[0];
+                // Generalized ToVirtualMList(source, rowId, order?): works for projected elements
+                // (e.g. an EmbeddedEntity) where the rowId/order come from explicit selectors instead
+                // of T : Entity. Handled from the raw body so the selector lambdas keep their parameters.
+                if (cleanLambda.Body is MethodCallExpression rawMce &&
+                    rawMce.Method.DeclaringType == typeof(VirtualMList) &&
+                    rawMce.Method.Name == nameof(VirtualMList.ToVirtualMList) &&
+                    rawMce.Arguments.Count >= 2)
+                {
+                    var proj = (ProjectionExpression)Visit(rawMce.Arguments[0])!;
 
-                if (!entityCompleter)
-                    return proj;
+                    if(proj.Projector is MemberInitExpression initEmbedded && initEmbedded.Type.IsEmbeddedEntity())
+                    {
+                        var newProjector = new EmbeddedEntityExpression(initEmbedded.Type, Expression.Constant(true),
+                            initEmbedded.Bindings.Select(b =>
+                            {
+                                FieldInfo? fi = b.Member as FieldInfo ?? Reflector.FindFieldInfo(initEmbedded.Type, (PropertyInfo)b.Member);
+                                return new FieldBinding(fi, ((MemberAssignment)b).Expression);
+                            }),
+                             null, null, null, null);
 
-                var preserveOrder = mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder);
+                        proj = new ProjectionExpression(proj.Select, newProjector, proj.UniqueFunction, proj.Type);
+                    }
 
-                var ee = (EntityExpression)proj.Projector;
+                    if (!entityCompleter)
+                        return proj;
 
-                var type = mce.Method.GetGenericArguments()[0];
+                    var type = rawMce.Method.GetGenericArguments()[0];
+                    var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
+                    var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) })!;
 
-                var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
+                    var rowIdExpr = ApplyAdditionalSelector(rawMce.Arguments[1], proj.Projector);
+                    if (rowIdExpr.Type != typeof(PrimaryKey))
+                        rowIdExpr = rowIdExpr.UnNullify();
 
-                var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) })!;
+                    var orderExpr = rawMce.Arguments.Count >= 3 && rawMce.Arguments[2] is not ConstantExpression { Value: null } ?
+                        ApplyAdditionalSelector(rawMce.Arguments[2], proj.Projector).Nullify() :
+                        (Expression)Expression.Constant(null, typeof(int?));
 
-                var order = preserveOrder ?
-                    ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type))) :
-                    (Expression)Expression.Constant(null, typeof(int?));
+                    var newExp = Expression.New(ci, proj.Projector, rowIdExpr, orderExpr);
 
-                var newExp = Expression.New(ci, ee, ee.ExternalId.UnNullify(), order.Nullify());
-
-                return new ProjectionExpression(proj.Select, newExp, proj.UniqueFunction, typeof(IQueryable<>).MakeGenericType(mlistType));
+                    return new ProjectionExpression(proj.Select, newExp, proj.UniqueFunction, typeof(IQueryable<>).MakeGenericType(mlistType));
+                }
+                else
+                {
+                    var expression = Visit(cleanLambda.Body);
+                    return expression;
+                }
+            }
+            finally
+            {
+                map.Remove(cleanLambda.Parameters[1]);
+                map.Remove(cleanLambda.Parameters[0]);
             }
         }
-
-        return expression;
     }
 
-    private static PropertyInfo GetOrderColumn(Type type)
+    // Inlines an additional-field selector lambda (e.g. rowId: x => x.Goal.Id) over an already
+    // bound projector, by mapping the lambda parameter to it and visiting the body.
+    Expression ApplyAdditionalSelector(Expression selectorArg, Expression target)
     {
-        if (!typeof(ICanBeOrdered).IsAssignableFrom(type))
-            throw new InvalidOperationException($"Type '{type.Name}' should implement '{nameof(ICanBeOrdered)}'");
-
-        var pi = type.GetProperty(nameof(ICanBeOrdered.Order), BindingFlags.Instance | BindingFlags.Public);
-
-        if (pi == null)
-            throw new InvalidOperationException("Order Property not found");
-
-        return pi;
+        var lambda = selectorArg.StripQuotes();
+        map[lambda.Parameters[0]] = target;
+        var result = Visit(lambda.Body)!;
+        map.Remove(lambda.Parameters[0]);
+        return result;
     }
 
     internal Alias NextSelectAlias()

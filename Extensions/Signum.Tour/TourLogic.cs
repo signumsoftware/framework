@@ -13,24 +13,8 @@ public static class TourLogic
 {
     public static ResetLazy<FrozenDictionary<Lite<Entity>, TourEntity>> ToursByTrigger = null!;
 
-    public static IEnumerable<TourTriggerSymbol> RegisteredTourTriggers
-    {
-        get { return tourTriggers; }
-    }
-
-    static HashSet<TourTriggerSymbol> tourTriggers = new HashSet<TourTriggerSymbol>();
-
-    public static void RegisterTourTriggers(params TourTriggerSymbol[] tours)
-    {
-        foreach (var t in tours)
-        {
-            if (t == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(TourTriggerSymbol), nameof(tours));
-
-            TourLogic.tourTriggers.Add(t);
-        }
-    }
-
+    // Trigger registration lives in the framework (Signum.Basics.TourTriggerLogic) so modules can
+    // declare and register triggers without referencing this extension.
 
     public static void Start(SchemaBuilder sb)
     {
@@ -52,7 +36,10 @@ public static class TourLogic
                 e.ShowCloseButton,
             });
 
-        SymbolLogic<TourTriggerSymbol>.Start(sb, () => RegisteredTourTriggers.ToHashSet());
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommandMList((TourStepEntity ts) => ts.CssSteps, Database.MListQuery((TourStepEntity ts) => ts.CssSteps).Where(mle => mle.Element.Property.Is(property)));
+
+        SymbolLogic<TourTriggerSymbol>.Start(sb, () => TourTriggerLogic.RegisteredTourTriggers.ToHashSet());
 
         ToursByTrigger = sb.GlobalLazy(() =>
             Database.Query<TourEntity>().ToFrozenDictionaryEx(a => a.Trigger),
@@ -63,8 +50,7 @@ public static class TourLogic
             EntityPackTS.AddExtension += pack =>
             {
                 var tour = ToursByTrigger.Value.TryGetC(pack.entity.GetType().ToTypeEntity().ToLite());
-                if (tour != null)
-                    pack.extension.Add("hasTour", true);
+                pack.extension.Add("hasTour", tour != null);
             };
         }
 

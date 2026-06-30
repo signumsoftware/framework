@@ -52,7 +52,7 @@ export default function DashboardPage(): React.JSX.Element {
               <div>
                 {!entity ? <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1> :
                   dashboard.showTitleAsBreadcrumb ?
-                    <h4 className="mb-3 mt-2">
+                    <h4 className="sf-breadcrumb-title">
                       <EntityLink lite={toLite(entity)} inPlaceNavigation />
                       <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
                       {DashboardClient.Options.customTitle(dashboard)}
@@ -83,6 +83,7 @@ export default function DashboardPage(): React.JSX.Element {
                 <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
               </Link>
             }
+            {DashboardClient.onDashboardPageActions.map((fn, i) => <React.Fragment key={i}>{fn(dashboard)}</React.Fragment>)}
           </div>
         </div>}
 

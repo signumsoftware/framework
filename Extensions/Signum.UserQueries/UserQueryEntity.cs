@@ -27,9 +27,20 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 
     public bool GroupResults { get; set; }
 
-    public Lite<TypeEntity>? EntityType { get; set; }
+    Lite<TypeEntity>? entityType;
+    public Lite<TypeEntity>? EntityType
+    {
+        get { return entityType; }
+        set
+        {
+            if (Set(ref entityType, value) && value == null)
+                ShowTitleAsBreadcrumb = false;
+        }
+    }
 
     public bool HideQuickLink { get; set; }
+
+    public bool ShowTitleAsBreadcrumb { get; set; }
 
     public bool? IncludeDefaultFilters { get; set; }
 
@@ -118,6 +129,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null : new XAttribute("Owner", Owner.KeyLong()),
             !HideQuickLink ? null : new XAttribute("HideQuickLink", HideQuickLink),
+            !ShowTitleAsBreadcrumb ? null : new XAttribute("ShowTitleAsBreadcrumb", ShowTitleAsBreadcrumb),
             IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             !AppendFilters ? null : new XAttribute("AppendFilters", AppendFilters),
             RefreshMode == RefreshMode.Auto ? null : new XAttribute("RefreshMode", RefreshMode.ToString()),
@@ -139,6 +151,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, uq => uq.Owner))!;
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
+        ShowTitleAsBreadcrumb = element.Attribute("ShowTitleAsBreadcrumb")?.Let(a => bool.Parse(a.Value)) ?? false;
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         AppendFilters = element.Attribute("AppendFilters")?.Let(a => bool.Parse(a.Value)) ?? false;
         RefreshMode = element.Attribute("RefreshMode")?.Let(a => a.Value.ToEnum<RefreshMode>()) ?? RefreshMode.Auto;
@@ -260,12 +273,14 @@ public class UserQueryLiteModel : ModelEntity
     public string DisplayName { get; set; }
     public QueryEntity Query { get; set; }
     public bool HideQuickLink { get; set; }
+    public bool ShowTitleAsBreadcrumb { get; set; }
 
     internal static UserQueryLiteModel Translated(UserQueryEntity uq) => new UserQueryLiteModel
     {
         DisplayName = uq.TranslatedField(a => a.DisplayName),
         Query = uq.Query,
         HideQuickLink = uq.HideQuickLink,
+        ShowTitleAsBreadcrumb = uq.ShowTitleAsBreadcrumb,
     };
 
     [AutoExpressionField]

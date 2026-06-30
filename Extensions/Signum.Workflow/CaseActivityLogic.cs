@@ -1007,6 +1007,74 @@ public static class CaseActivityLogic
                 },
             }.Register();
 
+            new Execute(CaseActivityOperation.ResetToCaseActivity)
+            {
+                FromStates = { CaseActivityState.Done },
+                ToStates = { CaseActivityState.Done, CaseActivityState.Pending },
+                Execute = (ca, args) =>
+                {
+                    var @case = ca.Case;
+
+                    //All activities of THIS case that follow the target (transitively) must be undone.
+                    //The walk is restricted to the same case: a subcase's first activity points back (via Previous)
+                    //to a decomposition surrogate in this case, so staying within @case guarantees subcases are never touched.
+                    var following = new HashSet<CaseActivityEntity>();
+                    var queue = new Queue<CaseActivityEntity>(ca.NextActivities().Where(a => a.Case.Is(@case)).ToList());
+                    while (queue.Count > 0)
+                    {
+                        var cur = queue.Dequeue();
+                        if (following.Add(cur))
+                            cur.NextActivities().Where(a => a.Case.Is(@case)).ToList().ForEach(queue.Enqueue);
+                    }
+
+                    //Resetting to before a decomposition that already spawned subcases is not supported,
+                    //because the subcases must stay untouched (and the surrogate they depend on cannot be undone).
+                    var subcaseSurrogates = @case.SubCases().ToList().Select(sc => sc.DecompositionSurrogateActivity()).ToList();
+                    if (subcaseSurrogates.Any(s => following.Contains(s)))
+                        throw new ApplicationException(CaseActivityMessage.ResetToCaseActivityIsNotSupportedForDecomposedCases.NiceToString());
+
+                    //Is the target itself a decomposition activity (a surrogate that spawned subcases)?
+                    var isDecomposition = ca.WorkflowActivity is WorkflowActivityEntity wa &&
+                        (wa.Type == WorkflowActivityType.DecompositionWorkflow || wa.Type == WorkflowActivityType.CallWorkflow);
+
+                    if (isDecomposition)
+                    {
+                        //Resetting a decomposition only makes sense while at least one of its subcases is still open,
+                        //because finishing that subcase is what will recompose the (reopened) surrogate again.
+                        var subcasesOpen = Database.Query<CaseActivityEntity>()
+                            .Where(a => a.Previous.Is(ca) && !a.Case.Is(@case))
+                            .Select(a => a.Case)
+                            .Any(c => c.FinishDate == null);
+
+                        if (!subcasesOpen)
+                            throw new ApplicationException(CaseActivityMessage.ResetToCaseActivityRequiresAnOpenSubCase.NiceToString());
+                    }
+                    
+
+
+                    var followingLites = following.Select(a => a.ToLite()).ToList();
+                    if (following.Any())
+                    {
+                        Database.Query<CaseNotificationEntity>().Where(n => followingLites.Contains(n.CaseActivity)).UnsafeDelete();
+                        Database.Query<CaseActivityEntity>().Where(a => followingLites.Contains(a.ToLite())).UnsafeDelete();
+                    }
+
+                    //Reopen the case if it was finished.
+                    @case.FinishDate = null;
+                    @case.Save();
+
+                    
+                    ca.DoneBy = null;
+                    ca.DoneDate = null;
+                    ca.DoneType = null;
+                    ca.DoneDecision = null;
+                   
+                    if (isDecomposition == false)
+                        InsertCaseActivityNotifications(ca);
+
+                },
+            }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
+
             new Execute(CaseActivityOperation.ScriptExecute)
             {
                 CanExecute = s => s.WorkflowActivity is WorkflowActivityEntity wa && wa.Type == WorkflowActivityType.Script ? null : CaseActivityMessage.OnlyForScriptWorkflowActivities.NiceToString(),

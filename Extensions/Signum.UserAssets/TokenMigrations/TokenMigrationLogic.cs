@@ -76,6 +76,7 @@ public static class TokenMigrationLogic
             return;
 
         var fullPath = Path.GetFileNameWithoutExtension(fullFileName) + QueryFileExtension;
+        file.Print();
         file.Save(fullPath);
         return;
     }

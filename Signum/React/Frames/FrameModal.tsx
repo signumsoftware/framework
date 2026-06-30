@@ -106,7 +106,7 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
   function setPack(pack: EntityPack<T>, getComponent: (ctx: TypeContext<T>) => React.ReactElement, callback?: () => void) {
     setState({
       pack,
-      lastEntity: JSON.stringify(pack.entity),
+      lastEntity: pack == state?.pack ? state?.lastEntity : JSON.stringify(pack.entity),
       getComponent,
       refreshCount: state ? state.refreshCount + 1 : 0
     }).then(callback);

@@ -32,7 +32,7 @@ import {
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
   WorkflowReplacementModel, WorkflowModel, BpmnEntityPairEmbedded, WorkflowActivityModel, ICaseMainEntity, WorkflowGatewayEntity, WorkflowEventEntity,
   WorkflowLaneModel, WorkflowConnectionModel, IWorkflowNodeEntity, WorkflowActivityMessage, WorkflowTimerEmbedded, CaseTagsModel, CaseTagTypeEntity,
-  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin,
+  WorkflowPermission, WorkflowEventModel, WorkflowEventTaskEntity, DoneType, CaseOperation, WorkflowMainEntityStrategy, WorkflowActivityType, CaseActivityMixin, CaseActivityMessage,
 } from './Signum.Workflow'
 
 
@@ -468,6 +468,17 @@ export namespace WorkflowClient {
         isVisible: ctx => true,
         color: "danger"
       },
+    }));
+
+    Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.ResetToCaseActivity, {
+      isVisible: ctx => false,
+      contextual: {
+        isVisible: ctx => true,
+        color: "warning",
+        icon: "rotate-left",
+        confirmMessage: coc => CaseActivityMessage.AreYouSureYouWantToResetTheCaseBackToTheSelectedActivity.niceToString(),
+      },
+      contextualFromMany: { isVisible: ctx => false },
     }));
 
     QuickLinkClient.registerQuickLink(WorkflowEntity, new QuickLinkLink("bam", () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(), ctx => workflowActivityMonitorUrl(ctx.lite), {

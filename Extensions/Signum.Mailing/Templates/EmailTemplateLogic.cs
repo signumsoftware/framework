@@ -381,7 +381,6 @@ public static class EmailTemplateLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(et, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteEmailTemplate(TokenSyncContext ctx, EmailTemplateEntity et)
@@ -398,7 +397,6 @@ public static class EmailTemplateLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Delete);
     }
 
     static void RegenerateEmailTemplate(TokenSyncContext ctx, EmailTemplateEntity et)
@@ -406,7 +404,6 @@ public static class EmailTemplateLogic
         if (ctx.Mode == TokenSyncMode.Record)
         {
             ctx.AddUserAssetAction(et, UserAssetEntityActionType.Regenerate);
-            ctx.LogEntityChange(et, UserAssetEntityActionType.Regenerate);
             return;
         }
 
@@ -422,8 +419,6 @@ public static class EmailTemplateLogic
             newTemplate.Save();
             tr.Commit();
         }
-
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Regenerate);
     }
 
     static void SaveEmailTemplate(EmailTemplateEntity et)
@@ -449,7 +444,7 @@ public static class EmailTemplateLogic
                     case UserAssetEntityActionType.Regenerate: RegenerateEmailTemplate(ctx, et); return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(et, ex); return; }
+            catch (Exception ex) { ctx.LogError(et, ex); return; }
         }
 
         Console.Write(".");
@@ -609,14 +604,12 @@ public static class EmailTemplateLogic
                     try
                     {
                         SaveEmailTemplate(et);
-                        ctx.LogEntityChange(et, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(et, ex); }
+                    catch (Exception ex) { ctx.LogError(et, ex); }
                 }
-                else ctx.LogEntityChange(et, changes.ToArray());
             }
         }
-        catch (Exception ex) { ctx.LogEntityError(et, ex); }
+        catch (Exception ex) { ctx.LogError(et, ex); }
     }
 
 

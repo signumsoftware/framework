@@ -360,7 +360,7 @@ public class TokenValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange, canAny: false);
 
         Declare(sc.Variables);
     }
@@ -457,7 +457,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange, canAny: false);
 
         Declare(sc.Variables);
     }

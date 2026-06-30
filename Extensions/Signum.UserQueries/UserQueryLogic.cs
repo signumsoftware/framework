@@ -353,7 +353,6 @@ public static class UserQueryLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(uq, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(uq, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteUserQuery(TokenSyncContext ctx, UserQueryEntity uq)
@@ -370,7 +369,6 @@ public static class UserQueryLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(uq, UserAssetEntityActionType.Delete);
     }
 
     static void SaveUserQuery(UserQueryEntity uq)
@@ -399,7 +397,7 @@ public static class UserQueryLogic
                         return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(uq, ex); return; }
+            catch (Exception ex) { ctx.LogError(uq, ex); return; }
         }
 
         Console.Write(".");
@@ -576,14 +574,12 @@ public static class UserQueryLogic
                     try
                     {
                         SaveUserQuery(uq);
-                        ctx.LogEntityChange(uq, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(uq, ex); }
+                    catch (Exception ex) { ctx.LogError(uq, ex); }
                 }
-                else ctx.LogEntityChange(uq, changes.ToArray());
             }
         }
-        catch (Exception ex) { ctx.LogEntityError(uq, ex); }
+        catch (Exception ex) { ctx.LogError(uq, ex); }
     }
 
 

@@ -41,7 +41,11 @@ internal static class SmartEqualizer
         return Expression.NotEqual(e1.NullifyWithMetadata(), e2.NullifyWithMetadata());
     }
 
-    public static Expression PolymorphicEqual(Expression exp1, Expression exp2)
+    // safeNull = true (the default) produces three-valued logic for ImplementedBy comparisons (see EntityIbEquals),
+    // which is required for correct negation (a != b, !a.Is(b), !(cond && a.Is(b))). Pass false only where the
+    // result is used purely as a positive match and is never negated -- notably join conditions (BindJoin), where
+    // the extra CASE would also make the condition non-hash/merge-joinable and break Postgres FULL JOIN.
+    public static Expression PolymorphicEqual(Expression exp1, Expression exp2, bool safeNull = true)
     {
         if (exp1.NodeType == ExpressionType.New || exp2.NodeType == ExpressionType.New)
         {
@@ -52,7 +56,7 @@ internal static class SmartEqualizer
             exp2 = ConstanToNewExpression(exp2) ?? exp2;
 
             return ((NewExpression)exp1).Arguments.ZipStrict(
-                   ((NewExpression)exp2).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i)).AggregateAnd();
+                   ((NewExpression)exp2).Arguments, (o, i) => SmartEqualizer.PolymorphicEqual(o, i, safeNull)).AggregateAnd();
         }
 
         Expression? result;
@@ -60,23 +64,23 @@ internal static class SmartEqualizer
         if (result != null)
             return result;
 
-        result = ObjectEquals(exp1, exp2);
+        result = ObjectEquals(exp1, exp2, safeNull);
         if (result != null)
             return result;
 
-        result = ConditionalEquals(exp1, exp2);
+        result = ConditionalEquals(exp1, exp2, safeNull);
         if (result != null)
             return result;
 
-        result = CoalesceEquals(exp1, exp2);
+        result = CoalesceEquals(exp1, exp2, safeNull);
         if (result != null)
             return result;
 
-        result = LiteEquals(exp1, exp2);
+        result = LiteEquals(exp1, exp2, safeNull);
         if (result != null)
             return result;
 
-        result = EntityEquals(exp1, exp2);
+        result = EntityEquals(exp1, exp2, safeNull);
         if (result != null)
             return result;
 
@@ -181,7 +185,7 @@ internal static class SmartEqualizer
         return null;
     }
 
-    public static Expression? ObjectEquals(Expression expr1, Expression expr2)
+    public static Expression? ObjectEquals(Expression expr1, Expression expr2, bool safeNull = true)
     {
         if (expr1.Type == typeof(object) && expr2.Type == typeof(object))
         {
@@ -197,7 +201,7 @@ internal static class SmartEqualizer
             if (left == null || right == null)
                 return null;
 
-            return PolymorphicEqual(left, right);
+            return PolymorphicEqual(left, right, safeNull);
         }
 
         return null;
@@ -314,50 +318,50 @@ internal static class SmartEqualizer
         return unary;
     }
 
-    private static Expression? ConditionalEquals(Expression exp1, Expression exp2)
+    private static Expression? ConditionalEquals(Expression exp1, Expression exp2, bool safeNull = true)
     {
         if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify())||
             Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
             return null;
 
         if (exp1 is ConditionalExpression ce1)
-            return DispachConditional(ce1, exp2);
+            return DispachConditional(ce1, exp2, safeNull);
 
         if (exp2 is ConditionalExpression ce2)
-            return DispachConditional(ce2, exp1);
+            return DispachConditional(ce2, exp1, safeNull);
 
         return null;
     }
 
-    private static Expression DispachConditional(ConditionalExpression ce, Expression exp)
+    private static Expression DispachConditional(ConditionalExpression ce, Expression exp, bool safeNull = true)
     {
-        var ifTrue = PolymorphicEqual(ce.IfTrue, exp);
-        var ifFalse = PolymorphicEqual(ce.IfFalse, exp);
+        var ifTrue = PolymorphicEqual(ce.IfTrue, exp, safeNull);
+        var ifFalse = PolymorphicEqual(ce.IfFalse, exp, safeNull);
 
         return SmartOr(SmartAnd(ce.Test, ifTrue), SmartAnd(SmartNot(ce.Test), ifFalse));
     }
 
-    private static Expression? CoalesceEquals(Expression exp1, Expression exp2)
+    private static Expression? CoalesceEquals(Expression exp1, Expression exp2, bool safeNull = true)
     {
         if (Schema.Current.Settings.IsDbType(exp1.Type.UnNullify()) ||
             Schema.Current.Settings.IsDbType(exp2.Type.UnNullify()))
             return null;
 
         if (exp1.NodeType == ExpressionType.Coalesce)
-            return DispachCoalesce((BinaryExpression)exp1, exp2);
+            return DispachCoalesce((BinaryExpression)exp1, exp2, safeNull);
 
         if (exp2.NodeType == ExpressionType.Coalesce)
-            return DispachCoalesce((BinaryExpression)exp2, exp1);
+            return DispachCoalesce((BinaryExpression)exp2, exp1, safeNull);
 
         return null;
     }
 
-    private static Expression DispachCoalesce(BinaryExpression be, Expression exp)
+    private static Expression DispachCoalesce(BinaryExpression be, Expression exp, bool safeNull = true)
     {
-        var leftNull = PolymorphicEqual(be.Left, Expression.Constant(null, be.Type));
+        var leftNull = PolymorphicEqual(be.Left, Expression.Constant(null, be.Type), safeNull);
 
-        var left = PolymorphicEqual(be.Left, exp);
-        var right = PolymorphicEqual(be.Right, exp);
+        var left = PolymorphicEqual(be.Left, exp, safeNull);
+        var right = PolymorphicEqual(be.Right, exp, safeNull);
 
         return SmartOr(SmartAnd(SmartNot(leftNull), left), SmartAnd(leftNull, right));
     }
@@ -662,14 +666,14 @@ internal static class SmartEqualizer
 
 
 
-    public static Expression? LiteEquals(Expression e1, Expression e2)
+    public static Expression? LiteEquals(Expression e1, Expression e2, bool safeNull = true)
     {
         if ( e1.Type.IsLite() || e2.Type.IsLite())
         {
             if (!e1.Type.IsLite() && !e1.IsNull() || !e2.Type.IsLite() && !e2.IsNull())
                 throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".FormatWith(e1.Type.TypeName(), e2.Type.TypeName()));
 
-            return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
+            return PolymorphicEqual(GetEntity(e1), GetEntity(e2), safeNull); //Conditional and Coalesce could be inside
         }
 
         return null;
@@ -707,7 +711,7 @@ internal static class SmartEqualizer
         return liteReference.Reference;
     }
 
-    public static Expression? EntityEquals(Expression e1, Expression e2)
+    public static Expression? EntityEquals(Expression e1, Expression e2, bool safeNull = true)
     {
         e1 = ConstantToEntity(e1) ?? e1;
         e2 = ConstantToEntity(e2) ?? e2;
@@ -720,15 +724,15 @@ internal static class SmartEqualizer
         if (e1 is EntityExpression ee1)
         {
             if (e2 is EntityExpression ee2) return EntityEntityEquals(ee1, ee2);
-            else if (e2 is ImplementedByExpression ib2) return EntityIbEquals(ee1, ib2);
+            else if (e2 is ImplementedByExpression ib2) return EntityIbEquals(ee1, ib2, safeNull);
             else if (e2 is ImplementedByAllExpression iba2) return EntityIbaEquals(ee1, iba2);
             else if (e2.IsNull()) return EqualsToNull((ee1).ExternalId);
             else return null;
         }
         else if (e1 is ImplementedByExpression ib1)
         {
-            if (e2 is EntityExpression ee2) return EntityIbEquals(ee2, ib1);
-            else if (e2 is ImplementedByExpression ib2) return IbIbEquals(ib1, ib2);
+            if (e2 is EntityExpression ee2) return EntityIbEquals(ee2, ib1, safeNull);
+            else if (e2 is ImplementedByExpression ib2) return IbIbEquals(ib1, ib2, safeNull);
             else if (e2 is ImplementedByAllExpression iba2) return IbIbaEquals(ib1, iba2);
             else if (e2.IsNull()) return (ib1).Implementations.Select(a => EqualsToNull(a.Value.ExternalId)).AggregateAnd();
             else return null;
@@ -777,13 +781,25 @@ internal static class SmartEqualizer
             return False;
     }
 
-    static Expression EntityIbEquals(EntityExpression ee, ImplementedByExpression ib)
+    // ImplementedBy has no type-discriminator column (the active type is implied by which FK is non-null). Unlike
+    // EntityEntity (single type) or ImplementedByAll (explicit Type column), a *type mismatch* between two non-null
+    // references therefore surfaces as NULL (null = id on the non-matching FK) rather than FALSE. Under negation that
+    // NULL silently drops rows ('a != b' becomes NOT(NULL) = NULL), which is the bug. We restore proper three-valued
+    // logic, distinguishing the two sources of NULL:
+    //   NULL  if either reference is genuinely null (no entity to compare) -- consistent with Entity/Iba
+    //   TRUE  if some implementation matches
+    //   FALSE otherwise (different active type, or different id)
+    static Expression EntityIbEquals(EntityExpression ee, ImplementedByExpression ib, bool safeNull = true)
     {
         var imp = ib.Implementations.TryGetC(ee.Type);
-        if (imp == null)
-            return False;
 
-        return EntityEntityEquals(imp, ee);
+        if (!safeNull) // plain equality: positive-only use (e.g. join keys), never negated
+            return imp == null ? False : EntityEntityEquals(imp, ee);
+
+        var anyNull = SmartOr(EqualsToNull(ee.ExternalId), AllNull(ib));
+        var match = imp == null ? (Expression)False : EntityEntityEquals(imp, ee);
+
+        return ThreeValued(anyNull, match);
     }
 
     static Expression EntityIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
@@ -794,11 +810,41 @@ internal static class SmartEqualizer
             .And(ee.ExternalPeriod.Overlaps(iba.ExternalPeriod));
     }
 
-    static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
+    static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2, bool safeNull = true)
     {
-        var list = ib.Implementations.JoinDictionary(ib2.Implementations, (t, i, j) => EntityEntityEquals(i, j)).Values.ToList();
+        // Match on the overlapping types only. A different active type makes every term NULL, which falls through
+        // the CASE WHEN below to the ELSE (FALSE); a genuine null reference is caught by 'anyNull' first.
+        var match = ib.Implementations.JoinDictionary(ib2.Implementations, (t, i, j) => EntityEntityEquals(i, j)).Values.ToList().AggregateOr();
 
-        return list.AggregateOr();
+        if (!safeNull) // plain equality: positive-only use (e.g. join keys), never negated
+            return match;
+
+        var anyNull = SmartOr(AllNull(ib), AllNull(ib2));
+
+        return ThreeValued(anyNull, match);
+    }
+
+    // "the ImplementedBy reference is null" == all its implementation FK columns are null.
+    static Expression AllNull(ImplementedByExpression ib)
+    {
+        return ib.Implementations.Values.Select(i => EqualsToNull(i.ExternalId)).AggregateAnd();
+    }
+
+    // bool-typed SQL NULL. Expression.Constant(null, typeof(bool)) is illegal in LINQ (bool is not nullable), but a
+    // SqlConstantExpression can hold a null value with .NET type 'bool' and renders as NULL. Keeping the .NET type
+    // 'bool' (rather than bool?) is what lets the result flow through callers that wrap it in '!' without the
+    // ExpressionVisitor rejecting a bool -> bool? rewrite.
+    static readonly Expression NullBool = new SqlConstantExpression(null, typeof(bool));
+
+    // CASE WHEN anyNull THEN NULL WHEN match THEN true ELSE false END  (nominated from nested Conditionals).
+    // A NULL 'match' (different active types) falls through to the ELSE => FALSE, so negation is safe.
+    static Expression ThreeValued(Expression anyNull, Expression match)
+    {
+        var inner = match is ConstantExpression { Value: false } // no overlapping/matching type: never TRUE
+            ? (Expression)False
+            : Expression.Condition(match, True, False);
+
+        return Expression.Condition(anyNull, NullBool, inner);
     }
 
     static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)

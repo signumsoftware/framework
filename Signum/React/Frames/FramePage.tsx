@@ -62,7 +62,7 @@ export default function FramePage(): React.ReactElement {
   function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement }, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
     return setState({
       pack,
-      lastEntity: JSON.stringify(pack.entity),
+      lastEntity: pack == state?.pack ? state?.lastEntity : JSON.stringify(pack.entity),
       getComponent: view.getComponent,
       viewName: view.viewName,
       createNew: createNew,

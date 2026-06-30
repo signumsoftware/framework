@@ -1,9 +1,9 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { CheckboxLine, EntityCombo, EntityLine, EntityTable, EnumLine, FontAwesomeIcon, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SkillCustomizationEntity, SkillCodeEntity, SubSkillEmbedded } from '../Signum.Agent'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { MarkdownLine } from '@framework/Lines/MarkdownLine'
+import { MarkdownLine } from '@extensions/Signum.Markdown/MarkdownLine'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument'
 import { LinkButton } from '@framework/Basics/LinkButton'
 import { AgentClient, SkillPropertyMeta } from '../AgentClient'
@@ -154,3 +154,4 @@ function PropertyValueControl(p: {
       helpText={helpText} />
   );
 }
+

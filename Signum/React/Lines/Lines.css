@@ -606,6 +606,10 @@ input[type=checkbox].form-control-xs {
     min-height: initial;
 }
 
+.form-control-md { /*required for read-only ones*/
+    min-height: calc(1.5em + 0.75rem + calc(var(--bs-border-width) * 2));
+}
+
 .form-control-sm .rw-widget-picker {
     min-height: 31px;
 }
@@ -824,6 +828,7 @@ body:not(.rtl) .sf-mandatory-warning-widget .rw-widget-input {
     --rw-input-disabled-bg: var(--bs-secondary-bg);
     --rw-input-disabled-border-color: var(--bs-border-color);
     --rw-bg: var(--bs-body-bg);
+    --rw-widget-bg: var(--bs-body-bg);
     --rw-multiselect-tag-bg: var(--bs-body-bg);
     --rw-multiselect-tag-border-color: var(--bs-border-color);
     /*repeat*/
