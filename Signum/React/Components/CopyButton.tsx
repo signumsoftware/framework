@@ -41,7 +41,7 @@ export default function CopyButton(p: CopyButtonProps): React.ReactElement | nul
       <LinkButton ref={link} className="btn btn-sm btn-tertiary sf-pointer mx-1" onClick={handleCopy} title={p.title}>
         {p.children}
       </LinkButton>
-      <Overlay target={link.current} show={showTooltip} placement="bottom">
+      <Overlay target={link.current} show={showTooltip} placement="auto">
         <Tooltip>
           {FrameMessage.Copied.niceToString()}
         </Tooltip>

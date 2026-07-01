@@ -7,7 +7,7 @@ import { WorkflowClient } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
-import { QueryToken } from "@framework/FindOptions";
+import { QueryToken } from "@framework/QueryToken";
 import { getToString, is } from "@framework/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {

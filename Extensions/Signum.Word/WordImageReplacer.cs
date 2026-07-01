@@ -141,9 +141,9 @@ public static class WordImageReplacer
     {
         var query = GetDrawings(doc);
 
-        var drawing = query.Single(r => r.GetTitle() == titleOrDescription);
+        var drawings = query.Where(r => r.GetTitle() == titleOrDescription);
 
-        return drawing.Descendants<Blip>().SingleEx();
+        return drawings.SingleEx().Descendants<Blip>().SingleEx();
     }
 
     public static Blip[] FindAllBlips(this WordprocessingDocument doc, Func<DocProperties, bool> predicate)

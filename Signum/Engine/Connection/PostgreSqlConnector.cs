@@ -16,7 +16,7 @@ public static class PostgresVersionDetector
 {
     public static Version? Detect(string connectionString, Version? fallback)
     {
-        try 
+        try
         {
             using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
             {
@@ -68,10 +68,14 @@ public class PostgreSqlConnector : Connector
     Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
 
     string originalDatabaseName;
+    
+    public bool IsAzurePostgres { get; private set; }
+    
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
         this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         this.customizeBuilder = customizeBuilder;
+        this.IsAzurePostgres = connectionString.Contains("postgres.database.azure.com", StringComparison.OrdinalIgnoreCase);
         this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
@@ -246,7 +250,14 @@ public class PostgreSqlConnector : Connector
                         for (int j = 0; j < dt.Columns.Count; j++)
                         {
                             var col = dt.Columns[j];
-                            writer.Write(row[col], columns[j].DbType.PostgreSql);
+                            var type = columns[j].DbType.PostgreSql;
+                            if (type == AbstractDbType.VectorPG)
+                            {
+                                var vector = row[col];
+                                writer.Write(vector);
+                            }
+                            else
+                                writer.Write(row[col], type);
                         }
                     }
 
@@ -449,7 +460,12 @@ public static class PostgreSqlConnectorScripts
         if (databaseName != null)
             throw new NotSupportedException();
 
-        return new SqlPreCommandSimple(@"
+        var executeAsRole = Schema.Current.ExecuteAs;
+        var executeAsCondition = executeAsRole != null 
+            ? $" OR pr.rolname='{executeAsRole}'" 
+            : "";
+
+        return new SqlPreCommandSimple($@"
 DO $$
 DECLARE
         r RECORD;
@@ -508,7 +524,7 @@ BEGIN
                 FROM pg_namespace pns, pg_roles pr
                 WHERE pr.oid=pns.nspowner
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast', 'public')
-                    AND pr.rolname=current_user
+                    AND (pr.rolname=current_user{executeAsCondition})
             ) LOOP
                 EXECUTE format('DROP SCHEMA %I;', r.nspname);
         END LOOP;
@@ -528,7 +544,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
                 AssertDateTime(dt, datetimeKind);
         }
 
-        if(dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
+        if (dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
         {
             value = shi.ToSortableString();
         }
@@ -538,7 +554,9 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
             IsNullable = nullable
         };
 
-        result.NpgsqlDbType = dbType.PostgreSql;
+        if (!dbType.IsVector())
+            result.NpgsqlDbType = dbType.PostgreSql;
+
         if (udtTypeName != null)
             result.DataTypeName = udtTypeName;
 
@@ -555,7 +573,7 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         var exp =
              uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
              uType == typeof(SqlHierarchyId) ? Expression.Coalesce(
-                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))), 
+                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))),
                     Expression.Constant(DBNull.Value, typeof(object))) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
@@ -578,8 +596,10 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         List<MemberBinding> mb = new List<MemberBinding>()
             {
                 Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.IsNullable))!, Expression.Constant(nullable)),
-                Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)),
             };
+
+        if (dbType.PostgreSql != AbstractDbType.VectorPG)
+            mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.NpgsqlDbType))!, Expression.Constant(dbType.PostgreSql)));
 
         if (size != null)
             mb.Add(Expression.Bind(typeof(NpgsqlParameter).GetProperty(nameof(NpgsqlParameter.Size))!, Expression.Constant(size)));

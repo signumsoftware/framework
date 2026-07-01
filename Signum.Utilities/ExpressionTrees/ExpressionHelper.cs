@@ -167,6 +167,25 @@ public static class ExpressionHelper
         return -1;
     }
 
+    [DebuggerStepThrough]
+    public static Expression GetArgument(this NewExpression nex, string parameterName)
+    {
+        var index = FindParameter(nex.Constructor!.GetParameters(), parameterName);
+
+        if (index == -1)
+            throw new ArgumentException("parameterName '{0}' not found".FormatWith(parameterName));
+
+        return nex.Arguments[index];
+    }
+
+    [DebuggerStepThrough]
+    public static Expression? TryGetArgument(this NewExpression nex, string parameterName)
+    {
+        int index = FindParameter(nex.Constructor!.GetParameters(), parameterName);
+
+        return index == -1 ? null : nex.Arguments[index];
+    }
+
 
     [DebuggerStepThrough]
     public static LambdaExpression StripQuotes(this Expression e)

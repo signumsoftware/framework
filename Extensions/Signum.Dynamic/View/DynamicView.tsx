@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Navigator, ViewOverride } from '@framework/Navigator'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
@@ -42,7 +42,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     ];
   }
 
-  componentWillMount(): undefined {
+  override componentWillMount(): undefined {
     this.updateRoot();
   }
 
@@ -76,7 +76,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     }
 
     if (ctx.value.entityType)
-      Navigator.viewDispatcher.getViewOverrides(ctx.value.entityType.cleanName)
+      Navigator.getViewDispatcher().getViewOverrides(ctx.value.entityType.cleanName)
         .then(vos => this.setState({ viewOverrides: vos }));
     else
       this.setState({ viewOverrides: undefined });
@@ -137,7 +137,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     return Promise.resolve(true);
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const ctx = this.props.ctx;
 
     return (
@@ -174,3 +174,4 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
     );
   }
 }
+

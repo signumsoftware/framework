@@ -4,7 +4,8 @@
     "outDir": "./ts_out",
     "paths": {
       "@framework/*": [ "../../Signum/React/*" ]
-    }
+    },
+    "types": [ "node", "google.maps" ]
   },
   "references": [
     { "path": "../../Signum" },

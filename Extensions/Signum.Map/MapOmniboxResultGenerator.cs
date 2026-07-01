@@ -3,7 +3,6 @@ using Signum.Authorization.Rules;
 using Signum.Omnibox;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
-using System.Xml.XPath;
 
 namespace Signum.Map;
 

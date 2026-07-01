@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Finder } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName, tryGetTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, SelectionChangeReason, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
@@ -18,6 +18,7 @@ export interface SimpleFilterBuilderProps {
 }
 
 export interface SearchControlProps {
+  ref?: React.Ref<SearchControlHandler>;
   findOptions: FindOptions;
   formatters?: { [token: string]: Finder.CellFormatter };
   rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
@@ -72,7 +73,7 @@ export interface SearchControlProps {
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
-  onPageSubTitleChanged?: () => void;
+  onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
   showTitle?: HeaderType;
@@ -91,17 +92,17 @@ export interface SearchControlHandler {
   searchControlLoaded: SearchControlLoaded | null;
 }
 
-export namespace SearchControlOptions {
-  export let showSelectedButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSelectedButton ?? true) && is_touch_device();
-  export let showSystemTimeButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSystemTimeButton ?? false);
-  export let showGroupButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showGroupButton ?? false);
-  export let showFilterButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showFilterButton ?? true);
-  export let allowChangeColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeColumns ?? true);
-  export let allowOrderColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeOrder ?? true);
-  export let showFooter = (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter;
-}
+export const SearchControlOptions = {
+  showSelectedButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSelectedButton ?? true) && is_touch_device(),
+  showSystemTimeButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSystemTimeButton ?? false),
+  showGroupButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showGroupButton ?? false),
+  showFilterButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showFilterButton ?? true),
+  allowChangeColumns: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeColumns ?? true),
+  allowOrderColumns: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeOrder ?? true),
+  showFooter: (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter,
+};
 
-const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.RefAttributes<SearchControlHandler>> = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
+function SearchControl(p: SearchControlProps): React.JSX.Element | null {
 
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
   const lastDeps = usePrevious(p.deps);
@@ -116,7 +117,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
     doSearch: opts => searchControlLoaded.current && searchControlLoaded.current.doSearch(opts),
     doSearchPage1: force => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(force),
   };
-  React.useImperativeHandle(ref, () => handler, [p.findOptions, searchControlLoaded.current]);
+  React.useImperativeHandle(p.ref, () => handler, [p.findOptions, searchControlLoaded.current]);
 
   const qd = useAPI<QueryDescription | "not-allowed">(() => {
 
@@ -191,7 +192,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
 
   const qs = Finder.getSettings(fop.queryKey);
 
-  const tis = getTypeInfos(qd.columns["Entity"].type);
+  const tis = tryGetTypeInfos(qd.columns["Entity"].type);
 
   return (
     <ErrorBoundary>
@@ -218,16 +219,16 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
         showFilterButton={SearchControlOptions.showFilterButton(handler, p)}
-        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler, p) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
+        showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler, p) && (qs?.allowSystemTime ?? tis.notNull().some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler, p)}
         showSelectedButton={SearchControlOptions.showSelectedButton(handler, p)}
         showFooter={SearchControlOptions.showFooter(handler, p)}
         allowChangeColumns={SearchControlOptions.allowChangeColumns(handler, p)}
         allowChangeOrder={SearchControlOptions.allowOrderColumns(handler, p)}
-        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
+        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.notNull().some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
         createButtonClass={p.createButtonClass}
 
-        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: "main" }))}
+        view={p.view != null ? p.view : tis.notNull().some(ti => Navigator.isViewable(ti, { isSearch: "main" }))}
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
         showContextMenu={p.showContextMenu ?? qs?.showContextMenu ?? ((fo) => fo.groupResults ? "Basic" : true)}
@@ -256,7 +257,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
 
         ctx={p.ctx}
         customRequest={p.customRequest}
-        onPageTitleChanged={p.onPageSubTitleChanged}
+        onPageTitleChanged={p.onPageTitleChanged}
 
         selectionFormatter={p.selectionFromatter}
 
@@ -265,7 +266,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
       />
     </ErrorBoundary>
   );
-});
+}
 
 export default SearchControl;
 

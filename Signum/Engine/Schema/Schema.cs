@@ -6,7 +6,6 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Globalization;
-using static Signum.Engine.Maps.FullTextTableIndex;
 using static Signum.Engine.Sync.Replacements;
 
 namespace Signum.Engine.Maps;
@@ -81,9 +80,10 @@ public class Schema : IImplementationsFinder
 
     public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        { "plpgsql", s => true },
+        { "plpgsql", s => true }, // Always include in the list (pre-installed in Azure PostgreSQL)
         { "uuid-ossp", s => true },
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
+        { "vector", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.DbType.IsVector()))},
     };
 
     #region Events
@@ -417,17 +417,14 @@ public class Schema : IImplementationsFinder
     }
 
     public event Func<Replacements, SqlPreCommand?> Synchronizing;
-    public SqlPreCommand? SynchronizationScript(bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
+    public SqlPreCommand? SynchronizationScript(out Replacements replacements, bool interactive = true, bool schemaOnly = false, string? replaceDatabaseName = null, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
     {
         OnBeforeDatabaseAccess();
-
-        if (Synchronizing == null)
-            return null;
 
         using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
         using (ExecutionMode.Global())
         {
-            Replacements replacements = new Replacements()
+            var rep = new Replacements()
             {
                 Interactive = interactive,
                 ReplaceDatabaseName = replaceDatabaseName,
@@ -445,7 +442,7 @@ public class Schema : IImplementationsFinder
                         SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
                         Console.Write("...");
 
-                        var result = e(replacements);
+                        var result = e(rep);
 
                         if (result == null)
                             SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
@@ -463,6 +460,8 @@ public class Schema : IImplementationsFinder
                     }
                 })
                 .Combine(Spacing.Triple);
+
+            replacements = rep;
 
             return command;
         }
@@ -696,6 +695,7 @@ public class Schema : IImplementationsFinder
         OnInvalidateCache += () => GlobalLazy.ResetAll(systemLog: false);
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
+        SchemaCompleted += CascadeDeleteLogic.RegisterCascadeDeleteHandlers;
     }
 
     public static Schema Current

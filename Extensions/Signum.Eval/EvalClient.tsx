@@ -37,13 +37,17 @@ export namespace EvalClient {
   export type FormatColumnType = "Text" | "Code" | "JSon";
   
   export namespace Options {
-  
-    export let onGetDynamicPanelSearch: ((ctx: StyleContext, search: string) => React.ReactNode)[] = [];
-  
+    export const onGetDynamicPanelSearch: ((ctx: StyleContext, search: string) => React.ReactNode)[] = [];
+    export const onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
+    export const onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
+    export const checkEvalFindOptions: FindOptions[] = [];
+    let _getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
+    export function getDynaicMigrationsStep(): (() => React.ReactElement<any>) | undefined { return _getDynaicMigrationsStep; }
+    export function setDynaicMigrationsStep(fn: (() => React.ReactElement<any>) | undefined): void { _getDynaicMigrationsStep = fn; }
     export function registerDynamicPanelSearch<T extends Entity>(type: Type<T>, getColumns: (token: QueryTokenString<T & { entity: T }>) => { token: QueryTokenString<any>, type: FormatColumnType }[]): void {
-      onGetDynamicPanelSearch.push((ctx, search) => {
+      Options.onGetDynamicPanelSearch.push((ctx, search) => {
         var columns = getColumns(type.token());
-  
+
         var findOptions = {
           queryName: type,
           filterOptions: [{
@@ -55,8 +59,7 @@ export namespace EvalClient {
           columnOptionsMode: "Add",
           columnOptions: columns.filter(c => c.token.toString().startsWith("Entity.")).map(c => ({ token: c.token }) as ColumnOption)
         } as FindOptions;
-  
-  
+
         return (
           <SearchValueLine ctx={ctx} findOptions={findOptions} searchControlProps={{
             formatters: columns.toObjectDistinct(a => a.token.toString(), a => new Finder.CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />, true))
@@ -64,12 +67,6 @@ export namespace EvalClient {
         );
       });
     }
-  
-    export let onGetDynamicLineForPanel: ((ctx: StyleContext) => React.ReactNode)[] = [];
-    export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
-    export let checkEvalFindOptions: FindOptions[] = [];
-  
-    export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
   }
   
   

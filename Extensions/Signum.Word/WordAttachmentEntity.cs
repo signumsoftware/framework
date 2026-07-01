@@ -2,7 +2,6 @@ using Signum.UserAssets;
 using Signum.Mailing.Templates;
 using Signum.Templating;
 using System.Xml.Linq;
-using Signum.Excel;
 
 namespace Signum.Word;
 

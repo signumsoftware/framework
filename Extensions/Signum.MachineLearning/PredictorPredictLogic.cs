@@ -145,7 +145,7 @@ public static class PredictorPredictLogic
             ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
             var valuesTuples = tuples;
 
-            return resultTable.Rows.AgGroupToDictionary(
+            return resultTable.Rows.GroupAggregateToDictionary(
                 row => row.GetValues(entityGroupKey),
                 gr => gr.ToDictionaryEx(
                     row => row.GetValues(remainingKeys),
@@ -207,7 +207,7 @@ public static class PredictorPredictLogic
             ResultColumn[] remainingKeys = tuples.Extract(t => t.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
             var valuesTuples = tuples;
 
-            return resultTable.Rows.AgGroupToDictionary(
+            return resultTable.Rows.GroupAggregateToDictionary(
                 row => row.GetValues(parentKeys),
                 gr => gr.ToDictionaryEx(
                     row => row.GetValues(remainingKeys),

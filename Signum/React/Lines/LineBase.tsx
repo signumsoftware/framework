@@ -179,7 +179,7 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
 
   get mandatoryClass(): "sf-mandatory-warning" | "sf-mandatory" | null {
 
-    if (this.props.mandatory && !this.props.readOnly) {
+    if (this.props.mandatory) {
       const val = this.props.ctx.value;
       if (val == null || val === "" || Array.isArray(val) && val.length == 0) {
         if (this.props.mandatory == "warning")

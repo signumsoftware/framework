@@ -9,18 +9,17 @@ import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import { Constructor } from '@framework/Constructor'
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
-import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
-import { AuthClient } from '../Signum.Authorization/AuthClient'
+import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption } from '@framework/FindOptions'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel, BigValuePartEntity } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { DashboardClient, CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
-import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems, ContextualMenuItem } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
+import SearchPage from '@framework/SearchControl/SearchPage';
+import { EntityLink } from '@framework/Search';
 import SelectorModal from '@framework/SelectorModal';
-import { Dic } from '@framework/Globals';
 import { QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 import { UserQueryPartHandler } from './Dashboard/View/UserQueryPart';
 import { ToolbarClient } from '../Signum.Toolbar/ToolbarClient';
@@ -42,6 +41,33 @@ export namespace UserQueryClient {
     OmniboxClient.registerProvider(new UserQueryOmniboxProvider());
   
     options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
+
+    // On SearchPage / UserQueryPage, render the user query title either as a breadcrumb (entity > query)
+    // when configured, or as "query - userQueryName" otherwise.
+    Finder.Options.onSearchPageRenderTitle.push((scl, defaultTitle) => {
+      const uq = scl.getCurrentUserQuery?.();
+      const model = uq?.model as UserQueryLiteModel | undefined;
+      const entity = scl.getCurrentEntity?.();
+
+      if (model == null)
+        return undefined;
+
+      if (model.showTitleAsBreadcrumb && entity != null)
+        return (
+          <span className="sf-breadcrumb-title d-inline-flex align-items-center">
+            <EntityLink lite={entity} inPlaceNavigation />
+            <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+            {defaultTitle}
+          </span>
+        );
+
+      return (
+        <>
+          {defaultTitle}
+          <small className="sf-type-nice-name text-muted"> - {getToString(uq)}</small>
+        </>
+      );
+    });
   
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
   
@@ -58,7 +84,7 @@ export namespace UserQueryClient {
           .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), async ctx => {
             const uqe = await Navigator.API.fetch(uq);
             const url = await getUserQueryUrl(uqe, ctx.lite);
-            window.open(url);
+            window.open(AppContext.toAbsoluteUrl(url));
           }, {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
             onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
@@ -117,7 +143,7 @@ export namespace UserQueryClient {
       defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
       withPanel: c => true,
       getQueryNames: c => [c.userQuery?.query].notNull(),
-      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+      handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) || !AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ? undefined :
         (c, e, cdRef, ev) => {
           return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
         },
@@ -131,7 +157,9 @@ export namespace UserQueryClient {
         if (!c.createNew)
           return null;
   
-        return <CreateNewButton queryKey={c.userQuery.query.key} onClick={(tis, qd) => {
+        return <CreateNewButton queryKey={c.userQuery.query.key}
+          getFindOptions={() => UserQueryClient.Converter.toFindOptions(c.userQuery, entity)}
+          onClick={(tis, qd) => {
           const handler = cdRef.current as UserQueryPartHandler;
           return Finder.parseFilterOptions(handler.findOptions.filterOptions ?? [], handler.findOptions.groupResults ?? false, qd!)
             .then(fop => SelectorModal.chooseType(tis!)
@@ -425,5 +453,6 @@ declare module '@framework/SearchControl/SearchControlLoaded' {
 
   export interface SearchControlLoaded {
     getCurrentUserQuery?: () => Lite<UserQueryEntity> | undefined;
+    getCurrentEntity?: () => Lite<Entity> | undefined;
   }
 }

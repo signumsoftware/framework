@@ -1,6 +1,4 @@
 using Signum.API.Filters;
-using Signum.Utilities;
-using System;
 using System.IO;
 
 namespace Signum.Files.FileTypeAlgorithms;

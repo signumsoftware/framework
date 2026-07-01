@@ -12,6 +12,7 @@ public static class PropertyRouteLogic
         As.Expression(() => prdn.RootType.Is(pr.RootType.ToTypeEntity()) && prdn.Path == pr.PropertyString());
 
     public static ResetLazy<FrozenDictionary<TypeEntity, FrozenDictionary<string, PropertyRouteEntity>>> Properties = null!;
+    public static ResetLazy<FrozenDictionary<Lite<PropertyRouteEntity>, PropertyRouteEntity>> PropertiesFromLite = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -30,7 +31,10 @@ public static class PropertyRouteLogic
 
         sb.Schema.Synchronizing += SynchronizeProperties;
 
-        Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().GroupAggregateToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
+        PropertiesFromLite = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
+            new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
+
+        Properties = sb.GlobalLazy(() => PropertiesFromLite.Value.Values.GroupAggregateToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
             new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
         PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
@@ -50,6 +54,11 @@ public static class PropertyRouteLogic
                 }
             });
         }
+    }
+
+    public static PropertyRouteEntity RetrieveFromCache(this Lite<PropertyRouteEntity> route)
+    {
+        return PropertiesFromLite.Value.GetOrThrow(route);
     }
 
     private static SqlPreCommand? PropertyRouteLogic_PreDeleteSqlSync(TypeEntity type)
@@ -115,6 +124,50 @@ public static class PropertyRouteLogic
     static PropertyRoute ToPropertyRouteImplementation(PropertyRouteEntity route)
     {
         return PropertyRoute.Parse(TypeLogic.EntityToType.GetOrThrow(route.RootType), route.Path);
+    }
+
+    /// <summary>
+    /// Non-interactive, destructive cleanup intended for production migrations: deletes every PropertyRouteEntity
+    /// whose path can no longer be parsed against the current schema (e.g. a member or root type was removed).
+    /// These rows make AuthLogic.ImportRules / PropertyRouteEntity.ToPropertyRoute() throw because the migrations only fix the PropertyRoutes know in dev/test
+    /// Each deleted route is written to the console. Relies on the PreDeleteSqlSync handlers registered for every
+    /// entity that references PropertyRouteEntity (Help, Tour, TranslatedInstance) to remove dependent rows.
+    /// </summary>
+    public static void PropertyRouteProductionCleanup()
+    {
+        Table table = Schema.Current.Table<PropertyRouteEntity>();
+
+        var invalidRoutes = Database.Query<PropertyRouteEntity>().ToList().Where(pr =>
+        {
+            try
+            {
+                pr.ToPropertyRoute();
+                return false;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }).ToList();
+
+        if (invalidRoutes.IsEmpty())
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "PropertyRouteProductionCleanup: no invalid PropertyRoutes found.");
+            return;
+        }
+
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"PropertyRouteProductionCleanup: deleting {invalidRoutes.Count} invalid PropertyRoutes not fixed by migrations:");
+
+        using (var tr = new Transaction())
+        {
+            foreach (var pr in invalidRoutes)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, $"  Deleting PropertyRoute Id = {pr.Id}, RootType = {pr.RootType.CleanName}, Path = {pr.Path}");
+                table.DeleteSqlSync(pr, null).ExecuteLeaves();
+            }
+
+            tr.Commit();
+        }
     }
 
     public static PropertyRouteEntity ToPropertyRouteEntity(this PropertyRoute route)

@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Scheduler;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 
 namespace Signum.Dashboard;
@@ -23,7 +22,10 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         set
         {
             if (Set(ref entityType, value) && value == null)
+            {
                 EmbeddedInEntity = null;
+                ShowTitleAsBreadcrumb = false;
+            }
         }
     }
 
@@ -36,10 +38,12 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
-    [StringLengthValidator(Min = 2, Max = 200)]
+    [StringLengthValidator(Min = 2, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool HideDisplayName { get; set; }
+
+    public bool ShowTitleAsBreadcrumb { get; set; }
 
     public bool CombineSimilarRows { get; set; } = true;
 
@@ -358,6 +362,12 @@ public enum DashboardMessage
     InteractiveDashboard,
     SelectIcon,
     Close,
+
+    [Description("Incompatible Entity Type")]
+    IncompatibleEntityType,
+
+    [Description("Not filtering by {0}")]
+    NotFilteringBy0,
 }
 
 public enum DashboardVariableMessage

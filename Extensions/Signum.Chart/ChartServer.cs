@@ -1,6 +1,4 @@
 using Signum.UserAssets;
-using Signum.Chart;
-using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
 using Signum.Chart.UserChart;
 using Signum.API;

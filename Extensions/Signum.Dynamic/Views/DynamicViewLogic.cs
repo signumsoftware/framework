@@ -52,7 +52,7 @@ public static class DynamicViewLogic
 
         DynamicViews = sb.GlobalLazy(() =>
             Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv })
-            .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToFrozenDictionaryEx(a => a.ViewName)).ToFrozenDictionary(),
+            .GroupAggregateToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToFrozenDictionaryEx(a => a.ViewName)).ToFrozenDictionary(),
             new InvalidateWith(typeof(DynamicViewEntity)));
 
         sb.Include<DynamicViewSelectorEntity>()

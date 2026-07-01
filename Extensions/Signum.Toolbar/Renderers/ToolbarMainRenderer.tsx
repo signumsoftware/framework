@@ -132,7 +132,7 @@ interface ToolbarMainModalModalProps extends IModalProps<undefined> {
   tr: ToolbarResponse<any>;
 }
 
-function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
+function ToolbarMainModalModal(p: ToolbarMainModalModalProps) : React.ReactElement {
 
   const [show, setShow] = React.useState<boolean>(true);
 

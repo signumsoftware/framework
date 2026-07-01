@@ -2,7 +2,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
 using Signum.Cache;
-using System.Threading.Channels;
 
 namespace Signum.Processes;
 
@@ -243,11 +242,17 @@ public static class ProcessRunner
                                         var queued = Database.Query<ProcessEntity>()
                                             .Where(p => p.State == ProcessState.Queued)
                                             .Where(p => p.IsMine() || p.IsShared())
-                                            .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
+                                            .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName, a.Algorithm })
                                             .ToListWakeup("Planned dependency");
 
+                                        var executingAlgorithmsNoParallel = executing.Values
+                                            .Where(ep => !ep.Algorithm.AllowParallelExecution)
+                                            .Select(ep => ep.CurrentProcess.Algorithm)
+                                            .ToHashSet();
 
                                         var afordable = queued
+                                            .Where(q => ProcessLogic.GetProcessAlgorithm(q.Algorithm).AllowParallelExecution
+                                                     || !executingAlgorithmsNoParallel.Contains(q.Algorithm))
                                             .OrderByDescending(p => p.MachineName == Schema.Current.MachineName)
                                             .OrderBy(a => a.QueuedDate)
                                             .Take(remaining).ToList();

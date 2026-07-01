@@ -1,4 +1,3 @@
-using Signum.API;
 using Signum.Chart.ColorPalette;
 using Signum.Chart.UserChart;
 using Signum.Omnibox;

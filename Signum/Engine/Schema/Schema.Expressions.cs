@@ -56,6 +56,13 @@ public partial class Table
         return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
     }
 
+    internal ColumnExpression GetVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = this.Columns.GetOrThrow(columnName);
+
+        return new ColumnExpression(typeof(Pgvector.Vector), tableAlias, column.Name);
+    }
+
     internal ColumnExpression PartitionIdExpression(Alias tableAlias)
     {
         return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PartitionId!).Name);

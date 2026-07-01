@@ -69,7 +69,7 @@ internal class AliasReplacer : DbExpressionVisitor
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments);
         Alias newAlias = aliasMap.TryGetC(sqlFunction.Alias) ?? sqlFunction.Alias;
         if (args != sqlFunction.Arguments || sqlFunction.Alias != newAlias)
-            return new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, newAlias, args);
+            return new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, newAlias, args, sqlFunction.NamedArguments);
         return sqlFunction;
     }
 

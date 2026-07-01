@@ -564,7 +564,9 @@ public partial class Table
                 var cast = Expression.Parameter(table.Type);
                 assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
-                foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
+                // AvoidSave fields keep their column and are written on INSERT, but are excluded here so
+                // UPDATE never overrides the stored value (e.g. a value managed through an UnsafeUpdate).
+                foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey) && !a.AvoidSave))
                     item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramSuffix);
 
                 if (table.Mixins != null)
@@ -1455,6 +1457,13 @@ public partial class TableMList
         var column = (PostgresTsVectorColumn)this.Columns.GetOrThrow(columnName) ;
 
         return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
+    }
+
+    internal ColumnExpression GetVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = this.Columns.GetOrThrow(columnName);
+
+        return new ColumnExpression(typeof(Pgvector.Vector), tableAlias, column.Name);
     }
 }
 

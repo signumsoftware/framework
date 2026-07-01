@@ -1,14 +1,6 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Sources;
 
 namespace Signum.Upgrade.Upgrades;
 

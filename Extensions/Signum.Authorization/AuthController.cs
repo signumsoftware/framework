@@ -24,11 +24,11 @@ public class AuthController : ControllerBase
         try
         {
             if (AuthLogic.Authorizer == null)
-                user = AuthLogic.Login(data.userName, PasswordEncoding.EncodePasswordAlternatives(data.userName, data.password), out authenticationType);
+                user = AuthLogic.Login(data.userName, data.password, out authenticationType);
             else
                 user = AuthLogic.Authorizer.Login(data.userName, data.password, out authenticationType);
         }
-        catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
+        catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException || e is UserLockedException)
         {
             if (AuthServer.AvoidExplicitErrorMessages)
             {
@@ -41,6 +41,10 @@ public class AuthController : ControllerBase
             else if (e is IncorrectPasswordException)
             {
                 return ModelError("password", LoginAuthMessage.InvalidPassword.NiceToString());
+            }
+            else if (e is UserLockedException)
+            {
+                return ModelError("password", LoginAuthMessage.User0IsDeactivated.NiceToString(data.userName));
             }
             throw;
         }
@@ -123,8 +127,7 @@ public class AuthController : ControllerBase
             return ModelError("newPassword", LoginAuthMessage.PasswordMustHaveAValue.NiceToString());
 
         var user = UserEntity.Current.Retrieve();
-        
-        var error = UserEntity.OnValidatePassword(request.newPassword, user.Role);
+        var error = UserEntity.OnValidatePassword(request.newPassword, user);
         if (error.HasText())
             return ModelError("newPassword", error);
 
@@ -135,11 +138,13 @@ public class AuthController : ControllerBase
         }
         else
         {
-            if (user.PasswordHash == null || !PasswordEncoding.EncodePasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
+            if (user.PasswordHash == null || 
+                !PasswordEncoding.HashPassword(user.UserName, request.oldPassword).SequenceEqual(user.PasswordHash) &&
+                !PasswordEncoding.HashPasswordAlternatives(user.UserName, request.oldPassword).Any(oldPasswordHash => oldPasswordHash.SequenceEqual(user.PasswordHash)))
                 return ModelError("oldPassword", LoginAuthMessage.InvalidPassword.NiceToString());
         }
 
-        user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, request.newPassword);
+        user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, request.newPassword);
         user.MustChangePassword = false;
         using (AuthLogic.Disable())
         using (OperationLogic.AllowSave<UserEntity>())
@@ -150,19 +155,6 @@ public class AuthController : ControllerBase
         return new LoginResponse { userEntity = user, token = AuthTokenServer.CreateToken(user), authenticationType = "changePassword" };
     }
 
-    [HttpPost("api/auth/validatePassword")]
-    public PasswordValidationResponse ValidatePasswordComplexity([Required, FromBody] ValidatePasswordRequest request)
-    {
-        var user = UserEntity.Current?.Retrieve();
-        var result = PasswordValidator.ValidatePassword(request.password, user?.Role);
-        
-        return new PasswordValidationResponse
-        {
-            isValid = result.IsValid,
-            errorMessage = result.ErrorMessage,
-            complexityWarning = result.ComplexityWarning
-        };
-    }
 
     private BadRequestObjectResult ModelError(string field, string error)
     {
@@ -201,17 +193,5 @@ public class ResetPasswordRequest
 public class ForgotPasswordRequest
 {
     public string eMail { get; set; }
-}
-
-public class ValidatePasswordRequest
-{
-    public string password { get; set; }
-}
-
-public class PasswordValidationResponse
-{
-    public bool isValid { get; set; }
-    public string? errorMessage { get; set; }
-    public string? complexityWarning { get; set; }
 }
 #pragma warning restore IDE1006 // Naming Styles

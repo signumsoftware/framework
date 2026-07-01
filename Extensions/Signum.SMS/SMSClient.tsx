@@ -8,7 +8,7 @@ import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 
 export namespace SMSClient {
   
-  export var allTypes: string[] = [];
+  export const allTypes: string[] = [];
   
   export function start(options: { routes: RouteObject[] }): void {
   

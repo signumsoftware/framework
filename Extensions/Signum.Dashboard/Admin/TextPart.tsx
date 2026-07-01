@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { AutoLine, Binding, } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { TextPartEntity, TextPartType } from '../Signum.Dashboard';
@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@framework/Components/ErrorBoundary';
 import { ReadonlyBinding } from '@framework/Lines'
 import { useForceUpdate } from '../../../Signum/React/Hooks';
 import { LinkButton } from '@framework/Basics/LinkButton';
+import HtmlViewer from '../../Signum.HtmlEditor/HtmlViewer';
 
 export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
@@ -77,18 +78,4 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
   );
 }
 
-export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttributes<HTMLDivElement> }): React.JSX.Element {
 
-  var binding = new ReadonlyBinding(p.text, "");
-
-  return (
-    <div className="html-viewer" >
-      <HtmlEditor readOnly
-        binding={binding}
-        htmlAttributes={p.htmlAttributes}
-        small
-        extensions={[]}
-      />
-    </div>
-  );
-}

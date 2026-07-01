@@ -1,9 +1,6 @@
-using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Maps;
-using Signum.Utilities;
 using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Test.LinqProvider;
 

@@ -2,7 +2,6 @@ using Signum.Utilities.Reflection;
 using System.Data;
 using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
-using System.Reflection.Metadata;
 
 namespace Signum.Cache;
 

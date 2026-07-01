@@ -1,13 +1,7 @@
-using Npgsql.Internal.Postgres;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Engine.Sync;
 internal class PrimaryKeyUpdater
@@ -262,14 +256,14 @@ internal class PrimaryKeyUpdater
 
     private SqlPreCommand? UpdateIBAIfNecesary(ITable table, ObjectName oldTableName, IColumn newId, DiffColumn oldId, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId, IColumn ibaNewId)
     {
-        var count = (int)Executor.ExecuteScalar($"""
+        var count = Convert.ToInt32(Executor.ExecuteScalar($"""
                     SELECT Count(*) 
                     FROM {ibaTable} iba
                     JOIN {type_Table} type 
                     ON type.{Esc(this.type_Id)} = iba.{ibaType} 
                     AND type.{Esc(this.type_TableName)} = '{oldTableName}' 
                     """
-            )!;
+            )!);
 
         if (count == 0)
             return null;

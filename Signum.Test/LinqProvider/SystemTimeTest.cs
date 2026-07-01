@@ -1,5 +1,4 @@
 using Signum.DynamicQuery;
-using Signum.Entities;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Test.LinqProvider;

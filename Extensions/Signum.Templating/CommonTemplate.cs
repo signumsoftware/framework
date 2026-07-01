@@ -11,7 +11,7 @@ namespace Signum.Templating;
 
 public static class TemplateUtils
 {
-    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>(?>[^\[\]]+|\[(?<open>)|\](?<-open>))*(?(open)(?!))?)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|elseif|if|raw|global|model|modelraw|any|declare|))\[(?<expr>(?>[^\[\]]+|\[(?<open>)|\](?<-open>))*(?(open)(?!))?)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
     public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?) *(?<operation>(" + FilterValueConverter.OperationRegex + @")) *(?<value>[^\]]+)");
 
@@ -259,6 +259,7 @@ public static class ParsedModel
                 var errors = miParameters.Take(miParameters.Length - 1).ZipOrDefault(arguments, (p, a) => 
                     a == null ? $"The parameter {p.Name} ({p.ParameterType.TypeName()}) is not set for method {method.MethodSignature()}":
                     p == null ? $"Extra argument {a} in method {method.MethodSignature()}" :
+                    a.Type == null ? null : /* Error already logged */
                     !p.ParameterType.IsAssignableFrom(a.Type) ? $"Unable to assign the expression {a} ({a.Type!.TypeName()}) to the parameter {p.Name} ({p.ParameterType.TypeName()}) in {methodName}": 
                     null)
                     .NotNull().ToString("\n");
@@ -314,26 +315,26 @@ public class TemplateSynchronizationContext
 {
     public ScopedDictionary<string, ValueProviderBase> Variables;
     public Type? ModelType;
-    public Replacements Replacements;
+    public Signum.UserAssets.TokenMigrations.TokenSyncContext TokenSync;
     public StringDistance StringDistance;
     public QueryDescription? QueryDescription;
 
-    public IEntity Template; 
+    public IEntity Template;
 
     public bool HasChanges;
 
-    public TemplateSynchronizationContext(IEntity template, Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
+    public TemplateSynchronizationContext(IEntity template, Signum.UserAssets.TokenMigrations.TokenSyncContext tokenSync, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
     {
         Template = template;
         Variables = new ScopedDictionary<string, ValueProviderBase>(null);
         ModelType = modelType;
-        Replacements = replacements;
+        TokenSync = tokenSync;
         StringDistance = stringDistance;
         QueryDescription = queryDescription;
         HasChanges = false;
     }
 
-    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange)
+    internal void SynchronizeToken(ParsedToken parsedToken, string remainingText, bool forceChange, bool canAny)
     {
         if (parsedToken.QueryToken != null)
             return;
@@ -371,7 +372,12 @@ public class TemplateSynchronizationContext
         SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
         Console.WriteLine(" " + remainingText);
 
-        FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out QueryToken? token, QueryDescription, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll /*not always*/ | SubTokensOptions.CanNested, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
+        var st = SubTokensOptions.CanElement 
+            | (canAny ? SubTokensOptions.CanAnyAll : 0)
+            | SubTokensOptions.CanNested 
+            | SubTokensOptions.CanToArray;
+
+        FixTokenResult result = QueryTokenSynchronizer.FixToken(TokenSync, tokenString, out QueryToken? token, QueryDescription, st, remainingText, allowRemoveToken: false, allowReGenerate: ModelType != null, forceChange);
         switch (result)
         {
             case FixTokenResult.Nothing:
@@ -402,7 +408,7 @@ public class TemplateSynchronizationContext
                 .Concat(type.IsModifiableEntity() && !type.IsAbstract ? MixinDeclarations.GetMixinDeclarations(type) : new HashSet<Type>())
                 .ToDictionary(a => a.Name);
 
-            string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
+            string? s = this.TokenSync.AskRename(Signum.UserAssets.TokenMigrations.RenameBucket.Member, type.FullName, field, allMembers.Keys, this.StringDistance);
 
             if (s == null)
             {

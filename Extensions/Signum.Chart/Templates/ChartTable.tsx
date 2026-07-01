@@ -1,13 +1,17 @@
 import * as React from 'react'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed, withoutAggregate } from '@framework/FindOptions'
+import {
+  ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow,
+  ColumnOption, FilterOptionParsed, withoutAggregate
+} from '@framework/FindOptions'
 import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Chart'
 import { ChartClient, ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
 import { TypeInfo } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
+import { hasAggregate } from '@framework/QueryToken'
 
 interface ChartTableProps {
   resultTable: ResultTable;
@@ -100,7 +104,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
     .map(co => {
 
-      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined);
+      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined, undefined)).last("FormatRules").formatter(co.token!, undefined, undefined);
 
       let resultIndex: number | "Entity" = resultTable.columns.indexOf(co.token!.fullKey);
 

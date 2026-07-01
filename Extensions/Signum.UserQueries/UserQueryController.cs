@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
 using Signum.API;
-using Signum.UserAssets;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Threading;
 using System.Linq.Expressions;

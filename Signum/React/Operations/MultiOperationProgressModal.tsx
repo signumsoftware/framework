@@ -56,7 +56,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
   }
 
   function handleOnExited() {
-    p.onExited!({ errors: operationResultsRef.current.toObject(a => liteKey(a.entity), a => a.error) });
+    p.onExited!({ errors: operationResultsRef.current.toObject(a => liteKey(a.entity), a => a.error ?? null) });
   }
 
   var errors = operationResultsRef.current.filter(a => a.error != null);
@@ -98,7 +98,7 @@ export namespace MultiOperationProgressModal {
     } else {
       return makeRequest().then(r => r.json()).then(obj => {
         var a = obj as Operations.API.OperationResult;
-        return softCast<Operations.API.ErrorReport>({ errors: { [liteKey(a.entity)]: a.error } });
+        return softCast<Operations.API.ErrorReport>({ errors: { [liteKey(a.entity)]: a.error ?? null } });
       });
     }
   };

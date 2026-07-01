@@ -22,7 +22,7 @@
 
 
 .sf-query-token-part .rw-popup-container {
-    min-width: 400px;
+    min-width: fit-content;
 }
 
 .sf-query-token-plus {
@@ -38,7 +38,7 @@
 .has-error .sf-query-token-part .rw-dropdownlist {
     border: 1px solid var(--bs-danger);
     background-color: var(--bs-danger-bg-subtle);
-    color: var(--bs-danger-text);
+    color: var(--bs-danger);
 }
 
 .sf-prefix-btn {

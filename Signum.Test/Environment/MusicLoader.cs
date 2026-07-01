@@ -1,8 +1,4 @@
 using Microsoft.SqlServer.Types;
-using Microsoft.Win32;
-using Npgsql;
-using NpgsqlTypes;
-using Signum.Engine.Maps;
 using System.Threading;
 
 namespace Signum.Test.Environment;

@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
@@ -37,7 +37,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
 
-export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function TypesRulesPackControl({ ctx, ref }: { ctx: TypeContext<TypeRulePack>, ref?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   const [filter, setFilter] = React.useState("");
 
@@ -52,7 +52,7 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
     ];
   }
 
-  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -167,13 +167,13 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Overriden.niceToString()}
             </th>
-            {AuthAdminClient.properties && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.Options.properties && <th style={{ textAlign: "center" }}>
               {PropertyRouteEntity.niceName()}
             </th>}
-            {AuthAdminClient.operations && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.Options.operations && <th style={{ textAlign: "center" }}>
               {OperationSymbol.niceName()}
             </th>}
-            {AuthAdminClient.queries && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.Options.queries && <th style={{ textAlign: "center" }}>
               {QueryEntity.niceName()}
             </th>}
           </tr>
@@ -395,19 +395,19 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             p.updateFrame();
           }} />
         </td>
-        {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.Options.properties && <td style={{ textAlign: "center" }}>
           {link("edit", rule.modified ? "Invalidated" : rule.properties?.fallback ?? null, PropertyRouteEntity.nicePluralName(), 
             () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
             m => rule.properties = collapsePropertyRules(m, rule.allowed)
           )}
         </td>}
-        {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.Options.operations && <td style={{ textAlign: "center" }}>
           {link("bolt", rule.modified ? "Invalidated" : rule.operations?.fallback ?? null, OperationSymbol.nicePluralName(),
             () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
             m => rule.operations = collapseOperationRules(m, rule.allowed)
           )}
         </td>}
-        {AuthAdminClient.queries && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.Options.queries && <td style={{ textAlign: "center" }}>
           {link("search", rule.modified ? "Invalidated" : rule.queries, QueryEntity.nicePluralName(),
             () => AuthAdminClient.API.fetchQueryRulePack(rule.resource.cleanName, roleId),
             m => rule.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
@@ -458,7 +458,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             </td>
             <td>
             </td>
-            {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
+            {AuthAdminClient.Options.properties && <td style={{ textAlign: "center" }}>
               {link("edit", rule.modified ? "Invalidated" : rule.properties?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
                 PropertyRouteEntity.nicePluralName(),
                 () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
@@ -466,7 +466,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
                 { initialTypeConditions: cr.typeConditions.map(a=>a.element) }
               )}
             </td>}
-            {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
+            {AuthAdminClient.Options.operations && <td style={{ textAlign: "center" }}>
               {link("bolt", rule.modified ? "Invalidated" : rule.operations?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
                 OperationSymbol.nicePluralName(),
                 () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
@@ -474,7 +474,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
                 { initialTypeConditions: cr.typeConditions.map(a=>a.element) }                
               )}
             </td>}
-            <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
+            <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.Options.properties) + Number(AuthAdminClient.Options.operations) + Number(AuthAdminClient.Options.queries)}>
             </td>
           </AccessibleRow>
         );
@@ -709,3 +709,4 @@ export interface DragConfig {
   dropClass?: string;
   title?: string;
 }
+

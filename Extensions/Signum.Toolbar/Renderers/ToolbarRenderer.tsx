@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import { is } from '@framework/Signum.Entities'
+import { is,liteKey } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig, ToolbarContext, InferActiveResponse } from "../ToolbarConfig";
@@ -11,15 +11,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, EngineMessage, getToString, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
-import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity,  ToolbarSwitcherEntity } from '../Signum.Toolbar';
+import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar';
 import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
+import { QueryEntity } from '@framework/Signum.Basics';
 
 
 export default function ToolbarRenderer(p: {
@@ -222,8 +223,9 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.url) {
         const config = res.content && ToolbarClient.getConfig(res);
         return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={ToolbarUrl.isExternalLink(res.url)
-      }
+          <ToolbarNavItem key={key} title={res.label} 
+            isExternalLink={ToolbarUrl.isExternalLink(res.url)}
+            content={res.content}
             extraIcons={renderExtraIcons(res.extraIcons, ctx, selectedEntity)}
             active={isActive(ctx.active, res, selectedEntity)} icon={<>
               {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
@@ -412,12 +414,7 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   }, [p.response]);
 
 
-  const entities = useAPI(() => Finder.API.fetchAllLites({ types: entityType }), [entityType]);
-
   React.useEffect(() => {
-    if (!entities)
-      return;
-
     if (selEntityRef.current)
       return;
 
@@ -425,10 +422,12 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     if (!savedId)
       return;
 
-    const only = entities.onlyOrNull(a => a.id!.toString() == savedId);
-    if (only != null)
-      setSelectedEntity(only);
-  }, [entities]);
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity.Id", operation: "EqualTo", value: savedId }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+      });
+  }, [entityType]);
 
   const active = p.ctx.active;
 
@@ -442,14 +441,20 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
     }
   }, [active, p.response]);
   React.useEffect(() => {
+    if (!selEntityRef.current || selEntityRef.current.model)
+      return;
 
-    if (selEntityRef.current && !selEntityRef.current.model && entities) {
-      var only = entities.onlyOrNull(a => is(a, selEntityRef.current));
-      if (only != null)
-        setSelectedEntity(only);
-    }
-
-  }, [selEntityRef.current, entities]);
+    const current = selEntityRef.current;
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity", operation: "EqualTo", value: current }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0)
+          setSelectedEntity(lites[0]);
+        else {
+          current.model = EngineMessage._01NotFound.niceToString(getTypeInfo(entityType).niceName, current.id);
+          forceUpdate();
+        }
+      });
+  }, [selEntityRef.current]);
 
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
@@ -462,6 +467,17 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new RefBinding(selEntityRef, "current"));
   var ti = getTypeInfo(entityType);
+
+  const filter = ToolbarClient.entityElementFilters[entityType];
+  const hiddenGuids = useAPI(
+    async () => {
+      if (!filter || !selEntityRef.current)
+        return null;
+      return await filter(selEntityRef.current);
+    },
+    [entityType, selEntityRef.current && liteKey(selEntityRef.current)]
+  );
+
   return (
     <>
       {entityType && (
@@ -469,28 +485,31 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
-              onChange={e => handleSelect(e.originalEvent)} create={false} formGroupStyle="SrOnly" />
+              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly" />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
       )}
       {selEntityRef.current ?
-        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
+        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current, hiddenGuids ?? undefined).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
         p.response.elements!.filter(sr => !sr.withEntity).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))
       }
     </>
   );
 }
 
-function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>): ToolbarResponse<any>[] {
+function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, hiddenGuids?: Set<string>): ToolbarResponse<any>[] {
   var result = resp
     .map(tr => {
+
+      if (hiddenGuids && tr.guid && hiddenGuids.has(tr.guid))
+        return null;
 
       if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {
-        const inner = simplifyForEntity(tr.elements, selectedEntity);
+        const inner = simplifyForEntity(tr.elements, selectedEntity, hiddenGuids);
         if (inner.length == 0)
           return null;
 
@@ -498,7 +517,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
       }
 
       if (tr.extraIcons && tr.extraIcons.length > 0) {
-        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity);
+        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity, hiddenGuids);
 
         tr = { ...tr, extraIcons };
       }
@@ -584,10 +603,13 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
     label: el.label || getToString(el.content),
     icon: el.iconName ? ToolbarConfig.coloredIcon(parseIcon(el.iconName), el.iconColor) : undefined
   }));
+
   return (
     <li>
       <ul>
-        <Nav.Item title={title} className="d-flex mb-2">
+        <Nav.Item 
+        data-toolbar-content={liteKeyOrQuery(p.response.content)}
+        title={title} className="d-flex mb-2">
           {icon}
           <RightCaretDropdown
             options={options}
@@ -610,10 +632,13 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<Entity>, active?: boolean, isExternalLink?: boolean, isGroup?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
+  
+
   return (
     <li className="nav-item d-flex">
-      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100" >
+      <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
+        data-toolbar-content={liteKeyOrQuery(p.content)}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
           {p.title}
@@ -624,6 +649,10 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
       </Nav.Link>
     </li>
   );
+}
+
+export function liteKeyOrQuery(content: Lite<Entity> | null | undefined): string | null{
+  return content == null ? null : QueryEntity.isLite(content) ? getToString(content): liteKey(content);
 }
 
 export function isActive(active: InferActiveResponse | null, res: ToolbarResponse<any>, selectedEntity: Lite<Entity> | null): boolean {
@@ -644,7 +673,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
 
       if (ei.url) {
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
-          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); } }>
+          onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); }}>
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }

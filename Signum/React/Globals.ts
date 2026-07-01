@@ -64,6 +64,8 @@ declare global {
     toDictionaryDistinct<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string): Dictionary<K, T>;
     toDictionaryDistinct<K, V>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: (key: K) => string, valueSelector: (element: T) => V): Dictionary<K, V>;
 
+    toHashSet(this: Array<T>, keyStringifier: (element: T) => string): HashSet<T>;
+
     distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
     clear(this: Array<T>): void;
@@ -82,24 +84,24 @@ declare global {
     count(this: Array<T>, predicate: (element: T, index: number, array: T[]) => boolean): number;
 
     first(this: Array<T>, errorContext?: string): T;
-    first<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S;
-    first(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
+    first<S extends T>(this: Array<T>, predicate: (element: T, index: number, array: T[]) => element is S, errorContext?: string): S;
+    first(this: Array<T>, predicate: (element: T, index: number, array: T[]) => unknown, errorContext?: string): T;
 
     firstOrNull(this: Array<T>): T | null;
     firstOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
     firstOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
     last(this: Array<T>, errorContext?: string): T;
-    last<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): T;
-    last(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
+    last<S extends T>(this: Array<T>, predicate: (element: T, index: number, array: T[]) => element is S, errorContext?: string): S;
+    last(this: Array<T>, predicate: (element: T, index: number, array: T[]) => unknown, errorContext?: string): T;
 
     lastOrNull(this: Array<T>): T | null;
     lastOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
     lastOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
     single(this: Array<T>, errorContext?: string): T;
-    single<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S;
-    single(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
+    single<S extends T>(this: Array<T>, predicate: (element: T, index: number, array: T[]) => element is S, errorContext?: string): S;
+    single(this: Array<T>, predicate: (element: T, index: number, array: T[]) => unknown, errorContext?: string): T;
 
     singleOrNull(this: Array<T>, errorContext?: string): T | null;
     singleOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
@@ -487,6 +489,15 @@ Array.prototype.toDictionaryDistinct = function(this: any[], keySelector: (eleme
   return dic;
 };
 
+Array.prototype.toHashSet = function(this: any[], keyStringifier: (element: any) => string): HashSet<any> {
+  const set = new HashSet<any>(keyStringifier)
+
+  this.forEach(item => {
+    set.add(item)
+  })
+
+  return set
+};
 
 Array.prototype.distinctBy = function(this: any[], keySelector: (element: any) => unknown): any[] {
   const keysFound = new Set<unknown>();
@@ -617,86 +628,132 @@ Array.prototype.count = function(this: any[], predicate: (element: any, index: n
 };
 
 
-Array.prototype.first = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.first = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown), errorContext?: string) {
 
-  var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+  if (typeof errorContextOrPredicate == "function") {
+    for (var i = 0; i < this.length; i++)
+      if (errorContextOrPredicate(this[i], i, this))
+        return this[i];
+    throw new Error("No " + (errorContext ?? "element") + " found");
+  }
 
-  if (array.length == 0)
+  if (this.length == 0)
     throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
 
-  return array[0];
+  return this[0];
 };
 
 
 Array.prototype.firstOrNull = function(this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
-  var array = typeof predicate == "function" ? this.filter(predicate) : this;
-
-  if (array.length == 0)
+  if (typeof predicate == "function") {
+    for (var i = 0; i < this.length; i++)
+      if (predicate(this[i], i, this))
+        return this[i];
     return null;
+  }
 
-  return array[0];
+  return this.length == 0 ? null : this[0];
 };
 
-Array.prototype.last = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.last = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown), errorContext?: string) {
 
-  var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+  if (typeof errorContextOrPredicate == "function") {
+    for (var i = this.length - 1; i >= 0; i--)
+      if (errorContextOrPredicate(this[i], i, this))
+        return this[i];
+    throw new Error("No " + (errorContext ?? "element") + " found");
+  }
 
-  if (array.length == 0)
+  if (this.length == 0)
     throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
 
-  return array[array.length - 1];
+  return this[this.length - 1];
 };
 
 
 Array.prototype.lastOrNull = function(this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
-  var array = typeof predicate == "function" ? this.filter(predicate) : this;
-
-  if (array.length == 0)
+  if (typeof predicate == "function") {
+    for (var i = this.length - 1; i >= 0; i--)
+      if (predicate(this[i], i, this))
+        return this[i];
     return null;
+  }
 
-  return array[array.length - 1];
+  return this.length == 0 ? null : this[this.length - 1];
 };
 
-Array.prototype.single = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
+Array.prototype.single = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown), errorContext?: string) {
 
-  var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+  const ctx = typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element";
 
-  if (array.length == 0)
-    throw new Error("No " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+  if (typeof errorContextOrPredicate == "function") {
+    const ctx2 = errorContext ?? "element";
+    var found: any = undefined;
+    var foundCount = 0;
+    for (var i = 0; i < this.length; i++) {
+      if (errorContextOrPredicate(this[i], i, this)) {
+        if (++foundCount > 1)
+          throw new Error("More than one " + ctx2 + " found");
+        found = this[i];
+      }
+    }
+    if (foundCount == 0)
+      throw new Error("No " + ctx2 + " found");
+    return found;
+  }
 
-  if (array.length > 1)
-    throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
+  if (this.length == 0)
+    throw new Error("No " + ctx + " found");
 
-  return array[0];
+  if (this.length > 1)
+    throw new Error("More than one " + ctx + " found");
+
+  return this[0];
 };
 
 Array.prototype.singleOrNull = function(this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
-  var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
+  if (typeof errorContextOrPredicate == "function") {
+    var found: any = undefined;
+    var foundCount = 0;
+    for (var i = 0; i < this.length; i++) {
+      if (errorContextOrPredicate(this[i], i, this)) {
+        if (++foundCount > 1)
+          throw new Error("More than one element found");
+        found = this[i];
+      }
+    }
+    return foundCount == 0 ? null : found;
+  }
 
-  if (array.length == 0)
+  if (this.length == 0)
     return null;
 
-  if (array.length > 1)
+  if (this.length > 1)
     throw new Error("More than one " + (typeof errorContextOrPredicate == "string" ? errorContextOrPredicate : "element") + " found");
 
-  return array[0];
+  return this[0];
 };
 
 
 Array.prototype.onlyOrNull = function(this: any[], predicate?: (element: any, index: number, array: any[]) => unknown) {
 
-  var array = predicate ? this.filter(predicate) : this;
+  if (typeof predicate == "function") {
+    var found: any = undefined;
+    var foundCount = 0;
+    for (var i = 0; i < this.length; i++) {
+      if (predicate(this[i], i, this)) {
+        if (++foundCount > 1)
+          return null;
+        found = this[i];
+      }
+    }
+    return foundCount == 1 ? found : null;
+  }
 
-  if (array.length == 0)
-    return null;
-
-  if (array.length > 1)
-    return null;
-
-  return array[0];
+  return this.length == 1 ? this[0] : null;
 };
 
 Array.prototype.contains = function(this: any[], element: any) {
@@ -1107,7 +1164,7 @@ String.prototype.repeat = function(this: string, n: number) {
   return result;
 };
 
-export module Dic {
+export namespace Dic {
 
   var simplesTypes = ["number", "boolean", "string"];
   export const skipClasses: Function[] = [];
@@ -1340,7 +1397,7 @@ export function bytesToSize(bytes: number): string {
   return Math.round((bytes / Math.pow(1024, unit)) * 100) / 100 + ' ' + sizes[unit];
 };
 
-export module DomUtils {
+export namespace DomUtils {
   export function matches(elem: HTMLElement, selector: string): boolean {
     // Vendor-specific implementations of `Element.prototype.matches()`.
     const proto = Element.prototype as any;
@@ -1430,13 +1487,37 @@ export function roundTwoDecimals(num: number): number {
 }
 
 
-export function getColorContrasColorBWByHex(hexcolor: string): "black" | "white" {
-  hexcolor = hexcolor.replace("#", "");
-  var r = parseInt(hexcolor.substr(0, 2), 16);
-  var g = parseInt(hexcolor.substr(2, 2), 16);
-  var b = parseInt(hexcolor.substr(4, 2), 16);
-  var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  return (yiq >= 128) ? 'black' : 'white';
+export function getContrastingTextColorWCAG(hexcolor: string): "black" | "white" {
+  const hex = hexcolor.replace('#', '');
+
+  const normalized =
+    hex.length === 3
+      ? hex
+        .split('')
+        .map((c) => c + c)
+        .join('')
+      : hex;
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+
+  const toLinear = (value: number) => {
+    const s = value / 255;
+    return s <= 0.03928
+      ? s / 12.92
+      : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+
+  const luminance =
+    0.2126 * toLinear(r) +
+    0.7152 * toLinear(g) +
+    0.0722 * toLinear(b);
+
+  const contrastWithBlack = (luminance + 0.05) / 0.05;
+  const contrastWithWhite = 1.05 / (luminance + 0.05);
+
+  return contrastWithBlack > contrastWithWhite ? 'black' : 'white';
 }
 
 export function isPromise(value: any): value is Promise<any> {
@@ -1485,4 +1566,42 @@ export class Dictionary<K, V> {
   values(): MapIterator<V> {
     return this.map.values();
   }
+} 
+
+export class HashSet<T> {
+  private map = new Map<string, T>();
+  private keyStringifier: (item: T) => string;
+
+  constructor(keyStringifier: (item: T) => string) {
+    this.keyStringifier = keyStringifier;
+  }
+
+  add(item: T): this {
+    this.map.set(this.keyStringifier(item), item);
+    return this;
+  }
+
+  has(item: T): boolean {
+    return this.map.has(this.keyStringifier(item));
+  }
+
+  delete(item: T): boolean {
+    return this.map.delete(this.keyStringifier(item));
+  }
+
+  get size(): number {
+    return this.map.size;
+  }
+
+  clear(): void {
+    this.map.clear();
+  }
+
+  values(): MapIterator<T> {
+    return this.map.values();
+  }
+
+  [Symbol.iterator](): MapIterator<T> {
+    return this.map.values()
+  } 
 } 

@@ -38,8 +38,8 @@
 .sf-grid-element .card-header {
     cursor: move;
     color: var(--bs-body-color) !important;
-    background-color: var(--bs-body-bg) !important;
     border-color: var(--bs-border-color) !important;
+    background-color: var(--bs-body-bg) !important;
 }
 
 .sf-rightHandle {
@@ -98,7 +98,29 @@ div.row-control-panel {
 .sf-hide:not(:hover) {
     color: var(--bs-secondary-color);
     opacity: .3;
-    transition: opacity 200ms, color 200ms;
+}
+
+.sf-tooltip-icon {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.sf-tooltip-icon:hover {
+    opacity: 1;
+}
+
+.dashboard-tooltip-content {
+    max-width: 350px;
+    word-wrap: break-word;
+    z-index: 10000;
+}
+
+.dashboard-tooltip-content .tooltip-inner {
+    max-width: 350px;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .huge {

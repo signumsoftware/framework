@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { ColumnOptionParsed, QueryDescription, QueryToken, SubTokensOptions } from '../FindOptions'
+import { ColumnOptionParsed, QueryDescription } from '../FindOptions'
+import { QueryToken, SubTokensOptions } from '../QueryToken';
 import { SearchMessage, JavascriptMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

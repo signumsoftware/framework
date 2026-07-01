@@ -70,11 +70,11 @@ export namespace ChangeLogClient {
     return result;
   }
   
-  export namespace Options {
-    export let applicationName: string;
-    export let mainChangeLog: () => Promise<{ default: ChangeLogDic }>;
-    export let changeLogs: { [key: string]: () => Promise<{ default: ChangeLogDic }> } = {};
-  }
+  export const Options = {
+    applicationName: undefined! as string,
+    mainChangeLog: undefined! as () => Promise<{ default: ChangeLogDic }>,
+    changeLogs: {} as { [key: string]: () => Promise<{ default: ChangeLogDic }> },
+  };
   
   export namespace API {
     export function getLastDate(): Promise<string | null> {

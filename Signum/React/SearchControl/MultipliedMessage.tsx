@@ -1,7 +1,8 @@
 
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroup } from '../FindOptions'
+import { FindOptionsParsed, isFilterGroup } from '../FindOptions'
+import { getTokenParents, QueryToken } from '../QueryToken';
 import { tryGetTypeInfos, TypeReference, getTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FilterOptionParsed } from '../Search';

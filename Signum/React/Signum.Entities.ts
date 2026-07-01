@@ -12,7 +12,6 @@ export interface ModifiableEntity {
   toStr: string | undefined;
   modified: boolean;
   isNew: boolean | undefined; //required in embedded to remove and re-create in EntityJsonSerializer
-  temporalId: string;
   error?: { [member: string]: string };
   propsMeta?: string[];
   mixins?: { [name: string]: MixinEntity }
@@ -361,6 +360,17 @@ export namespace CalendarMessage {
   export const Today: MessageKey = new MessageKey("CalendarMessage", "Today");
 }
 
+export namespace CascadeDeleteMessage {
+  export const ThisEntityIsStillReferenced: MessageKey = new MessageKey("CascadeDeleteMessage", "ThisEntityIsStillReferenced");
+  export const TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting: MessageKey = new MessageKey("CascadeDeleteMessage", "TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting");
+  export const NoReferencesFoundYouCanNowDeleteThisEntity: MessageKey = new MessageKey("CascadeDeleteMessage", "NoReferencesFoundYouCanNowDeleteThisEntity");
+  export const Refresh: MessageKey = new MessageKey("CascadeDeleteMessage", "Refresh");
+  export const ReferencedVia: MessageKey = new MessageKey("CascadeDeleteMessage", "ReferencedVia");
+  export const Delete: MessageKey = new MessageKey("CascadeDeleteMessage", "Delete");
+  export const ErrorDetails: MessageKey = new MessageKey("CascadeDeleteMessage", "ErrorDetails");
+  export const _0MoreNotVisibleForYou: MessageKey = new MessageKey("CascadeDeleteMessage", "_0MoreNotVisibleForYou");
+}
+
 export namespace ConnectionMessage {
   export const VersionInfo: MessageKey = new MessageKey("ConnectionMessage", "VersionInfo");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0: MessageKey = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
@@ -385,7 +395,7 @@ export interface EmbeddedEntity extends ModifiableEntity {
 
 export namespace EngineMessage {
   export const ConcurrencyErrorOnDatabaseTable0Id1: MessageKey = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
-  export const EntityWithType0AndId1NotFound: MessageKey = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
+  export const _01NotFound: MessageKey = new MessageKey("EngineMessage", "_01NotFound");
   export const NoWayOfMappingType0Found: MessageKey = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
   export const TheEntity0IsNew: MessageKey = new MessageKey("EngineMessage", "TheEntity0IsNew");
   export const ThereAre0ThatReferThisEntityByProperty1: MessageKey = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
@@ -522,6 +532,11 @@ export namespace LiteMessage {
   export const InvalidFormat: MessageKey = new MessageKey("LiteMessage", "InvalidFormat");
   export const Type0NotFound: MessageKey = new MessageKey("LiteMessage", "Type0NotFound");
   export const ToStr: MessageKey = new MessageKey("LiteMessage", "ToStr");
+}
+
+export namespace MarkdownMessage {
+  export const Edit0: MessageKey = new MessageKey("MarkdownMessage", "Edit0");
+  export const Preview0: MessageKey = new MessageKey("MarkdownMessage", "Preview0");
 }
 
 export interface ModelEntity extends ModifiableEntity {
@@ -675,6 +690,9 @@ export namespace SearchMessage {
   export const DeleteAllFilter: MessageKey = new MessageKey("SearchMessage", "DeleteAllFilter");
   export const Filters: MessageKey = new MessageKey("SearchMessage", "Filters");
   export const Columns: MessageKey = new MessageKey("SearchMessage", "Columns");
+  export const Orders: MessageKey = new MessageKey("SearchMessage", "Orders");
+  export const Before: MessageKey = new MessageKey("SearchMessage", "Before");
+  export const After: MessageKey = new MessageKey("SearchMessage", "After");
   export const Find: MessageKey = new MessageKey("SearchMessage", "Find");
   export const FinderOf0: MessageKey = new MessageKey("SearchMessage", "FinderOf0");
   export const Name: MessageKey = new MessageKey("SearchMessage", "Name");
@@ -742,6 +760,7 @@ export namespace SearchMessage {
   export const Copy: MessageKey = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected: MessageKey = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith: MessageKey = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const SmartSearchDescription: MessageKey = new MessageKey("SearchMessage", "SmartSearchDescription");
   export const Equal0: MessageKey = new MessageKey("SearchMessage", "Equal0");
   export const SwitchViewMode: MessageKey = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup: MessageKey = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
@@ -752,6 +771,7 @@ export namespace SearchMessage {
   export const AdvancedFilters: MessageKey = new MessageKey("SearchMessage", "AdvancedFilters");
   export const FilterDesigner: MessageKey = new MessageKey("SearchMessage", "FilterDesigner");
   export const TimeMachine: MessageKey = new MessageKey("SearchMessage", "TimeMachine");
+  export const EditAllColumns: MessageKey = new MessageKey("SearchMessage", "EditAllColumns");
   export const Options: MessageKey = new MessageKey("SearchMessage", "Options");
   export const YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages: MessageKey = new MessageKey("SearchMessage", "YouHaveSelectedAllRowsOnThisPageDoYouWantTo0OnlyTheseRowsOrToAllRowsAcrossAllPages");
   export const CurrentPage: MessageKey = new MessageKey("SearchMessage", "CurrentPage");
@@ -765,6 +785,8 @@ export namespace SearchMessage {
   export const _0ResultTable: MessageKey = new MessageKey("SearchMessage", "_0ResultTable");
   export const SelectRow0_: MessageKey = new MessageKey("SearchMessage", "SelectRow0_");
   export const Enter: MessageKey = new MessageKey("SearchMessage", "Enter");
+  export const Error: MessageKey = new MessageKey("SearchMessage", "Error");
+  export const FilterGroupInvalidMixedOperations: MessageKey = new MessageKey("SearchMessage", "FilterGroupInvalidMixedOperations");
 }
 
 export namespace SelectorMessage {

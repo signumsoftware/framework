@@ -103,4 +103,5 @@ public enum AuthAdminMessage
 
     [Description("Download AuthRules.xml")]
     DownloadAuthRules,
+    PasswordChangeIsNotCompleted,
 }

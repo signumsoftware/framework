@@ -29,6 +29,7 @@
     <Member Name="Recipient" Description="Empfänger" />
     <Member Name="State" Description="Status" />
     <Member Name="Target" Description="Ziel" />
+    <Member Name="TargetToString" Description="Ziel zu String" />
     <Member Name="Text" Description="Text" />
     <Member Name="TextArguments" Description="Textargumente" />
     <Member Name="TextField" Description="Textfeld" />

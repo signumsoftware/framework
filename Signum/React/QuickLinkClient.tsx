@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
 import { classes, Dic, toPromise } from './Globals'
-import { FindOptions, ManualCellDto, ManualToken, QueryToken } from './FindOptions'
+import { FindOptions } from './FindOptions'
+import { ManualCellDto, ManualToken, QueryToken } from './QueryToken'
 import { Finder } from './Finder'
 import * as AppContext from './AppContext'
 import { Navigator } from './Navigator'
@@ -159,7 +160,9 @@ export namespace QuickLinkClient {
       }));
   }
 
-  export var ignoreErrors = false;
+  let ignoreErrors = false;
+
+  export function getIgnoreErrors(): boolean { return ignoreErrors; }
 
   export function setIgnoreErrors(value: boolean): void {
     ignoreErrors = value;
@@ -275,12 +278,12 @@ export interface QuickLinkContext<T extends Entity> {
 
 
 
-const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor }, ref: React.Ref<HTMLAnchorElement>) {
+function QuickLinkToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor, ref?: React.Ref<HTMLAnchorElement> }) {
 
 
   return (
     <LinkButton
-      ref={ref}
+      ref={p.ref}
       className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
       title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
       data-toggle="dropdown"
@@ -288,7 +291,7 @@ const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: Re
       {p.content}
     </LinkButton>
   );
-});
+}
 
 export interface QuickLinkGroup {
   name: string;

@@ -22,10 +22,9 @@ export namespace DynamicClientClient {
     ]);
   }
   
-  export namespace Options {
-    export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
-  
-  }
+  export const Options = {
+    getDynaicMigrationsStep: undefined as (() => React.ReactElement<any>) | undefined,
+  };
   
   //Run before reload
   export function getIsSafeMode(): boolean {

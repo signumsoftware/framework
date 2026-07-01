@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { openModal, IModalProps } from '../Modals';
+import { openModal, IModalProps, IGetUIState, UIState } from '../Modals';
 import { Finder } from '../Finder';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed, ResultTable } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo, tryGetTypeInfo } from '../Reflection'
@@ -28,6 +28,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   searchControlProps?: Partial<SearchControlProps>;
   autoCheckSingleRowResult?: boolean;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
+  ref?: React.Ref<IGetUIState>;
 }
 
 function SearchModal(p: SearchModalProps): React.ReactElement {
@@ -39,6 +40,13 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
   const okPressed = React.useRef<boolean>(false);
   const forceUpdate = useForceUpdate();
   const searchControl = React.useRef<SearchControlHandler>(null);
+
+  React.useImperativeHandle(p.ref, () => ({
+    getUIState(): UIState {
+      const scl = searchControl.current?.searchControlLoaded;
+      return { name: "SearchModal", context: scl && Finder.toFindOptions(scl.props.findOptions, scl.props.queryDescription, scl.props.defaultIncudeDefaultFilters) };
+    }
+  }));
 
   React.useEffect(() => {
     window.addEventListener('resize', onResize);
@@ -148,7 +156,7 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
       const marginTop = rect.top + marginModal;
       const marginButton = (modalContent!.offsetHeight - rect.bottom) + marginModal;
       const maxHeight = window.innerHeight - marginTop - marginButton;
-      containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
+      containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.Options.minHeight) + "px";
     }
   }
 
@@ -207,7 +215,7 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
 
 
 namespace SearchModal {
-  export let minHeight = 400;
+  export const Options = { minHeight: 400 };
 
   export function open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 

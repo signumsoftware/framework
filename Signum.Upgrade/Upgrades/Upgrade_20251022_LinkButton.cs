@@ -1,5 +1,3 @@
-using Signum.Utilities;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20251022_LinkButton : CodeUpgradeBase

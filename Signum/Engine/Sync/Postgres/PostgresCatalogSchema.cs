@@ -95,17 +95,29 @@ public static class PostgresCatalogSchema
                                              }).ToList(),
 
                          SimpleIndices = (from ix in t.Indices()
+                                          let am = ix.Class().AccessMethod()
+                                          let isVectorIndex = am != null && (am.amname == "hnsw" || am.amname == "ivfflat")
                                           select new DiffIndex
                                           {
                                               IsUnique = ix.indisunique,
                                               IsPrimary = ix.indisprimary,
                                               IndexName = ix.Class().relname,
                                               FilterDefinition = pg_get_expr(ix.indpred!, ix.indrelid),
-                                              Type = DiffIndexType.NonClustered,
+                                              Type = isVectorIndex ? DiffIndexType.VectorIndex : DiffIndexType.NonClustered,
+                                              VectorIndex = !isVectorIndex ? null : new DiffVectorIndex
+                                              {
+                                                  IndexType = am!.amname,
+                                                  DistanceMetric = Database.View<PgOpClass>().Where(oc => oc.oid == ix.indclass[0]).FirstOrDefault()!.opcname,
+                                              },
                                               Columns = (from i in generate_subscripts(ix.indkey, 1)
                                                          let at = t.Attributes().Single(a => a.attnum == ix.indkey[i])
                                                          orderby i
-                                                         select new DiffIndexColumn { ColumnName = at.attname, Type = i >= ix.indnkeyatts ? DiffIndexColumnType.Included : DiffIndexColumnType.Key }).ToList()
+                                                         select new DiffIndexColumn
+                                                         {
+                                                             Index = i,
+                                                             ColumnName = at.attname,
+                                                             Type = i >= ix.indnkeyatts ? DiffIndexColumnType.Included : DiffIndexColumnType.Key
+                                                         }).ToList()
                                           }).ToList(),
 
                          ViewIndices = new List<DiffIndex>(),
@@ -213,6 +225,7 @@ public static class PostgresCatalogSchema
         { "ltree", NpgsqlDbType.LTree },
         { "name", NpgsqlDbType.Name },
         { "oidvector", NpgsqlDbType.Oidvector },
+        { "vector", AbstractDbType.VectorPG },
         { "pg_lsn", NpgsqlDbType.PgLsn },
         { "oid", (NpgsqlDbType)(-1) },
         { "cid", (NpgsqlDbType)(-1) },

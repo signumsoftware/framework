@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections;

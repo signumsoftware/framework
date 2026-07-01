@@ -53,6 +53,7 @@
   <Type Name="ProcessMessage">
     <Member Name="_0ProcessesExcecutingIn1_2" Description="{0} Prozesse, die in {1} / {2} ausgeführt werden" />
     <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="Dates" Description="Daten" />
     <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
     <Member Name="ExecutingProcesses" Description="Ausführen von Prozessen" />
     <Member Name="InitialDelayMilliseconds" Description="Anfangsverzögerung in Millisekunden" />

@@ -50,6 +50,7 @@ public class PgClass : IView
     public int reltuples;
 
     public int relowner;
+    public int relam; // access method OID
 
     [AutoExpressionField]
     public PgRoles? Owner() =>
@@ -71,6 +72,9 @@ public class PgClass : IView
     public IQueryable<PgConstraint> Constraints() =>
         As.Expression(() => Database.View<PgConstraint>().Where(t => t.conrelid == oid));
 
+    [AutoExpressionField]
+    public PgAm? AccessMethod() =>
+     As.Expression(() => Database.View<PgAm>().SingleOrDefault(am => am.oid == relam));
 
     [AutoExpressionField]
     public PgNamespace? Namespace() =>
@@ -217,6 +221,7 @@ public class PgIndex : IView
     public bool indisprimary;
 
     public short[] indkey;
+    public int[] indclass; // operator class OIDs
 
     public string? indexprs;
     public string? indpred;
@@ -264,4 +269,24 @@ public static class ConstraintType
     public const char Trigger = 't';
     public const char Exclusion = 'x';
 }
+
+[TableName("pg_catalog.pg_am")]
+public class PgAm : IView
+{
+    [ViewPrimaryKey]
+    public int oid;
+
+    public string amname;
+}
+
+[TableName("pg_catalog.pg_opclass")]
+public class PgOpClass : IView
+{
+    [ViewPrimaryKey]
+    public int oid;
+
+    public string opcname;
+    public int opcnamespace;
+}
+
 #pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.

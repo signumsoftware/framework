@@ -1,5 +1,3 @@
-using Signum.API;
-
 namespace Signum.ConcurrentUser;
 public static class ConcurrentUserLogic
 {
@@ -27,6 +25,8 @@ public static class ConcurrentUserLogic
                 e.StartTime,
                 e.SignalRConnectionID,
             });
+
+        sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<ConcurrentUserEntity>().Where(a => a.TargetEntity.EntityType.ToTypeEntity().Is(type)));
 
         if (sb.WebServerBuilder != null)
             ConcurrentUserServer.Start(sb.WebServerBuilder);

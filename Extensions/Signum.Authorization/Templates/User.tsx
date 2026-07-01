@@ -38,21 +38,19 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
           <AutoLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
           {!ctx.readOnly && !ctx.subCtx(a => a.passwordHash).isMemberReadOnly() && changePasswordVisible(ctx.value) &&
             <div className="mb-2">
-              <DoublePassword 
-                ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} 
-                initialOpen={Boolean(entity.isNew)} 
-                mandatory 
-                userRole={ctx.value.role}
+              <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory
                 onChange={() => {
+                  ctx.value.passwordIsChanging = false;
                   if (!is(ctx.value, AuthClient.currentUser())) {
                     ctx.value.mustChangePassword = true;
                     forceUpdate();
                   }
-                }} />
+                }}
+              />
               <div className="row">
                 <div className="offset-sm-3 col-sm-9">
-              <CheckboxLine ctx={ctx.subCtx(e => e.mustChangePassword)} inlineCheckbox />
-              </div>
+                  <CheckboxLine ctx={ctx.subCtx(e => e.mustChangePassword)} inlineCheckbox />
+                </div>
               </div>
             </div>
           }
@@ -75,17 +73,17 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
   );
 }
 
-export let changePasswordVisible = (user: UserEntity) => true;
+export let changePasswordVisible: (user: UserEntity) => boolean = (user: UserEntity) => user.externalId == null;
 export function setChangePasswordVisibleFunction(newFunction: (user: UserEntity) => boolean): void {
   changePasswordVisible = newFunction;
 }
 
-export let userNameReadonly = (user: UserEntity) => false;
+export let userNameReadonly: (user: UserEntity) => boolean = (user: UserEntity) => user.externalId != null;
 export function setUserNameReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   userNameReadonly = newFunction;
 }
 
-export let emailReadonly = (user: UserEntity) => false;
+export let emailReadonly: (user: UserEntity) => boolean = (user: UserEntity) => user.externalId != null;
 export function setEmailReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   emailReadonly = newFunction;
 }

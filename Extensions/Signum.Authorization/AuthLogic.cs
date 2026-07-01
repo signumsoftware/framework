@@ -1,15 +1,10 @@
-using Microsoft.Extensions.Logging.Abstractions;
-using Signum.API;
 using Signum.API.Filters;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
-using Signum.Entities;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections.Frozen;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using static Signum.Engine.Sync.Replacements;
 
@@ -95,6 +90,7 @@ public static class AuthLogic
         {
             userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
             userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
+            userWithClaims.Claims["ExternalId"] = ((UserEntity)user).ExternalId;
         };
 
         CultureInfoLogic.AssertStarted(sb);
@@ -225,6 +221,8 @@ public static class AuthLogic
                 EntityCache.AddFullGraph(role);
                 var allRoles = Database.RetrieveAll<RoleEntity>();
 
+                var roleToTrivialMerge = allRoles.ToDictionary(a => a.ToLite(), a => a.IsTrivialMerge);
+
                 if (role.InheritsFrom.IsGraphModified)
                 {
                     var roleGraph = DirectedGraph<RoleEntity>.Generate(allRoles, r => r.InheritsFrom.Select(sr => sr.RetrieveAndRemember()));
@@ -239,7 +237,7 @@ public static class AuthLogic
 
                 var dic = allRoles.ToDictionary(a => a.ToLite());
 
-                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => RolesByLite.Value.GetOrThrow(inh).IsTrivialMerge).Select(inh => new { r, inh })).ToList();
+                var problems2 = allRoles.SelectMany(r => r.InheritsFrom.Where(inh => roleToTrivialMerge.GetOrThrow(inh)).Select(inh => new { r, inh })).ToList();
                 if (problems2.Any())
                     throw new ApplicationException(
                         problems2.GroupBy(a => a.r, a => a.inh)
@@ -319,7 +317,7 @@ public static class AuthLogic
         var result = RetrieveUserByUsername(username);
 
         if (result != null && result.State == UserState.Deactivated)
-            throw new ApplicationException(LoginAuthMessage.User0IsDeactivated.NiceToString().FormatWith(result.UserName));
+            throw new UserLockedException(LoginAuthMessage.User0IsDeactivated.NiceToString().FormatWith(result.UserName));
 
         return result;
     }
@@ -395,12 +393,19 @@ public static class AuthLogic
         OnRulesChanged?.Invoke();
     }
 
-    public static UserEntity Login(string username, IList<byte[]> passwordHashes, out string authenticationType)
+    public static UserEntity Login(string username, string password, out string authenticationType)
+    {
+        return Login(username,
+            PasswordEncoding.HashPassword(username, password),
+            PasswordEncoding.HashPasswordAlternatives(username, password),
+            out authenticationType);
+    }
+
+    public static UserEntity Login(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes, out string authenticationType)
     {
         using (AuthLogic.Disable())
         {
-            UserEntity user = RetrieveUser(username, passwordHashes);
-
+            UserEntity user = RetrieveUser(username, passwordHash, alternativePasswordHashes);
             OnUserLogingIn(user, nameof(Login));
 
             authenticationType = "database";
@@ -416,7 +421,7 @@ public static class AuthLogic
 
     public static Action<UserEntity>? OnDeactivateUser;
 
-    public static UserEntity RetrieveUser(string username, IList<byte[]> passwordHashes)
+    public static UserEntity RetrieveUser(string username, byte[] passwordHash, IList<byte[]> alternativePasswordHashes)
     {
         using (AuthLogic.Disable())
         {
@@ -426,7 +431,7 @@ public static class AuthLogic
                 throw new IncorrectUsernameException(LoginAuthMessage.Username0IsNotValid.NiceToString().FormatWith(username));
 
 
-            if (user.PasswordHash == null || (!passwordHashes.Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
+            if (user.PasswordHash == null || (!alternativePasswordHashes.PreAnd(passwordHash).Any(passwordHash => passwordHash.SequenceEqual(user.PasswordHash))))
             {
                 using (UserHolder.UserSession(SystemUser!))
                 {
@@ -458,9 +463,9 @@ public static class AuthLogic
                 }
             }
 
-            if (!user.PasswordHash.SequenceEqual(passwordHashes.Last()))
+            if (!user.PasswordHash.SequenceEqual(passwordHash))
             {
-                user.PasswordHash = passwordHashes.Last();
+                user.PasswordHash = passwordHash;
 
                 using (AuthLogic.Disable())
                 using (OperationLogic.AllowSave<UserEntity>())
@@ -471,6 +476,14 @@ public static class AuthLogic
 
             return user;
         }
+    }
+
+    public static UserEntity? TryRetrieveUser(string username, string password)
+    {
+        return TryRetrieveUser(username, [
+            PasswordEncoding.HashPassword(username, password),
+            ..PasswordEncoding.HashPasswordAlternatives(username, password)
+        ]);
     }
 
     public static UserEntity? TryRetrieveUser(string username, IList<byte[]> passwordHashes)
@@ -764,7 +777,7 @@ public static class AuthLogic
                        new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
                        Connector.Current.SqlBuilder.UseDatabase(),
                        roleInsertsDeletes,
-                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry("Auth_Roles {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
                     if (!SafeConsole.Ask("Did you run the previous script (Sync Roles)?"))
                         return;
@@ -843,7 +856,7 @@ public static class AuthLogic
                    Connector.Current.SqlBuilder.UseDatabase(),
                    roleRelationships,
                    trivialMerges,
-                   new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry();
+                   new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT"))!.OpenSqlFileRetry("Auth_RoleRels {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
                 if (!SafeConsole.Ask("Did you run the previous script (Sync Roles Relationships)?"))
                     return;
@@ -924,7 +937,7 @@ public static class AuthLogic
             if (command == null)
                 SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
             else
-                command.OpenSqlFileRetry();
+                command.OpenSqlFileRetry("Auth {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now));
 
             GlobalLazy.ResetAll(systemLog: false);
         }

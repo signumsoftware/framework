@@ -13,12 +13,13 @@ import TemplateControls from '../../Signum.Templating/TemplateControls'
 import TemplateApplicable from '../../Signum.Templating/Templates/TemplateApplicable'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import { QueryDescription } from '@framework/FindOptions'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { UserChartEntity } from '../../Signum.Chart/UserChart/Signum.Chart.UserChart'
 import { UserQueryEntity } from '../../Signum.UserQueries/Signum.UserQueries'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SubTokensOptions } from '@framework/QueryToken'
 
 
 export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }): React.JSX.Element {

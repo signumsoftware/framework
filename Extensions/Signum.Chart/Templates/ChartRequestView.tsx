@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
-import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
+import { FilterOptionParsed } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer, getTypeInfos } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
@@ -25,6 +25,7 @@ import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import ChartTimeSeries from './ChartTimeSeries';
 import { DateTime } from 'luxon';
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken';
 import { LinkButton } from '@framework/Basics/LinkButton';
 
 interface ChartRequestViewProps {
@@ -185,6 +186,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
             lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFiltersOptionsButton={true} /> :
           <AutoFocus>
             <PinnedFilterBuilder
+              queryDescription={qd}
               filterOptions={cr.filterOptions}
               onFiltersChanged={handlePinnedFilterChanged} />
           </AutoFocus>
@@ -228,12 +230,12 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           </Tab>
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (
-            <span
-              className={maxRowsReached ? "text-danger fw-bold" : undefined}
-              title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
+              <span
+                className={maxRowsReached ? "text-danger fw-bold" : undefined}
+                title={maxRowsReached ? ChartMessage.QueryResultReachedMaxRows0.niceToString(result.chartRequest.maxRows) : undefined}>
                 {(result.chartResult.resultTable.rows.length)}
               </span>
-            )
+              )
             </span> as any}>
               <ChartTableComponent chartRequest={cr} lastChartRequest={result.lastChartRequest} resultTable={result.chartResult.resultTable}
                 onOrderChanged={() => handleOnDrawClick()} />

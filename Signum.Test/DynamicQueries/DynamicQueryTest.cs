@@ -1,10 +1,4 @@
 using Signum.DynamicQuery;
-using Signum.DynamicQuery.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Signum.Test.DynamicQueries;
 
@@ -36,7 +30,7 @@ public class DynamicQueryTest
         var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
         {
             QueryName = typeof(ArtistEntity),
-            Columns =  new List<Column>
+            Columns = new List<Column>
             {
                 new Column(QueryUtils.Parse("Id",qd, cto), null),
                 new Column(QueryUtils.Parse("Name",qd, cto), null),
@@ -104,7 +98,7 @@ public class DynamicQueryTest
     {
         var qd = QueryLogic.Queries.QueryDescription(typeof(ArtistEntity));
 
-      
+
         var rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
         {
             QueryName = typeof(ArtistEntity),
@@ -208,7 +202,7 @@ public class DynamicQueryTest
                 new Column(QueryUtils.Parse("Entity.Friends.Nested.Name",qd, cto), null),
             },
             Filters = new List<DynamicQuery.Filter>(),
-            Orders = new List<Order> 
+            Orders = new List<Order>
             {
                 new Order(QueryUtils.Parse("Entity.Friends.Nested.Id",qd, cto), OrderType.Ascending),
             },
@@ -274,6 +268,5 @@ public class DynamicQueryTest
         Assert.True(rt.Columns.Length == 3);
         Assert.True(rt.Rows.Length > 0);
     }
-
 
 }

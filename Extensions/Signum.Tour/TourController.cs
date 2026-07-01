@@ -1,0 +1,116 @@
+using Microsoft.AspNetCore.Mvc;
+using Signum.API;
+using Signum.Basics;
+using Signum.Dashboard;
+using Signum.UserQueries;
+
+namespace Signum.Tour;
+
+public class TourController : ControllerBase
+{
+    [HttpGet("api/tour/byEntity/{typeName}")]
+    public TourDTO? GetTourByEntity(string typeName)
+    {
+        var type = TypeLogic.TryGetType(typeName);
+        if (type == null)
+            return null;
+
+        var typeEntity = type.ToTypeEntity().ToLite();
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(typeEntity);
+
+        return tour == null ? null : ToDTO(tour);
+    }
+
+    [HttpGet("api/tour/bySymbol/{symbolKey}")]
+    public TourDTO? GetTourBySymbol(string symbolKey)
+    {
+        var symbol = SymbolLogic<TourTriggerSymbol>.ToSymbol(symbolKey);
+
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(symbol.ToLite());
+
+        return tour == null ? null : ToDTO(tour);
+    }
+
+    [HttpGet("api/tour/triggerType")]
+    public Lite<TypeEntity>? GetTriggerType([FromQuery] string liteKey)
+    {
+        var lite = (Lite<TourTriggerSymbol>)Lite.Parse(liteKey);
+
+        var type = TourTriggerLogic.GetTriggerType(lite.RetrieveAndRemember());
+
+        return type?.ToTypeEntity().ToLite();
+    }
+
+    [HttpGet("api/tour/byLite")]
+    public TourDTO? GetTourByLite([FromQuery] string liteKey)
+    {
+        var lite = Lite.Parse(liteKey);
+
+        if (lite.EntityType != typeof(DashboardEntity)
+            && lite.EntityType != typeof(UserQueryEntity))
+            return null;
+
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(lite);
+
+        return tour == null ? null : ToDTO(tour);
+    }
+
+    private static TourDTO ToDTO(TourEntity tour)
+    {
+        return new TourDTO
+        {
+            Tour = tour.ToLite(),
+            ForEntity = tour.Trigger,
+            Animate = tour.Animate,
+            ShowCloseButton = tour.ShowCloseButton,
+            Steps = tour.Steps.Select(s => new TourStepDTO
+            {
+                CssSelector = ResolveCssSelector(s.CssSteps),
+                Title = s.Title,
+                Description = s.Description,
+                Side = s.Side?.ToString().ToLower(),
+                Align = s.Align?.ToString().ToLower(),
+                Click = s.Click 
+            }).ToList()
+        };
+    }
+
+    private static string? ResolveCssSelector(MList<CssStepEmbedded> cssSteps)
+    {
+        if (cssSteps == null || cssSteps.Count == 0)
+            return null;
+
+        var selectors = new List<string>();
+
+        foreach (var step in cssSteps)
+        {
+            switch (step.Type)
+            {
+                case CssStepType.CSSSelector:
+                    selectors.Add(step.CssSelector!);
+                    break;
+
+                case CssStepType.Property:
+                    var propertyRoute = step.Property!;
+                    selectors.Add($"[data-property-path='{propertyRoute.Path}']");
+                    break;
+
+                case CssStepType.ToolbarContent:
+                    var lite = step.ToolbarContent!;
+                    var key = lite is Lite<QueryEntity> q ? q.RetrieveFromCache().Key : lite.Key();
+                    selectors.Add($"[data-toolbar-content='{key}']");
+                    break;
+
+                case CssStepType.DashboardPart:
+                    selectors.Add($"[data-part-content='{step.DashboardPart}']");
+                    break;
+
+                case CssStepType.TableColumn:
+                    selectors.Add($"[data-column-name='{step.TableColumn}']");
+                    break;
+            }
+        }
+
+        return selectors.ToString(" ");
+    }
+}

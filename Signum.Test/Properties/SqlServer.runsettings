@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<RunConfiguration>
+		<EnvironmentVariables>
+			<ASPNETCORE_ENVIRONMENT>SqlServer</ASPNETCORE_ENVIRONMENT>
+		</EnvironmentVariables>
+	</RunConfiguration>
+</RunSettings>

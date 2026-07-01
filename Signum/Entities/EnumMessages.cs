@@ -45,11 +45,11 @@ public enum OperationMessage
     [Description("{0} & New")]
     _0AndNew,
 
-    BulkModifications, 
+    BulkModifications,
     [Description("Please confirm that you would like to apply the above changes and execute {0} over {1} {2}")]
     PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12,
 
-    Condition, 
+    Condition,
     Setters,
     [Description("Add setter")]
     AddSetter,
@@ -77,6 +77,26 @@ public enum OperationMessage
     Operation
 }
 
+public enum CascadeDeleteMessage
+{
+    [Description("This entity is still referenced")]
+    ThisEntityIsStillReferenced,
+    [Description("The following entities still reference {0}. Remove them before deleting.")]
+    TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting,
+    [Description("No references found. You can now delete this entity.")]
+    NoReferencesFoundYouCanNowDeleteThisEntity,
+    [Description("Refresh")]
+    Refresh,
+    [Description("referenced via")]
+    ReferencedVia,
+    [Description("Delete")]
+    Delete,
+    [Description("Error details")]
+    ErrorDetails,
+    [Description("{0} more not visible for you")]
+    _0MoreNotVisibleForYou,
+}
+
 public enum SynchronizerMessage
 {
     [Description("--- END OF SYNC SCRIPT")]
@@ -89,8 +109,8 @@ public enum EngineMessage
 {
     [Description("Concurrency error on the database, Table = {0}, Id = {1}")]
     ConcurrencyErrorOnDatabaseTable0Id1,
-    [Description("Entity with type {0} and Id {1} not found")]
-    EntityWithType0AndId1NotFound,
+    [Description("{0} {1} not found")]
+    _01NotFound,
     [Description("No way of mapping type {0} found")]
     NoWayOfMappingType0Found,
     [Description("The entity {0} is new")]
@@ -185,6 +205,14 @@ public enum HtmlEditorMessage
     Code,
 }
 
+public enum MarkdownMessage
+{
+    [Description("Edit {0}")]
+    Edit0,
+    [Description("Preview {0}")]
+    Preview0,
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum BooleanEnum
 {
@@ -228,6 +256,11 @@ public enum SearchMessage
     DeleteAllFilter,
     Filters,
     Columns,
+    Orders,
+    [Description("before")]
+    Before,
+    [Description("after")]
+    After,
     Find,
     [Description("Finder of {0}")]
     FinderOf0,
@@ -343,6 +376,9 @@ public enum SearchMessage
     MoreThanOne0Selected,
     CombineRowsWith,
 
+    [Description("Finds similar results based on meaning, not exact words")]
+    SmartSearchDescription,
+
     [Description("Equal {0}")]
     Equal0,
 
@@ -364,6 +400,8 @@ public enum SearchMessage
     AdvancedFilters,
     FilterDesigner,
     TimeMachine,
+    [Description("Edit all columns")]
+    EditAllColumns,
     Options,
 
     [Description("You have selected all rows on this page. Do you want to {0} only these rows, or to all rows across all pages?")]
@@ -389,6 +427,9 @@ public enum SearchMessage
     [Description("Select row {0}")]
     SelectRow0_,
     Enter,
+    Error,
+    [Description("This filter group contains some operations that require a list ('is in' / 'is not in') and some than not. Enable 'Split' or use operation consitently.")]
+    FilterGroupInvalidMixedOperations,
 }
 
 public enum SearchHelpMessage

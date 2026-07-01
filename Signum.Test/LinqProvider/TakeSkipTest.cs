@@ -1,4 +1,3 @@
-
 namespace Signum.Test.LinqProvider;
 
 public class TakeSkipTest

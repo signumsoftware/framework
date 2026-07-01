@@ -9,7 +9,6 @@ using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.API.Controllers;
 using Signum.API;
-using Signum.Authorization.UserTicket;
 
 namespace Signum.Authorization.AuthToken;
 

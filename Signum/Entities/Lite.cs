@@ -396,7 +396,7 @@ public static class Lite
         if (lmc == null)
         {
             if (lite.ModelType == typeof(string))
-                return ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(lite.EntityType.NiceName(), lite.Id) + "]");
+                return ("[" + EngineMessage._01NotFound.NiceToString().FormatWith(lite.EntityType.NiceName(), lite.Id) + "]");
 
             throw new InvalidOperationException($"Entity '{lite.EntityType}' has not registered LiteModelConstructor for '{lite.ModelType}'");
         }

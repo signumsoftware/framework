@@ -1,8 +1,5 @@
-using DocumentFormat.OpenXml.Spreadsheet;
-using Microsoft.CodeAnalysis.FlowAnalysis;
 using Signum.DynamicQuery.Tokens;
 using Signum.UserAssets;
-using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Globalization;
@@ -182,7 +179,7 @@ public abstract class ValueProviderBase
         if (Type == null)
             return;
 
-        var result = FilterValueConverter.IsValidExpression(valueString, Type, Operation!.Value.IsList(), null);
+        var result = FilterValueConverter.IsValidExpression(valueString, Type, Operation!.Value.IsListOrPair(), null);
 
         if (result is Result<Type>.Error e)
             addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));
@@ -363,7 +360,7 @@ public class TokenValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange, canAny: false);
 
         Declare(sc.Variables);
     }
@@ -460,7 +457,7 @@ public class TranslateInstanceValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        sc.SynchronizeToken(ParsedToken, remainingText, forceChange);
+        sc.SynchronizeToken(ParsedToken, remainingText, forceChange, canAny: false);
 
         Declare(sc.Variables);
     }
@@ -907,7 +904,7 @@ public class GlobalValueProvider : ValueProviderBase
 
     public override void Synchronize(TemplateSynchronizationContext sc, string remainingText, bool forceChange)
     {
-        globalKey = sc.Replacements.SelectInteractive(globalKey, GlobalVariables.Keys, "Globals", sc.StringDistance) ?? globalKey;
+        globalKey = sc.TokenSync.AskRename(Signum.UserAssets.TokenMigrations.RenameBucket.Global, subKey: null, globalKey, GlobalVariables.Keys, sc.StringDistance) ?? globalKey;
 
         if(remainingFieldsOrProperties.HasText() && Members == null)
         {

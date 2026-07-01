@@ -31,9 +31,9 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
   const tokens = Dic.getValues(tokensObj);
 
   return (
-    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
+    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 600, maxWidth: 'min(900px, 90vw)' }}>
       <Popover.Header as="h3"><strong>{SearchHelpMessage.SearchHelp.niceToString()}</strong></Popover.Header>
-      <Popover.Body>
+      <Popover.Body style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
         <div className="my-2">{SearchHelpMessage.The0IsVeryPowerfulButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt.niceToString().formatHtml(<strong>{SearchHelpMessage.SearchControl.niceToString()}</strong>)}</div>
         <div className="pt-2"><strong>{SearchHelpMessage.TheBasics.niceToString()}</strong></div>
         {searchMode == "Search" && <p className="my-2">{SearchHelpMessage.CurrentlyWeAreInTheQuery0YouCanOpenA1ByClickingThe2IconOrDoing3InTheRowButNotInALink.niceToString().formatHtml(<strong><samp>{query}</samp></strong>, <strong><samp>{type}</samp></strong>, <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchHelpMessage.DoubleClick.niceToString()}</samp></strong>)}</p>}
@@ -58,9 +58,9 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
 
 export function GroupHelp(p: { injected: OverlayInjectedProps }): React.ReactElement {
   return (
-    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
+    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 600, maxWidth: 'min(900px, 90vw)' }}>
       <Popover.Header as="h3"><strong>{SearchHelpMessage.GroupHelp.niceToString()}</strong></Popover.Header>
-      <Popover.Body>
+      <Popover.Body style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
         <p className="my-2">{SearchHelpMessage.AnyNewColumnShouldEitherBeAnAggregate0OrItWillBeConsideredANewGroupKey1.niceToString().formatHtml(<span>(<samp>{AggregateFunction.niceToString("Count")}</samp>, <samp>{AggregateFunction.niceToString("Sum")}</samp>, <samp>{AggregateFunction.niceToString("Min")}</samp>...)</span>, <FontAwesomeIcon aria-hidden={true} icon="key" color="gray" />)}</p>
         <p className="my-2">{SearchHelpMessage.OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField0.niceToString().formatHtml(<span><code>HAVING</code> {SearchHelpMessage.InSql.niceToString()}</span>)}</p>
         <p className="my-2">{SearchHelpMessage.FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1.niceToString().formatHtml(<strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchHelpMessage.RightClicking.niceToString()}</samp></strong>, <span>{getResotreDefaultColumnsIcon()}<em style={{ whiteSpace: 'nowrap' }}>{SearchHelpMessage.RestoreDefaultColumns.niceToString()}</em></span>)}</p>
@@ -85,9 +85,9 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
   var sampleColumns = Finder.getDefaultColumns(p.queryDescription);
   return (
-    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: expressionExpanded ? 900 : 600 }}>
+    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 400, maxWidth: expressionExpanded ? 'min(900px, 90vw)' : 'min(600px, 90vw)' }}>
       <Popover.Header as="h3"><strong>{FilterFieldMessage.FiltersHelp.niceToString()}</strong></Popover.Header>
-      <Popover.Body>
+      <Popover.Body style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
         <div className="my-2">{FilterFieldMessage.AFilterConsistsOfA0AComparison1AndAConstant2.niceToString()
           .formatHtml(<strong>{FilterFieldMessage.Field.niceToString()}</strong>, <strong>{FilterFieldMessage.Operator.niceToString()}</strong>, <strong>{FilterFieldMessage.Value.niceToString()}</strong>)}</div>
         <ul>
@@ -115,9 +115,9 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
   const type = getNiceTypeName(p.queryDescription.columns['Entity'].type);
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
   return (
-    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 800 }}>
+    <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 600, maxWidth: 'min(800px, 90vw)' }}>
       <Popover.Header as="h3"><strong>{ColumnFieldMessage.ColumnsHelp.niceToString()}</strong></Popover.Header>
-      <Popover.Body>
+      <Popover.Body style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
         <div className="my-2">{SearchHelpMessage.YouAreEditingAColumnLetMeExplainWhatEachFieldDoes.niceToString()}</div>
         <ul>
           <li>

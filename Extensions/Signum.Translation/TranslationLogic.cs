@@ -1,16 +1,11 @@
 using System.Globalization;
-using Signum.Translation;
 using System.Xml.Linq;
 using System.IO;
 using System.Collections.Concurrent;
 using Signum.Authorization;
-using Signum.Basics;
 using Signum.Authorization.Rules;
 using Signum.Engine.Sync;
-using Signum.API;
 using Signum.Translation.Translators;
-using Microsoft.AspNetCore.Mvc;
-using Signum.API.Filters;
 using System.Text.RegularExpressions;
 
 namespace Signum.Translation;

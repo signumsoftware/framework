@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Signum.Chart;
 
 namespace Signum.Chart;
 

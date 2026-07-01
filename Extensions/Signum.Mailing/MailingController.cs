@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Signum.Basics;
 using Signum.Mailing.Templates;
 using Signum.API.Filters;
-using Signum.Basics;
 using Signum.API;
 using Signum.Authorization;
 using Microsoft.AspNetCore.Cors;

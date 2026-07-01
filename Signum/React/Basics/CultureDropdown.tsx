@@ -15,7 +15,7 @@ export default function CultureDropdown(p: { fullName?: boolean; isMobile?: bool
   if (!cultures)
     return null;
 
-  const current = CultureClient.currentCulture;
+  const current = CultureClient.getCurrentCulture();
 
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
@@ -59,7 +59,7 @@ export function CultureDropdownMenuItem(props: {
   if (!cultures)
     return null;
 
-  const current = CultureClient.currentCulture;
+  const current = CultureClient.getCurrentCulture();
 
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
@@ -78,7 +78,8 @@ export function CultureDropdownMenuItem(props: {
     <div>
       <button
         type="button"
-        className="dropdown-item d-flex align-items-center"
+        data-culture={current.name}
+        className="dropdown-item d-flex align-items-center sf-culture-menu-item"
         onClick={() => setShow(!show)}
         aria-expanded={show}
         aria-haspopup="true"

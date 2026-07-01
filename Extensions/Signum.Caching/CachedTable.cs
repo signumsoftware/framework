@@ -3,8 +3,6 @@ using Signum.Engine.Linq;
 using System.Data;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
-using System.Linq;
-using static Signum.Engine.Maps.FullTextTableIndex;
 
 namespace Signum.Cache;
 

@@ -54,7 +54,7 @@ export namespace TranslatedInstanceClient {
           var binding = (vProps.ctx.binding as Binding<string>);
           var value = binding.parentObject[binding.member + "_translated"];
           if (value != null)
-            vProps.helpText = <><strong>{CultureClient.currentCulture.name}:</strong> {value}</>;
+            vProps.helpText = <><strong>{CultureClient.getCurrentCulture().name}:</strong> {value}</>;
         }
       }
     }

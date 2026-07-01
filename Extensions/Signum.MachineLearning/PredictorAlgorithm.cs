@@ -83,9 +83,9 @@ public class PredictorPredictContext
 
         OutputCodifications = codifications.Where(a => a.Column.Usage == PredictorColumnUsage.Output).ToList();
         MainOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnMain m).GroupToDictionary(a => ((PredictorColumnMain)a.Column).PredictorColumn);
-        SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup =>
+        SubQueryOutputCodifications = OutputCodifications.Where(a => a.Column is PredictorColumnSubQuery).GroupAggregateToDictionary(a => ((PredictorColumnSubQuery)a.Column).SubQuery, sqGroup =>
         new PredictorPredictSubQueryContext(sqGroup.Key,
-            sqGroup.AgGroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys!,
+            sqGroup.GroupAggregateToDictionary(a => ((PredictorColumnSubQuery)a.Column).Keys!,
                 keysGroup => keysGroup.GroupToDictionary(a => ((PredictorColumnSubQuery)a.Column).PredictorSubQueryColumn!), ObjectArrayComparer.Instance)
         ));
     }

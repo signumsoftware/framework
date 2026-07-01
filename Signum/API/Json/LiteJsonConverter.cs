@@ -133,6 +133,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                         entity = converter.Read(ref reader, typeof(Entity), options, (Entity?)(IEntity?)existingValue?.EntityOrNull, null);
                     }
                     break;
+                case "Type": throw new JsonException($"Unexpected property 'Type' in Lite JSON. Use 'EntityType' instead (Lite uses 'EntityType', full entities use 'Type').");
                 default: throw new JsonException("unexpected property " + propName);
             }
 

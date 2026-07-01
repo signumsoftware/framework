@@ -2,6 +2,7 @@ namespace Signum.Chart.Scripts;
 
 public class BarsChartScript : ChartScript
 {
+    
     public BarsChartScript() : base(D3ChartScript.Bars)
     {
         Icon = ChartScriptLogic.LoadIcon("bars.png");

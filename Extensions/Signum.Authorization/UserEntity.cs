@@ -1,34 +1,22 @@
 using Signum.Authorization.Rules;
-using System.Globalization;
 
 namespace Signum.Authorization;
 
 [EntityKind(EntityKind.Main, EntityData.Transactional)]
 public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 {
-    public static Func<string, Lite<RoleEntity>?, PasswordValidationResult> ValidatePassword = (p, role) =>
+    public static Func<string, UserEntity?, string?> ValidatePassword = (p, user) =>
     {
-        return PasswordValidator.ValidatePassword(p, role);
+        if (p.Length >= 5)
+            return null;
+
+        return LoginAuthMessage.ThePasswordMustHaveAtLeast0Characters.NiceToString(5);
     };
 
-    public static string? OnValidatePassword(string password, Lite<RoleEntity>? userRole = null)
+    public static string? OnValidatePassword(string password, UserEntity? user)
     {
         if (ValidatePassword != null)
-        {
-            var result = ValidatePassword(password, userRole);
-            return result.ErrorMessage;
-        }
-
-        return null;
-    }
-
-    public static string? OnValidatePasswordComplexity(string password)
-    {
-        if (ValidatePassword != null)
-        {
-            var result = ValidatePassword(password, null);
-            return result.ComplexityWarning;
-        }
+            return ValidatePassword(password, user);
 
         return null;
     }
@@ -39,6 +27,9 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 
     [DbType(Size = 128), QueryableProperty(false)]
     public byte[]? PasswordHash { get; set; }
+
+    [Ignore]
+    public bool PasswordIsChanging { get; set; }
 
     public Lite<RoleEntity> Role { get; set; }
 
@@ -61,10 +52,25 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
                 return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
         }
 
+        if (pi.Name == nameof(PasswordIsChanging) && PasswordIsChanging)
+            return AuthAdminMessage.PasswordChangeIsNotCompleted.NiceToString();
+
+        if (pi.Name == nameof(ExternalId) && ExternalId != null && PasswordHash != null && !AllowPasswordForUserWithExternalId)
+            return UserExternalIdMessage.TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet.NiceToString(this);
+
         return base.PropertyValidation(pi);
     }
 
     public int LoginFailedCounter { get; set; }
+
+    [UniqueIndex]
+    [StringLengthValidator(Max = 500)]
+    public string? ExternalId { get; set; }
+
+    public static bool AllowPasswordForUserWithExternalId = false;
+
+    public static string? CurrentExternalId =>
+        UserHolder.Current?.GetClaim("ExternalId") as string;
 
     public static Lite<UserEntity> Current => (Lite<UserEntity>)UserHolder.Current?.User!;
 
@@ -75,7 +81,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
         CultureInfo = CultureInfo,
         DisplayName = UserName,
         Email = Email,
-        AzureUserId = null,
+        ExternalId = null,
     });
 
     [AutoExpressionField]
@@ -138,9 +144,7 @@ public class UserLiteModel : ModelEntity
 
     public string? ToStringValue { get; set; }
 
-    public Guid? OID { get; set; }
-
-    public string? SID { get; set; }
+    public string? ExternalId { get; set; }
 
     public string? PhotoSuffix { get; set; }
 
@@ -153,5 +157,10 @@ public class UserLiteModel : ModelEntity
 public enum UserMessage
 {
     UserIsNotActive
+}
 
+public enum UserExternalIdMessage
+{
+    [Description("The user {0} is connected to an external provider and can not have a local password set")]
+    TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet,
 }

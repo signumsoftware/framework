@@ -5,10 +5,16 @@ import { CultureInfoEntity } from '../Signum.Basics'
 import { reloadTypes } from '../Reflection'
 import { toLite } from '../Signum.Entities';
 
+
+
 export namespace CultureClient {
-  
-  export let currentCulture: CultureInfoEntity;
-  
+
+  let currentCulture: CultureInfoEntity;
+
+  export function getCurrentCulture() : CultureInfoEntity {
+    return currentCulture;
+  }
+
   export const onCultureLoaded: Array<(culture: CultureInfoEntity) => void> = [];
   export function loadCurrentCulture(): Promise<void> {
     return API.fetchCurrentCulture()
@@ -19,7 +25,7 @@ export namespace CultureClient {
       });
   }
   
-  export let onCultureChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void = (pci, nci) => { };
+  let onCultureChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void = (pci, nci) => { };
   export function setOnCultureChanged(onChanged: (previousCulture: Lite<CultureInfoEntity>, newCulture: Lite<CultureInfoEntity>) => void): void {
     onCultureChanged = onChanged;
   }

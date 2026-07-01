@@ -8,7 +8,7 @@
 }
 
 .st-tt-entry .numTimes {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }
 
 .st-tt-entry .max,
@@ -57,7 +57,7 @@
 
 
 .sf-tt-entityName {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
     font-weight: bold;
 }
 

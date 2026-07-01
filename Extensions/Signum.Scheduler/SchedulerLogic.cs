@@ -1,13 +1,6 @@
-using Signum.Utilities.DataStructures;
-using Signum.Basics;
-using System.Collections.Concurrent;
 using Signum.UserAssets;
 using Signum.Authorization;
-using Signum.Authorization.Rules;
-using Signum.API;
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Text.Json;
 
 namespace Signum.Scheduler;
 
@@ -29,6 +22,15 @@ public static class SchedulerLogic
     [AutoExpressionField]
     public static IQueryable<SchedulerTaskExceptionLineEntity> ExceptionLines(this ScheduledTaskLogEntity e) =>
         As.Expression(() => Database.Query<SchedulerTaskExceptionLineEntity>().Where(a => a.SchedulerTaskLog.Is(e)));
+
+    [AutoExpressionField]
+    public static ScheduledTaskLogDatesDTO Dates(this ScheduledTaskLogEntity s) =>
+        As.Expression(() => new ScheduledTaskLogDatesDTO
+        {
+            StartTime = s.StartTime,
+            EndTime = s.EndTime,
+            HasException = s.Exception != null,
+        });
 
     public static Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>> ExecuteTask =
         new Polymorphic<Func<ITaskEntity, ScheduledTaskContext, Lite<IEntity>?>>();
@@ -83,10 +85,11 @@ public static class SchedulerLogic
                 cte.MachineName,
                 cte.User,
                 cte.Exception,
-
+                Dates = cte.Dates(),
             });
 
         sb.Include<SchedulerTaskExceptionLineEntity>()
+            .WithCascadeDeleteBy(a=>a.SchedulerTaskLog)
             .WithQuery(() => cte => new
             {
                 Entity = cte,
@@ -108,6 +111,7 @@ public static class SchedulerLogic
         QueryLogic.Expressions.Register((ITaskEntity ct) => ct.LastExecution(), ITaskMessage.LastExecution);
         QueryLogic.Expressions.Register((ScheduledTaskEntity ct) => ct.Executions(), ITaskMessage.Executions);
         QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.ExceptionLines(), ITaskMessage.ExceptionLines);
+        QueryLogic.Expressions.Register((ScheduledTaskLogEntity ct) => ct.Dates(), ScheduledTaskMessage.Dates);
 
 
 
@@ -141,12 +145,6 @@ public static class SchedulerLogic
             new InvalidateWith(typeof(ScheduledTaskEntity)));
 
         ScheduledTasksLazy.OnReset += ScheduleTaskRunner.ScheduledTasksLazy_OnReset;
-
-        sb.Schema.EntityEvents<ScheduledTaskLogEntity>().PreUnsafeDelete += query =>
-        {
-            query.SelectMany(e => e.ExceptionLines()).UnsafeDelete();
-            return null;
-        };
 
         UserAssetsImporter.Register<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely", e => e.Save());
         UserAssetsImporter.Register<ScheduleRuleMonthsEntity>("ScheduleRuleMonths", e => e.Save());

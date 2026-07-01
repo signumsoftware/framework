@@ -229,7 +229,7 @@ public class WordTemplateParser : ITemplateParser
                                 ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
                                 AnyNode any = new AnyNode(matchNode.NodeProvider, cond)
                                 {
-                                    AnyToken = new MatchNodePair(matchNode)
+                                    AnyToken = matchNode
                                 };
                                 PushBlock(any);
 
@@ -242,7 +242,7 @@ public class WordTemplateParser : ITemplateParser
                                 var an = PeekBlock<AnyNode>();
                                 if (an != null)
                                 {
-                                    an.NotAnyToken = new MatchNodePair(matchNode);
+                                    an.NotAnyToken = matchNode;
                                 }
                                 break;
                             }
@@ -251,7 +251,7 @@ public class WordTemplateParser : ITemplateParser
                                 var an = PopBlock<AnyNode>();
                                 if (an != null)
                                 {
-                                    an.EndAnyToken = new MatchNodePair(matchNode);
+                                    an.EndAnyToken = matchNode;
 
                                     an.ReplaceBlock();
                                 }
@@ -262,7 +262,7 @@ public class WordTemplateParser : ITemplateParser
                                 var cond = TemplateUtils.ParseCondition(expr, variable, this);
                                 IfNode ifn = new IfNode(matchNode.NodeProvider, cond)
                                 {
-                                    IfToken = new MatchNodePair(matchNode)
+                                    IfToken = matchNode
                                 };
                                 PushBlock(ifn);
 
@@ -271,12 +271,24 @@ public class WordTemplateParser : ITemplateParser
 
                                 break;
                             }
+                        case "elseif":
+                            {
+                                var ifn = PeekBlock<IfNode>();
+                                if (ifn != null)
+                                {
+                                    var cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                    ifn.ElseIfBranches.Add((matchNode, cond, null));
+                                    if (cond is ConditionCompare cc)
+                                        DeclareVariable(cc.ValueProvider);
+                                }
+                                break;
+                            }
                         case "else":
                             {
                                 var an = PeekBlock<IfNode>();
                                 if (an != null)
                                 {
-                                    an.ElseToken = new MatchNodePair(matchNode);
+                                    an.ElseToken = matchNode;
                                 }
                                 break;
                             }
@@ -285,7 +297,7 @@ public class WordTemplateParser : ITemplateParser
                                 var ifn = PopBlock<IfNode>();
                                 if (ifn != null)
                                 {
-                                    ifn.EndIfToken = new MatchNodePair(matchNode);
+                                    ifn.EndIfToken = matchNode;
 
                                     ifn.ReplaceBlock();
                                 }
@@ -297,7 +309,7 @@ public class WordTemplateParser : ITemplateParser
                                 if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
                                     AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
 
-                                var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
+                                var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = matchNode };
                                 PushBlock(fn);
 
                                 DeclareVariable(vp);
@@ -308,7 +320,7 @@ public class WordTemplateParser : ITemplateParser
                                 var fn = PopBlock<ForeachNode>();
                                 if (fn != null)
                                 {
-                                    fn.EndForeachToken = new MatchNodePair(matchNode);
+                                    fn.EndForeachToken = matchNode;
 
                                     fn.ReplaceBlock();
                                 }
@@ -334,10 +346,10 @@ public class WordTemplateParser : ITemplateParser
         return new Disposable(() =>
         {
             if (!stack.IsEmpty())
-                AddError(true, "Missing ".FormatWith(stack.ToString(a =>
-                a is IfNode ? "#endif" :
-                a is AnyNode ? "#endany" :
-                a is ForeachNode ? "#endforeach" :
+                AddError(true, "Missing {0}".FormatWith(stack.ToString(a =>
+                a is IfNode ? "@endif" :
+                a is AnyNode ? "@endany" :
+                a is ForeachNode ? "@endforeach" :
                 throw new UnexpectedValueException(a), ", ")));
         });
     }

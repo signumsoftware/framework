@@ -9,7 +9,8 @@ import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
+  FilterOption, OrderOption, QueryRequest, ResultTable, OrderRequest, OrderType, FilterOptionParsed,
+  ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
 } from '@framework/FindOptions'
 import ChartButton from './ChartButton'
 import { ChartRequestViewHandle } from './Templates/ChartRequestView'
@@ -26,7 +27,7 @@ import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
-import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameter, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameter, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript, ChartMessage } from './Signum.Chart';
 import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
 import { CachedQueryJS, getAllFilterTokens, getCachedResultTable } from '../Signum.Dashboard/CachedQueryExecutor';
 import { UserQueryClient } from '../Signum.UserQueries/UserQueryClient';
@@ -35,6 +36,7 @@ import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queri
 import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import ChartOmniboxProvider from './ChartOmniboxProvider';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { hasAggregate, QueryToken, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace ChartClient {
   
@@ -414,7 +416,7 @@ export namespace ChartClient {
   }
   
   export function getChartColumnType(token: QueryToken): ChartColumnType | undefined {
-  
+
     switch (token.filterType) {
       case "Lite": return "Entity";
       case "Boolean":
@@ -491,8 +493,13 @@ export namespace ChartClient {
       }
       case "Scala":
         const standardScalas = (scriptParameter.valueDefinition as Scala).standardScalas;
-        if (value && (standardScalas as Object).hasOwnProperty(value))
+        if (relatedColumn && value &&  standardScalas[value]) {
+          var cct = standardScalas[value];
+          if (cct && !isChartColumnType(relatedColumn, cct))
+            return false;
+
           return true;
+        }
 
         if (value?.contains("..."))
           return !isNaN(parseFloat(value.before("..."))) && !isNaN(parseFloat(value.after("...")));
@@ -553,7 +560,6 @@ export namespace ChartClient {
     queryName: any,
     chartScript?: string,
     maxRows?: number | null,
-    groupResults?: boolean,
     timeSeries?: ChartTimeSeriesEmbedded | null | undefined;
     filterOptions?: (FilterOption | null | undefined)[];
     orderOptions?: (OrderOption | null | undefined)[];
@@ -644,7 +650,6 @@ export namespace ChartClient {
         maxRows:
           co.maxRows === null ? "null" : 
           co.maxRows === undefined || co.maxRows == Decoder.DefaultMaxRows ? undefined : co.maxRows,
-        groupResults: co.groupResults,        
         userChart: userChart && liteKey(userChart)
       };
   
@@ -692,7 +697,7 @@ export namespace ChartClient {
   
   export namespace Decoder {
   
-    export let DefaultMaxRows = 1000;
+    export const DefaultMaxRows = 1000;
   
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequestModel> {
   
@@ -861,13 +866,16 @@ export namespace ChartClient {
   
       return v => v == null ? "#555" : null;
     }
+
+    export const nullString = (qt: QueryToken) : string => ChartMessage.Blank.niceToString();
   
     export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown, width?: number) => string) {
   
       if (token.type.isLite)
         return v => {
           var lite = v as Lite<Entity> | null;
-          return String(getToString(lite) ?? "");
+
+          return lite == null ? nullString(token) : getToString(lite);
         };
   
       if (token.filterType == "Enum")
@@ -875,7 +883,7 @@ export namespace ChartClient {
           var value = v as string | null;
   
           if (!value)
-            return String(null);
+            return nullString(token);
   
           var ei = getEnumInfo(token.type.name, value as any as number);
           return ei ? ei.niceName : value;
@@ -885,7 +893,7 @@ export namespace ChartClient {
         return (v, width) => {
           var date = v as string | null;
           if (date == null)
-            return String(null);
+            return nullString(token);
   
           var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
           var result = toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
@@ -900,7 +908,7 @@ export namespace ChartClient {
         return v => {
           var date = v as string | null;
           var format = chartColumn.format || token.format;
-          return date == null ? String(null) : timeToString(date, format);
+          return date == null ? nullString(token) : timeToString(date, format);
         };
   
       if ((token.filterType == "Decimal" || token.filterType == "Integer"))
@@ -908,10 +916,10 @@ export namespace ChartClient {
           var number = v as number | null;
           var format = chartColumn.format || (token.key == "Sum" ? "K1" : undefined) || token.format || "0";
           var numFormat = toNumberFormat(format);
-          return number == null ? String(null) : numFormat.format(number);
+          return number == null ? nullString(token) : numFormat.format(number);
         };
   
-      return v => String(v);
+      return v => v == null ? nullString(token) : String(v);
     }
   
     export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): Record<ChartParameter, string> {

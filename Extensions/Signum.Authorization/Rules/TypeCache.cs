@@ -1,13 +1,7 @@
-using Microsoft.VisualBasic;
-using Signum.Authorization;
-using Signum.Authorization.Rules;
-using Signum.Basics;
-using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Data;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -187,7 +181,9 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
                                       let tcs = xc.Attribute("Name")!.Value.SplitNoEmpty(",")
                                       .Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim())))
                                       .NotNull()
-                                      .Where(tc => TypeConditionLogic.IsDefined(type, tc) || !SafeConsole.Ask($"Type condition {tc} is not defined. Remove it?"))
+                                      .Where(tc => TypeConditionLogic.IsDefined(type, tc) || 
+                                            (replacements.Interactive? !SafeConsole.Ask($"Type condition {tc} is not defined for {type}. Remove it?"): 
+                                                throw new Exception($"Type condition {tc} is not defined for {type}. Import AuthRules interactively.")))
                                       .ToFrozenSet()
                                       where tcs.Count > 0
                                       select new ConditionRule<TypeAllowed>(typeConditions: tcs, allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>()))

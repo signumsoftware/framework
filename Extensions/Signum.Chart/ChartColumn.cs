@@ -1,7 +1,6 @@
 using System.Xml.Linq;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
-using Signum.UserAssets.QueryTokens;
 
 namespace Signum.Chart;
 
@@ -42,6 +41,7 @@ public class ChartColumnEmbedded : EmbeddedEntity
         }
     }
 
+    [Translatable]
     public string? DisplayName { get; set; }
 
     public string? Format { get; set; }

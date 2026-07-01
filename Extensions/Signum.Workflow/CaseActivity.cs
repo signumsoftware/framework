@@ -60,7 +60,7 @@ public class CaseActivityEntity : Entity
     }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => WorkflowActivity + " " + DoneBy);
+    public override string ToString() => As.Expression(() => (WorkflowActivity + " " + DoneBy).Trim());
 
     protected override void PreSaving(PreSavingContext ctx)
     { 
@@ -109,6 +109,7 @@ public static class CaseActivityOperation
     public static readonly ExecuteSymbol<CaseActivityEntity> Timer;
     public static readonly ExecuteSymbol<CaseActivityEntity> MarkAsUnread;
     public static readonly ExecuteSymbol<CaseActivityEntity> Undo;
+    public static readonly ExecuteSymbol<CaseActivityEntity> ResetToCaseActivity;
     public static readonly ExecuteSymbol<CaseActivityEntity> ScriptExecute;
     public static readonly ExecuteSymbol<CaseActivityEntity> ScriptScheduleRetry;
     public static readonly ExecuteSymbol<CaseActivityEntity> ScriptFailureJump;
@@ -165,7 +166,13 @@ public enum CaseActivityMessage
     HideHelp,
     CanceledCase,
     AlreadyFinished,
-    NotCanceled
+    NotCanceled,
+    [Description("Reset to this activity is not supported because a decomposition that already created subcases comes after it. Reset to an activity at or after the decomposition instead.")]
+    ResetToCaseActivityIsNotSupportedForDecomposedCases,
+    [Description("Reset to a decomposition is only possible while at least one of its subcases is not finished.")]
+    ResetToCaseActivityRequiresAnOpenSubCase,
+    [Description("Are you sure you want to reset the case back to the selected activity? The case will be reopened if closed, all later activities will be undone (kept as history) and a new pending activity will be created.")]
+    AreYouSureYouWantToResetTheCaseBackToTheSelectedActivity
 }
 
 

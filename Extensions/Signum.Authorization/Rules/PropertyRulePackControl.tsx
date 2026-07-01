@@ -15,7 +15,7 @@ import SelectorModal from '../../../Signum/React/SelectorModal';
 import { AccessibleTable, AccessibleRow } from '../../../Signum/React/Basics/AccessibleTable';
 import { LinkButton } from '../../../Signum/React/Basics/LinkButton';
 
-export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function PropertyRulesPackControl({ ctx, initialTypeConditions, ref }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, ref?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
 
   const [typeConditions, setTypeConditions] = React.useState<TypeConditionSymbol[] | undefined>(initialTypeConditions);
@@ -49,7 +49,7 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
     ];
   }
 
-  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value]);
+  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
 
   function updateFrame() {
     ctx.frame!.frameComponent.forceUpdate();

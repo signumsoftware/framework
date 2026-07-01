@@ -2,7 +2,6 @@ import * as React from "react";
 import { RouteObject, Location } from 'react-router'
 import * as Services from '@framework/Services';
 import { ImportComponent } from '@framework/ImportComponent'
-import LoginPage from "./Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
 import { ajaxGet, ajaxPost, ServiceError } from "@framework/Services";
 import { is } from '@framework/Signum.Entities';
@@ -10,13 +9,17 @@ import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 import * as Reflection from "@framework/Reflection";
-import { UserEntity, UserOperation} from './Signum.Authorization';
+import { LoginAuthMessage, UserEntity, UserOperation} from './Signum.Authorization';
 import { PermissionSymbol } from "@framework/Signum.Basics";
 import { EntityOperationSettings, Operations } from "../../Signum/React/Operations";
 
 export namespace AuthClient {
   
-  export let pendingPasswordChangeUser: UserEntity | undefined;
+  let pendingPasswordChangeUser: UserEntity | undefined;
+  export function getPendingPasswordChangeUser(): UserEntity | undefined { return pendingPasswordChangeUser; }
+  export function setPendingPasswordChangeUser(v: UserEntity | undefined): void { pendingPasswordChangeUser = v; }
+
+  export interface PasswordValidationResult { message: string, level: "error" | "warning" }
 
   export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }): void {
     Options.userTicket = options.userTicket;
@@ -42,11 +45,28 @@ export namespace AuthClient {
   }
   
   
-  export namespace Options {
-    export let AuthHeader = "Authorization";
-    export let disableWindowsAuthentication = false;
-  }
-  
+  export const Options = {
+    AuthHeader: "Authorization",
+    disableWindowsAuthentication: false,
+    validatePassword: undefined as ((password: string, user: UserEntity) => Promise<PasswordValidationResult | null>) | undefined,
+    getCookie(): string | null { return Cookies.get("sfUser"); },
+    removeCookie(): void { return Cookies.remove("sfUser", "/", document.location.hostname); },
+    onLogout: (): Promise<void> => {
+      throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
+    },
+    onLogin: (_back?: string): void => {
+      throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
+    },
+    userTicket: false,
+  };
+
+  export const LoginOptions = {
+    customLoginButtons: null as ((ctx: LoginContext) => React.ReactNode) | null,
+    showLoginForm: "yes" as "yes" | "no" | "initially_not",
+    usernameLabel: (): string => LoginAuthMessage.Username.niceToString(),
+    resetPasswordControl: () => null as null | React.ReactElement,
+  };
+
   var notifyLogout: boolean;
   
   export const authenticators: Array<() => Promise<AuthenticatedUser | undefined>> = [];
@@ -73,8 +93,12 @@ export namespace AuthClient {
   
   
   export async function authenticate(): Promise<AuthenticatedUser | undefined> {
+
     for (let i = 0; i < authenticators.length; i++) {
-      let aUser = await authenticators[i]();
+
+      var f = authenticators[i];
+      let aUser = await f();
+      console.log(f.name + "..." + (aUser ? "OK" : "Null"));
       if (aUser)
         return aUser;
     }
@@ -105,14 +129,14 @@ export namespace AuthClient {
     });
   }
   
-  function logoutInternal() {
+  async function logoutInternal() : Promise<void> {
     setAuthToken(undefined, undefined);
     setCurrentUser(undefined);
     Options.disableWindowsAuthentication = true;
-    Options.onLogout();
+    await Options.onLogout();
   }
   
-  Services.AuthTokenFilter.addAuthToken = addAuthToken;
+  Services.AuthTokenFilter.Options.addAuthToken = addAuthToken;
   
   export const onCurrentUserChanged: Array<(newUser: UserEntity | undefined, avoidReRender?: boolean) => void> = [];
   
@@ -170,6 +194,7 @@ export namespace AuthClient {
   }
   
   export function setAuthToken(authToken: string | undefined, authenticationType: AuthenticationType | undefined): void {
+    console.log("setAuthToken(" + (authToken == null ? "null" : authToken.etc(10)) + ", " + authenticationType + ")");
     sessionStorage.setItem("authToken", authToken ?? "");
     sessionStorage.setItem("authenticationType", authenticationType ?? "");
   }
@@ -189,14 +214,17 @@ export namespace AuthClient {
     function loginWithAuthToken() {
       return API.fetchCurrentUser().then(u => {
         if (u.mustChangePassword) {
+          console.log("loginWithAuthToken...OK (mustChangePassword)");
           pendingPasswordChangeUser = u;
           return undefined;
         } else {
+          console.log("loginWithAuthToken...OK");
           setCurrentUser(u);
           AppContext.resetUI();
           return u;
         }
       }, e => {
+        console.log("loginWithAuthToken...Error");
         console.error(e);
         setAuthToken(undefined, undefined);
         return undefined;
@@ -233,27 +261,19 @@ export namespace AuthClient {
         }
       });
   }
-  
+
+  export interface LoginContext {
+    loading: string | undefined;
+    setLoading: (loading: string | undefined) => void;
+    userNameRef?: React.RefObject<HTMLInputElement | null>;
+  }
+
+
   export function logoutOtherTabs(user: UserEntity): void {
     if (notifyLogout)
       localStorage.setItem('requestLogout' + Services.SessionSharing.getAppName(), user.userName + "&&" + new Date().toString());
   }
   
-  export namespace Options {
-  
-    export function getCookie(): string | null { return Cookies.get("sfUser"); }
-    export function removeCookie(): void { return Cookies.remove("sfUser", "/", document.location.hostname); }
-  
-    export let onLogout: () => void = () => {
-      throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
-    }
-  
-    export let onLogin: (back?: string) => void = () => {
-      throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
-    }
-  
-    export let userTicket: boolean;
-  }
   
   export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows";
   
@@ -297,20 +317,6 @@ export namespace AuthClient {
   
     export function fetchCurrentUser(refreshToken: boolean = false): Promise<UserEntity> {
       return ajaxGet({ url: "/api/auth/currentUser" + (refreshToken ? "?refreshToken=true" : ""), cache: "no-cache" });
-    }
-
-    export interface ValidatePasswordRequest {
-      password: string;
-    }
-
-    export interface PasswordValidationResponse {
-      isValid: boolean;
-      errorMessage?: string;
-      complexityWarning?: string;
-    }
-
-    export function validatePassword(password: string): Promise<PasswordValidationResponse> {
-      return ajaxPost({ url: "/api/auth/validatePassword" }, { password });
     }
   
     export function logout(): Promise<void> {

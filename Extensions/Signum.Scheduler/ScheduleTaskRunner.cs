@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
-using Signum.Basics;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 
@@ -387,7 +386,7 @@ public class ScheduledTaskContext
         Log = log;
     }
 
-    public ScheduledTaskLogEntity Log { internal get; set; }
+    public ScheduledTaskLogEntity Log {  get; set; }
 
     public StringBuilder StringBuilder { get; } = new StringBuilder();
     internal CancellationTokenSource CancellationTokenSource { get; } = new CancellationTokenSource();

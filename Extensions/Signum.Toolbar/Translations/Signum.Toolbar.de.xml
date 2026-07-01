@@ -2,15 +2,20 @@
 <Translations>
   <Type Name="LayoutMessage">
     <Member Name="JumpToMainContent" Description="Zum Hauptinhalt springen" />
-	<Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
+    <Member Name="SelectA0_G" Description="Wählen Sie [m:ein|f:eine|n:ein] {0} aus" />
   </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
   </Type>
+  <Type Name="SubPageMessage">
+    <Member Name="No0FoundIn1" Description="Kein {0} in {1} gefunden" />
+    <Member Name="NotAllowedToCreate0In1" Description="Es ist nicht erlaubt, {0} in {1} zu erstellen" />
+  </Type>
   <Type Name="ToolbarElementEmbedded" Description="Toolbar-element">
     <Member Name="AutoRefreshPeriod" Description="Autoaktualisierungszeitraum" />
     <Member Name="Content" Description="Inhalt" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="Label" Description="Etikett" />
@@ -60,7 +65,6 @@
     <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
     <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
-
     <Member Name="ShowTogether" Description="Gemeinsam anzeigen" />
   </Type>
   <Type Name="ToolbarOperation">

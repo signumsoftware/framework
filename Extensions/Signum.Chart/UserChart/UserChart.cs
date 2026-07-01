@@ -38,7 +38,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
 
     public Lite<Entity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 200)]
+    [StringLengthValidator(Min = 3, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
     public bool? IncludeDefaultFilters { get; set; }

@@ -1,6 +1,3 @@
-
-using System.Diagnostics;
-
 namespace Signum.Utilities;
 
 public static class TimeOnlyExtensions

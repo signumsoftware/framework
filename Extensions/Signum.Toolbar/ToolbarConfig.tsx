@@ -63,6 +63,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     return (
       <ToolbarNavItem key={key}
         title={res.label}
+        content={res.content}
         onClick={(e: React.MouseEvent<any>) => {
           this.handleNavigateClick(e, res, selectedEntity);
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))

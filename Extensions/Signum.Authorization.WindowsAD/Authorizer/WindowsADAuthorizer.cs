@@ -5,7 +5,7 @@ using System.DirectoryServices.AccountManagement;
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Authorization.WindowsAD.Authorizer;
 
-public class WindowsADAuthorizer : ICustomAuthorizer
+public class WindowsADAuthorizer : ICustomAuthorizer, IDirectoryInviter
 {
     public Func<WindowsADConfigurationEmbedded?> GetConfig;
 
@@ -16,10 +16,9 @@ public class WindowsADAuthorizer : ICustomAuthorizer
 
     public virtual UserEntity Login(string userName, string password, out string authenticationType)
     {
-        var passwordHashes = PasswordEncoding.EncodePasswordAlternatives(userName, password);
 
-        if (AuthLogic.TryRetrieveUser(userName, passwordHashes) != null)
-            return AuthLogic.Login(userName, passwordHashes, out authenticationType); //Database is faster than Active Directory
+        if (AuthLogic.TryRetrieveUser(userName, password) != null)
+            return AuthLogic.Login(userName, password, out authenticationType); //Database is faster than Active Directory
 
         UserEntity? user = LoginWithWindowsADRegistry(userName, password);
         if (user != null)
@@ -28,7 +27,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
             return user;
         }
 
-        return AuthLogic.Login(userName, passwordHashes, out authenticationType);
+        return AuthLogic.Login(userName, password, out authenticationType);
     }
 
     public virtual UserEntity? LoginWithWindowsADRegistry(string userName, string password)
@@ -52,7 +51,7 @@ public class WindowsADAuthorizer : ICustomAuthorizer
                             
                             var sid = dsacuCtx.GetUserPrincipal().Sid;
 
-                            UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == sid.ToString()) ?? 
+                            UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == sid.ToString()) ??
                                 AuthLogic.RetrieveUser(localName);
 
                             if (user != null)
@@ -178,11 +177,11 @@ public class WindowsADAuthorizer : ICustomAuthorizer
             user.DisabledOn = null;
         }
 
-        if (ctx.SID != null)
+        if (ctx.ExternalId != null)
         {
-            user.Mixin<UserWindowsADMixin>().SID = ctx.SID;
-            if (!UserWindowsADMixin.AllowPasswordForActiveDirectoryUsers)
-            { 
+            user.ExternalId = ctx.ExternalId;
+            if (!UserEntity.AllowPasswordForUserWithExternalId)
+            {
                 user.PasswordHash = null;
                 user.MustChangePassword = false;
             }
@@ -216,12 +215,12 @@ public class WindowsADAuthorizer : ICustomAuthorizer
         }
     }
 
-    public Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token)
+    public Task<List<ExternalUser>> FindUser(string subString, int count, CancellationToken token)
     {
         return WindowsADLogic.SearchUser(subString, count);
     }
 
-    public UserEntity CreateADUser(ActiveDirectoryUser user)
+    public UserEntity CreateFromExternalUser(ExternalUser user)
     {
         return WindowsADLogic.CreateUserFromAD(user);
     }

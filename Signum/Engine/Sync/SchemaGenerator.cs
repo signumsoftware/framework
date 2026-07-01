@@ -1,8 +1,5 @@
-using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
-using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using System.IO;
 
 namespace Signum.Engine.Sync;
 
@@ -85,7 +82,7 @@ public static class SchemaGenerator
 
             fullTextSearchCatallogs?.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.SqlServer.CatallogName));
 
-            var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
+            var mainIndices = allIndexes.Where(a => !a.DelayCreation).Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
             var historyIndices = t.SystemVersioned == null ? null :
                      allIndexes.Where(a => a.GetType() == typeof(TableIndex) && !a.Unique).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
@@ -127,8 +124,13 @@ public static class SchemaGenerator
             return null;
 
         var s = Schema.Current;
+        var isAzure = Connector.Current is PostgreSqlConnector psc && psc.IsAzurePostgres;
 
-        return s.PostgresExtensions.Where(kvp => kvp.Value(s)).Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key)).Combine(Spacing.Simple);
+        return s.PostgresExtensions
+            .Where(kvp => kvp.Value(s))
+            .Where(kvp => !isAzure || kvp.Key != "plpgsql") // Skip plpgsql creation in Azure (pre-installed)
+            .Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key))
+            .Combine(Spacing.Simple);
     }
 
 

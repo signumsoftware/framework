@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPostRaw, ajaxGet, saveFile, ajaxPost } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import { QueryRequest, QueryToken } from '@framework/FindOptions'
+import { QueryRequest } from '@framework/FindOptions'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { ExcelReportEntity, ExcelMessage, ExcelPermission, ImportExcelModel } from './Signum.Excel'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
@@ -17,6 +17,7 @@ import { softCast } from '@framework/Globals';
 import { QueryString } from '@framework/QueryString';
 import { isPermissionAuthorized } from '@framework/AppContext';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { QueryToken } from '@framework/QueryToken';
 
 export namespace ExcelClient {
   

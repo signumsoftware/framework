@@ -1,6 +1,7 @@
 using Signum.Entities.Reflection;
 using OpenQA.Selenium;
 using System.Globalization;
+using System.IO;
 
 namespace Signum.Selenium;
 
@@ -11,6 +12,55 @@ public class BrowserProxy
     public BrowserProxy(WebDriver selenium)
     {
         this.Selenium = selenium;
+    }
+
+    private static bool? _debugMode;
+
+    /// <summary>
+    /// When true, keeps browser open on test failure and prevents modal auto-close.
+    /// Checks for SELENIUM_DEBUG_MODE.txt file (relative path: ../../../SELENIUM_DEBUG_MODE.txt from bin folder).
+    /// Debug mode is enabled only if the file exists AND contains "true".
+    /// </summary>
+    public static bool DebugMode
+    {
+        get
+        {
+            if (_debugMode == null)
+            {
+                var debugFilePath = Path.Combine(Directory.GetCurrentDirectory(), "../../../SELENIUM_DEBUG_MODE.txt");
+                try
+                {
+                    if (File.Exists(debugFilePath))
+                    {
+                        var content = File.ReadAllText(debugFilePath).Trim();
+                        _debugMode = content.Equals("true", StringComparison.OrdinalIgnoreCase);
+
+                        if (_debugMode.Value)
+                        {
+                            Console.WriteLine($"[SELENIUM DEBUG MODE] Enabled via {Path.GetFullPath(debugFilePath)}");
+                            Console.WriteLine("[SELENIUM DEBUG MODE] Browser will stay open on test failure and modals won't auto-close");
+                        }
+                    }
+                    else
+                    {
+                        _debugMode = false;
+                    }
+                }
+                catch
+                {
+                    _debugMode = false;
+                }
+            }
+            return _debugMode.Value;
+        }
+    }
+
+    /// <summary>
+    /// Reset the cached debug mode value to re-read from file.
+    /// </summary>
+    public static void ResetDebugMode()
+    {
+        _debugMode = null;
     }
 
     public virtual string Url(string url)

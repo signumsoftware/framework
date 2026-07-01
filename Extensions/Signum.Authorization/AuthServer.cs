@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Utilities.Reflection;
-using Microsoft.AspNetCore.Builder;
 using System.Text.Json;
 using Signum.Authorization.SessionLog;
 using Signum.Authorization.Rules;
@@ -8,12 +7,8 @@ using Signum.Authorization.AuthToken;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Json;
-using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
-using System.Reflection;
 using System.Collections.Frozen;
-using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
 
 namespace Signum.Authorization;
 
@@ -266,7 +261,7 @@ public static class AuthServer
                 if (allowed == PropertyAllowed.None)
                     return PropertyMetadata.Hidden;
 
-                if (allowed == PropertyAllowed.Read)
+                if (allowed == PropertyAllowed.Read && asm.Default != PropertyAllowed.Read)
                     return PropertyMetadata.ReadOnly;
 
                 return null;
@@ -326,11 +321,11 @@ public static class AuthServer
                     user.PasswordHash = null;
                 else
                 {
-                    var error = UserEntity.OnValidatePassword(password);
+                    var error = UserEntity.OnValidatePassword(password, user);
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+                    user.PasswordHash = PasswordEncoding.HashPassword(user.UserName, password);
 
                 }
             }

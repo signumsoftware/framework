@@ -402,6 +402,10 @@ public class EntityField
     public Field Field { get; set; }
     public FieldInfo FieldInfo { get; private set; }
 
+    // When true (see AvoidSaveAttribute), the column is written on INSERT but excluded from UPDATE,
+    // so saving the entity never overrides the stored value.
+    public bool AvoidSave { get; set; }
+
     Type type;
     Func<object, object?>? getter;
     public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);
@@ -1718,6 +1722,19 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
         throw new NotImplementedException();
     }
 
+    public static NpgsqlDbType VectorPG = (NpgsqlDbType)0x10000000; //NpgsqlDbType.Vector is not yet in the stable release
+
+    public bool IsVector()
+    {
+        if(sqlServer is SqlDbType s)
+            return s == SqlDbType.Vector;
+
+        if (postgreSql is NpgsqlDbType p)
+            return p == VectorPG;
+
+        throw new NotImplementedException();
+    }
+
     public bool IsNumber()
     {
         if (sqlServer is SqlDbType s)
@@ -1838,6 +1855,9 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
 
         if (pg == NpgsqlDbType.Double)
             return "double precision";
+
+        if (pg == VectorPG)
+            return "vector";
 
         return pg.ToString()!;
     }

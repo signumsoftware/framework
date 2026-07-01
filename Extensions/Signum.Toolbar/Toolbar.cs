@@ -1,10 +1,7 @@
 using Signum.Authorization;
-using Signum.DynamicQuery;
 using Signum.UserAssets;
 using Signum.Utilities.Reflection;
-using System;
 using System.ComponentModel;
-using System.Net.Sockets;
 using System.Xml.Linq;
 
 namespace  Signum.Toolbar;
@@ -25,7 +22,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     public ToolbarLocation Location { get; set; }
@@ -84,9 +81,11 @@ public static class ToolbarOperation
 
 public class ToolbarElementEmbedded : EmbeddedEntity
 {
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     public ToolbarElementType Type { get; set; }
 
-    [StringLengthValidator(Min = 1, Max = 100)]
+    [StringLengthValidator(Min = 1, Max = 100), Translatable]
     public string? Label { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 100)]
@@ -113,6 +112,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     public virtual XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ToolbarElement",
+            new XAttribute("Guid", Guid),
             new XAttribute("Type", Type),
             string.IsNullOrEmpty(Label) ? null! : new XAttribute("Label", Label),
             string.IsNullOrEmpty(IconName) ? null! : new XAttribute("IconName", IconName),
@@ -130,6 +130,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
     public virtual void FromXml(XElement x, IFromXmlContext ctx)
     {
+        Guid = x.Attribute("Guid")?.Value is { } g ? Guid.Parse(g) : Guid.NewGuid();
         Type = x.Attribute("Type")!.Value.ToEnum<ToolbarElementType>();
         Label = x.Attribute("Label")?.Value;
         ShowCount = x.Attribute("ShowCount")?.Value.ToEnum<ShowCount>();
@@ -207,7 +208,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    [StringLengthValidator(Max = 100)]
+    [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     [PreserveOrder]
@@ -297,4 +298,13 @@ public enum LayoutMessage
     JumpToMainContent,
     [Description("Select a {0}")]
     SelectA0_G,
+}
+
+[AllowUnauthenticated]
+public enum SubPageMessage
+{
+    [Description("No {0} found in {1}")]
+    No0FoundIn1,
+    [Description("Not allowed to create {0} in {1}")]
+    NotAllowedToCreate0In1,
 }

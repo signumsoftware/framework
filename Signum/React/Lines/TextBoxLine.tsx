@@ -125,7 +125,7 @@ function internalTextBox<V extends string | null>(c: TextBoxLineController, type
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-  if (p.ctx.readOnly)
+  if (p.ctx.readOnly && type == "text")
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={mergedHtmlReadOnly} ctx={p.ctx} innerRef={c.setRefs}>
@@ -162,6 +162,7 @@ function internalTextBox<V extends string | null>(c: TextBoxLineController, type
       {inputId => <>
         {c.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}
+            disabled={p.ctx.readOnly}
             id={inputId}
             autoComplete="off" 
             {...mergedHtml}

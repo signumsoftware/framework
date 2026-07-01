@@ -80,6 +80,9 @@ public class CollectionElementToken : QueryToken
 
             foreach (var item in this.TsVectorColumns(ept))
                 st.Add(item);
+
+            foreach (var item in this.VectorColumns(ept))
+                st.Add(item);
         }
 
         return st;

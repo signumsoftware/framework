@@ -39,7 +39,7 @@ export namespace ColorPaletteClient {
     getColor(key: string): string;
   }
   
-  export let colorPalette: { [typeName: string]: Promise<ColorPalette | null> } = {};
+  export const colorPalette: { [typeName: string]: Promise<ColorPalette | null> } = {};
   export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> {
 
     const ti = getTypeInfo(type);

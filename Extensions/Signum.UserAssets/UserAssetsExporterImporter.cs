@@ -1,6 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
 using Signum.Authorization;
+using Signum.UserAssets.TokenMigrations;
 using Signum.Utilities.Reflection;
 using System.IO;
 using System.Xml.Linq;
@@ -182,6 +181,11 @@ public static class UserAssetsImporter
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
         }
 
+        public Lite<TypeEntity>? TryGetTypeLite(string cleanName)
+        {
+            return TypeLogic.TryGetType(cleanName)?.ToTypeEntity().ToLite();
+        }
+
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
@@ -214,6 +218,21 @@ public static class UserAssetsImporter
                where T : Symbol
         {
             return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public T? TryGetSymbol<T>(string value)
+               where T : Symbol
+        {
+            return SymbolLogic<T>.TryToSymbol(value);
+        }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
         }
     }
 
@@ -308,6 +327,11 @@ public static class UserAssetsImporter
             return TypeLogic.GetType(cleanName).ToTypeEntity().ToLite();
         }
 
+        public Lite<TypeEntity>? TryGetTypeLite(string cleanName)
+        {
+            return TypeLogic.TryGetType(cleanName)?.ToTypeEntity().ToLite();
+        }
+
         public QueryDescription GetQueryDescription(QueryEntity Query)
         {
             return QueryLogic.Queries.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
@@ -328,9 +352,25 @@ public static class UserAssetsImporter
             return lite.Retrieve();
         }
 
-        public T GetSymbol<T>(string value) where T : Symbol
+        public T GetSymbol<T>(string value)
+             where T : Symbol
         {
-            throw new NotImplementedException();
+            return SymbolLogic<T>.ToSymbol(value);
+        }
+
+        public T? TryGetSymbol<T>(string value)
+             where T : Symbol
+        {
+            return SymbolLogic<T>.TryToSymbol(value);
+        }
+
+        public PropertyRouteEntity GetPropertyRoute(TypeEntity typeEntity, string path)
+        {
+            var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity);
+
+            var pr = properties.SingleEx(a => a.Path == path);
+
+            return pr;
         }
     }
 
@@ -435,6 +475,18 @@ public static class UserAssetsImporter
         return new T { Guid = guid };
     }
 
+    static readonly GenericInvoker<Func<Guid, Lite<Entity>>> giRetrieveUserAssetLite = new(
+        guid => RetrieveUserAssetLite<FakeEntity>(guid));
+    static Lite<Entity> RetrieveUserAssetLite<T>(Guid guid) where T : Entity, IUserAssetEntity
+    {
+        return Database.Query<T>().Where(a => a.Guid == guid).Select(a => a.ToLite()).SingleEx();
+    }
+
+    public static Lite<Entity> RetrieveUserAssetLite(Type type, Guid guid)
+    {
+        return giRetrieveUserAssetLite.GetInvoker(type)(guid);
+    }
+
     public class FakeEntity : Entity, IUserAssetEntity
     {
         public Guid Guid { get; set; }
@@ -448,7 +500,8 @@ public static class UserAssetsImporter
 
     public static void Register<T>(string userAssetName, Action<T> saveEntity) where T : Entity, IUserAssetEntity
     {
-        PermissionLogic.RegisterPermissions(UserAssetPermission.UserAssetsToXML);
+        TokenMigrationLogic.AssertStarted();
+
         UserAssetNames.Add(userAssetName, typeof(T));
         UserAssetsImporter.SaveEntity.Register(saveEntity);
     }

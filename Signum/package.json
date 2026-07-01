@@ -31,7 +31,7 @@
     "@types/luxon": "3.6.2",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "@microsoft/signalr": "8.0.7",
+    "@microsoft/signalr": "10.0.0",
     "d3": "7.9.0",
     "d3-scale-chromatic": "3.1.0",
     "luxon": "3.7.1",
@@ -42,6 +42,7 @@
     "bootstrap": "5.3.7",
     "react-bootstrap": "2.10.10",
     "react-dom": "19.1.2",
-    "react-widgets-up": "6.0.14"
+    "react-widgets-up": "6.0.14",
+    "react-markdown": "10.1.0"
   }
 }

@@ -3,13 +3,14 @@ import { DateTime, DateTimeUnit, Duration } from 'luxon'
 import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
-  FilterOptionParsed,
-  QueryToken,
+  FilterOptionParsed, FindOptions, QueryDescription,
   FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroup, isFilterCondition,
-  hasToArray, getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList
+  getFilterOperations, getFilterGroupUnifiedFilterType, FilterConditionOption, isList, isPair
 } from './FindOptions';
+import { hasToArray, QueryToken } from './QueryToken';
 import { FilterOperation } from './Signum.DynamicQuery';
-import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement } from './Signum.Entities';
+import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement, liteKey } from './Signum.Entities';
+import { CollectionMessage } from './Signum.External';
 import {
   TypeReference,
   tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat,
@@ -20,17 +21,18 @@ import {
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
 import { EntityBaseController, EntityCombo, EntityLine, EntityStrip, FormGroup, StyleContext, TypeContext } from "./Lines";
-import { similarToken } from "./Search";
+import { similarToken, findFilterValue } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TextHighlighter } from "./Components/Typeahead";
 import { Finder } from "./Finder";
-import { OverlayTrigger, Popover } from "react-bootstrap";
+import { OverlayTrigger, Popover, Tooltip } from "react-bootstrap";
 import { TypeEntity } from "./Signum.Basics";
 import { useForceUpdate } from "./Hooks";
 import { TextAreaLine } from "./Lines/TextAreaLine";
 import { TextBoxLine } from "./Lines/TextBoxLine";
 import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
+import { DateTimeRange } from "./Lines/DateTimeRange";
 import { KeyNames } from "./Components";
 import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
 import { LinkButton } from "./Basics/LinkButton";
@@ -162,16 +164,16 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "DateTime",
       isApplicable: qt => qt.filterType == "DateTime",
-      formatter: qt => {
-        const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {
       name: "Time",
       isApplicable: qt => qt.filterType == "Time",
-      formatter: qt => {
-        const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
+      formatter: (qt, sc, opts) => {
+        const durationFormat = toLuxonDurationFormat(opts?.format ?? qt.format) ?? "hh:mm:ss";
 
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -179,8 +181,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "TimeSeries",
       isApplicable: qt => qt.fullKey == QueryTokenString.timeSeries.token,
-      formatter: (qt, scl) => {
-        let luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+      formatter: (qt, scl, opts) => {
+        let luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         const st = scl?.props.findOptions.systemTime;
         if (st) {
           var start = DateTime.fromISO(st.startDate!);
@@ -189,7 +191,7 @@ export function initFormatRules(): Finder.FormatRule[] {
             luxonFormat = toLuxonFormat(st.timeSeriesUnit == "Year" ? "YYYY" :
               st.timeSeriesUnit == "Month" ? "LLLL YYYY" :
                 st.timeSeriesUnit == "Day" ? "d" :
-                  qt.format, "DateTime");
+                  opts?.format ?? qt.format, "DateTime");
           }
         }
 
@@ -200,7 +202,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "SystemValidFrom",
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidFrom",
-      formatter: qt => {
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined, ctx) => {
 
           if (cell == undefined || cell == "")
@@ -212,7 +215,6 @@ export function initFormatRules(): Finder.FormatRule[] {
             ctx.systemTime && ctx.systemTime.mode == "Between" && DateTime.fromISO(ctx.systemTime.startDate!) <= c ? "date-created" :
               undefined;
 
-          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
               {toFormatWithFixes(c, luxonFormat)}
@@ -223,7 +225,8 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "SystemValidTo",
       isApplicable: qt => qt.fullKey.tryAfterLast(".") == "SystemValidTo",
-      formatter: qt => {
+      formatter: (qt, sc, opts) => {
+        const luxonFormat = toLuxonFormat(opts?.format ?? qt.format, qt.type.name as "DateOnly" | "DateTime");
         return new Finder.CellFormatter((cell: string | undefined, ctx) => {
           if (cell == undefined || cell == "")
             return "";
@@ -234,7 +237,6 @@ export function initFormatRules(): Finder.FormatRule[] {
             ctx.systemTime && ctx.systemTime.mode == "Between" && c <= DateTime.fromISO(ctx.systemTime.endDate!) ? "date-removed" :
               undefined;
 
-          const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(c, luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -242,9 +244,9 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Integer",
       isApplicable: qt => qt.filterType == "Integer",
-      formatter: (qt, sc) => {
+      formatter: (qt, sc, opts) => {
         var values = getKeywordsSC(qt, sc)?.map(a => a.toLowerCase());
-        const numberFormat = toNumberFormat(qt.format);
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
         return new Finder.CellFormatter((cell: number | undefined) => {
           if (cell == null)
             return cell;
@@ -262,17 +264,18 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Decimal",
       isApplicable: qt => qt.filterType == "Decimal",
-      formatter: (qt, hl) => {
-        const numberFormat = toNumberFormat(qt.format);
+      formatter: (qt, sc, opts) => {
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
         return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, false, "numeric-cell");
       }
     },
     {
       name: "Number with Unit",
-      isApplicable: qt => (qt.filterType == "Integer" || qt.filterType == "Decimal") && Boolean(qt.unit),
-      formatter: qt => {
-        const numberFormat = toNumberFormat(qt.format);
-        return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + qt.unit}</span>, false, "numeric-cell");
+      isApplicable: (qt, sc, opts) => (qt.filterType == "Integer" || qt.filterType == "Decimal") && (opts?.unit !== undefined ? Boolean(opts.unit) : Boolean(qt.unit)),
+      formatter: (qt, sc, opts) => {
+        const numberFormat = toNumberFormat(opts?.format ?? qt.format);
+        const unit = opts !== undefined && opts.unit !== undefined ? opts.unit : qt.unit;
+        return new Finder.CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell) + "\u00a0" + unit}</span>, false, "numeric-cell");
       }
     },
     {
@@ -491,7 +494,7 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
         <EntityLink lite={row.entity}
           inSearch="main"
-          hideIfNotViable
+          hideIfNotViewable
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
@@ -577,6 +580,61 @@ export function initQuickFilterRules(): Finder.QuickFilterRule[] {
 
 
 
+function findParentTokensInRegistry(
+  filterToken: QueryToken,
+  qd: QueryDescription,
+  registry: Map<string, Finder.DomainRegistryEntry>
+): { tokenStr: QueryTokenString<any>, typeName: string }[] {
+  const result: { tokenStr: QueryTokenString<any>, typeName: string }[] = [];
+
+  let current: QueryToken | undefined = filterToken.parent;
+  while (current) {
+    if (!current.type.isCollection && registry.has(current.type.name)) {
+      result.push({ tokenStr: new QueryTokenString(current.fullKey), typeName: current.type.name });
+    }
+    current = current.parent;
+  }
+
+  const rootTypeName = qd.columns["Entity"]?.type.name;
+  if (rootTypeName && registry.has(rootTypeName))
+    result.push({ tokenStr: new QueryTokenString("Entity"), typeName: rootTypeName });
+
+  return result;
+}
+
+function getAllSubConditions(fg: FilterGroupOptionParsed): FilterConditionOptionParsed[] {
+  return fg.filters.flatMap(sf =>
+    isFilterCondition(sf) ? [sf] : getAllSubConditions(sf as FilterGroupOptionParsed)
+  );
+}
+
+function getDomainFindOptions(filterToken: QueryToken, ffc: Finder.FilterFormatterContext): FindOptions | undefined {
+  const entry = Finder.domainRegistry.get(filterToken.type.name)!;
+  const parents = findParentTokensInRegistry(filterToken, ffc.queryDescription, Finder.domainRegistry);
+  const allDomains: any[] = [];
+  for (const parent of parents) {
+    const parentEntry = Finder.domainRegistry.get(parent.typeName)!;
+    const val = findFilterValue(ffc.filterOptions, parent.tokenStr.append(parentEntry.getDomainField), op => op == "EqualTo" || op == "IsIn");
+    if (val != null) {
+      if (Array.isArray(val)) allDomains.push(...val);
+      else allDomains.push(val);
+    }
+  }
+  if (allDomains.length == 0)
+    return undefined;
+
+  var distinctDomains = allDomains.distinctBy(liteKey);
+
+  return {
+    queryName: entry.type,
+    filterOptions: [{
+      token: entry.type.token((a: any) => a.entity).append(entry.getDomainField),
+      operation: distinctDomains.length > 1 ? "IsIn" : "EqualTo",
+      value: distinctDomains.length > 1 ? distinctDomains : distinctDomains[0]
+    }]
+  };
+}
+
 export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
   return [
 
@@ -641,7 +699,11 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       name: "Lite",
       applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Lite",
       renderValue: (f, ffc) => {
-        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        const fo = Finder.domainRegistry.has(f.token!.type.name) ? getDomainFindOptions(f.token!, ffc) : undefined;
+        return <EntityLine ctx={ffc.ctx} type={f.token!.type} create={false}
+          onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory}
+          findOptions={fo}
+        />;
       }
     },
     {
@@ -669,6 +731,26 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       }
     },
     {
+      name: "DateRange",
+      applicable: (f, ffc) => isFilterCondition(f) && isPair(f.operation!) && f.token?.filterType == "DateTime",
+      renderValue: (f, ffc) => {
+        if (!Array.isArray(f.value))
+          f.value = [null, null];
+
+        const minCtx = new TypeContext<string | null>(undefined, { readOnly: f.frozen }, undefined, new Binding<any>(f.value, 0));
+        const maxCtx = new TypeContext<string | null>(undefined, { readOnly: f.frozen }, undefined, new Binding<any>(f.value, 1));
+
+        return (
+          <DateTimeRange
+            mainCtx={ffc.ctx}
+            label={ffc.label}
+            min={{ ctx: minCtx, type: f.token!.type, format: f.token!.format, onChange: () => ffc.handleValueChange(f) }}
+            max={{ ctx: maxCtx, type: f.token!.type, format: f.token!.format, onChange: () => ffc.handleValueChange(f) }}
+          />
+        );
+      }
+    },
+    {
       name: "MultiValue",
       applicable: (f, ffc) => isFilterCondition(f) && isList(f.operation!),
       renderValue: (f, ffc) => {
@@ -688,11 +770,12 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       name: "MultiEntity",
       applicable: (f, ffc) => isFilterCondition(f) && isList(f.operation!) && f.token!.filterType == "Lite",
       renderValue: (f, ffc) => {
-        const fc = f as FilterConditionOptionParsed;
-
+        const fo = Finder.domainRegistry.has(f.token!.type.name) ? getDomainFindOptions(f.token!, ffc) : undefined;
         return (
           <FormGroup ctx={ffc.ctx} label={ffc.label}>
-            {inputId => <MultiEntity values={f.value} readOnly={f.frozen} type={f.token!.type.name} onChange={() => ffc.handleValueChange(f)} />}
+            {inputId => <MultiEntity values={f.value} readOnly={f.frozen} type={f.token!.type.name} onChange={() => ffc.handleValueChange(f)}
+              findOptions={fo}
+            />}
           </FormGroup>
         );
       }
@@ -705,6 +788,17 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
         return <FilterTextArea ctx={ffc.ctx}
           filterOperation={fc.operation ?? null}
           onChange={(() => ffc.handleValueChange(f, isComplexFullTextSearch(fc.operation)))}
+          label={ffc.label || SearchMessage.Search.niceToString()} />
+      }
+    },
+    {
+      name: "VectorSmartSearch",
+      applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Vector" && f.operation == "SmartSearch",
+      renderValue: (f, ffc) => {
+        const fc = f as FilterConditionOptionParsed;
+        return <FilterTextArea ctx={ffc.ctx}
+          filterOperation={fc.operation ?? null}
+          onChange={(() => ffc.handleValueChange(f, false))}
           label={ffc.label || SearchMessage.Search.niceToString()} />
       }
     },
@@ -728,15 +822,80 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
     },
     {
       name: "FilterGroup_TextArea",
-      applicable: (f, ffc) => isFilterGroup(f) && f.filters.some(sf => isFilterCondition(sf) && isFullTextSearch(sf.operation)),
+      applicable: (f, ffc) => isFilterGroup(f) && getAllSubConditions(f as FilterGroupOptionParsed).some(sf => isFullTextSearch(sf.operation)),
       renderValue: (f, ffc) => {
         var fg = f as FilterGroupOptionParsed;
-        const isComplex = fg.filters.some(sf => isFilterCondition(sf) && isComplexFullTextSearch(sf.operation));
-        var filterOperation = fg.filters.map(sf => isFilterCondition(sf) && isFullTextSearch(sf.operation) ? sf.operation : null).notNull().distinctBy(a => a).onlyOrNull();
+        const subConds = getAllSubConditions(fg);
+        const isComplex = subConds.some(sf => isComplexFullTextSearch(sf.operation));
+        var filterOperation = subConds.map(sf => isFullTextSearch(sf.operation) ? sf.operation : null).notNull().distinctBy(a => a).onlyOrNull();
         return <FilterTextArea ctx={ffc.ctx}
           filterOperation={filterOperation}
           onChange={(() => ffc.handleValueChange(f, isComplex))}
           label={ffc.label || SearchMessage.Search.niceToString()} />;
+      }
+    },
+    {
+      name: "FilterGroup_MultiValue",
+      applicable: (f, ffc) => isFilterGroup(f) &&
+        getAllSubConditions(f as FilterGroupOptionParsed).every(sf => sf.token?.filterType != "Lite") &&
+        getAllSubConditions(f as FilterGroupOptionParsed).some(sf => isList(sf.operation!)),
+      renderValue: (f, ffc) => {
+        const fg = f as FilterGroupOptionParsed;
+        const subConds = getAllSubConditions(fg);
+        if (!fg.pinned?.splitValue && subConds.some(sf => !isList(sf.operation!))) {
+          return (
+            <OverlayTrigger overlay={<Tooltip>{SearchMessage.FilterGroupInvalidMixedOperations.niceToString()}</Tooltip>}>
+              <span className="text-danger">{SearchMessage.Error.niceToString() }<FontAwesomeIcon icon="circle-info" /></span>
+            </OverlayTrigger>
+          );
+        }
+
+        if (!ffc.ctx.value)
+          ffc.ctx.value = [];
+
+        const firstCond = subConds.find(sf => sf != null) as FilterConditionOptionParsed;
+        const pseudoFilter = { ...firstCond, operation: "EqualTo" } as FilterConditionOptionParsed;
+        const rule = Finder.filterValueFormatRules.filter(r => r.applicable(pseudoFilter, ffc)).last();
+
+        return (
+          <FormGroup ctx={ffc.ctx} label={ffc.label}>
+            {inputId => <MultiValue values={ffc.ctx.value} readOnly={fg.frozen}
+              onChange={() => ffc.handleValueChange(f)}
+              onRenderItem={ctx => rule.renderValue(firstCond, { ...ffc, ctx, mandatory: true })} />}
+          </FormGroup>
+        );
+      }
+    },
+    {
+      name: "FilterGroup_MultiEntity",
+      applicable: (f, ffc) => isFilterGroup(f) &&
+        getAllSubConditions(f as FilterGroupOptionParsed).every(sf => sf.token?.filterType == "Lite") &&
+        getAllSubConditions(f as FilterGroupOptionParsed).some(sf => isList(sf.operation!)),
+      renderValue: (f, ffc) => {
+        const fg = f as FilterGroupOptionParsed;
+        const subConds = getAllSubConditions(fg);
+        if (!fg.pinned?.splitValue && subConds.some(sf => !isList(sf.operation!)))
+          return (
+            <OverlayTrigger overlay={<Tooltip>{SearchMessage.FilterGroupInvalidMixedOperations.niceToString()}</Tooltip>}>
+              <span className="text-danger">{SearchMessage.Error.niceToString()} <FontAwesomeIcon icon="circle-info" /></span>
+            </OverlayTrigger>
+          );
+
+        if (!ffc.ctx.value)
+          ffc.ctx.value = [];
+
+        const firstLiteCond = subConds.find(sf => sf.token?.filterType == "Lite") as FilterConditionOptionParsed;
+        const typeName = firstLiteCond.token!.type.name;
+        const entry = Finder.domainRegistry.get(typeName);
+        const fo = entry ? getDomainFindOptions(firstLiteCond.token!, ffc) : undefined;
+
+        return (
+          <FormGroup ctx={ffc.ctx} label={ffc.label}>
+            {() => <MultiEntity values={ffc.ctx.value} readOnly={fg.frozen} type={typeName}
+              onChange={() => ffc.handleValueChange(f)}
+              findOptions={fo} />}
+          </FormGroup>
+        );
       }
     },
   ]
@@ -812,30 +971,31 @@ export function MultiValue(p: MultiValueProps): React.ReactElement {
 }
 
 
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.ReactElement {
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean, findOptions?: FindOptions, helpText?: React.ReactNode }): React.ReactElement {
   const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
-
 
   mListEntity.current.clear();
   mListEntity.current.push(...p.values.map(lite => newMListElement(lite)));
 
   var ctx = new TypeContext<MList<Lite<Entity>>>(undefined, { formGroupStyle: "None", readOnly: p.readOnly, formSize: "xs" }, undefined, Binding.create(mListEntity, a => a.current));
 
-
-  return <EntityStrip ctx={ctx} type={{ name: p.type, isLite: true, isCollection: true }} create={false} vertical={p.vertical} onChange={() => {
-    p.values.clear();
-    p.values.push(...mListEntity.current.map(a => a.element));
-    p.onChange();
-  }} />
+  return <EntityStrip ctx={ctx} type={{ name: p.type, isLite: true, isCollection: true }} create={false} vertical={p.vertical}
+    findOptions={p.findOptions} helpText={p.helpText}
+    onChange={() => {
+      p.values.clear();
+      p.values.push(...mListEntity.current.map(a => a.element));
+      p.onChange();
+    }} />
 }
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string }): React.ReactElement {
+export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: FilterOperation | null, onChange: () => void, label?: string, placeholder?: string }): React.ReactElement {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
     valueHtmlAttributes={p.filterOperation != null && p.filterOperation != "FreeText" ? {
+      placeholder: p.placeholder,
       onKeyDown: e => {
         console.log(e);
         if (e.key == KeyNames.enter && !e.shiftKey) {
@@ -848,7 +1008,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, filterOperation: F
           e.stopPropagation()
         }
       }
-    } : undefined}
+    } : { placeholder: p.placeholder }}
     extraButtons={vlc => p.filterOperation && <ComplexConditionSyntax fo={p.filterOperation} />}
     onChange={p.onChange}
   />
@@ -862,18 +1022,22 @@ export function ComplexConditionSyntax(p: { fo: FilterOperation }): React.ReactE
 
   const popover = (
     <Popover id="popover-basic">
-      <Popover.Header as="h3">{ }</Popover.Header>
+      <Popover.Header as="h3">{help.title}</Popover.Header>
       <Popover.Body>
-        <ul className="ps-3">
-          {help?.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
-        </ul>
+        {p.fo == "SmartSearch" ? (
+          <div>{SearchMessage.SmartSearchDescription.niceToString()}</div>
+        ) : (
+          <ul className="ps-3">
+            {help.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
+          </ul>
+        )}
       </Popover.Body>
     </Popover>
   );
 
   return (
     <OverlayTrigger trigger="click" placement="right" overlay={popover} >
-      <button className="sf-line-button sf-view btn input-group-text">{help?.icon}</button>
+      <button className="sf-line-button sf-view btn input-group-text">{help.icon}</button>
     </OverlayTrigger>
   );
 
@@ -945,6 +1109,12 @@ const FullTextSearchHelps: Partial<Record<FilterOperation, FullTextSearchHelp>> 
       "\"Dragon Fruit\" OR \"Passion Fruit\"",
       "grape*"
     ]
+  },
+  "SmartSearch": {
+    icon: <FontAwesomeIcon icon="brain" />,
+    title: "Smart Search",
+    url: <span></span>,
+    examples: []
   },
 };
 

@@ -1,10 +1,8 @@
 using NpgsqlTypes;
-using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.Data;
-using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Sync;
 
@@ -620,7 +618,7 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
-            SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
+            SqlPreCommand? addForeignKeys = Synchronizer.SynchronizeScript(
                  Spacing.Double,
                  modelTables,
                  databaseTables,
@@ -654,7 +652,7 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? addIndices =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
-                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !a.PrimaryKey).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
+                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => !a.PrimaryKey && !a.DelayCreation).Select(index => sqlBuilder.CreateIndex(index, null)).Combine(Spacing.Simple),
                 removeOld: null,
                 mergeBoth: (tn, tab, dif) =>
                 {
@@ -676,7 +674,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex or VectorTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) && !mix.DelayCreation ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
                     return SqlPreCommand.Combine(Spacing.Simple, indexes);
@@ -760,7 +758,7 @@ public static class SchemaSynchronizer
                 delayedDrops.Combine(Spacing.Simple),
                 delayedAddSystemVersioning.Combine(Spacing.Simple),
                 syncEnums,
-                addForeingKeys,
+                addForeignKeys,
                 addIndices, addIndicesHistory,
 
                 dropSchemas,
@@ -885,13 +883,29 @@ public static class SchemaSynchronizer
                 return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
             }
 
-            var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
+            SqlPreCommandSimple UpdateWithHasValueDefault(bool forHistory = false)
+            {
+                var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
+                            return new SqlPreCommandSimple($@"UPDATE {(forHistory ? table.SystemVersioned!.TableName : table.Name)} SET
+                {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
+            WHERE {where};");
 
-            return SqlPreCommand.Combine(Spacing.Simple,
+            }
+
+            if (!withHistory)
+                return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
-WHERE {where};"))!;
+                UpdateWithHasValueDefault())!;
+
+            return new SqlPreCommand_WithHistory(
+                normal: SqlPreCommand.Combine(Spacing.Simple,
+                    sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                    UpdateWithHasValueDefault()),
+                history: SqlPreCommand.Combine(Spacing.Simple,
+                    sqlBuilder.AlterTableAddColumn(table, column, forHistory: true).Do(a => a.GoAfter = true),
+                    UpdateWithHasValueDefault(forHistory: true))
+            );
+
         }
         else if (column is FieldPartitionId)
         {
@@ -1013,7 +1027,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
-            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID") :
+            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID()") :
             column.DbType.IsTime() ? "'00:00'" :
             column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
@@ -1285,31 +1299,34 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
         var s = Schema.Current;
         var should = s.PostgresExtensions.Where(kvp => kvp.Value(s)).ToDictionary(a => a.Key, a => a.Key);
 
+        var isAzure = Connector.Current is PostgreSqlConnector psc && psc.IsAzurePostgres;
 
         var sb = Connector.Current.SqlBuilder;
         var result = Synchronizer.SynchronizeScript(Spacing.Simple,
               newDictionary: should,
               oldDictionary: current,
-              createNew: (key, n) => sb.CreateExtensionIfNotExist(key),
-              removeOld: (key, o) => sb.DropExtension(key),
+              createNew: (key, n) => isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
+              removeOld: (key, o) => isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
               mergeBoth: (k, n, o) => null);
 
         return result;
     }
 
 
-    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements replacements)
+    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements? replacements = null)
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
         var culture = (string)Executor.ExecuteScalar("SHOW default_text_search_config;")!;
 
-        if(culture.StartsWith("pg_catalog."))
+        if (culture.StartsWith("pg_catalog."))
             culture = culture.After("pg_catalog.");
 
         if (culture != FullTextTableIndex.PostgresOptions.DefaultLanguage())
+        {
             return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+        }
 
         return null;
     }

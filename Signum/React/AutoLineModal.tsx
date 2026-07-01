@@ -105,7 +105,7 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
 }
 
 namespace AutoLineModal {
-  export var show = (options: AutoLineModalOptions): Promise<any> => {
+  export const show = (options: AutoLineModalOptions): Promise<any> => {
     return openModal<any>(<AutoLineModal options={options} />);
   }
 }

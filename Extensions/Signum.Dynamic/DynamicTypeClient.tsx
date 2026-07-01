@@ -65,13 +65,14 @@ export namespace DynamicTypeClient {
   
     EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
     EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
-    EvalClient.Options.getDynaicMigrationsStep = () =>
+    EvalClient.Options.setDynaicMigrationsStep(() =>
       <>
         <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
         <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
         <h3>{DynamicRenameEntity.nicePluralName()}</h3>
         <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-      </>;
+      </>
+    );
   
     EvalClient.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
       { token: t.append(p => p.typeName), type: "Text" },

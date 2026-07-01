@@ -16,9 +16,18 @@
 span.process-contextual-icon {
     font-size: initial;
     margin-left: 5px;
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }
 
 span.process-contextual-icon:hover {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
+}
+
+.tooltip-process .tooltip-inner {
+	max-width: initial;
+	white-space: normal;
+	color: var(--bs-body-color);
+	background-color: var(--bs-body-bg);
+	border-color: var(--bs-border-color);
+	box-shadow: var(--bs-box-shadow);
 }

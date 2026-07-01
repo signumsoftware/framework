@@ -13,6 +13,7 @@ public class WorkflowNodeGraph
     public Dictionary<Lite<WorkflowActivityEntity>, WorkflowActivityEntity> Activities { get; internal set; }
     public Dictionary<Lite<WorkflowGatewayEntity>, WorkflowGatewayEntity> Gateways { get; internal set; }
     public Dictionary<Lite<WorkflowConnectionEntity>, WorkflowConnectionEntity> Connections { get; internal set; }
+    public List<WorkflowLaneEntity> Lanes { get; internal set; }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
     public bool IsStartCurrentUser()
     {

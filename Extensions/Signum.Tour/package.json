@@ -1,0 +1,8 @@
+{
+  "name": "@framework/tour",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "driver.js": "^1.3.1"
+  }
+}

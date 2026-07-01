@@ -6,6 +6,7 @@ import { namespace } from 'd3';
 import { FunctionalAdapter } from '../Modals';
 
 export interface ButtonBarProps extends ButtonsContext {
+  ref?: React.Ref<ButtonBarHandle>;
   align?: "left" | "right";
 }
 
@@ -14,7 +15,7 @@ export interface ButtonBarHandle {
 }
 
 
-export const ButtonBar: React.ForwardRefExoticComponent<ButtonBarProps & React.RefAttributes<ButtonBarHandle>> = React.forwardRef(function ButtonBar(p: ButtonBarProps, ref: React.Ref<ButtonBarHandle>) {
+export function ButtonBar(p: ButtonBarProps): React.JSX.Element {
 
   const ctx: ButtonsContext = p;
   const rb = FunctionalAdapter.innerRef(ctx.frame.entityComponent) as IRenderButtons | null;
@@ -40,7 +41,7 @@ export const ButtonBar: React.ForwardRefExoticComponent<ButtonBarProps & React.R
       }
     }
   }
-  React.useImperativeHandle(ref, () => ({
+  React.useImperativeHandle(p.ref, () => ({
     handleKeyDown
   }));
 
@@ -48,7 +49,7 @@ export const ButtonBar: React.ForwardRefExoticComponent<ButtonBarProps & React.R
     undefined,
     ...buttons.map(a => a!.button)
   );
-});
+}
 
 export namespace ButtonBarManager {
 

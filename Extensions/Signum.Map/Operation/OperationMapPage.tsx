@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLocation, useParams, Location } from 'react-router'
 import { Dic } from '@framework/Globals'
@@ -106,7 +106,7 @@ export default function OperationMapPage(): React.JSX.Element | null {
       </div>
     );
   }
-  if (AppContext.Expander.onGetExpanded && !AppContext.Expander.onGetExpanded())
+  if (AppContext.Expander.Options.onGetExpanded && !AppContext.Expander.Options.onGetExpanded())
     return null;
 
   return (
@@ -215,5 +215,6 @@ export function OperationMapRenderer(p: OperationMapRendererProps): React.JSX.El
     </div>
   );
 }
+
 
 

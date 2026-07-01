@@ -68,6 +68,7 @@ export namespace AuthAdminMessage {
   export const AuthRuleOverview: MessageKey = new MessageKey("AuthAdminMessage", "AuthRuleOverview");
   export const QueryPermissionsOverview: MessageKey = new MessageKey("AuthAdminMessage", "QueryPermissionsOverview");
   export const DownloadAuthRules: MessageKey = new MessageKey("AuthAdminMessage", "DownloadAuthRules");
+  export const PasswordChangeIsNotCompleted: MessageKey = new MessageKey("AuthAdminMessage", "PasswordChangeIsNotCompleted");
 }
 
 export const AuthThumbnail: EnumType<AuthThumbnail> = new EnumType<AuthThumbnail>("AuthThumbnail");

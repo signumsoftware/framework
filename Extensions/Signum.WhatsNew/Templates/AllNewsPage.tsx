@@ -21,7 +21,7 @@ export default function AllNews(): React.JSX.Element {
       </h1>
         <div className="mt-3">
         <div style={{ display: "flex", flexFlow: "wrap" }}>
-          {news && news.orderByDescending(n => n.creationDate).map(wn =>
+          {news && news.filter(n => n.status == "Publish").orderByDescending(n => n.creationDate).map(wn =>
                   <WhatsNewPreviewPicture key={wn.whatsNew.id} news={wn} />
                 )}
             </div>

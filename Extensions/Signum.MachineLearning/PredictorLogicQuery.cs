@@ -45,7 +45,7 @@ public static class PredictorLogicQuery
                 var splitKeys = pairs.Extract(a => a.sqc.Usage == PredictorSubQueryColumnUsage.SplitBy).Select(a => a.rc).ToArray();
                 var values = pairs.Select(a => a.rc).ToArray();
 
-                var groupedValues = groupResult.Rows.AgGroupToDictionary(
+                var groupedValues = groupResult.Rows.GroupAggregateToDictionary(
                     row => row.GetValues(parentKeys),
                     gr => gr.ToDictionaryEx(
                         row => row.GetValues(splitKeys),

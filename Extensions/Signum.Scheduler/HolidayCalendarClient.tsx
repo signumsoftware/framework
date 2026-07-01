@@ -18,7 +18,7 @@ export namespace HolidayCalendarClient {
     Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
 
     if (Navigator.isViewable(HolidayCalendarEntity))
-      DateTimeLineOptions.useRenderDay = HolidayCalendarClient.useRenderHoliday;
+      DateTimeLineOptions.Options.useRenderDay = HolidayCalendarClient.useRenderHoliday;
   }
 
   export type CalendarDictionary = { [key: string]: string };

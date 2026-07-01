@@ -203,7 +203,7 @@ class RedundantSubqueryRemover : DbExpressionVisitor
                 {
                     if (where != null)
                     {
-                        where = Expression.And(fromSelect.Where, where.UnNullify());
+                        where = Expression.And(fromSelect.Where.UnNullify(), where.UnNullify());
                     }
                     else
                     {

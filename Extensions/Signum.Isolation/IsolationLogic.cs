@@ -1,4 +1,3 @@
-using Signum.Engine.Maps;
 using Signum.Files;
 using Signum.Utilities.Reflection;
 using System.IO;

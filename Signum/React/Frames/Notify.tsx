@@ -68,14 +68,14 @@ function Notify(): React.ReactElement {
 
   React.useEffect(() => {
 
-    Notify.singleton = {
+    Notify.setSingleton({
       notify: notify,
       notifyTimeout: notifyTimeout,
       notifyPendingRequest: notifyPendingRequest,
       remove: remove,
-    };
+    });
 
-    return () => Notify.singleton = undefined;
+    return () => Notify.setSingleton(undefined);
   }, []);
 
 
@@ -117,7 +117,7 @@ function Notify(): React.ReactElement {
     }
   }
 
-  const styleLock: React.CSSProperties | undefined = (Notify.lockScreenOnLoading && optionsStack.current.some(o => o.type == "loading") ?
+  const styleLock: React.CSSProperties | undefined = (Notify.Options.lockScreenOnLoading && optionsStack.current.some(o => o.type == "loading") ?
     { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined);
 
   return (
@@ -134,8 +134,11 @@ function Notify(): React.ReactElement {
 }
 
 namespace Notify {
-  export let singleton = undefined as (NotifyHandle | undefined);
-  export let lockScreenOnLoading = false;
+  let singleton = undefined as (NotifyHandle | undefined);
+  export function getSingleton(): NotifyHandle | undefined { return singleton; }
+  export function setSingleton(v: NotifyHandle | undefined): void { singleton = v; }
+
+  export const Options = { lockScreenOnLoading: false };
 }
 
 export default Notify;

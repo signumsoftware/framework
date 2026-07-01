@@ -88,14 +88,14 @@ export function AccessibleTable({
       aria-label={ariaLabel}
       aria-multiselectable={`${multiselectable ? "true" : "false"}`}
       {...rest}>
-      {AccessibleTable.ariaLabelAsCaption && <caption>{ariaLabel}</caption>}
+      {AccessibleTable.Options.ariaLabelAsCaption && <caption>{ariaLabel}</caption>}
       {enhancedChildren}
     </table>
   );
 }
 
 export namespace AccessibleTable {
-  export let ariaLabelAsCaption = false;
+  export const Options = { ariaLabelAsCaption: false };
 }
 
 /**

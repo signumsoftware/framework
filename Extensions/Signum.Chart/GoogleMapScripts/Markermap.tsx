@@ -1,4 +1,3 @@
-/// <reference path="../../../../node_modules/@types/googlemaps/index.d.ts" />
 import * as React from 'react'
 import * as d3 from 'd3'
 import { Navigator } from '@framework/Navigator';
@@ -160,8 +159,8 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
             });
           }
           else {
-            marker.addListener("click", e => {
-              onDrillDown(r, e as any as MouseEvent);
+            marker.addListener("click", (e: google.maps.MapMouseEvent) => {
+              onDrillDown(r, e.domEvent as MouseEvent);
             });
           }
 

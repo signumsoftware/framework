@@ -10,9 +10,7 @@ using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync.SqlServer;
 using Signum.API;
-using Signum.Authorization;
 using Signum.Authorization.Rules;
-using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 using Signum.Caching;
 
 namespace Signum.Cache;
@@ -68,7 +66,7 @@ public static class CacheLogic
         if (withSqlDependency == true && !Connector.Current.SupportsSqlDependency)
             throw new InvalidOperationException("Sql Dependency is not supported by the current connection");
 
-        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency;
+        WithSqlDependency = withSqlDependency ?? Connector.Current.SupportsSqlDependency && serverBroadcast == null;
 
         if (serverBroadcast != null && WithSqlDependency)
             throw new InvalidOperationException("cacheInvalidator is only necessary if SqlDependency is not enabled");

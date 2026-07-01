@@ -407,7 +407,7 @@ export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNo
 
 function validatePropType(propName: string, value: any, typeScriptType: string | undefined) {
 
-  if (propName == "innerRef")
+  if (propName == "ref" || propName == "innerRef")
     return null;
 
   if (typeScriptType == null)

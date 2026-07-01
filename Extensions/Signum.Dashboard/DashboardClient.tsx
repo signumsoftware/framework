@@ -10,7 +10,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
-import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
+import { tryGetTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
@@ -75,24 +75,40 @@ export namespace DashboardClient {
 
     Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
+    AppContext.clearSettingsActions.push(DashboardClient.clearDashboardPageActions);
+
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard'), { modalSize: "xl" }));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
     Navigator.addSettings(new EntitySettings(CustomPartEntity, e => import('./Admin/CustomPart')));
     Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
-    Navigator.addSettings(new EntitySettings(ToolbarMenuPartEntity, e => import('./Admin/ToolbarMenuPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
     Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
     Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
 
+    if (ToolbarMenuPartEntity.tryTypeInfo()) {
+      Navigator.addSettings(new EntitySettings(ToolbarMenuPartEntity, e => import('./Admin/ToolbarMenuPart')));
+      var tm = Navigator.getSettings(ToolbarMenuEntity);
+      if (tm == null)
+        throw new Error("Call ToolbarClient before DasboardClient");
+      tm.overrideView(rm => rm.insertAfterElement(SearchValueLine, scl => (scl.props.findOptions as FindOptions)?.queryName == ToolbarSwitcherEntity, scl => [
+        <SearchValueLine ctx={scl.props.ctx} findOptions={{
+          queryName: DashboardEntity,
+          filterOptions: [
+            { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: rm.ctx.value },
+          ]
+        }} />
+      ]));
+
+      registerRenderer(ToolbarMenuPartEntity, {
+        component: () => import('./View/ToolbarMenuPart').then(a => a.default),
+        icon: () => ({ icon: "list", iconColor: "#B9770E" })
+      });
+    }
+
     ToolbarClient.registerConfig(new DashboardToolbarConfig());
     OmniboxClient.registerProvider(new DashboardOmniboxProvider());
 
-    if (ToolbarMenuPartEntity.tryTypeInfo())
-      Navigator.getSettings(ToolbarMenuEntity)?.overrideView(vr => {
-        vr.insertAfterElement(SearchValueLine, a => (a.props.findOptions as FindOptions).queryName === ToolbarSwitcherEntity, a => [<SearchValueLine ctx={vr.ctx.subCtx({ labelColumns: 4 })}
-          findOptions={{ queryName: DashboardEntity, filterOptions: [{ token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: vr.ctx.value }] }} />]);
-      });
 
     Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
       isVisible: () => false,
@@ -115,10 +131,7 @@ export namespace DashboardClient {
       withPanel: () => false,
     });
 
-    registerRenderer(ToolbarMenuPartEntity, {
-      component: () => import('./View/ToolbarMenuPart').then(a => a.default),
-      icon: () => ({ icon: "list", iconColor: "#B9770E" })
-    });
+
 
     registerRenderer(ImagePartEntity, {
       component: () => import('./View/ImagePartView').then(a => a.default),
@@ -298,9 +311,15 @@ export namespace DashboardClient {
     return result;
   }
 
+  export const onDashboardPageActions: Array<(dashboard: DashboardEntity) => React.ReactElement | undefined> = [];
+
+  export function clearDashboardPageActions(): void {
+    onDashboardPageActions.clear();
+  }
+
   export namespace Options {
 
-    export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
+    export const customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
 
     export const customPartRenderers: Record<string /*typeName*/, Record<string /*customPartName*/, CustomPartRenderer>> = {};
 
@@ -339,14 +358,22 @@ declare module '@framework/Signum.Entities' {
   }
 }
 
-export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }): React.JSX.Element | null {
+export function CreateNewButton(p: { queryKey: string, getFindOptions?: () => Promise<FindOptions>, onClick: (types: TypeInfo[], qd: QueryDescription) => void }): React.JSX.Element | null {
 
-  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
+  const data = useAPI(async () => {
+    const qd = await Finder.getQueryDescription(p.queryKey);
+    const fo = p.getFindOptions ? await p.getFindOptions() : undefined;
+    const fop = fo ? await Finder.parseFindOptions(fo, qd, false) : undefined;
+    return { qd, fop };
+  }, [p.queryKey]);
 
-  if (qd == null)
+  if (data == null)
     return null;
 
-  const tis = getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+  const { qd, fop } = data;
+
+  //Pass fo so domain-aware isCreableEvent (e.g. typeAllowedInDomain) can check create access for the filtered domain, like SearchControl does
+  const tis = tryGetTypeInfos(qd.columns["Entity"].type).notNull().filter(ti => Navigator.isCreable(ti, { isSearch: true, fo: fop }));
 
   if (tis.length == 0)
     return null;
@@ -393,3 +420,5 @@ export function DashboardTitle(p: { dashboard: DashboardEntity }): React.JSX.Ele
     </div>
   );
 }
+
+export { DashboardTooltipIcon } from './View/DashboardTooltipIcon';

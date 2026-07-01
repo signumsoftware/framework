@@ -1,5 +1,3 @@
-using Signum.Mailing;
-
 namespace Signum.Mailing.Package;
 
 

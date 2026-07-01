@@ -15,7 +15,7 @@ import {
   PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
 } from './Signum.MachineLearning'
 import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
-import { QueryToken } from '@framework/FindOptions';
+import { QueryToken } from '@framework/QueryToken';
 import { ImportComponent } from '@framework/ImportComponent';
 import { TypeContext } from '@framework/Lines';
 import SelectorModal from '@framework/SelectorModal';

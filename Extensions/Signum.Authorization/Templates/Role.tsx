@@ -23,7 +23,6 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
         <AutoLine ctx={ctx.subCtx(e => e.isTrivialMerge)} /> :
         <AutoLine ctx={ctx.subCtx(e => e.description)} />
       }
-      <AutoLine ctx={ctx.subCtx(e => e.minPasswordLength)} />
       <br/>
       <EntityStrip ctx={ctx.subCtx(e => e.inheritsFrom)}
         iconStart={true}

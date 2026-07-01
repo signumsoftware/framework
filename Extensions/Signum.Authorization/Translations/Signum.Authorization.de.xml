@@ -56,6 +56,7 @@
     <Member Name="FirstRule" Description="1. Regel" />
     <Member Name="NthRule" Description="{0}. Regel" />
     <Member Name="Overriden" Description="Überschrieben" />
+    <Member Name="PasswordChangeIsNotCompleted" Description="Passwortänderung ist nicht abgeschlossen" />
     <Member Name="PermissionOverriden" Description="Permission-!overriden" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PermissionRulesOverview" Description="Übersicht über Berechtigungsregeln" />
@@ -155,10 +156,10 @@
     <Member Name="Logout" Description="Logout" />
     <Member Name="MyProfile" Description="Mein Profil" />
     <Member Name="NewPassword" Description="Neues Passwort" />
+    <Member Name="NoLocalUserFound" Description="Kein lokaler Benutzer gefunden" />
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
-    <Member Name="PasswordComplexityWarning" Description="Sie haben nicht die empfohlene Passwortkomplexität erreicht (mindestens 1 Großbuchstabe, 1 Kleinbuchstabe, 1 Zahl und 1 Sonderzeichen)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Das Passwort wurde erfolgreich geändert" />
     <Member Name="PasswordMustBeChanged" Description="Das Passwort muss geändert werden" />
     <Member Name="PasswordMustHaveAValue" Description="Das Kennwort muss angegeben werden" />
@@ -173,7 +174,6 @@
     <Member Name="SignUpWithAzureB2C" Description="Registrieren mit Azure B2C" />
     <Member Name="Success" Description="Erfolg" />
     <Member Name="SwitchUser" Description="Benutzer wechseln" />
-    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="Das Super-User-Passwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="Das Kennwort muss mindestens {0} Zeichen enthalten." />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="Der Benutzer ist nicht mehr in der Datenbank" />
     <Member Name="TryToLogInWithIt" Description="Versuchen Sie, sich damit anzumelden!" />
@@ -233,7 +233,6 @@
     <Member Name="InheritsFrom" Description="Erbt von" />
     <Member Name="IsTrivialMerge" Description="Ist triviale Zusammenführung" />
     <Member Name="MergeStrategy" Description="Zusammenführstrategie" />
-    <Member Name="MinPasswordLength" Description="Minimale Passwortlänge" />
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="RoleMappingEmbedded" Description="Rollenabbildung">
@@ -330,17 +329,21 @@
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="LoginFailedCounter" Description="fehlgeschlagener Login-Zähler" />
     <Member Name="MustChangePassword" Description="Passwort muss geändert werden" />
     <Member Name="PasswordHash" Description="Passwort-Hash" />
+    <Member Name="PasswordIsChanging" Description="Passwort wird geändert" />
     <Member Name="Role" Description="Rolle" />
     <Member Name="State" Description="Status" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>
+  <Type Name="UserExternalIdMessage">
+    <Member Name="TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit einem externen Anbieter verbunden und kann kein lokales Kennwort festlegen" />
+  </Type>
   <Type Name="UserLiteModel" Description="Benutzer-Lite">
-    <Member Name="OID" Description="OID" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="PhotoSuffix" Description="Foto-Suffix" />
-    <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>

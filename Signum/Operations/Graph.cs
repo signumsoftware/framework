@@ -178,7 +178,7 @@ public class Graph<T>
 
         public bool CanBeNew { get; set; }
         public bool ResultIsSaved { get; set; }
-
+        public bool SourceEntityIsModified { get; set; }
 
         public Func<F, string?>? CanConstruct { get; set; }
 
@@ -191,6 +191,7 @@ public class Graph<T>
         }
 
         public Func<F, object?[]?, T?> Construct { get; set; } = null!;
+
 
         public void OverrideConstruct(Overrider<Func<F, object?[]?, T?>> overrider)
         {

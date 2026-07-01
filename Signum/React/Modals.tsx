@@ -1,8 +1,9 @@
 import * as AppContext from './AppContext';
 import * as React from 'react'
-import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef} from './Hooks';
+import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef } from './Hooks';
 import { useLocation } from 'react-router';
 import './Modals.css';
+
 
 declare global {
   interface KeyboardEvent {
@@ -18,13 +19,22 @@ export interface IHandleKeyboard {
   handleKeyDown?: (e: KeyboardEvent) => void;
 }
 
+export interface UIState {
+  name: string;
+  context: unknown | null;
+}
+
+export interface IGetUIState {
+  getUIState?: () => UIState;
+}
+
 export interface GlobalModalContainerState {
   modals: React.ReactElement<IModalProps<any>>[];
   currentUrl: string;
 }
 let current: GlobalModalContainerHandles;
   
-const modalInstances: (React.Component & IHandleKeyboard)[] = [];
+const modalInstances: (React.Component & IHandleKeyboard & IGetUIState)[] = [];
 
 export function isStarted(): boolean {
   return current != null;
@@ -38,7 +48,7 @@ interface GlobalModalContainerHandles {
 }
 
 export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
-    className: string;
+  className: string;
 }, HTMLElement> {
 
 
@@ -81,7 +91,7 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
     return () => { current = null!; };
   }, []);
 
-  function hanldleKeyDown(e: KeyboardEvent){
+  function hanldleKeyDown(e: KeyboardEvent) {
     if (modalInstances.length) {
       e.openedModals = true;
       var topMost = modalInstances[modalInstances.length - 1];
@@ -130,11 +140,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     if (!React.isValidElement(only))
       throw new Error("Not a valid react element: " + only);
 
-    if (isForwardRef(only.type)) {
-      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } } as any);//TODO: while forwardRef exists
-    }
-
-    return React.cloneElement(only, { innerRef: (a: any) => { this.innerRef = a; } } as any); //TODO: To avoid having to use forward Ref until is removed
+    return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } } as any);
   }
 
   static withRef<P>(element: React.ReactElement<P>, ref: React.Ref<any>): React.ReactElement<P> {
@@ -168,7 +174,30 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
   }
 }
 
-function isForwardRef(type: any) {
-  return type.$$typeof == Symbol.for("react.forward_ref");
+
+let currentGetPageUIState: (() => UIState) | null = null;
+
+export namespace GlobalModalContainer {
+  export function getPageUIState(): UIState | null {
+    return currentGetPageUIState?.() ?? null;
+  }
+
+  export function getModalUIStates(): (UIState| null)[] {
+    return modalInstances
+      .map(inst => FunctionalAdapter.innerRef(inst))
+      .map(inst => inst.getUIState?.() ?? null);
+  }
 }
 
+export function usePageUIState(getState: () => UIState): void {
+  const getStateRef = useUpdatedRef(getState);
+
+  React.useEffect(() => {
+    const fn = () => getStateRef.current();
+    currentGetPageUIState = fn;
+    return () => {
+      if (currentGetPageUIState === fn)
+        currentGetPageUIState = null;
+    };
+  }, []);
+}

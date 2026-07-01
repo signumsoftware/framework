@@ -29,7 +29,7 @@ public class FrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButtonCo
 
     public override void Dispose()
     {
-        if (!AvoidClose)
+        if (!AvoidClose && !BrowserProxy.DebugMode)
         {
             string? confirmationMessage = null;
             Selenium.Wait(() =>

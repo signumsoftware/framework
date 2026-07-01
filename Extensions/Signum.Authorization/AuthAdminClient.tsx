@@ -27,30 +27,27 @@ import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink, similarToken } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
 import { AuthMessage, RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
-import { QueryDescription, SubTokensOptions, getTokenParents, isFilterCondition } from '@framework/FindOptions';
+import { QueryDescription, isFilterCondition } from '@framework/FindOptions';
 import { similarTokenToStr } from '@framework/FinderRules';
 import { CollectionMessage } from '@framework/Signum.External';
 import { useAPI } from '@framework/Hooks';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { QuickLinkAction, QuickLinkClient } from '@framework/QuickLinkClient';
+import { getTokenParents, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace AuthAdminClient {
   
-  export let types: boolean;
-  export let properties: boolean;
-  export let operations: boolean;
-  export let queries: boolean | "queryContext";
-  export let permissions: boolean;
+  export const Options: { types: boolean; properties: boolean; operations: boolean; queries: boolean | "queryContext"; permissions: boolean } = {} as any;
   
   export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean | "queryContext"; permissions: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
   
-    types = options.types;
-    properties = options.properties;
-    operations = options.operations;
-    queries = options.queries;
-    permissions = options.permissions;
+    Options.types = options.types;
+    Options.properties = options.properties;
+    Options.operations = options.operations;
+    Options.queries = options.queries;
+    Options.permissions = options.permissions;
   
     AppContext.clearSettingsActions.push(() => urlProviders.clear());
   
@@ -173,7 +170,7 @@ export namespace AuthAdminClient {
           });
         }
       });
-
+  
       fixTypes();
       onReloadTypesActions.push(() => fixTypes());
   
@@ -291,7 +288,7 @@ export namespace AuthAdminClient {
   
     var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 
-    if (queries == "queryContext" && context != null)
+    if (Options.queries == "queryContext" && context != null)
       return result && typeAllowedInDomain(queryKey, context);
 
     return result;

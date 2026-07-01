@@ -1,10 +1,11 @@
 import * as React from 'react'
-import { FindOptions, QueryToken } from '@framework/FindOptions'
+import { FindOptions } from '@framework/FindOptions'
+import { QueryToken } from '@framework/QueryToken'
 import { getQueryKey } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
 import { SearchValue, SearchValueController } from '@framework/Search'
 import { UserQueryClient } from '../../UserQueryClient'
-import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
+import { classes, getContrastingTextColorWCAG, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
 import { useAPI, useForceUpdate, useVersion } from '@framework/Hooks'
@@ -18,7 +19,7 @@ import { toAbsoluteUrl } from '@framework/AppContext'
 import { ToolbarUrl } from '../../../Signum.Toolbar/ToolbarUrl'
 import { ToolbarClient } from '../../../Signum.Toolbar/ToolbarClient'
 import { selectSubEntity } from '../../UserQueryToolbarConfig'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { PanelPartContentProps, DashboardTooltipIcon } from '../../../Signum.Dashboard/DashboardClient'
 
 
 export interface UserQueryPartHandler {
@@ -44,11 +45,11 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
-          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, foObj.groupResults ?? false, qd))
-          .then(fops => {
-            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(foObj.queryName), fops));
-            p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
-          });
+          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, foObj.groupResults ?? false, qd)
+            .then(fops => {
+              p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(foObj.queryName), qd, fops));
+              p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
+            }));
       } else {
         p.dashboardController.clearPinnesFilter(p.partEmbedded);
         p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
@@ -122,6 +123,8 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
 
   var custom = p.content.customBigValue ? BigValueClient.renderCustomBigValue(p.content.customBigValue, { content: p.content, entity: p.entity, value: vsc.current?.value }) : null; 
 
+  const tooltipHtml = translated(p.partEmbedded, pe => pe.tooltip);
+
   function renderCardContent() {
     return (
       <>
@@ -144,11 +147,17 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
               <FontAwesomeIcon role="img" icon={parseIcon(p.partEmbedded.iconName)!} color={p.partEmbedded.iconColor ?? undefined} size="2x" />}
           </div>
         </div>
-        <h2 className="medium h3">{
-          custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
-            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))
-
-        }</h2>
+        <h2 className="medium h3">
+          {custom?.message ?? (translated(p.partEmbedded, a => a.title) ||
+            (p.content.userQuery ? translated(p.content.userQuery, a => a.displayName) : valueToken?.niceName))}
+          {tooltipHtml && (
+            <DashboardTooltipIcon
+              tooltipHtml={tooltipHtml}
+              className="ms-2"
+              iconClassName="sf-tooltip-icon"
+            />
+          )}
+        </h2>
       </>
     );
   }
@@ -157,7 +166,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
     <div className={classes("card", "border-tertiary shadow-sm mb-3 w-100", "o-hidden")}
       style={{
         backgroundColor: customColor ?? undefined,
-        color: Boolean(customColor) ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"
+        color: Boolean(customColor) ? getContrastingTextColorWCAG(customColor!) : "var(--bs-body-color)"
       }}>
       {clickable ? (
         <button
@@ -166,7 +175,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
           className="card-body border-0 bg-transparent text-start w-100"
           style={{
             backgroundColor: customColor ?? undefined,
-            color: p.partEmbedded.titleColor ?? (customColor ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"),
+            color: p.partEmbedded.titleColor ?? (customColor ? getContrastingTextColorWCAG(customColor!) : "var(--bs-body-color)"),
           }}>
           {renderCardContent()}
         </button>
@@ -175,7 +184,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
           className="card-body"
           style={{
             backgroundColor: customColor ?? undefined,
-            color: p.partEmbedded.titleColor ?? (customColor ? getColorContrasColorBWByHex(customColor!) : "var(--bs-body-color)"),
+            color: p.partEmbedded.titleColor ?? (customColor ? getContrastingTextColorWCAG(customColor!) : "var(--bs-body-color)"),
           }}>
           {renderCardContent()}
         </div>

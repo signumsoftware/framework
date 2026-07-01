@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Builder;
 using Signum.API;
-using Signum.API.Filters;
 using Signum.API.Json;
-using Signum.Files.FileTypeAlgorithms;
 using System.Text.Json;
 
 namespace Signum.Files;

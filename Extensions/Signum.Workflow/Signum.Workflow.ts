@@ -107,6 +107,9 @@ export namespace CaseActivityMessage {
   export const CanceledCase: MessageKey = new MessageKey("CaseActivityMessage", "CanceledCase");
   export const AlreadyFinished: MessageKey = new MessageKey("CaseActivityMessage", "AlreadyFinished");
   export const NotCanceled: MessageKey = new MessageKey("CaseActivityMessage", "NotCanceled");
+  export const ResetToCaseActivityIsNotSupportedForDecomposedCases: MessageKey = new MessageKey("CaseActivityMessage", "ResetToCaseActivityIsNotSupportedForDecomposedCases");
+  export const ResetToCaseActivityRequiresAnOpenSubCase: MessageKey = new MessageKey("CaseActivityMessage", "ResetToCaseActivityRequiresAnOpenSubCase");
+  export const AreYouSureYouWantToResetTheCaseBackToTheSelectedActivity: MessageKey = new MessageKey("CaseActivityMessage", "AreYouSureYouWantToResetTheCaseBackToTheSelectedActivity");
 }
 
 export const CaseActivityMixin: Type<CaseActivityMixin> = new Type<CaseActivityMixin>("CaseActivityMixin");
@@ -126,6 +129,7 @@ export namespace CaseActivityOperation {
   export const Timer : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Timer");
   export const MarkAsUnread : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.MarkAsUnread");
   export const Undo : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Undo");
+  export const ResetToCaseActivity : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ResetToCaseActivity");
   export const ScriptExecute : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptExecute");
   export const ScriptScheduleRetry : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptScheduleRetry");
   export const ScriptFailureJump : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptFailureJump");
@@ -696,6 +700,7 @@ export namespace WorkflowMessage {
   export const YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0: MessageKey = new MessageKey("WorkflowMessage", "YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0");
   export const EvaluationOrderOfTheConnectionForIfElse: MessageKey = new MessageKey("WorkflowMessage", "EvaluationOrderOfTheConnectionForIfElse");
   export const SaveAsSVG: MessageKey = new MessageKey("WorkflowMessage", "SaveAsSVG");
+  export const _0Operations: MessageKey = new MessageKey("WorkflowMessage", "_0Operations");
 }
 
 export const WorkflowModel: Type<WorkflowModel> = new Type<WorkflowModel>("WorkflowModel");

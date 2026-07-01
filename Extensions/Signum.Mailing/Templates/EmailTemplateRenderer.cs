@@ -1,6 +1,5 @@
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
-using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.Queries;
 using Signum.Authorization;
@@ -224,7 +223,7 @@ class EmailMessageBuilder
                     EmailOwner = null,
                     EmailAddress = user.Email!,
                     DisplayName = user.DisplayName,
-                    AzureUserId = user.AzureUserId,
+                    AzureUserId = user.ExternalId?.ToGuid(),
                 };
             }
         }
@@ -235,7 +234,7 @@ class EmailMessageBuilder
                 EmailOwner = from.Owner,
                 EmailAddress = from.Email!,
                 DisplayName = from.DisplayName,
-                AzureUserId = from.AzureUserId,
+                AzureUserId = from.ExternalId?.ToGuid(),
             };
         }
         else

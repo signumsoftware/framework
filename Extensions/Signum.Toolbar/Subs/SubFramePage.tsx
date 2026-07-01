@@ -20,8 +20,11 @@ import { useTitle } from '@framework/AppContext'
 import { FunctionalAdapter } from '@framework/Modals'
 import { QueryString } from '@framework/QueryString'
 import { classes } from '@framework/Globals'
-import FramePage, { useLooseChanges } from '../../../Signum/React/Frames/FramePage'
+import FramePage from '../../../Signum/React/Frames/FramePage'
 import { SubsClient } from './SubsClient'
+import MessageModal from '@framework/Modals/MessageModal'
+import { EntityLink } from '@framework/Search'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
@@ -50,12 +53,35 @@ export default function SubFramePage(): React.ReactElement {
   const childType = cti.name;
   const parentType = pti.name;
 
+  const parentLite = React.useMemo(() => newLite(pti.name, params.parentid!), [pti.name, params.parentid]);
+  Navigator.useFillToString(parentLite);
+
   if (state && state.pack.entity.Type != childType)
     state = undefined;
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
-  useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
+  const blocker = useBlocker(() => {
+    const s = stateRef.current;
+    return !!s && hasChanges(s);
+  });
+
+  React.useEffect(() => {
+    if (blocker.state === "blocked") {
+      MessageModal.show({
+        title: JavascriptMessage.loseCurrentChanges.niceToString(),
+        message: JavascriptMessage.loseCurrentChanges.niceToString(),
+        buttons: "yes_no",
+        style: "warning",
+        icon: "warning",
+      }).then(result => {
+        if (result === "yes")
+          blocker.proceed?.();
+        else
+          blocker.reset?.();
+      });
+    }
+  }, [blocker]);
 
   function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement }) {
     return setState({
@@ -225,19 +251,18 @@ export default function SubFramePage(): React.ReactElement {
   function renderTitle() {
 
     if (!state)
-      return <h1 className="display-6 sf-entity-title h3">{JavascriptMessage.loading.niceToString()}</h1>;
+      return <h1 className="sf-breadcrumb-title">{JavascriptMessage.loading.niceToString()}</h1>;
 
     const entity = state.pack.entity;
-    const title = Navigator.renderEntity(entity); 
+    const title = Navigator.renderEntity(entity);
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
     return (
-      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
-        {title && <>
-          <span className="sf-entity-title">{title}</span>&nbsp;
-        </>
-        }
+      <h1 className={classes("border-bottom pb-3 mb-2 sf-breadcrumb-title", settings?.stickyHeader && "sf-sticky-header")} >
+        <EntityLink lite={parentLite} inPlaceNavigation />
+        <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+        {title}
         {(subTitle || widgets) &&
           <div className="sf-entity-sub-title mt-2">
             {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
@@ -256,6 +281,10 @@ function hasChanges(state: FramePageState) {
     return false;
 
   const entity = state.pack.entity;
+
+  if (entity.isNew)
+    return true;
+
   const ge = GraphExplorer.propagateAll(entity);
   if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
     return true

@@ -4,10 +4,10 @@ import { DomUtils, classes, Dic, softCast, isNumber } from '../Globals'
 import { Finder } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed,
-  Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive,
-  hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual,
-  withoutPinned
+  Pagination, OrderOption, OrderOptionParsed, filterOperations, QueryRequest, isActive,
+  FindOptions, isFilterCondition, withoutPinned
 } from '../FindOptions'
+import { getTokenParents, hasElement, hasManual, hasOperation, hasToArray, QueryToken, SubTokensOptions } from '../QueryToken'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType, getTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
@@ -18,6 +18,7 @@ import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
 import ColumnEditor, { columnError, columnSummaryError } from './ColumnEditor'
+import ColumnEditorModal from './ColumnEditorModal'
 import MultipliedMessage, { multiplyResultTokens } from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
 import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem, ContextMenuPack } from './ContextualItems'
@@ -182,7 +183,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
   static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
-  pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
   getMobileOptions(fop: FindOptionsParsed): SearchControlMobileOptions {
@@ -251,7 +251,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   entityColumnTypeInfos(): TypeInfo[] {
-    return getTypeInfos(this.entityColumn().type);
+    return tryGetTypeInfos(this.entityColumn().type).notNull();
   }
 
   canFilter(): boolean {
@@ -591,7 +591,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 <table aria-multiselectable="true" role="grid"
                   aria-label={this.createCaption()}
                   className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
-                  {AccessibleTable.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
+                  {AccessibleTable.Options.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
                     {this.renderHeaders()}
                   </thead>
@@ -632,7 +632,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true, force = false): Promise<void> => {
+  async handleChangeFiltermode(mode: SearchControlFilterMode, refreshFilters: boolean = true, force: boolean = false): Promise<void> {
     if (this.state.filterMode == mode && !force)
       return;
 
@@ -644,7 +644,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
       filterMode: mode
     }, () => this.handleHeightChanged());
-
   }
 
   handleSystemTimeClick = (): void => {
@@ -1049,6 +1048,30 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
+  handleEditAllColumns = (): void => {
+    const fo = this.props.findOptions;
+    const qd = this.props.queryDescription;
+
+    const clonedFO: FindOptionsParsed = {
+      ...fo,
+      columnOptions: fo.columnOptions.map(co => ({ ...co })),
+      orderOptions: fo.orderOptions.map(oo => ({ ...oo })),
+    };
+
+    ColumnEditorModal.show(clonedFO, qd, this.props.querySettings)
+      .then(ok => {
+        if (ok) {
+          fo.groupResults = clonedFO.groupResults;
+          fo.columnOptions.clear();
+          fo.columnOptions.push(...clonedFO.columnOptions);
+          fo.orderOptions.clear();
+          fo.orderOptions.push(...clonedFO.orderOptions);
+          this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+          this.doSearch({ force: true });
+        }
+      });
+  }
+
   handleGroupByThisColumn = async (): Promise<void> => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
@@ -1183,6 +1206,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
           {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+          {cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
@@ -1192,6 +1216,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
           {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
+
 
         menuItems.push(<Dropdown.Divider />);
 
@@ -1208,6 +1233,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}>
         {getResotreDefaultColumnsIcon()}&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
+
+      menuItems.push(<Dropdown.Divider />);
+      menuItems.push(<Dropdown.Item className="sf-edit-all-columns" onClick={this.handleEditAllColumns}>
+        {getEditAllColumnsIcon()}&nbsp;{SearchMessage.EditAllColumns.niceToString()}
+      </Dropdown.Item>);
+
 
       if (fo.columnOptions.some(a => a.hiddenColumn == true)) {
         menuItems.push(<Dropdown.Divider />);
@@ -1861,7 +1892,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   getEntityFormatter(): Finder.EntityFormatter {
     const qs = this.props.querySettings;
-    return this.props.entityFormatter ?? (qs?.entityFormatter) ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
+    return (this.state.resultFindOptions?.groupResults ? null : this.props.entityFormatter ?? qs?.entityFormatter)
+      ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
   }
 
   hasEntityColumn(): boolean | "InPlace" {
@@ -2122,6 +2154,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return (
       <AutoFocus disabled={!this.props.enableAutoFocus}>
         <PinnedFilterBuilder
+          queryDescription={this.props.queryDescription}
           filterOptions={fo.filterOptions}
           pinnedFilterVisible={this.props.pinnedFilterVisible}
           onFiltersChanged={this.handlePinnedFilterChanged}
@@ -2283,6 +2316,16 @@ export function getRemoveColumnIcon(): React.ReactElement {
   </span>
 }
 
+export function getEditAllColumnsIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
+  </span>
+}
+
+export function getTimeMachineIcon(): React.ReactElement {
+  return <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" transform="left-2" color="blue" />
+}
+
 export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
@@ -2360,6 +2403,33 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
 
   const activeFilters = p.sc.props.findOptions.filterOptions.filter(f => isActive(f)).length ?? 0;
 
+  function handleEditColumns() {
+    const fo = p.sc.props.findOptions;
+    const qd = p.sc.props.queryDescription;
+
+    const clonedFO: FindOptionsParsed = {
+      queryKey: fo.queryKey,
+      filterOptions: [],
+      groupResults: fo.groupResults,
+      pagination: fo.pagination,
+      columnOptions: fo.columnOptions.map(co => ({ ...co })),
+      orderOptions: fo.orderOptions.map(oo => ({ ...oo })),
+    };
+
+    ColumnEditorModal.show(clonedFO, qd, p.sc.props.querySettings)
+      .then(ok => {
+        if (ok) {
+          fo.groupResults = clonedFO.groupResults;
+          fo.columnOptions.clear();
+          fo.columnOptions.push(...clonedFO.columnOptions);
+          fo.orderOptions.clear();
+          fo.orderOptions.push(...clonedFO.orderOptions);
+          p.sc.setState({ editingColumn: undefined }, () => p.sc.handleHeightChanged());
+          p.sc.doSearch({ force: true });
+        }
+      });
+  }
+
   return (
     <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
       <Button type="button" variant="tertiary" className="sf-filter-button" aria-label={SearchMessage.Filters.niceToString()} active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
@@ -2372,6 +2442,8 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
         <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
         {props.showSystemTimeButton && <Dropdown.Divider />}
         {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
+        <Dropdown.Divider />
+        <Dropdown.Item onClick={handleEditColumns}>{getEditAllColumnsIcon()}&nbsp;{SearchMessage.EditAllColumns.niceToString()}</Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
   );
@@ -2393,7 +2465,8 @@ function CountEntities(p: { fop: FindOptionsParsed, tis: TypeInfo[] }): React.Re
       columnOptions: [
         { token: "Count" },
         { token: "Entity.Type" },
-      ]
+      ],
+      includeDefaultFilters: false,
     }), []);
 
   return counts == undefined ? <span>…</span> :

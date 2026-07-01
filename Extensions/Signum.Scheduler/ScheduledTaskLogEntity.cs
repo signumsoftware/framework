@@ -1,5 +1,3 @@
-using Signum.Basics;
-
 namespace Signum.Scheduler;
 
 [EntityKind(EntityKind.System, EntityData.Transactional)]
@@ -49,6 +47,13 @@ public class ScheduledTaskLogEntity : Entity
             return "{0} Error: {1}".FormatWith(StartTime, Exception);
         return StartTime.ToString();
     }
+}
+
+public class ScheduledTaskLogDatesDTO
+{
+    public DateTime StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
+    public bool HasException { get; set; }
 }
 
 [AutoInit]

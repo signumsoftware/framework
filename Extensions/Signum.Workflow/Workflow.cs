@@ -162,6 +162,9 @@ public enum WorkflowMessage
 
     [Description("Save as SVG")]
     SaveAsSVG,
+
+    [Description("{0} operations")]
+    _0Operations,
 }
 
 public class WorkflowXmlEmbedded : EmbeddedEntity

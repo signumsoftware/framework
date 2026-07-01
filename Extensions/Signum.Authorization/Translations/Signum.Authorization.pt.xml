@@ -40,14 +40,11 @@
     <Member Name="NotUserLogged" Description="Nenhum utilizador com sessão iniciada" />
     <Member Name="Password" Description="Palavra-passe" />
     <Member Name="PasswordChanged" Description="Palavra-passe alterada" />
-    <Member Name="PasswordComplexityWarning" Description="Você não atendeu aos requisitos de complexidade de senha recomendados (mínimo de 1 letra maiúscula, 1 letra minúscula, 1 número e 1 caractere especial)." />
     <Member Name="PasswordHasBeenChangedSuccessfully" Description="Palara-passe alterada com êxito" />
     <Member Name="PasswordMustHaveAValue" Description="A palavra-passe tem de ter um valor" />
     <Member Name="PasswordsAreDifferent" Description="As palavras-passes são diferentes" />
     <Member Name="RememberMe" Description="Recordar-me" />
     <Member Name="SendEmail" Description="Enviar e-mail" />
-    <Member Name="SuperUserPasswordMustHaveAtLeast0Characters" Description="A senha do super usuário deve ter pelo menos {0} caracteres" />
-    <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="A palavra-passe deve ter pelo menos {0} caracteres" />
     <Member Name="User0IsDisabled" Description="O utilizador {0} está desactivado" />
     <Member Name="Username" Description="Nome de utilizador" />
     <Member Name="Username0IsNotValid" Description="O nome de utilizador {0} não é válido" />
@@ -72,7 +69,6 @@
   <Type Name="QueryRulePack" Description="Pack de regras Query" />
   <Type Name="RoleEntity" Description="Função">
     <Member Name="MergeStrategy" Description="Estratégia de fusão" />
-    <Member Name="MinPasswordLength" Description="Comprimento mínimo da senha" />
     <Member Name="Name" Description="Nome" />
   </Type>
   <Type Name="RoleOperation">

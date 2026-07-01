@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Routing;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization.Rules;
 
@@ -167,8 +164,8 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
     static FrozenDictionary<A, WithConditions<A>> simpleCache = EnumExtensions.GetValues<A>().ToFrozenDictionary(a => a, a => new WithConditions<A>(a, ReadOnlyCollection<ConditionRule<A>>.Empty));
     public static WithConditions<A> Simple(A value) => simpleCache.GetOrThrow(value);
 
-    static Dictionary<WithConditions<A>, WithConditions<A>> Cache = new Dictionary<WithConditions<A>, WithConditions<A>>();
-    public WithConditions<A> Intern() => Cache.GetOrCreate(this, () => this);
+    static ConcurrentDictionary<WithConditions<A>, WithConditions<A>> Cache = new ConcurrentDictionary<WithConditions<A>, WithConditions<A>>();
+    public WithConditions<A> Intern() => Cache.GetOrAdd(this, k => k);
 
     private int CalculateHash()
     {

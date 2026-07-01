@@ -5,6 +5,7 @@ using Signum.API.Filters;
 using Signum.API;
 using Signum.Rest;
 using Signum.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.Rest;
 
@@ -18,10 +19,11 @@ public static class RestApiKeyServer
         SignumAuthenticationFilter.Authenticators.Insert(0, ApiKeyAuthenticator);
     }
 
-    private static SignumAuthenticationResult? ApiKeyAuthenticator(FilterContext ctx)
+    private static SignumAuthenticationResult? ApiKeyAuthenticator(FilterContext ctx) => ApiKeyAuthenticator(ctx.HttpContext);
+    public static SignumAuthenticationResult? ApiKeyAuthenticator(HttpContext httpCtx)
     {
-        ctx.HttpContext.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
-        ctx.HttpContext.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeader, out var headerKeys);
+        httpCtx.Request.Query.TryGetValue(RestApiKeyLogic.ApiKeyQueryParameter, out var val);
+        httpCtx.Request.Headers.TryGetValue(RestApiKeyLogic.ApiKeyHeader, out var headerKeys);
 
         var keys = val.Distinct().Union(headerKeys.Distinct()).NotNull().ToList()!;
 

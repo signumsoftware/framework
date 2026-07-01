@@ -18,4 +18,9 @@ public static class FileLogic
         if (sb.WebServerBuilder != null)
             FilesServer.Start(sb.WebServerBuilder);
     }
+
+    public static FileContent ToFileContent(this FileEntity f)
+    {
+        return new FileContent(f.FileName, f.BinaryFile);
+    }
 }

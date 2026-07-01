@@ -9,12 +9,11 @@ export interface ValidationErrorsHandle {
   forceUpdate() : void; 
 }
 
-export const ValidationErrors: React.ForwardRefExoticComponent<{ entity: ModifiableEntity; prefix: string; } & React.RefAttributes<ValidationErrorsHandle>>
-  = React.forwardRef(function ValidationErrors(p: { entity: ModifiableEntity, prefix: string }, ref: React.Ref<ValidationErrorsHandle>) {
+export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, ref?: React.Ref<ValidationErrorsHandle> }): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
 
-  React.useImperativeHandle(ref, () => ({ forceUpdate }), []);
+  React.useImperativeHandle(p.ref, () => ({ forceUpdate }), []);
 
   const modelState = GraphExplorer.collectModelState(p.entity, p.prefix);
 
@@ -60,4 +59,4 @@ export const ValidationErrors: React.ForwardRefExoticComponent<{ entity: Modifia
       }
     }
   }
-});
+}

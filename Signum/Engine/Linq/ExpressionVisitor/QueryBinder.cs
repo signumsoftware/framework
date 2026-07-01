@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Engine.Linq;
 
@@ -472,15 +471,19 @@ internal class QueryBinder : ExpressionVisitor
     {
         using (SetCurrentSource(source))
         {
+            var oldIsNegated = isNegated;
+            isNegated = false;
             var oldParam = map.TryGetC(lambda.Parameters[0]);
 
             map[lambda.Parameters[0]] = projector;
+        
             Expression result = Visit(lambda.Body);
             if (oldParam == null)
                 map.Remove(lambda.Parameters[0]);
             else
                 map[lambda.Parameters[0]] = oldParam;
 
+            isNegated = oldIsNegated;
             return result;
         }
     }
@@ -518,15 +521,10 @@ internal class QueryBinder : ExpressionVisitor
 
     private ProjectionExpression VisitCastProjection(Expression source)
     {
-        if (isPostgres && source is MemberExpression m && m.Type.IsArray)
+        var unnestCall = TryWrapArrayWithUnnest(source);
+        if (unnestCall != null)
         {
-            var miUnnest = ReflectionTools.GetMethodInfo(() => PostgresFunctions.unnest<int>(null!)).GetGenericMethodDefinition();
-
-            var eType = m.Type.ElementType()!;
-
-            var newSource = Expression.Call(null, miUnnest.MakeGenericMethod(eType), m);
-
-            return BindTableValueFunction(newSource);
+            return BindTableValueFunction(unnestCall);
         }
 
         if (source is MethodCallExpression mc && IsTableValuedFunction(mc))
@@ -539,6 +537,17 @@ internal class QueryBinder : ExpressionVisitor
             var visit = Visit(source);
             return AsProjection(visit);
         }
+    }
+
+    private MethodCallExpression? TryWrapArrayWithUnnest(Expression source)
+    {
+        if (isPostgres && source is MemberExpression m && m.Type.IsArray)
+        {
+            var miUnnest = ReflectionTools.GetMethodInfo(() => PostgresFunctions.unnest<int>(null!)).GetGenericMethodDefinition();
+            var eType = m.Type.ElementType()!;
+            return Expression.Call(null, miUnnest.MakeGenericMethod(eType), m);
+        }
+        return null;
     }
 
     private ProjectionExpression BindTableValueFunction(MethodCallExpression mc)
@@ -1090,7 +1099,7 @@ internal class QueryBinder : ExpressionVisitor
             se = new InExpression(DbExpressionNominator.FullNominate(newItem), new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
         else
         {
-            Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem))!;
+            Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem, safeNull: false))!;
             se = new ExistsExpression(new SelectExpression(alias, false, null, pc.Columns, projection.Select, where, null, null, 0));
         }
 
@@ -1150,15 +1159,51 @@ internal class QueryBinder : ExpressionVisitor
         ProjectionExpression projection = this.VisitCastProjection(source);
         bool outer = OverloadingSimplifier.ExtractDefaultIfEmpty(ref collectionSelector);
 
-        JoinType joinType = IsTable(collectionSelector.Body) && !outer ? JoinType.CrossJoin :
+        // Check if collection selector body is a PostgreSQL array that needs unnest wrapping
+        Expression collectionBody = collectionSelector.Body;
+        var unnestCall = TryWrapArrayWithUnnest(collectionBody);
+        if (unnestCall != null)
+        {
+            collectionBody = unnestCall;
+        }
+
+        JoinType joinType = IsTable(collectionBody) && !outer ? JoinType.CrossJoin :
                             outer ? JoinType.OuterApply :
                             JoinType.CrossApply;
 
-        Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
-            MapVisitExpand(collectionSelector, projection) :
-            MapVisitExpandWithIndex(collectionSelector, ref projection);
+        ProjectionExpression collectionProjection;
 
-        ProjectionExpression collectionProjection = AsProjection(collectionExpression);
+        // If the collection body is a TVF (including unnest), handle it specially
+        if (collectionBody is MethodCallExpression mce && IsTableValuedFunction(mce))
+        {
+            // Handle indexed selector if needed (2 parameters means index is requested)
+            if (collectionSelector.Parameters.Count == 2)
+            {
+                projection = WithIndex(projection, out ColumnExpression index);
+                map.Add(collectionSelector.Parameters[1], index);
+            }
+
+            // Map the parameter before visiting the TVF so arguments can reference it
+            using (SetCurrentSource(projection.Select))
+            {
+                map.Add(collectionSelector.Parameters[0], projection.Projector);
+                collectionProjection = BindTableValueFunction(mce);
+                map.Remove(collectionSelector.Parameters[0]);
+            }
+
+            if (collectionSelector.Parameters.Count == 2)
+            {
+                map.Remove(collectionSelector.Parameters[1]);
+            }
+        }
+        else
+        {
+            Expression collectionExpression = collectionSelector.Parameters.Count == 1 ?
+                MapVisitExpand(collectionSelector, projection) :
+                MapVisitExpandWithIndex(collectionSelector, ref projection);
+
+            collectionProjection = AsProjection(collectionExpression);
+        }
 
         Alias alias = NextSelectAlias();
         if (resultSelector == null)
@@ -1206,7 +1251,9 @@ internal class QueryBinder : ExpressionVisitor
         Expression outerKeyExpr = MapVisitExpand(outerKey, outerProj);
         Expression innerKeyExpr = MapVisitExpand(innerKey, innerProj);
 
-        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.EqualNullable(outerKeyExpr, innerKeyExpr))!;
+        // safeNull: false -> plain equality for the join key. A join matches only on TRUE, so the three-valued
+        // CASE is pointless here, and it would make the condition non-hash/merge-joinable (breaks Postgres FULL JOIN).
+        Expression condition = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(outerKeyExpr, innerKeyExpr, safeNull: false))!;
 
         JoinType jt = rightOuter && leftOuter ? JoinType.FullOuterJoin :
                       rightOuter ? JoinType.RightOuterJoin :
@@ -1497,10 +1544,8 @@ internal class QueryBinder : ExpressionVisitor
         Type returnType = mce.Method.ReturnType;
         var type = returnType.GetGenericArguments()[0];
 
-
-
-        if (mce.Method.DeclaringType == typeof(FullTextSearch) &&
-              mce.Method.Name is nameof(FullTextSearch.ContainsTable) or nameof(FullTextSearch.FreeTextTable))
+        if (mce.Method.DeclaringType == typeof(SqlFullTextSearch) &&
+              mce.Method.Name is nameof(SqlFullTextSearch.ContainsTable) or nameof(SqlFullTextSearch.FreeTextTable))
         {
             var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
             var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
@@ -1518,7 +1563,7 @@ internal class QueryBinder : ExpressionVisitor
                 new SqlLiteralExpression(typeof(object), tab.Name.ToString()),
                 new SqlLiteralExpression(typeof(object),cols == null ?  "*" : ($"({cols.ToString(a=>a.Name, ", ")})")),
                 DbExpressionNominator.FullNominate(mce.GetArgument(
-                    mce.Method.Name is nameof(FullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
+                    mce.Method.Name is nameof(SqlFullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
             };
 
             var rank = DbExpressionNominator.FullNominate(mce.GetArgument("top_n_by_rank"));
@@ -1526,11 +1571,68 @@ internal class QueryBinder : ExpressionVisitor
             if (!rank.IsNull())
                 arguments.Add(rank);
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments, null);
 
             Alias selectAlias = NextSelectAlias();
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
+            pc.Projector, null, returnType);
+
+            return projection;
+        }
+        else if (mce.Method.DeclaringType == typeof(SqlVectorSearch) &&
+                 mce.Method.Name == nameof(SqlVectorSearch.Vector_Search))
+        {
+            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
+            var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
+            var originalType = type.GetGenericArguments()[0];
+
+            Alias tableAlias = NextTableAlias(tab.Name);
+            Alias distanceAlias = NextSelectAlias();
+
+            Expression originalEntity = tab is Table t ? t.GetProjectorExpression(tableAlias, this) :
+                                        tab is TableMList tml ? tml.GetMListElementExpression(tableAlias, this) :
+                                        throw new UnexpectedValueException(tab);
+
+            var col = (IColumn)((ConstantExpression)mce.GetArgument("columns")).Value!;
+            var distanceMetric = (SqlVectorDistanceMetric)((ConstantExpression)mce.GetArgument("distanceMetric")).Value!;
+
+            var arguments = new List<Expression>
+            {
+                new TableExpression(tableAlias, tab, null, null),
+                new SqlLiteralExpression(typeof(string), col.Name),
+                DbExpressionNominator.FullNominate(mce.GetArgument("queryVector")),
+                new SqlConstantExpression(SqlVectorSearch.GetSqlVectorDistanceMetric(distanceMetric), typeof(string)),
+            };
+
+            var topN = DbExpressionNominator.FullNominate(mce.GetArgument("top_n"));
+
+            if (!topN.IsNull())
+                arguments.Add(topN);
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, tab as Table, null, distanceAlias, arguments, new[]
+            {
+                "TABLE",
+                "COLUMN",
+                "SIMILAR_TO",
+                "METRIC",
+                "TOP_N"
+            });
+
+            var distanceColumn = new ColumnExpression(typeof(float), distanceAlias, "Distance");
+
+            var withDistanceExpression = Expression.MemberInit(
+                Expression.New(type),
+                Expression.Bind(type.GetProperty(nameof(WithDistance<>.Original))!, originalEntity),
+                Expression.Bind(type.GetProperty(nameof(WithDistance<>.Distance))!, distanceColumn)
+            );
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(withDistanceExpression, selectAlias);
 
             ProjectionExpression projection = new ProjectionExpression(
                 new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
@@ -1550,7 +1652,7 @@ internal class QueryBinder : ExpressionVisitor
 
             List<Expression> arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), table, null, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), table, null, tableAlias, arguments, null);
 
             Alias selectAlias = NextSelectAlias();
 
@@ -1573,7 +1675,7 @@ internal class QueryBinder : ExpressionVisitor
 
             var arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), null, type, tableAlias, arguments);
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), null, type, tableAlias, arguments, null);
 
             var columnExpression = new ColumnExpression(type, tableAlias, null);
 
@@ -1800,6 +1902,19 @@ internal class QueryBinder : ExpressionVisitor
                 throw new InvalidOperationException("Unexpected source");
 
             return tsVectorColumn;
+        }
+
+        if (m.Method.DeclaringType?.FullName == "Signum.Entities.VectorSearch.VectorExtensions" && m.Method.Name == "GetVectorColumn")
+        {
+            var colArg = m.TryGetArgument("vectorColumnName");
+            var colName = (string)((ConstantExpression)colArg!).Value!;
+
+            var vectorColumn =
+                source is EntityExpression e ? Completed(e).Let(ec => ec.Table.GetVectorColumn(ec.TableAlias!, colName)) :
+                source is MListElementExpression mle ? mle.Table.GetVectorColumn(mle.Alias, colName) :
+                throw new InvalidOperationException("Unexpected source");
+
+            return vectorColumn;
         }
 
         if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))
@@ -2499,8 +2614,22 @@ internal class QueryBinder : ExpressionVisitor
                 return SimplifyRedundandConverts(u).CopyMetadataIfNeeded(u.Operand);
         }
 
+        if (u.NodeType == ExpressionType.Not)
+        {
+            var oldIsNegated = isNegated;
+            isNegated = true;
+            var operand = Visit(u.Operand);
+            isNegated = oldIsNegated;
+
+            if (operand != u.Operand)
+                return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+            return u;
+        }
+
         return base.VisitUnary(u);
     }
+
+    bool isNegated = false;
 
     protected override Expression VisitLambda<T>(Expression<T> lambda)
     {
@@ -2629,7 +2758,7 @@ internal class QueryBinder : ExpressionVisitor
                 return Expression.Coalesce(left, right, b.Conversion);
 
             if (b.NodeType == ExpressionType.Equal)
-                return SmartEqualizer.PolymorphicEqual(left, right);
+                return SmartEqualizer.PolymorphicEqual(left, right, safeNull: isNegated);
 
             if (b.NodeType == ExpressionType.NotEqual)
                 return Expression.Not(SmartEqualizer.PolymorphicEqual(left, right));
@@ -2722,7 +2851,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new UnexpectedValueException(table);
 
         List<ColumnAssignment> assignments = new List<ColumnAssignment>();
-        using (SetCurrentSource(pr.Select.From!))
+        using (SetCurrentSource(pr.Select))
         {
             foreach (var setter in setterExpressions)
             {
@@ -3379,61 +3508,78 @@ internal class QueryBinder : ExpressionVisitor
 
         var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
-        Expression expression;
+        
         using (SetCurrentSource(null!))
         {
             map[cleanLambda.Parameters[0]] = parentEntity;
             map[cleanLambda.Parameters[1]] = af.MListRowId ?? NullId(typeof(int?));
-            expression = Visit(cleanLambda.Body);
-            map.Remove(cleanLambda.Parameters[1]);
-            map.Remove(cleanLambda.Parameters[0]);
-        }
-
-        if (expression is MethodCallExpression mce)
-        {
-            if (mce.Method.DeclaringType == typeof(VirtualMList) && (
-                mce.Method.Name == nameof(VirtualMList.ToVirtualMList) ||
-                mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder)))
+            try
             {
-                var proj = (ProjectionExpression)mce.Arguments[0];
+                // Generalized ToVirtualMList(source, rowId, order?): works for projected elements
+                // (e.g. an EmbeddedEntity) where the rowId/order come from explicit selectors instead
+                // of T : Entity. Handled from the raw body so the selector lambdas keep their parameters.
+                if (cleanLambda.Body is MethodCallExpression rawMce &&
+                    rawMce.Method.DeclaringType == typeof(VirtualMList) &&
+                    rawMce.Method.Name == nameof(VirtualMList.ToVirtualMList) &&
+                    rawMce.Arguments.Count >= 2)
+                {
+                    var proj = (ProjectionExpression)Visit(rawMce.Arguments[0])!;
 
-                if (!entityCompleter)
-                    return proj;
+                    if(proj.Projector is MemberInitExpression initEmbedded && initEmbedded.Type.IsEmbeddedEntity())
+                    {
+                        var newProjector = new EmbeddedEntityExpression(initEmbedded.Type, Expression.Constant(true),
+                            initEmbedded.Bindings.Select(b =>
+                            {
+                                FieldInfo? fi = b.Member as FieldInfo ?? Reflector.FindFieldInfo(initEmbedded.Type, (PropertyInfo)b.Member);
+                                return new FieldBinding(fi, ((MemberAssignment)b).Expression);
+                            }),
+                             null, null, null, null);
 
-                var preserveOrder = mce.Method.Name == nameof(VirtualMList.ToVirtualMListWithOrder);
+                        proj = new ProjectionExpression(proj.Select, newProjector, proj.UniqueFunction, proj.Type);
+                    }
 
-                var ee = (EntityExpression)proj.Projector;
+                    if (!entityCompleter)
+                        return proj;
 
-                var type = mce.Method.GetGenericArguments()[0];
+                    var type = rawMce.Method.GetGenericArguments()[0];
+                    var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
+                    var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) })!;
 
-                var mlistType = typeof(MList<>.RowIdElement).MakeGenericType(type);
+                    var rowIdExpr = ApplyAdditionalSelector(rawMce.Arguments[1], proj.Projector);
+                    if (rowIdExpr.Type != typeof(PrimaryKey))
+                        rowIdExpr = rowIdExpr.UnNullify();
 
-                var ci = mlistType.GetConstructor(new[] { type, typeof(PrimaryKey), typeof(int?) })!;
+                    var orderExpr = rawMce.Arguments.Count >= 3 && rawMce.Arguments[2] is not ConstantExpression { Value: null } ?
+                        ApplyAdditionalSelector(rawMce.Arguments[2], proj.Projector).Nullify() :
+                        (Expression)Expression.Constant(null, typeof(int?));
 
-                var order = preserveOrder ?
-                    ee.GetBinding(Reflector.FindFieldInfo(type, GetOrderColumn(type))) :
-                    (Expression)Expression.Constant(null, typeof(int?));
+                    var newExp = Expression.New(ci, proj.Projector, rowIdExpr, orderExpr);
 
-                var newExp = Expression.New(ci, ee, ee.ExternalId.UnNullify(), order.Nullify());
-
-                return new ProjectionExpression(proj.Select, newExp, proj.UniqueFunction, typeof(IQueryable<>).MakeGenericType(mlistType));
+                    return new ProjectionExpression(proj.Select, newExp, proj.UniqueFunction, typeof(IQueryable<>).MakeGenericType(mlistType));
+                }
+                else
+                {
+                    var expression = Visit(cleanLambda.Body);
+                    return expression;
+                }
+            }
+            finally
+            {
+                map.Remove(cleanLambda.Parameters[1]);
+                map.Remove(cleanLambda.Parameters[0]);
             }
         }
-
-        return expression;
     }
 
-    private static PropertyInfo GetOrderColumn(Type type)
+    // Inlines an additional-field selector lambda (e.g. rowId: x => x.Goal.Id) over an already
+    // bound projector, by mapping the lambda parameter to it and visiting the body.
+    Expression ApplyAdditionalSelector(Expression selectorArg, Expression target)
     {
-        if (!typeof(ICanBeOrdered).IsAssignableFrom(type))
-            throw new InvalidOperationException($"Type '{type.Name}' should implement '{nameof(ICanBeOrdered)}'");
-
-        var pi = type.GetProperty(nameof(ICanBeOrdered.Order), BindingFlags.Instance | BindingFlags.Public);
-
-        if (pi == null)
-            throw new InvalidOperationException("Order Property not found");
-
-        return pi;
+        var lambda = selectorArg.StripQuotes();
+        map[lambda.Parameters[0]] = target;
+        var result = Visit(lambda.Body)!;
+        map.Remove(lambda.Parameters[0]);
+        return result;
     }
 
     internal Alias NextSelectAlias()

@@ -1,4 +1,3 @@
-using Signum.Entities.Validation;
 using Signum.Mailing.Templates;
 using Signum.Processes;
 using Signum.Scheduler;

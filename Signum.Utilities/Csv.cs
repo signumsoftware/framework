@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections;
-using System.IO.Pipes;
 
 namespace Signum.Utilities;
 

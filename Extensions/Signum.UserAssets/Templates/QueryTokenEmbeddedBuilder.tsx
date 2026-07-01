@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { QueryToken, SubTokensOptions } from '@framework/FindOptions'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
 import { Finder } from '../../../Signum/React/Finder'
+import { QueryToken, SubTokensOptions } from '@framework/QueryToken'
 
 interface QueryTokenEmbeddedBuilderProps {
   ctx: TypeContext<QueryTokenEmbedded | null>;

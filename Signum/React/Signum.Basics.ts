@@ -188,6 +188,11 @@ export interface SystemEventLogEntity extends Entities.Entity {
   exception: Entities.Lite<ExceptionEntity> | null;
 }
 
+export const TourTriggerSymbol: Type<TourTriggerSymbol> = new Type<TourTriggerSymbol>("TourTrigger");
+export interface TourTriggerSymbol extends Symbol {
+  Type: "TourTrigger";
+}
+
 export const TranslatableRouteType: EnumType<TranslatableRouteType> = new EnumType<TranslatableRouteType>("TranslatableRouteType");
 export type TranslatableRouteType =
   "Text" |

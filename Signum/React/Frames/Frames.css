@@ -104,6 +104,13 @@
     margin-top: 10px;
 }
 
+.sf-breadcrumb-title {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
 button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
@@ -129,7 +136,7 @@ button.dropdown-item:not(:disabled):not(.disabled) {
 
 a.expand-window {
     cursor: pointer;
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
     margin-top: 10px;
     position: fixed;
     top: 50px;
@@ -138,7 +145,7 @@ a.expand-window {
 }
 
 a.expand-window:hover {
-    color: var(--bs-secondary-text);
+    color: var(--bs-secondary);
 }
 
 .btn-toolbar.right .btn,
@@ -264,4 +271,8 @@ background: var(--bs-body-bg);
 
 .modal-header {
     background: var(--bs-secondary-bg);
+}
+
+.spinner-grow, .spinner-border {
+    border-radius: 50% !important;
 }

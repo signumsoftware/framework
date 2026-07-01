@@ -68,6 +68,8 @@ public abstract class ChartScript
         Symbol = symbol;
     }
 
+    //public abstract string Description { get; }
+
     public ChartScriptSymbol Symbol { get; set; }
     public FileContent Icon { get; set; }
     public List<ChartScriptColumn> Columns { get; set; }

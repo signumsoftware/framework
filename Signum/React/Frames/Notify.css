@@ -35,7 +35,7 @@
 
         #sfNotify span.notify.error {
             background-color: var(--bs-danger-bg-subtle);
-            color: var(--bs-danger-text-emphasis);
+            color: var(--bs-danger-emphasis);
         }
 
         #sfNotify span.notify.warning {

@@ -1,10 +1,8 @@
 using System.ComponentModel;
 using System.Xml.Linq;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.Templating;
-using Signum.Chart.UserChart;
 
 namespace Signum.Mailing.Templates;
 

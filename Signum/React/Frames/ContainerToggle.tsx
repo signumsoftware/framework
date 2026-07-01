@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { classes } from '../Globals'
 import * as AppContext from '../AppContext'
 import { Navigator } from '../Navigator'
@@ -15,8 +15,8 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
   const fluidRef = useUpdatedRef(fluid);
 
   React.useEffect(() => {
-    AppContext.Expander.onGetExpanded = () => fluidRef.current;
-    AppContext.Expander.onSetExpanded = (isExpanded: boolean) => setFluid(isExpanded);
+    AppContext.Expander.Options.onGetExpanded = () => fluidRef.current;
+    AppContext.Expander.Options.onSetExpanded = (isExpanded: boolean) => setFluid(isExpanded);
   }, []);
 
   const forceUpdate = useForceUpdate();
@@ -40,4 +40,5 @@ export default function ContainerToggleComponent(p: { children: React.ReactNode 
     </div>
   );
 }
+
 

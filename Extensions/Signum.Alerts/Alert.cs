@@ -8,6 +8,9 @@ public class AlertEntity : Entity
     [ImplementedByAll]
     public Lite<Entity>? Target { get; set; }
 
+    [StringLengthValidator(Max = 200)]
+    public string? TargetToString { get; set; }
+
     [ImplementedByAll]
     public Lite<Entity>? LinkTarget { get; set; }
 
@@ -192,7 +195,7 @@ public enum AlertMessage
     Show0GroupsMore1Remaining,
 
     [Description("Ringing!")]
-    Ringing, 
+    Ringing
 }
 
 [InTypeScript(true)]

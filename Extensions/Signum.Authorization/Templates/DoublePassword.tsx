@@ -1,57 +1,68 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { UserEntity, UserState, LoginAuthMessage, RoleEntity } from '../Signum.Authorization'
+import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Authorization'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { TypeContext } from '@framework/TypeContext'
 import { classes } from '@framework/Globals'
 import { useForceUpdate } from '@framework/Hooks'
 import { LinkButton } from '@framework/Basics/LinkButton'
 import { AuthClient } from '../AuthClient'
-import { Lite } from '@framework/Signum.Entities'
 
-export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange: ()=> void, userRole?: Lite<RoleEntity> }): React.JSX.Element {
+export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean, onChange?: ()=> void }): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState(p.initialOpen);
-  const [complexityWarning, setComplexityWarning] = React.useState<string | undefined>(undefined);
+  const [passValidation, setPassValidation] = React.useState<AuthClient.PasswordValidationResult | null>(null);
   var newPass = React.useRef<HTMLInputElement>(null);
   var newPass2 = React.useRef<HTMLInputElement>(null);
   const forceUpdate = useForceUpdate();
 
+  async function handlePasswordChange(e: React.SyntheticEvent<any>) {
+    const ctx = p.ctx;
+    const user = ctx.frame!.pack.entity as UserEntity;
+    user.passwordIsChanging = true;
+    user.modified = true;
 
-  async function handlePasswordBlur(e: React.SyntheticEvent<any>) {
+    if (newPass.current!.value && AuthClient.Options.validatePassword) {
+      const result = await AuthClient.Options.validatePassword(newPass.current!.value, user);
+
+      setPassValidation(result);
+        
+      if (result?.level == "error") {
+        ctx.error = result.message;
+      } else {
+        ctx.error = undefined;
+        if (newPass.current?.value && newPass2.current?.value && newPass.current.value != newPass2.current.value) {
+          ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString();
+        }
+      }
+    } else {
+      setPassValidation(null);
+      ctx.error = undefined;
+    }
+    forceUpdate();
+    ctx.frame!.revalidate();
+  }
+
+  function handlePasswordBlur(e: React.SyntheticEvent<any>) {
     const ctx = p.ctx;
 
-    // Validate password complexity and length first (for first password field)
-    if (newPass.current!.value && e.currentTarget === newPass.current) {
-      try {
-        const validationResult = await AuthClient.API.validatePassword(newPass.current!.value);
-        if (validationResult.errorMessage) {
-          ctx.error = validationResult.errorMessage;
-        } else {
-          ctx.error = undefined;
-        }
-        // Always set complexity warning if it exists, regardless of other errors
-        setComplexityWarning(validationResult.complexityWarning);
-      } catch (error) {
-        console.error("Password validation error:", error);
-      }
-    }
+    const firstValue = newPass.current!.value;
+    const secondValue = newPass2.current!.value;
 
-    // Check if passwords match
-    if (newPass.current!.value && newPass2.current!.value) {
-      if (newPass.current!.value != newPass2.current!.value) {
-        ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString();
+    if (passValidation?.level == 'error') {
+      ctx.error = passValidation.message;
       }
-      else {
-        // Only clear error and set value if no validation error exists
-        if (!ctx.error || ctx.error === LoginAuthMessage.PasswordsAreDifferent.niceToString()) {
-          ctx.error = undefined;
-          ctx.value = newPass.current!.value;
-          p.onChange();
-        }
+    else if (firstValue && secondValue && firstValue == secondValue) {
+        ctx.error = undefined;
+      ctx.value = firstValue;
+      const user = ctx.frame!.pack.entity as UserEntity;
+      user.passwordIsChanging = false;
+      setPassValidation(null);
+        p.onChange?.();
       }
+    else if (firstValue || secondValue) {
+      ctx.error = LoginAuthMessage.PasswordsAreDifferent.niceToString();
     }
-    
     forceUpdate();
     ctx.frame!.revalidate();
   }
@@ -68,21 +79,40 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
 
   return (
     <div>
-      <FormGroup ctx={p.ctx} label={LoginAuthMessage.NewPassword.niceToString()}>
-        {inputId => 
+      <FormGroup label={LoginAuthMessage.NewPassword.niceToString()} ctx={p.ctx} error={null} >
+        {inputId => (
           <>
-            <input id={inputId} type="password" ref={newPass} autoComplete="off" placeholder={LoginAuthMessage.NewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />
-            {complexityWarning && (
-              <div className="alert alert-warning mt-2" role="alert">
-                {complexityWarning}
-              </div>
-            )}
+            <input 
+              id={inputId} 
+              type="password" 
+              ref={newPass} 
+              autoComplete="off" 
+              placeholder={LoginAuthMessage.NewPassword.niceToString()} 
+              className={classes(p.ctx.formControlClass, p.mandatory && !newPass.current?.value ? "sf-mandatory" : null, passValidation && "is-invalid")} 
+              onChange={handlePasswordChange} 
+              onBlur={handlePasswordBlur} 
+            />
+            {passValidation && <span className={classes('help-block', passValidation.level == 'error' ? 'text-danger' : 'text-warning')}>{passValidation.message}</span>}
           </>
-        }
+        )}
       </FormGroup>
-      <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()}>
-        {inputId => <input id={inputId} type="password" ref={newPass2} autoComplete="off" placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} onBlur={handlePasswordBlur} />}
+      <FormGroup ctx={p.ctx} label={LoginAuthMessage.ConfirmNewPassword.niceToString()} error={null}>
+        {inputId => (
+          <>
+            <input 
+              id={inputId} 
+              type="password" 
+              ref={newPass2} 
+              autoComplete="off" 
+              placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} 
+              className={classes(p.ctx.formControlClass, p.mandatory && !newPass2.current?.value ? "sf-mandatory" : null)} 
+              onBlur={handlePasswordBlur} 
+            />           
+          </>
+        )}
       </FormGroup>
     </div>
   );
 }
+
+

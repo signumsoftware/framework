@@ -20,8 +20,8 @@ export namespace WindowsADAuthenticator {
 
     AuthClient.authenticators.push(loginWindowsAuthentication);
     AuthClient.Options.AuthHeader = "Signum_Authorization"; //Authorization is used by IIS with Negotiate prefix
-    LoginPage.showLoginForm = "initially_not";
-    LoginPage.customLoginButtons = () => <LoginWithWindowsButton />;
+    AuthClient.LoginOptions.showLoginForm = "initially_not";
+    AuthClient.LoginOptions.customLoginButtons = () => <LoginWithWindowsButton />;
   }
   
   
@@ -70,3 +70,4 @@ export namespace WindowsADAuthenticator {
     );
   }
 }
+

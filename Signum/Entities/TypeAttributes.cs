@@ -72,6 +72,11 @@ public static class EntityKindCache
         return TryGetAttribute(type)?.IsLowPopulation ?? false;
     }
 
+    public static bool SerializeTemportalId(Type type)
+    {
+        return TryGetAttribute(type)?.SerializeTemporalId ?? false;
+    }
+
     public static EntityKindAttribute GetAttribute(Type type)
     {
         var attr = TryGetAttribute(type);
@@ -113,6 +118,9 @@ public sealed class EntityKindAttribute : Attribute
     public EntityData EntityData { get; private set; }
 
     public bool IsLowPopulation { get; set; }
+
+    //Usefull for EntityAssigner.tsx
+    public bool SerializeTemporalId { get; set; }
 
     bool? overridenRequiresSaveOperation;
     public bool RequiresSaveOperation

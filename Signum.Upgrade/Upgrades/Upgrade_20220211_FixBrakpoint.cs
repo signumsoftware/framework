@@ -1,5 +1,3 @@
-using Signum.Utilities;
-
 namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20220211_FixBrakpoint : CodeUpgradeBase

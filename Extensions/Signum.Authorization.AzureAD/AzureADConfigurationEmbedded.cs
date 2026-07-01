@@ -1,5 +1,4 @@
 using Signum.Authorization.BaseAD;
-using Signum.Mailing;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 

@@ -11,7 +11,7 @@ public class EmailOwnerData : IEquatable<EmailOwnerData>
     public string? Email { get; set; }
     public string? DisplayName { get; set; }
     public CultureInfoEntity? CultureInfo { get; set; }
-    public Guid? AzureUserId { get; set; }
+    public string? ExternalId { get; set; }
 
     public override bool Equals(object? obj) => obj is EmailOwnerData eod && Equals(eod);
     public bool Equals(EmailOwnerData? other)
