@@ -471,15 +471,19 @@ internal class QueryBinder : ExpressionVisitor
     {
         using (SetCurrentSource(source))
         {
+            var oldIsNegated = isNegated;
+            isNegated = false;
             var oldParam = map.TryGetC(lambda.Parameters[0]);
 
             map[lambda.Parameters[0]] = projector;
+        
             Expression result = Visit(lambda.Body);
             if (oldParam == null)
                 map.Remove(lambda.Parameters[0]);
             else
                 map[lambda.Parameters[0]] = oldParam;
 
+            isNegated = oldIsNegated;
             return result;
         }
     }
@@ -1095,7 +1099,7 @@ internal class QueryBinder : ExpressionVisitor
             se = new InExpression(DbExpressionNominator.FullNominate(newItem), new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
         else
         {
-            Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem))!;
+            Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem, safeNull: false))!;
             se = new ExistsExpression(new SelectExpression(alias, false, null, pc.Columns, projection.Select, where, null, null, 0));
         }
 
@@ -2610,8 +2614,22 @@ internal class QueryBinder : ExpressionVisitor
                 return SimplifyRedundandConverts(u).CopyMetadataIfNeeded(u.Operand);
         }
 
+        if (u.NodeType == ExpressionType.Not)
+        {
+            var oldIsNegated = isNegated;
+            isNegated = true;
+            var operand = Visit(u.Operand);
+            isNegated = oldIsNegated;
+
+            if (operand != u.Operand)
+                return Expression.MakeUnary(u.NodeType, operand, u.Type, u.Method);
+            return u;
+        }
+
         return base.VisitUnary(u);
     }
+
+    bool isNegated = false;
 
     protected override Expression VisitLambda<T>(Expression<T> lambda)
     {
@@ -2740,7 +2758,7 @@ internal class QueryBinder : ExpressionVisitor
                 return Expression.Coalesce(left, right, b.Conversion);
 
             if (b.NodeType == ExpressionType.Equal)
-                return SmartEqualizer.PolymorphicEqual(left, right);
+                return SmartEqualizer.PolymorphicEqual(left, right, safeNull: isNegated);
 
             if (b.NodeType == ExpressionType.NotEqual)
                 return Expression.Not(SmartEqualizer.PolymorphicEqual(left, right));

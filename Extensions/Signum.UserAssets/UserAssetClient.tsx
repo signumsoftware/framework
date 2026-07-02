@@ -17,7 +17,7 @@ import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
-import { QueryToken } from '@framework/QueryToken';
+import { completeToken, QueryToken } from '@framework/QueryToken';
 
 export namespace UserAssetClient {
   
@@ -62,7 +62,11 @@ export namespace UserAssetClient {
       throw new Error(token.parseException);
 
 
-    return token.token!;
+    // The server omits derived fields (niceName, toStr, fullKey, ...) when they match a default
+    // (see QueryTokenTS: niceName is set to null when it equals toStr). The TokenCompleter restores
+    // them for tokens parsed from a query, but tokens read straight from a stored entity skip that
+    // step, leaving niceName undefined and producing "undefined" titles. completeToken restores them.
+    return completeToken(token.token!);
   }
   
   export namespace Converter {
