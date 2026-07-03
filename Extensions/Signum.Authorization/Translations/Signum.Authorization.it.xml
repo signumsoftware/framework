@@ -44,6 +44,7 @@
     <Member Name="TypeRules" Description="Regole di tipo" />
     <Member Name="Uncheck" Description="Deselezionare" />
     <Member Name="UsedByRoles" Description="Utilizzato dai ruoli" />
+    <Member Name="UsersIncludingInheritedAndMergedRoles" Description="Utenti (inclusi i ruoli ereditati e uniti)" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="DefaultAuthorization" Description="Autorizzazione predefinita: " />

@@ -47,6 +47,7 @@
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="{0} conditions de type pour {1} sont définies." />
     <Member Name="TheUserStateMustBeDisabled" Description="Le statut de l’utilisateur doit être désactivé." />
     <Member Name="TypeRules" Description="Règles de type" />
+    <Member Name="UsersIncludingInheritedAndMergedRoles" Description="Utilisateurs (y compris les rôles hérités et fusionnés)" />
   </Type>
   <Type Name="AuthThumbnail" Description="Vignette d’authentification">
     <Member Name="All" Description="Tout" />

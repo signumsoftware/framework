@@ -50,6 +50,7 @@ export namespace AuthAdminMessage {
   export const Role0InheritsFromTrivialMergeRole1: MessageKey = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
   export const Role0IsTrivialMerge: MessageKey = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
   export const UsedByRoles: MessageKey = new MessageKey("AuthAdminMessage", "UsedByRoles");
+  export const UsersIncludingInheritedAndMergedRoles: MessageKey = new MessageKey("AuthAdminMessage", "UsersIncludingInheritedAndMergedRoles");
   export const Check: MessageKey = new MessageKey("AuthAdminMessage", "Check");
   export const Uncheck: MessageKey = new MessageKey("AuthAdminMessage", "Uncheck");
   export const AddCondition: MessageKey = new MessageKey("AuthAdminMessage", "AddCondition");
