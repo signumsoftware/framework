@@ -855,6 +855,7 @@
     <Member Name="Week" Description="Woche" />
     <Member Name="Year" Description="Jahr" />
   </Type>
+  <Type Name="TourTriggerSymbol" Description="Tour-Trigger" Gender="n" />
   <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
