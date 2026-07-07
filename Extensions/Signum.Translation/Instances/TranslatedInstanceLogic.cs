@@ -14,6 +14,26 @@ public static class TranslatedInstanceLogic
 
     static ResetLazy<FrozenDictionary<CultureInfo, FrozenDictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache = null!;
 
+    /// <summary>
+    /// Optional per-type filters restricting which instances are considered for translation (used by Status and Sync).
+    /// Register in the application Starter, e.g:
+    /// TranslatedInstanceLogic.RegisterFilter&lt;UserQueryEntity&gt;(uq => uq.Dashboards().Any() || uq.Toolbars().Any());
+    /// </summary>
+    public static Dictionary<Type, LambdaExpression> InstanceFilters = new();
+
+    public static void RegisterFilter<T>(Expression<Func<T, bool>> filter) where T : Entity =>
+        InstanceFilters[typeof(T)] = filter;
+
+    static Expression<Func<T, bool>>? GetInstanceFilter<T>(bool applyFilter) where T : Entity =>
+        applyFilter && InstanceFilters.TryGetValue(typeof(T), out var f) ? (Expression<Func<T, bool>>)f : null;
+
+    static IQueryable<T> QueryFiltered<T>(bool applyFilter) where T : Entity
+    {
+        var query = Database.Query<T>();
+        var filter = GetInstanceFilter<T>(applyFilter);
+        return filter == null ? query : query.Where(filter);
+    }
+
     public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
     {
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
@@ -86,7 +106,7 @@ public static class TranslatedInstanceLogic
     }
 
 
-    public static List<TranslatedTypeSummary> TranslationInstancesStatus()
+    public static List<TranslatedTypeSummary> TranslationInstancesStatus(bool applyFilter = true)
     {
         var cultures = TranslationLogic.CurrentCultureInfos(DefaultCulture);
 
@@ -96,13 +116,13 @@ public static class TranslatedInstanceLogic
                 {
                     Type = type,
                     CultureInfo = ci,
-                    State = ci.IsNeutralCulture && ci.Name != DefaultCulture.Name ? GetState(type, ci) : null,
+                    State = ci.IsNeutralCulture && ci.Name != DefaultCulture.Name ? GetState(type, ci, applyFilter) : null,
                 }).ToList();
 
     }
 
 
-    public static Dictionary<LocalizedInstanceKey, string?> FromEntities(Type type)
+    public static Dictionary<LocalizedInstanceKey, string?> FromEntities(Type type, bool applyFilter = false)
     {
         Dictionary<LocalizedInstanceKey, string?>? result = null;
 
@@ -111,8 +131,8 @@ public static class TranslatedInstanceLogic
             var mlist = pr.GetMListItemsRoute();
 
             var dic = mlist == null ?
-                giFromRoute.GetInvoker(type)(pr) :
-                giFromRouteMList.GetInvoker(type, mlist.Type)(pr);
+                giFromRoute.GetInvoker(type)(pr, applyFilter) :
+                giFromRouteMList.GetInvoker(type, mlist.Type)(pr, applyFilter);
 
             if (result == null)
                 result = dic;
@@ -123,25 +143,29 @@ public static class TranslatedInstanceLogic
         return result!;
     }
 
-    static GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>> giFromRoute =
-        new(pr => FromRoute<Entity>(pr));
-    static Dictionary<LocalizedInstanceKey, string?> FromRoute<T>(PropertyRoute pr) where T : Entity
+    static GenericInvoker<Func<PropertyRoute, bool, Dictionary<LocalizedInstanceKey, string?>>> giFromRoute =
+        new((pr, af) => FromRoute<Entity>(pr, af));
+    static Dictionary<LocalizedInstanceKey, string?> FromRoute<T>(PropertyRoute pr, bool applyFilter) where T : Entity
     {
         var selector = pr.GetLambdaExpression<T, string?>(safeNullAccess: false);
 
-        return (from e in Database.Query<T>()
+        return (from e in QueryFiltered<T>(applyFilter)
                 select KeyValuePair.Create(new LocalizedInstanceKey(pr, e.ToLite(), null), selector.Evaluate(e))).ToDictionary();
     }
 
-    static GenericInvoker<Func<PropertyRoute, Dictionary<LocalizedInstanceKey, string?>>> giFromRouteMList =
-        new(pr => FromRouteMList<Entity, EmbeddedEntity>(pr));
-    static Dictionary<LocalizedInstanceKey, string?> FromRouteMList<T, M>(PropertyRoute pr) where T : Entity
+    static GenericInvoker<Func<PropertyRoute, bool, Dictionary<LocalizedInstanceKey, string?>>> giFromRouteMList =
+        new((pr, af) => FromRouteMList<Entity, EmbeddedEntity>(pr, af));
+    static Dictionary<LocalizedInstanceKey, string?> FromRouteMList<T, M>(PropertyRoute pr, bool applyFilter) where T : Entity
     {
         var mlItemPr = pr.GetMListItemsRoute()!;
         var mListProperty = mlItemPr.Parent!.GetLambdaExpression<T, MList<M>>(safeNullAccess: false);
         var selector = pr.GetLambdaExpression<M, string>(safeNullAccess: false, skipBefore: mlItemPr);
+        var filter = GetInstanceFilter<T>(applyFilter);
 
-        return (from mle in Database.MListQuery(mListProperty)
+        var mleQuery = filter == null ? Database.MListQuery(mListProperty) :
+            Database.MListQuery(mListProperty).Where(mle => filter.Evaluate(mle.Parent));
+
+        return (from mle in mleQuery
                 select KeyValuePair.Create(new LocalizedInstanceKey(pr, mle.Parent.ToLite(), mle.RowId), selector.Evaluate(mle.Element))).ToDictionary();
     }
 
@@ -152,11 +176,11 @@ public static class TranslatedInstanceLogic
             kvp => kvp.Value.Where(a => a.Key.Route.RootType == type).ToDictionary());
     }
 
-    static TranslatedSummaryState? GetState(Type type, CultureInfo ci)
+    static TranslatedSummaryState? GetState(Type type, CultureInfo ci, bool applyFilter)
     {
         using (HeavyProfiler.LogNoStackTrace("GetState", () => type.Name + " " + ci.Name))
         {
-            if (!PropertyRouteTranslationLogic.TranslateableRoutes.GetOrThrow(type).Keys.Any(pr => AnyNoTranslated(pr, ci)))
+            if (!PropertyRouteTranslationLogic.TranslateableRoutes.GetOrThrow(type).Keys.Any(pr => AnyNoTranslated(pr, ci, applyFilter)))
                 return TranslatedSummaryState.Completed;
 
             if (Database.Query<TranslatedInstanceEntity>().Count(ti => ti.PropertyRoute.RootType.Is(type.ToTypeEntity()) && ti.Culture.Is(ci.ToCultureInfoEntity())) == 0)
@@ -166,23 +190,23 @@ public static class TranslatedInstanceLogic
         }
     }
 
-    public static bool AnyNoTranslated(PropertyRoute pr, CultureInfo ci)
+    public static bool AnyNoTranslated(PropertyRoute pr, CultureInfo ci, bool applyFilter = true)
     {
         var mlist = pr.GetMListItemsRoute();
 
         if (mlist == null)
-            return giAnyNoTranslated.GetInvoker(pr.RootType)(pr, ci);
+            return giAnyNoTranslated.GetInvoker(pr.RootType)(pr, ci, applyFilter);
 
-        return giAnyNoTranslatedMList.GetInvoker(pr.RootType, mlist.Type)(pr, ci);
+        return giAnyNoTranslatedMList.GetInvoker(pr.RootType, mlist.Type)(pr, ci, applyFilter);
     }
 
-    static GenericInvoker<Func<PropertyRoute, CultureInfo, bool>> giAnyNoTranslated =
-        new((pr, ci) => AnyNoTranslated<Entity>(pr, ci));
-    static bool AnyNoTranslated<T>(PropertyRoute pr, CultureInfo ci) where T : Entity
+    static GenericInvoker<Func<PropertyRoute, CultureInfo, bool, bool>> giAnyNoTranslated =
+        new((pr, ci, af) => AnyNoTranslated<Entity>(pr, ci, af));
+    static bool AnyNoTranslated<T>(PropertyRoute pr, CultureInfo ci, bool applyFilter) where T : Entity
     {
         var exp = pr.GetLambdaExpression<T, string?>(safeNullAccess: false);
 
-        return (from e in Database.Query<T>()
+        return (from e in QueryFiltered<T>(applyFilter)
                 let str = exp.Evaluate(e)
                 let ti = Database.Query<TranslatedInstanceEntity>().SingleOrDefault(ti =>
                     ti.Instance.Is(e) &
@@ -193,16 +217,20 @@ public static class TranslatedInstanceLogic
                 select e).Any();
     }
 
-    static GenericInvoker<Func<PropertyRoute, CultureInfo, bool>> giAnyNoTranslatedMList =
-       new((pr, ci) => AnyNoTranslatedMList<Entity, string>(pr, ci));
-    static bool AnyNoTranslatedMList<T, M>(PropertyRoute pr, CultureInfo ci) where T : Entity
+    static GenericInvoker<Func<PropertyRoute, CultureInfo, bool, bool>> giAnyNoTranslatedMList =
+       new((pr, ci, af) => AnyNoTranslatedMList<Entity, string>(pr, ci, af));
+    static bool AnyNoTranslatedMList<T, M>(PropertyRoute pr, CultureInfo ci, bool applyFilter) where T : Entity
     {
         var mlistItemPr = pr.GetMListItemsRoute()!;
         var mListProperty = mlistItemPr.Parent!.GetLambdaExpression<T, MList<M>>(safeNullAccess: false);
 
         var exp = pr.GetLambdaExpression<M, string?>(safeNullAccess: false, skipBefore: mlistItemPr);
+        var filter = GetInstanceFilter<T>(applyFilter);
 
-        return (from mle in Database.MListQuery(mListProperty)
+        var mleQuery = filter == null ? Database.MListQuery(mListProperty) :
+            Database.MListQuery(mListProperty).Where(mle => filter.Evaluate(mle.Parent));
+
+        return (from mle in mleQuery
                 let str = exp.Evaluate(mle.Element)
                 let ti = Database.Query<TranslatedInstanceEntity>().SingleOrDefaultEx(ti =>
                     ti.Instance.Is(mle.Parent) &&
@@ -386,19 +414,20 @@ public static class TranslatedInstanceLogic
 
 
 
-    public static string ExportExcelFile(Type type, CultureInfo culture, string folder)
+    public static string ExportExcelFile(Type type, CultureInfo culture, string folder, bool applyFilter = true)
     {
-        var fc = ExportExcelFile(type, culture);
+        var fc = ExportExcelFile(type, culture, applyFilter);
         var fileName = Path.Combine(folder, fc.FileName);
         File.WriteAllBytes(fileName, fc.Bytes);
         return fileName;
     }
 
-    public static FileContent ExportExcelFile(Type type, CultureInfo culture)
+    public static FileContent ExportExcelFile(Type type, CultureInfo culture, bool applyFilter = true)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<TranslatedInstanceEntity>(userInterface: true);
+        var master = FromEntities(type, applyFilter);
         var result = TranslationsForType(type, culture).Single().Value
-            .Where(a => isAllowed(a.Value))
+            .Where(a => isAllowed(a.Value) && master.ContainsKey(a.Key))
             .ToDictionary();
 
         var list = result
@@ -418,9 +447,9 @@ public static class TranslatedInstanceLogic
         );
     }
 
-    public static FileContent ExportExcelFileSync(Type type, CultureInfo culture)
+    public static FileContent ExportExcelFileSync(Type type, CultureInfo culture, bool applyFilter = true)
     {
-        var changes = GetInstanceChanges(type, culture, new List<CultureInfo> { DefaultCulture });
+        var changes = GetInstanceChanges(type, culture, new List<CultureInfo> { DefaultCulture }, applyFilter);
 
         var list = (from ic in changes
                     from pr in ic.RouteConflicts
@@ -472,13 +501,13 @@ public static class TranslatedInstanceLogic
         return new TypeCulturePair(type, culture);
     }
 
-    public static List<InstanceChanges> GetInstanceChanges(Type type, CultureInfo targetCulture, List<CultureInfo> cultures)
+    public static List<InstanceChanges> GetInstanceChanges(Type type, CultureInfo targetCulture, List<CultureInfo> cultures, bool applyFilter = true)
     {
         Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>> support = TranslationsForType(type, culture: null);
 
         Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>? target = support.TryGetC(targetCulture);
 
-        var instances = FromEntities(type).GroupBy(a => a.Key.Instance).Select(gr =>
+        var instances = FromEntities(type, applyFilter).GroupBy(a => a.Key.Instance).Select(gr =>
         {
             Dictionary<LocalizedInstanceKey, string> routeConflicts =
                 (from kvp in gr
