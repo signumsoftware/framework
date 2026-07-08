@@ -30,9 +30,13 @@ public static class DashboardLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this DashboardEntity db) =>
         As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.Dashboard.Is(db)));
 
+
     [AutoExpressionField]
-    public static IQueryable<ToolbarEntity> Toolbars(this DashboardEntity db) =>
-        As.Expression(() => Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.Content.Is(db))));
+    public static bool InToolbar(this DashboardEntity uq) =>
+        As.Expression(() =>
+            Database.Query<ToolbarEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq))) ||
+            Database.Query<ToolbarMenuEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq)))
+        );
 
     [AutoExpressionField]
     public static DashboardEntity? Dashboard(this IPartEntity part) =>
@@ -102,7 +106,7 @@ public static class DashboardLogic
                 DefaultIconName = lite => Dashboards.Value.GetOrCreate(lite).IconName,
             }.Register();
 
-            QueryLogic.Expressions.Register((DashboardEntity d) => d.Toolbars(), () => typeof(ToolbarEntity).NicePluralName());
+            QueryLogic.Expressions.Register((DashboardEntity d) => d.InToolbar());
             QueryLogic.Expressions.Register((ToolbarEntity t) => t.Dashboards(), () => typeof(DashboardEntity).NicePluralName());
         });
 

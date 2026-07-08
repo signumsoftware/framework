@@ -33,8 +33,12 @@ public static class UserQueryLogic
             TypeLogic.IsIncluded<ValueUserQueryListPartEntity>() && d.Parts.Any(p => ((ValueUserQueryListPartEntity)p.Content).UserQueries.Any(e => e.UserQuery.Is(uq)))));
 
     [AutoExpressionField]
-    public static IQueryable<ToolbarEntity> Toolbars(this UserQueryEntity uq) =>
-        As.Expression(() => Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.Content.Is(uq))));
+    public static bool InToolbar(this UserQueryEntity uq) =>
+        As.Expression(() => 
+        Database.Query<ToolbarEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq))) ||
+        Database.Query<ToolbarMenuEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq)))
+        );
+
 
     public static void Start(SchemaBuilder sb)
     {
@@ -87,7 +91,7 @@ public static class UserQueryLogic
                 GetRelatedQuery = lite => lite.RetrieveUserQuery().Query,
             }.Register();
 
-            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.Toolbars(), () => typeof(ToolbarEntity).NicePluralName());
+            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.InToolbar());
         });
 
         sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
