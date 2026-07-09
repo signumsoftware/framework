@@ -7,6 +7,7 @@ using Signum.Utilities.DataStructures;
 using System.Text.RegularExpressions;
 using Signum.Templating;
 using Signum.DynamicQuery.Tokens;
+using Signum.Word.Spreedsheet;
 
 namespace Signum.Word;
 
@@ -16,6 +17,10 @@ public class WordTemplateParser : ITemplateParser
     public QueryDescription? QueryDescription { get; private set; }
     public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = null!;
     public Type? ModelType { get; private set; }
+
+    // Row-level @foreach blocks found in spreadsheets, captured before the block is collapsed so the
+    // finalizer can renumber rows and fix formula ranges. Each block remembers its worksheet.
+    public List<SpreadsheetForeachBlock> SpreadsheetForeachBlocks = new();
 
     OpenXmlPackage document;
     WordTemplateEntity template;
@@ -33,6 +38,19 @@ public class WordTemplateParser : ITemplateParser
 
     public void ParseDocument()
     {
+        if (document is SpreadsheetDocument ssd && ssd.WorkbookPart is { } wb)
+        {
+            // Shared formulas would duplicate their shared index/range when a template row is cloned,
+            // corrupting the workbook; expand them to standalone formulas up front.
+            SpreadsheetUtils.DeshareFormulas(wb);
+
+            // Spreadsheets store cell text in a shared, deduplicated string pool (sharedStrings.xml)
+            // that is detached from the sheet's row/cell structure. Move token-bearing strings into
+            // the cells as inline strings first, so tokens (and specially @foreach/@if blocks) can be
+            // resolved against the worksheet rows instead of the flat string pool.
+            SpreadsheetUtils.InlineTokens(wb);
+        }
+
         foreach (var part in document.AllParts().Where(p => p.RootElement != null))
         {
             foreach (var item in part.RootElement!.Descendants())
@@ -43,8 +61,8 @@ public class WordTemplateParser : ITemplateParser
                 if (item is D.Paragraph dp)
                     ReplaceRuns(dp, new DrawingNodeProvider());
 
-                if (item is S.SharedStringItem s)
-                    ReplaceRuns(s, new SpreadsheetNodeProvider());
+                if (item is S.InlineString istr)
+                    ReplaceRuns(istr, new SpreadsheetNodeProvider());
             }
 
 
@@ -321,6 +339,15 @@ public class WordTemplateParser : ITemplateParser
                                 if (fn != null)
                                 {
                                     fn.EndForeachToken = matchNode;
+
+                                    if (fn.NodeProvider is SpreadsheetNodeProvider)
+                                    {
+                                        var ws = fn.ForeachToken.Ancestors<S.Worksheet>().FirstOrDefault();
+                                        var rf = fn.ForeachToken.Ancestors<S.Row>().FirstOrDefault()?.RowIndex?.Value;
+                                        var re = matchNode.Ancestors<S.Row>().FirstOrDefault()?.RowIndex?.Value;
+                                        if (ws != null && rf != null && re != null)
+                                            SpreadsheetForeachBlocks.Add(new SpreadsheetForeachBlock(ws, (int)rf.Value, (int)re.Value));
+                                    }
 
                                     fn.ReplaceBlock();
                                 }
