@@ -406,7 +406,16 @@ public class PropertyRoute : IEquatable<PropertyRoute>
     public Implementations? TryGetImplementations()
     {
         if (this.Type.CleanType().IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
-            return GetImplementations();
+        {
+            try
+            {
+                return GetImplementations();
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+        }
 
         return null;
     }
