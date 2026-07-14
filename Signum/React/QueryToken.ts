@@ -59,7 +59,8 @@ export function completeToken(token: QueryToken): QueryToken {
     t.niceName = t.toStr;
 
   t.queryTokenColor = getQueryTokenColor(t);
-  t.filterType = getFilterType(t.type);
+  if (t.filterType == null)
+    t.filterType = getFilterType(t.type);
   t.niceTypeName =
     t.type.isCollection ? QueryTokenMessage.ListOf0.niceToString(getNiceTypeName({ ...t.type, isCollection: false })) :
       getNiceTypeName(token.type, token.filterType);

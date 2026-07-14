@@ -6,7 +6,7 @@ import { Operations } from '@framework/Operations'
 import { CultureClient } from '@framework/Basics/CultureClient'
 import { TranslatedInstanceClient } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
-import { useParams } from "react-router";
+import { useParams, useLocation } from "react-router";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
@@ -28,10 +28,18 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
   const type = params.type;
   const culture = params.culture;
 
+  const location = useLocation();
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
+  const [applyFilter, setApplyFilter] = React.useState<boolean>(new URLSearchParams(location.search).get("applyFilter") != "false");
 
-  const [result, reloadResult] = useAPIWithReload(() => TranslatedInstanceClient.API.syncTranslatedInstance(type, culture), [type, culture]);
+  const [result, reloadResult] = useAPIWithReload(() => TranslatedInstanceClient.API.syncTranslatedInstance(type, culture, applyFilter), [type, culture, applyFilter]);
+
+  const filterToggle = (
+    <label className="d-block mb-2 text-end">
+      <input type="checkbox" checked={applyFilter} onChange={e => setApplyFilter(e.currentTarget.checked)} /> {TranslationMessage.OnlyRecommendedInstances.niceToString()}
+    </label>
+  );
 
   function renderTable() {
     if (result == undefined || cultures == undefined)
@@ -85,6 +93,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
         <div className="mb-2">
           <h1 className="h2"> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h1>
         </div>
+        {filterToggle}
         {deletedTranslations}
         {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
@@ -99,6 +108,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
       <div className="mb-2">
         <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
       </div>
+      {filterToggle}
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}
     </div>

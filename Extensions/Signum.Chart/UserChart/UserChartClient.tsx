@@ -88,7 +88,7 @@ export namespace UserChartClient {
       icon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
       defaultTitle: c => translated(c.userChart, uc => uc.displayName),
       getQueryNames: c => [c.userChart?.query].notNull(),
-      handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) || !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
         (c, e, cdRef, ev) => {
           return Navigator.view(c.userChart!).then(e => Boolean(e));
         },
@@ -118,7 +118,7 @@ export namespace UserChartClient {
       component: () => import('../Dashboard/View/CombinedUserChartPart').then(a => a.default),
       icon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
       getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
-      handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) || !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
         (c, e, cdRef, ev) => {
           return SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
             buttonDisplay: a => a.userChart.displayName ?? "",

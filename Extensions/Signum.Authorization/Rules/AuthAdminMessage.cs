@@ -74,6 +74,9 @@ public enum AuthAdminMessage
 
     UsedByRoles,
 
+    [Description("Users (including inherited and merged roles)")]
+    UsersIncludingInheritedAndMergedRoles,
+
     Check,
     Uncheck,
 

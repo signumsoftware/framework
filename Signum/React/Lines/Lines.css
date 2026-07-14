@@ -606,6 +606,10 @@ input[type=checkbox].form-control-xs {
     min-height: initial;
 }
 
+.form-control-md { /*required for read-only ones*/
+    min-height: calc(1.5em + 0.75rem + calc(var(--bs-border-width) * 2));
+}
+
 .form-control-sm .rw-widget-picker {
     min-height: 31px;
 }

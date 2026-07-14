@@ -235,6 +235,22 @@ public static class TypeLogic
         return TypeToName.TryGetC(type);
     }
 
+    /// <summary>
+    /// Whether the given entity type is included (has a table) in the current schema.
+    /// Safe to call inside a query expression: it has no query-parameter dependency, so the provider
+    /// evaluates it locally and short-circuits (e.g. <c>IsIncluded&lt;T&gt;() &amp;&amp; ((T)x.Content)...</c>),
+    /// avoiding a cast to a type that is not a registered implementation.
+    /// </summary>
+    public static bool IsIncluded(Type type)
+    {
+        return Schema.Current.Tables.ContainsKey(type);
+    }
+
+    public static bool IsIncluded<T>() where T : Entity
+    {
+        return IsIncluded(typeof(T));
+    }
+
     public static void AssertLoaded()
     {
         var a = TypeToId.Values;

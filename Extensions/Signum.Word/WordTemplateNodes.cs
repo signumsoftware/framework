@@ -3,11 +3,14 @@ using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
 using System.IO;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Signum.DynamicQuery.Tokens;
 using Signum.Templating;
+using Signum.Excel;
 
 namespace Signum.Word;
 
@@ -366,6 +369,9 @@ public class TokenNode : BaseNode
         object? obj = ValueProvider.GetValue(p);
         p.CurrentTokenNode = null;
 
+        if (this.NodeProvider is SpreadsheetNodeProvider && TrySetSpreadsheetCellValue(obj))
+            return;
+
         if (obj is OpenXmlElement oxe)
         {
             if (oxe is W.Paragraph)
@@ -425,6 +431,38 @@ public class TokenNode : BaseNode
                 this.ReplaceBy(NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), text));
             }
         }
+    }
+
+    // In a spreadsheet, a date or number must become a real typed cell value (not text) so that
+    // number formats apply and formulas like SUM/SUMIFS see numbers. Only done when this token is the
+    // cell's sole content; mixed text (e.g. "@[a] @[b]") stays a string. The cell's style (and thus its
+    // number format, e.g. TT.MM.JJJJ) is preserved.
+    private bool TrySetSpreadsheetCellValue(object? obj)
+    {
+        if (obj == null)
+            return false;
+
+        string? numeric =
+            obj is DateTime dt ? ExcelExtensions.ToExcelDate(dt) :
+            obj is DateOnly don ? ExcelExtensions.ToExcelDate(don.ToDateTime()) :
+            ReflectionTools.IsNumber(obj.GetType()) ? Convert.ToDecimal(obj, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture) :
+            null;
+
+        if (numeric == null)
+            return false;
+
+        var cell = this.Ancestors<S.Cell>().FirstOrDefault();
+        var inline = cell?.GetFirstChild<S.InlineString>();
+        if (cell == null || inline == null)
+            return false;
+
+        if (inline.Descendants<S.Text>().Any(t => !string.IsNullOrWhiteSpace(t.Text)))
+            return false; //not the sole content of the cell
+
+        cell.RemoveAllChildren();
+        cell.DataType = null; //numeric cell; keeps its StyleIndex (date/number format)
+        cell.Append(new S.CellValue(numeric));
+        return true;
     }
 
     static string SafeFormat(IFormattable fo, string? format, IFormatProvider provider)

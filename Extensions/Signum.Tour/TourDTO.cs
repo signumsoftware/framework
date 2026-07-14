@@ -3,7 +3,8 @@ using System.Text.Json.Serialization;
 namespace Signum.Tour;
 
 public class TourDTO
-{    
+{
+    public Lite<TourEntity> Tour { get; set; }
     public Lite<Entity> ForEntity { get; set; }
     public List<TourStepDTO> Steps { get; set; } = new List<TourStepDTO>();
     public bool ShowProgress { get; set; }

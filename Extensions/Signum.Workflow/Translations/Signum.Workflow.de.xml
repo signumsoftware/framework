@@ -27,6 +27,7 @@
     <Member Name="DurationRatio" Description="Dauerverhältnis" />
     <Member Name="DurationRealTime" Description="Dauer in Echtzeit" />
     <Member Name="DurationRealTimeRatio" Description="Dauer-Echtzeit-Verhältnis" />
+    <Member Name="IsHistoric" Description="Historisch" />
     <Member Name="Note" Description="Notiz" />
     <Member Name="OriginalWorkflowActivityName" Description="Ursprünglicher Name der Workflow-Aktivität" />
     <Member Name="Previous" Description="Vorherige" />
@@ -44,6 +45,7 @@
     <Member Name="Activity0HasNoJumps" Description="Aktivität &quot;{0}&quot; hat keine Sprünge" />
     <Member Name="Activity0HasNoTimers" Description="Aktivität '{0}' hat kein Timeout" />
     <Member Name="AlreadyFinished" Description="Bereits beendet" />
+    <Member Name="AreYouSureYouWantToResetTheCaseBackToTheSelectedActivity" Description="Möchten Sie den Fall wirklich auf die ausgewählte Aktivität zurücksetzen? Der Fall wird, falls geschlossen, wieder geöffnet, alle späteren Aktivitäten werden rückgängig gemacht (als Historie erhalten) und eine neue ausstehende Aktivität wird erstellt." />
     <Member Name="CanceledCase" Description="Abgebrochener Fall" />
     <Member Name="CaseContainsOtherActivities" Description="Fall enthält andere Aktivitäten" />
     <Member Name="CaseIsADecompositionOf0" Description="Vorgang ist eine Zersetzung von {0}" />
@@ -64,6 +66,8 @@
     <Member Name="Only0CanUndoThisOperation" Description="Nur &quot;{0}&quot; kann diesen Vorgang rückgängig machen." />
     <Member Name="OnlyForScriptWorkflowActivities" Description="Nur für Skript-Workflow-Aktivitäten" />
     <Member Name="Pending" Description="Ausstehend" />
+    <Member Name="ResetToCaseActivityIsNotSupportedForDecomposedCases" Description="Das Zurücksetzen auf diese Aktivität wird nicht unterstützt, da danach eine Zerlegung liegt, die bereits Teilfälle erzeugt hat. Setzen Sie stattdessen auf eine Aktivität an oder nach der Zerlegung zurück." />
+    <Member Name="ResetToCaseActivityRequiresAnOpenSubCase" Description="Das Zurücksetzen auf eine Zerlegung ist nur möglich, solange mindestens einer ihrer Teilfälle noch nicht abgeschlossen ist." />
     <Member Name="PersonalRemarksForThisNotification" Description="Persönliche Anmerkungen für diese Benachrichtigung" />
     <Member Name="ShowHelp" Description="Hilfe anzeigen" />
     <Member Name="TheActivity0RequiresToBeOpened" Description="Die Aktivität &quot;{0}&quot; muss geöffnet werden" />
@@ -82,6 +86,7 @@
     <Member Name="MarkAsUnread" Description="Als ungelesen markieren" />
     <Member Name="Next" Description="Nächstes" />
     <Member Name="Register" Description="Anlegen" />
+    <Member Name="ResetToCaseActivity" Description="Auf diese Aktivität zurücksetzen" />
     <Member Name="ScriptExecute" Description="Skript ausführen" />
     <Member Name="ScriptFailureJump" Description="Skript Fehler springen" />
     <Member Name="ScriptScheduleRetry" Description="Skript-Zeitplan wiederholen" />

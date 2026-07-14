@@ -254,6 +254,16 @@ public sealed class FieldWithoutPropertyAttribute : Attribute
 {
 }
 
+/// <summary>
+/// The field has a database column (unlike <see cref="IgnoreAttribute"/>) and is written on INSERT,
+/// but is excluded from the UPDATE statement, so saving the entity never overrides the stored value.
+/// Useful for columns whose value is managed externally (e.g. through an UnsafeUpdate from a parent entity).
+/// </summary>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+public sealed class AvoidSaveAttribute : Attribute
+{
+}
+
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class ForceNotNullableAttribute : Attribute
 {

@@ -85,17 +85,17 @@ export namespace TranslatedInstanceClient {
   
   export namespace API {
   
-    export function status(): Promise<TranslatedTypeSummary[]> {
-      return ajaxGet({ url: "/api/translatedInstance" });
+    export function status(applyFilter?: boolean): Promise<TranslatedTypeSummary[]> {
+      return ajaxGet({ url: "/api/translatedInstance?" + QueryString.stringify({ applyFilter }) });
     }
   
-    export function downloadView(type: string, culture: string | undefined): void {
-      ajaxGetRaw({ url: `/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture })}` })
+    export function downloadView(type: string, culture: string | undefined, applyFilter?: boolean): void {
+      ajaxGetRaw({ url: `/api/translatedInstance/viewFile/${type}?${QueryString.stringify({ culture, applyFilter })}` })
         .then(response => saveFile(response));
     }
-  
-    export function downloadSync(type: string, culture: string | undefined): void {
-      ajaxGetRaw({ url: `/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture })}` })
+
+    export function downloadSync(type: string, culture: string | undefined, applyFilter?: boolean): void {
+      ajaxGetRaw({ url: `/api/translatedInstance/syncFile/${type}?${QueryString.stringify({ culture, applyFilter })}` })
         .then(response => saveFile(response));
     }
   
@@ -108,12 +108,12 @@ export namespace TranslatedInstanceClient {
       content: string;
     }
   
-    export function viewTranslatedInstanceData(type: string, culture: string | undefined, filter: string | undefined): Promise<TranslatedInstanceViewType> {
-      return ajaxGet({ url: `/api/translatedInstance/view/${type}?${QueryString.stringify({ culture, filter })}` });
+    export function viewTranslatedInstanceData(type: string, culture: string | undefined, filter: string | undefined, applyFilter?: boolean): Promise<TranslatedInstanceViewType> {
+      return ajaxGet({ url: `/api/translatedInstance/view/${type}?${QueryString.stringify({ culture, filter, applyFilter })}` });
     }
-  
-    export function syncTranslatedInstance(type: string, culture: string): Promise<TypeInstancesChanges> {
-      return ajaxGet({ url: `/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
+
+    export function syncTranslatedInstance(type: string, culture: string, applyFilter?: boolean): Promise<TypeInstancesChanges> {
+      return ajaxGet({ url: `/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture, applyFilter })}` });
     }
   
     export function autoTranslate(type: string, culture: string): Promise<void> {

@@ -105,6 +105,8 @@ public enum TranslationMessage
     [Description("Translation for {0}")]
     TranslationFor0_,
     OnlyNeutralCultures,
+    [Description("Only recommended instances")]
+    OnlyRecommendedInstances,
     [Description("from {0} using {1}")]
     From0using1_,
     [Description("Select a .xlsx file with the translations")]

@@ -183,7 +183,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
   static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
 
-  pageSubTitle?: string;
   extraUrlParams: { [key: string]: string | undefined } = {};
 
   getMobileOptions(fop: FindOptionsParsed): SearchControlMobileOptions {
@@ -1994,7 +1993,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {this.props.allowSelection &&
             <td className="centered-cell">
               {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
-                <input type="checkbox"
+                <input type={this.props.allowSelection == "single" ? "radio" : "checkbox"}
+                  name={this.props.allowSelection == "single" ? `sf-td-selection-${this.props.findOptions.queryKey}` : undefined}
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
@@ -2114,7 +2114,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               {this.props.allowSelection &&
                 <span className="row-selection">
                   {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
-                    <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e => this.handleChecked(e, i)} data-index={i} />}
+                    <input type={this.props.allowSelection == "single" ? "radio" : "checkbox"} name={this.props.allowSelection == "single" ? `sf-td-selection-${this.props.findOptions.queryKey}` : undefined} className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e => this.handleChecked(e, i)} data-index={i} />}
                 </span>
               }
 

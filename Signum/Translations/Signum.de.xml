@@ -401,8 +401,8 @@
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
   </Type>
   <Type Name="MarkdownMessage">
-    <Member Name="_0IsCurrentlyEditable" Description="{0} ist derzeit bearbeitbar" />
-    <Member Name="_0IsCurrentlyViewableOnly" Description="{0} ist derzeit nur einsehbar" />
+    <Member Name="Edit0" Description="Edit {0}" />
+    <Member Name="Preview0" Description="Vorschau {0}" />
   </Type>
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
@@ -745,7 +745,7 @@
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
-    <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
+    <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elementen" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinFilter" Description="Pin-Filter" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
@@ -855,6 +855,7 @@
     <Member Name="Week" Description="Woche" />
     <Member Name="Year" Description="Jahr" />
   </Type>
+  <Type Name="TourTriggerSymbol" Description="Tour-Trigger" Gender="n" />
   <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />

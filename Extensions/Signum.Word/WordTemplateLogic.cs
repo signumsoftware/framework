@@ -9,6 +9,7 @@ using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.TokenMigrations;
 using Signum.Utilities.DataStructures;
+using Signum.Word.Spreedsheet;
 using System.Collections.Frozen;
 using System.Data;
 using System.Globalization;
@@ -407,6 +408,12 @@ public static class WordTemplateLogic
                             p.Switch("AssertClean");
                             renderer.AssertClean();
 
+                            if (document is SpreadsheetDocument ssd && ssd.WorkbookPart is { } workbookPart)
+                            {
+                                p.Switch("FinalizeSpreadsheet");
+                                SpreadsheetUtils.Finalize(workbookPart, parser.SpreadsheetForeachBlocks); Dump(document, "3b.Spreadsheet.txt");
+                            }
+
                             p.Switch("FixDocument");
                             FixDocument(document); Dump(document, "4.Fixed.txt");
 
@@ -501,7 +508,7 @@ public static class WordTemplateLogic
                     case UserAssetEntityActionType.Regenerate: RegenerateWordTemplateAndFile(ctx, wt); return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(wt, ex); return; }
+            catch (Exception ex) { ctx.LogError(wt, ex); return; }
         }
 
         Console.Write(".");
@@ -677,19 +684,14 @@ public static class WordTemplateLogic
                     try
                     {
                         SaveWordTemplate(wt, file, fileTouched, entityTouched);
-                        ctx.LogEntityChange(wt, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(wt, ex); }
-                }
-                else
-                {
-                    ctx.LogEntityChange(wt, changes.ToArray());
+                    catch (Exception ex) { ctx.LogError(wt, ex); }
                 }
             }
         }
         catch (Exception ex)
         {
-            ctx.LogEntityError(wt, ex);
+            ctx.LogError(wt, ex);
         }
     }
 
@@ -703,8 +705,6 @@ public static class WordTemplateLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Skip);
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Skip);
     }
 
     /// <summary>
@@ -727,8 +727,6 @@ public static class WordTemplateLogic
                 tr.Commit();
             }
         }
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Delete);
     }
 
     /// <summary>
@@ -740,7 +738,6 @@ public static class WordTemplateLogic
         if (ctx.Mode == TokenSyncMode.Record)
         {
             ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Regenerate);
-            ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
             return;
         }
 
@@ -763,8 +760,6 @@ public static class WordTemplateLogic
             wt.Save();
             tr.Commit();
         }
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
     }
 
     /// <summary>

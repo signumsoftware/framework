@@ -71,7 +71,13 @@ export namespace Finder {
     AppContext.clearSettingsActions.push(clearManualSubTokens);
     AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
     AppContext.clearSettingsActions.push(resetFormatRules);
+    AppContext.clearSettingsActions.push(cleanSearchPageTitleOptions);
     onReloadTypesActions.push(clearQueryDescriptionCache);
+  }
+
+  function cleanSearchPageTitleOptions() {
+    Options.onSearchPageRenderTitle = [];
+    Options.onSearchPageTitleElements = [];
   }
 
   export function addSettings(...settings: QuerySettings[]): void {
@@ -170,6 +176,15 @@ export namespace Finder {
     getSearchModal(): Promise<typeof import("./SearchControl/SearchModal")> {
       return import("./SearchControl/SearchModal");
     },
+
+    /** Extension point to override the leading content of the search page title (e.g. render it as a
+ * breadcrumb). Receives the SearchControlLoaded and the default title node; the first non-null
+ * result wins, otherwise the default title is used. Used by both SearchPage and UserQueryPage. */
+    onSearchPageRenderTitle: [] as ((scl: SearchControlLoaded, defaultTitle: React.ReactNode) => React.ReactNode | undefined)[],
+
+    /** Extension point to render extra elements (e.g. a TourButton) on the right of the search page title.
+    * Used by both SearchPage and UserQueryPage. */
+    onSearchPageTitleElements: [] as ((scl: SearchControlLoaded) => React.ReactNode)[],
 
     entityColumnHeader: (() => "") as () => React.ReactElement | string | null | undefined,
 

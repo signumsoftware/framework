@@ -118,7 +118,8 @@
     <Member Name="Maximize" Description="Maximieren" />
     <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
-    <Member Name="NewPalette" Description="Neue Palette" />
+	<Member Name="NewPalette" Description="Neue Palette" />
+	<Member Name="Blank" Description="(leer)" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht erlaubt" />
     <Member Name="QueryResultReachedMaxRows0" Description="Abfrageergebnis hat max. Zeilen erreicht ({0})" />

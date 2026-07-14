@@ -27,7 +27,7 @@ import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
-import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameter, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameter, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript, ChartMessage } from './Signum.Chart';
 import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
 import { CachedQueryJS, getAllFilterTokens, getCachedResultTable } from '../Signum.Dashboard/CachedQueryExecutor';
 import { UserQueryClient } from '../Signum.UserQueries/UserQueryClient';
@@ -866,13 +866,16 @@ export namespace ChartClient {
   
       return v => v == null ? "#555" : null;
     }
+
+    export const nullString = (qt: QueryToken) : string => ChartMessage.Blank.niceToString();
   
     export function getNiceName(token: QueryToken, chartColumn: ChartColumnEmbedded): ((val: unknown, width?: number) => string) {
   
       if (token.type.isLite)
         return v => {
           var lite = v as Lite<Entity> | null;
-          return String(getToString(lite) ?? "");
+
+          return lite == null ? nullString(token) : getToString(lite);
         };
   
       if (token.filterType == "Enum")
@@ -880,7 +883,7 @@ export namespace ChartClient {
           var value = v as string | null;
   
           if (!value)
-            return String(null);
+            return nullString(token);
   
           var ei = getEnumInfo(token.type.name, value as any as number);
           return ei ? ei.niceName : value;
@@ -890,7 +893,7 @@ export namespace ChartClient {
         return (v, width) => {
           var date = v as string | null;
           if (date == null)
-            return String(null);
+            return nullString(token);
   
           var luxonFormat = toLuxonFormat(chartColumn.format || token.format, token.type.name as "DateOnly" | "DateTime");
           var result = toFormatWithFixes(DateTime.fromISO(date), luxonFormat);
@@ -905,7 +908,7 @@ export namespace ChartClient {
         return v => {
           var date = v as string | null;
           var format = chartColumn.format || token.format;
-          return date == null ? String(null) : timeToString(date, format);
+          return date == null ? nullString(token) : timeToString(date, format);
         };
   
       if ((token.filterType == "Decimal" || token.filterType == "Integer"))
@@ -913,10 +916,10 @@ export namespace ChartClient {
           var number = v as number | null;
           var format = chartColumn.format || (token.key == "Sum" ? "K1" : undefined) || token.format || "0";
           var numFormat = toNumberFormat(format);
-          return number == null ? String(null) : numFormat.format(number);
+          return number == null ? nullString(token) : numFormat.format(number);
         };
   
-      return v => String(v);
+      return v => v == null ? nullString(token) : String(v);
     }
   
     export function getParameterWithDefault(request: ChartRequestModel, chartScript: ChartScript): Record<ChartParameter, string> {
