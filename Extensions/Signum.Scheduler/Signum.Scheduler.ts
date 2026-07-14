@@ -116,6 +116,7 @@ export namespace ScheduledTaskMessage {
   export const SchedulePanel: MessageKey = new MessageKey("ScheduledTaskMessage", "SchedulePanel");
   export const Start: MessageKey = new MessageKey("ScheduledTaskMessage", "Start");
   export const Stop: MessageKey = new MessageKey("ScheduledTaskMessage", "Stop");
+  export const Dates: MessageKey = new MessageKey("ScheduledTaskMessage", "Dates");
 }
 
 export namespace ScheduledTaskOperation {

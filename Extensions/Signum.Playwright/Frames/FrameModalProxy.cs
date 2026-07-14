@@ -1,7 +1,5 @@
-using Microsoft.Playwright;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
-using System.Diagnostics;
 
 namespace Signum.Playwright.Frames;
 

@@ -1,8 +1,8 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from 'react-bootstrap'
 import { Overlay } from 'react-bootstrap'
-import { HtmlViewer } from '../Admin/TextPart'
+import HtmlViewer from '../../Signum.HtmlEditor/HtmlViewer';
 
 export interface DashboardTooltipIconProps {
   tooltipHtml: string;
@@ -93,3 +93,5 @@ export function DashboardTooltipIcon(p: DashboardTooltipIconProps): React.JSX.El
     </>
   );
 }
+
+

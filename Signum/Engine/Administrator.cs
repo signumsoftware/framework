@@ -156,31 +156,42 @@ public static class Administrator
 
     public static Func<bool> AvoidSimpleSynchronize = () => false;
 
+    /// <summary>
+    /// Fires at the end of <see cref="Synchronize"/>, after the sync script (if any) has been
+    /// opened. Subscribers (e.g. token-migration recorder) can chain follow-up prompts here so
+    /// devs see them as part of their normal sync muscle memory.
+    /// </summary>
+    public static event Action<string? /*fileName*/, Replacements?>? AfterSynchronize;
+
     public static void Synchronize()
     {
         if (AvoidSimpleSynchronize())
-            return; 
+            return;
 
         Console.WriteLine();
 
-        SqlPreCommand? command = Administrator.TotalSynchronizeScript();
+        SqlPreCommand? command = Administrator.TotalSynchronizeScript(out var rep);
         if (command == null)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized!");
+            AfterSynchronize?.Invoke(null, null);
             return;
         }
 
-        command.OpenSqlFileRetry();
+        var fileName = "Sync {0:yyyy-MM-dd HH_mm_ss}.sql".FormatWith(DateTime.Now);
+        command.OpenSqlFileRetry(fileName);
 
         GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
         Schema.Current.InvalidateCache();
+
+        AfterSynchronize?.Invoke(fileName, rep);
     }
 
-    public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)
+    public static SqlPreCommand? TotalSynchronizeScript(out Replacements replacements, bool interactive = true, bool schemaOnly = false)
     {
 
-        var command = Schema.Current.SynchronizationScript(interactive, schemaOnly);
+        var command = Schema.Current.SynchronizationScript(out replacements, interactive, schemaOnly);
 
         if (command == null)
             return null;
@@ -950,6 +961,8 @@ public static class Administrator
                 PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
                 pg.ChangeConnectionStringDatabase(dbName);
+
+                SchemaSynchronizer.SyncPostgresDefaultTextLanguage()?.ExecuteLeaves();
             });
         }
         else 
@@ -970,6 +983,8 @@ public static class Administrator
             PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
             pg.ChangeConnectionStringDatabase(dbName);
+            
+            SchemaSynchronizer.SyncPostgresDefaultTextLanguage()?.ExecuteLeaves();
         }
         else
             throw new UnexpectedValueException(Connector.Current);
@@ -1030,10 +1045,7 @@ public static class Administrator
                 Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)};""");
             else
                 Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)} WITH TEMPLATE {fromTemplate.SqlEscape(true)};""");
-
         }
-
-      
 
         private static void CloseConnections(string dbName)
         {

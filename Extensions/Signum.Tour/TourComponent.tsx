@@ -10,7 +10,9 @@ import { TourEntity, TourMessage, TourTriggerSymbol } from "./Signum.Tour";
 import { useAPI } from "@framework/Hooks";
 import { TourClient, TourDTO } from "./TourClient";
 import { Entity,
-  Lite } from "@framework/Signum.Entities";
+  Lite,
+  isLite,
+  liteKey } from "@framework/Signum.Entities";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCompass } from "@fortawesome/free-solid-svg-icons";
 import { getTypeName,
@@ -20,10 +22,11 @@ import { classes } from "@framework/Globals";
 import { JSX } from "react/jsx-runtime";
 import { micromark } from "micromark";
 
-export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }): JSX.Element | null {
-  const storageKey = TourTriggerSymbol.isInstance(p.trigger)
-    ? `tour-viewed-${p.trigger.key}` 
-    : `tour-viewed-${getTypeName(p.trigger)}`;
+export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol | Lite<Entity> }): JSX.Element | null {
+  const storageKey =
+    isLite(p.trigger) ? `tour-viewed-${liteKey(p.trigger)}` :
+    TourTriggerSymbol.isInstance(p.trigger) ? `tour-viewed-${p.trigger.key}` :
+    `tour-viewed-${getTypeName(p.trigger)}`;
 
   const [hasViewed, setHasViewed] = React.useState(() => {
     return localStorage.getItem(storageKey) === "true";
@@ -32,7 +35,9 @@ export function TourButton(p: { trigger: PseudoType | TourTriggerSymbol }): JSX.
   const [startTour, setStartTour] = React.useState(false);
 
   const tour = useAPI(() => {
-    if (TourTriggerSymbol.isInstance(p.trigger)) {
+    if (isLite(p.trigger)) {
+      return TourClient.API.getTourByLite(p.trigger);
+    } else if (TourTriggerSymbol.isInstance(p.trigger)) {
       return TourClient.API.getTourBySymbol(p.trigger.key);
     } else {
       return TourClient.API.getTourByEntity(getTypeName(p.trigger));

@@ -22,7 +22,7 @@ export interface ReactChartProps {
 
 function ReactChart(p: ReactChartProps): React.JSX.Element {
 
-  const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
+  const isSimple = p.data == null || p.data.rows.length < ReactChart.Options.maxRowsForAnimation;
   const oldData = useThrottle(p.data, 200, { enabled: isSimple });
   const initialLoad = oldData == null && p.data != null && isSimple;
 
@@ -52,7 +52,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
 }
 
 namespace ReactChart {
-   export let maxRowsForAnimation = 500;
+  export const Options = { maxRowsForAnimation: 500 };
 }
 
 export default ReactChart;

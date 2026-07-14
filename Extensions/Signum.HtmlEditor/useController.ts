@@ -26,7 +26,7 @@ type ControllerProps = {
   small?: boolean;
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  extensions?: HtmlEditorExtension[];
+  extensionsMemo?: HtmlEditorExtension[];
   initiallyFocused?: boolean | number;
   handleKeybindings?: HtmlEditorProps["handleKeybindings"];
 };
@@ -43,7 +43,7 @@ export const useController = ({
   small,
   converter,
   innerRef,
-  extensions,
+  extensionsMemo,
   initiallyFocused,
   handleKeybindings,
   editableId,
@@ -59,15 +59,15 @@ export const useController = ({
       new CodeBlockExtension(),
     ];
 
-    if (!extensions) {
+    if (!extensionsMemo) {
       return defaultExtensions;
     }
 
-    const result = [...defaultExtensions, ...extensions];
+    const result = [...defaultExtensions, ...extensionsMemo];
     result.toObject((a) => a.name); // To throw if there are duplicates
 
     return result;
-  }, [extensions, controller]);
+  }, [extensionsMemo, controller]);
 
   React.useEffect(() => {
     if (!controller.editor) return;
@@ -94,11 +94,11 @@ export const useController = ({
 
   const nodes = React.useMemo(() => {
     return finalExtension.flatMap((e) => e.getNodes?.() ?? []);
-  }, [extensions]);
+  }, [finalExtension]);
 
   const builtinPlugins = React.useMemo(() => {
     return finalExtension.map((e) => e.getBuiltPlugin?.()).notNull();
-  }, [extensions]);
+  }, [finalExtension]);
 
   return { controller, nodes, builtinPlugins };
 };

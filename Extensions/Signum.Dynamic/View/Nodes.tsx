@@ -1565,7 +1565,7 @@ export namespace NodeConstructor {
     [typeName: string]: (mi: MemberInfo, field: string) => BaseNode | undefined;
   } = {};
 
-  export var appropiateComponent = (mi: MemberInfo, field: string): BaseNode | undefined => {
+  export const appropiateComponent = (mi: MemberInfo, field: string): BaseNode | undefined => {
     if (mi.name == "Id" || mi.notVisible == true)
       return undefined;
 

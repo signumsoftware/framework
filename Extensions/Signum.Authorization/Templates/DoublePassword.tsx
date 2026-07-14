@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserEntity, UserState, LoginAuthMessage } from '../Signum.Authorization'
 import { FormGroup } from '@framework/Lines/FormGroup'
@@ -22,8 +22,8 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
     user.passwordIsChanging = true;
     user.modified = true;
 
-    if (newPass.current!.value && AuthClient.validatePassword) {
-      const result = await AuthClient.validatePassword(newPass.current!.value, user);
+    if (newPass.current!.value && AuthClient.Options.validatePassword) {
+      const result = await AuthClient.Options.validatePassword(newPass.current!.value, user);
 
       setPassValidation(result);
         
@@ -114,4 +114,5 @@ export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boole
     </div>
   );
 }
+
 

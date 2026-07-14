@@ -282,9 +282,9 @@ public class FilterCondition : Filter
         if (operation == FilterOperation.SmartSearch)
             return typeof(string);
 
-        if (operation.IsList())
+        if (operation.IsList() || operation.IsPair())
             return typeof(IEnumerable<>).MakeGenericType(token.Type.Nullify());
-        
+
         return token.Type;
     }
 
@@ -404,6 +404,34 @@ public class FilterCondition : Filter
                 return Expression.Not(result);
 
             throw new InvalidOperationException("Unexpected operation");
+        }
+        else if (Operation.IsPair())
+        {
+            if (Value == null)
+                return Expression.Constant(true);
+
+            IList pair = (IList)Value;
+            var min = pair[0];
+            var max = pair[1];
+
+            var leftN = left.Nullify();
+            var nullableType = Token.Type.Nullify();
+
+            Expression? geMin = min == null ? null :
+                QueryUtils.GetCompareExpression(FilterOperation.GreaterThanOrEqual, leftN, Expression.Constant(min, nullableType), inMemory);
+            Expression? leMax = max == null ? null :
+                QueryUtils.GetCompareExpression(
+                    Operation == FilterOperation.BetweenNoEnd ? FilterOperation.LessThan : FilterOperation.LessThanOrEqual,
+                    leftN, Expression.Constant(max, nullableType), inMemory);
+
+            if (geMin == null && leMax == null)
+                return Expression.Constant(true);
+            if (geMin == null)
+                return leMax!;
+            if (leMax == null)
+                return geMin;
+
+            return Expression.AndAlso(geMin, leMax);
         }
         else if (Operation.IsTsQuery())
         {
@@ -561,7 +589,8 @@ public enum FilterOperation
     IsIn,
     [Description("is not in")]
     IsNotIn,
-    
+
+
     [Description("complex condition")]
     ComplexCondition, //Full Text Search SQL Server
     [Description("free text")]
@@ -579,6 +608,12 @@ public enum FilterOperation
 
     [Description("smart search")]
     SmartSearch, //Vector Search with Embeddings
+
+    [Description("between")]
+    Between,
+
+    [Description("between (no end)")]
+    BetweenNoEnd,
 }
 
 [InTypeScript(true)]

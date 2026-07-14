@@ -54,7 +54,9 @@ export type FilterOperation =
   "TsQuery_Plain" |
   "TsQuery_Phrase" |
   "TsQuery_WebSearch" |
-  "SmartSearch";
+  "SmartSearch" |
+  "Between" |
+  "BetweenNoEnd";
 
 export const FilterType: EnumType<FilterType> = new EnumType<FilterType>("FilterType");
 export type FilterType =

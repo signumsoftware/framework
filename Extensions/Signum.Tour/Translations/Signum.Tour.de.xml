@@ -6,13 +6,17 @@
   </Type>
   <Type Name="CssStepEmbedded" Description="CSS-Schritt">
     <Member Name="CssSelector" Description="CSS-Selektor" />
+    <Member Name="DashboardPart" Description="Dashboard Teil" />
     <Member Name="Property" Description="Objekt" />
+    <Member Name="TableColumn" Description="Tabellenspalte" />
     <Member Name="ToolbarContent" Description="Toolbar-Inhalt" />
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="CssStepType" Description="CSS-Schritttyp">
     <Member Name="CSSSelector" Description="CSS-Selektor" />
+    <Member Name="DashboardPart" Description="Dashboard Teil" />
     <Member Name="Property" Description="Objekt" />
+    <Member Name="TableColumn" Description="Tabellenspalte" />
     <Member Name="ToolbarContent" Description="Toolbar-Inhalt" />
   </Type>
   <Type Name="PopoverAlign" Description="Popover-Ausrichtung">

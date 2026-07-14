@@ -230,12 +230,8 @@ public static class ToolbarLogic
     {
         if (sb.Settings.ImplementedBy((ToolbarEntity tb) => tb.Elements.First().Content, typeof(T)))
         {
-            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
-            {
-                if (Schema.Current.IsAllowed(typeof(ToolbarEntity), false) == null)
-                    Database.MListQuery((ToolbarEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
-                return null;
-            };
+            sb.Include<ToolbarEntity>()
+                .WithCascadeDeleteMListBy(a => a.Elements, e => (Lite<T>)e.Content!);
 
             sb.Schema.EntityEvents<T>().PreDeleteSqlSync += entity =>
             {
@@ -257,12 +253,8 @@ public static class ToolbarLogic
 
         if (sb.Settings.ImplementedBy((ToolbarMenuEntity tb) => tb.Elements.First().Content, typeof(T)))
         {
-            sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
-            {
-                if (Schema.Current.IsAllowed(typeof(ToolbarMenuEntity), false) == null)
-                    Database.MListQuery((ToolbarMenuEntity tb) => tb.Elements).Where(mle => query.Contains((T)mle.Element.Content!.Entity)).UnsafeDeleteMList();
-                return null;
-            };
+            sb.Include<ToolbarMenuEntity>()
+              .WithCascadeDeleteMListBy(a => a.Elements, e => (Lite<T>)e.Content!);
 
             sb.Schema.EntityEvents<T>().PreDeleteSqlSync += entity =>
             {
@@ -408,6 +400,7 @@ public static class ToolbarLogic
 
         var result = new ToolbarResponse
         {
+            guid = element.Guid,
             type = element.Type,
             content = element.Content,
             url = element.Url,
@@ -438,6 +431,7 @@ public static class ToolbarLogic
 
                 return new ToolbarExtraIcon
                 {
+                    guid = extraElement.Guid,
                     type = extraElement.Type,
                     content = extraElement.Content,
                     url = extraElement.Url,
@@ -572,6 +566,7 @@ public class ToolbarExtraIcon : ToolbarResponseBase
 
 public class ToolbarResponseBase
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public Guid guid;
     public ToolbarElementType type;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? label;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Lite<Entity>? content;

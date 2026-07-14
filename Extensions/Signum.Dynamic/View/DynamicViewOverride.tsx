@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
@@ -28,7 +28,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
 
   const typeName: string | null = p.ctx.value.entityType?.cleanName;
   const typeHelp = useAPI(() => typeName ? TypeHelpClient.API.typeHelp(typeName, "CSharp") : Promise.resolve(undefined), [typeName]);
-  const viewNames = useAPI(() => typeName ? Navigator.viewDispatcher.getViewNames(typeName) : Promise.resolve(undefined), [typeName]);
+  const viewNames = useAPI(() => typeName ? Navigator.getViewDispatcher().getViewNames(typeName) : Promise.resolve(undefined), [typeName]);
 
   const scriptChangedRef = React.useRef(false);
 
@@ -164,7 +164,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
         setComponentType(null);
       else {
         const ctx = p.ctx;
-        return Navigator.viewDispatcher.getViewPromise(entity, ctx.value.viewName ?? undefined).promise.then(func => {
+        return Navigator.getViewDispatcher().getViewPromise(entity, ctx.value.viewName ?? undefined).promise.then(func => {
           var tempCtx = new TypeContext(undefined, undefined, PropertyRoute.root(entity.Type), new ReadonlyBinding(entity, "example"));
           var re = func(tempCtx);
           setComponentType(re.type as React.ComponentType<{ ctx: TypeContext<Entity> }>);
@@ -332,3 +332,4 @@ export function RenderWithReplacements(p: RenderWithReplacementsProps): React.JS
 
   return React.createElement(applyViewOverrides(p.viewOverride), { ctx: ctx });
 }
+

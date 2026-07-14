@@ -8,26 +8,29 @@ namespace Signum.Authorization.BaseAD;
 public class ActiveDirectoryController : ControllerBase
 {
     [HttpGet("api/findADUsers")]
-    public Task<List<ActiveDirectoryUser>> FindADUsers(string subString, int count, CancellationToken token)
+    public Task<List<ExternalUser>> FindADUsers(string subString, int count, CancellationToken token)
     {
         ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
 
-        return GetCustomAuthorizer().FindUser(subString, count, token);
+        return GetDirectoryInviter().FindUser(subString, count, token);
     }
 
     [HttpPost("api/createADUser")]
-    public Lite<UserEntity> CreateADUser([FromBody][Required] ActiveDirectoryUser user)
+    public Lite<UserEntity> CreateADUser([FromBody][Required] ExternalUser user)
     {
         ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
 
-        return GetCustomAuthorizer().CreateADUser(user).ToLite();
+        return GetDirectoryInviter().CreateFromExternalUser(user).ToLite();
     }
 
-    private static ICustomAuthorizer GetCustomAuthorizer()
+    private static IDirectoryInviter GetDirectoryInviter()
     {
         if (AuthLogic.Authorizer == null)
-            throw new InvalidOperationException($"No Authorizer set in AuthLogic");
+            throw new InvalidOperationException("No Authorizer set in AuthLogic");
 
-        return AuthLogic.Authorizer;
+        if (AuthLogic.Authorizer is not IDirectoryInviter inviter)
+            throw new InvalidOperationException($"{AuthLogic.Authorizer.GetType().Name} does not support inviting users from a directory");
+
+        return inviter;
     }
 }

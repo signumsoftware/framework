@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { classes, Dic, ifError } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
@@ -13,7 +13,7 @@ export default function ChangePasswordPage(): React.JSX.Element {
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
 
   const currentUser = AuthClient.currentUser();
-  const pendingUser = AuthClient.pendingPasswordChangeUser;
+  const pendingUser = AuthClient.getPendingPasswordChangeUser();
   const user = currentUser ?? pendingUser;
   const mustChangePassword = pendingUser != null || currentUser?.mustChangePassword === true;
   const [passValidation, setPassValidation] = React.useState<AuthClient.PasswordValidationResult | null>(null);
@@ -45,7 +45,7 @@ export default function ChangePasswordPage(): React.JSX.Element {
       .then(lr => {
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
-        AuthClient.pendingPasswordChangeUser = undefined;
+        AuthClient.setPendingPasswordChangeUser(undefined);
         
         if (mustChangePassword) {
           const back = QueryString.parse(window.location.search).back;
@@ -73,8 +73,8 @@ export default function ChangePasswordPage(): React.JSX.Element {
 
   async function handlePasswordChange(e: React.SyntheticEvent<any>) {
 
-    if (newPassword.current!.value && AuthClient.validatePassword && user) {
-      const result = await AuthClient.validatePassword(newPassword.current!.value, user);
+    if (newPassword.current!.value && AuthClient.Options.validatePassword && user) {
+      const result = await AuthClient.Options.validatePassword(newPassword.current!.value, user);
 
       setPassValidation(result);
 
@@ -156,3 +156,4 @@ export default function ChangePasswordPage(): React.JSX.Element {
     </div>
   );
 }
+

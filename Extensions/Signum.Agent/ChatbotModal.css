@@ -105,6 +105,12 @@ h4.chatbot-response {
         border-radius: 12px;
     }
 
+    .chat-bubble.reasoning {
+        background-color: var(--bs-info-bg-subtle);
+        color: var(--bs-body-color);
+        border-radius: 12px;
+    }
+
     .chat-bubble p:last-child {
         margin-bottom: 0;
     }

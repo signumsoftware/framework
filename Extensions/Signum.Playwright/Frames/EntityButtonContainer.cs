@@ -123,7 +123,7 @@ public static class EntityButtonContainerExtensions
         return await container.OperationClickCaptureAsync(symbol.Symbol, groupId);
     }
 
-    public static async Task ExecuteAsync<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true, string? groupId = null)
+    public static async Task ExecuteAsync<T>(this IEntityButtonContainer<T> container, ExecuteSymbol<T> symbol, bool consumeAlert = false, bool checkValidationErrors = true, string? groupId = null, float? timeoutMs = null)
         where T : Entity
     {
         await container.WaitReloadAsync(async () =>
@@ -131,7 +131,7 @@ public static class EntityButtonContainerExtensions
             await container.OperationClickAsync(symbol, groupId);
             if (consumeAlert)
                 await container.Container.Page.CloseMessageModalAsync(MessageModalButton.Yes);
-        });
+        }, timeoutMs);
 
         if (checkValidationErrors && container is IValidationSummaryContainer vs)
         {
@@ -190,12 +190,12 @@ public static class EntityButtonContainerExtensions
         return long.TryParse(value, out var result) ? result : null;
     }
 
-    public static async Task WaitReloadAsync(this IEntityButtonContainer container, Func<Task> action)
+    public static async Task WaitReloadAsync(this IEntityButtonContainer container, Func<Task> action, float? timeoutMs = null)
     {
         var oldCount = await container.RefreshCountAsync();
 
         await action();
 
-        await container.MainControl.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==");
+        await container.MainControl.WaitAttributeAsync("data-refresh-count", oldCount?.ToString(), "!==", timeoutMs);
     }
 }

@@ -104,6 +104,7 @@ public static class HelpLogic
                 });
 
             sb.Include<HelpImageEntity>()
+                .WithCascadeDeleteBy(i => i.Target.Entity)
                 .WithQuery(() => q => new
                 {
                     Entity = q,
@@ -113,10 +114,6 @@ public static class HelpLogic
                     q.Target,
                 });
 
-            sb.Schema.EntityEvents<AppendixHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<NamespaceHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<TypeHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
-            sb.Schema.EntityEvents<QueryHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
             FileTypeLogic.Register(HelpImageFileType.Image, helpImagesAlgorithm);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;

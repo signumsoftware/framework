@@ -18,7 +18,7 @@ export interface ReactChartCombinedInfo {
 
 export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null, sizeDeps?: React.DependencyList }): React.JSX.Element {
 
-  const isSimple = p.infos.every(a => a.data == null || a.data.rows.length < ReactChart.maxRowsForAnimation);
+  const isSimple = p.infos.every(a => a.data == null || a.data.rows.length < ReactChart.Options.maxRowsForAnimation);
   const allData = p.infos.every(a => a.data != null);
   const oldAllData = useThrottle(allData, 200, { enabled: isSimple });
   const initialLoad = oldAllData == false && allData && isSimple;

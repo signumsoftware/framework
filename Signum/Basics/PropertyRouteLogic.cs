@@ -126,6 +126,50 @@ public static class PropertyRouteLogic
         return PropertyRoute.Parse(TypeLogic.EntityToType.GetOrThrow(route.RootType), route.Path);
     }
 
+    /// <summary>
+    /// Non-interactive, destructive cleanup intended for production migrations: deletes every PropertyRouteEntity
+    /// whose path can no longer be parsed against the current schema (e.g. a member or root type was removed).
+    /// These rows make AuthLogic.ImportRules / PropertyRouteEntity.ToPropertyRoute() throw because the migrations only fix the PropertyRoutes know in dev/test
+    /// Each deleted route is written to the console. Relies on the PreDeleteSqlSync handlers registered for every
+    /// entity that references PropertyRouteEntity (Help, Tour, TranslatedInstance) to remove dependent rows.
+    /// </summary>
+    public static void PropertyRouteProductionCleanup()
+    {
+        Table table = Schema.Current.Table<PropertyRouteEntity>();
+
+        var invalidRoutes = Database.Query<PropertyRouteEntity>().ToList().Where(pr =>
+        {
+            try
+            {
+                pr.ToPropertyRoute();
+                return false;
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }).ToList();
+
+        if (invalidRoutes.IsEmpty())
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "PropertyRouteProductionCleanup: no invalid PropertyRoutes found.");
+            return;
+        }
+
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"PropertyRouteProductionCleanup: deleting {invalidRoutes.Count} invalid PropertyRoutes not fixed by migrations:");
+
+        using (var tr = new Transaction())
+        {
+            foreach (var pr in invalidRoutes)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, $"  Deleting PropertyRoute Id = {pr.Id}, RootType = {pr.RootType.CleanName}, Path = {pr.Path}");
+                table.DeleteSqlSync(pr, null).ExecuteLeaves();
+            }
+
+            tr.Commit();
+        }
+    }
+
     public static PropertyRouteEntity ToPropertyRouteEntity(this PropertyRoute route)
     {
         TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(route.RootType);

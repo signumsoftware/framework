@@ -105,10 +105,15 @@ public class FilterConditionTS : FilterTS
             var kind = parsedToken.DateTimeKind;
             val = dt.ToKind(kind);
         }
-        else if (val is ObservableCollection<DateTime?> col)
+        else if (val is IEnumerable<DateTime> col)
         {
             var kind = parsedToken.DateTimeKind;
-            val = col.Select(dt => dt?.ToKind(kind)).ToObservableCollection();
+            val = col.Select(dt => dt.ToKind(kind)).ToList();
+        }
+        else if (val is IEnumerable<DateTime?> col2)
+        {
+            var kind = parsedToken.DateTimeKind;
+            val = col2.Select(dt => dt?.ToKind(kind)).ToList();
         }
 
         return new FilterCondition(parsedToken, operation, val);

@@ -777,13 +777,22 @@ internal static class SmartEqualizer
             return False;
     }
 
+    // ImplementedBy has no type-discriminator column (the active type is implied by which FK is non-null). Unlike
+    // EntityEntity (single type) or ImplementedByAll (explicit Type column), a *type mismatch* between two non-null
+    // references therefore surfaces as NULL (null = id on the non-matching FK) rather than FALSE. Under negation that
+    // NULL silently drops rows ('a != b' becomes NOT(NULL) = NULL), which is the bug. We restore proper three-valued
+    // logic, distinguishing the two sources of NULL:
+    //   NULL  if either reference is genuinely null (no entity to compare) -- consistent with Entity/Iba
+    //   TRUE  if some implementation matches
+    //   FALSE otherwise (different active type, or different id)
     static Expression EntityIbEquals(EntityExpression ee, ImplementedByExpression ib)
     {
-        var imp = ib.Implementations.TryGetC(ee.Type);
-        if (imp == null)
-            return False;
+        var anyNull = SmartOr(EqualsToNull(ee.ExternalId), AllNull(ib));
 
-        return EntityEntityEquals(imp, ee);
+        var imp = ib.Implementations.TryGetC(ee.Type);
+        var match = imp == null ? (Expression)False : EntityEntityEquals(imp, ee);
+
+        return ThreeValued(anyNull, match);
     }
 
     static Expression EntityIbaEquals(EntityExpression ee, ImplementedByAllExpression iba)
@@ -796,9 +805,36 @@ internal static class SmartEqualizer
 
     static Expression IbIbEquals(ImplementedByExpression ib, ImplementedByExpression ib2)
     {
-        var list = ib.Implementations.JoinDictionary(ib2.Implementations, (t, i, j) => EntityEntityEquals(i, j)).Values.ToList();
+        var anyNull = SmartOr(AllNull(ib), AllNull(ib2));
 
-        return list.AggregateOr();
+        // Match on the overlapping types only. A different active type makes every term NULL, which falls through
+        // the CASE WHEN below to the ELSE (FALSE); a genuine null reference is caught by 'anyNull' first.
+        var match = ib.Implementations.JoinDictionary(ib2.Implementations, (t, i, j) => EntityEntityEquals(i, j)).Values.ToList().AggregateOr();
+
+        return ThreeValued(anyNull, match);
+    }
+
+    // "the ImplementedBy reference is null" == all its implementation FK columns are null.
+    static Expression AllNull(ImplementedByExpression ib)
+    {
+        return ib.Implementations.Values.Select(i => EqualsToNull(i.ExternalId)).AggregateAnd();
+    }
+
+    // bool-typed SQL NULL. Expression.Constant(null, typeof(bool)) is illegal in LINQ (bool is not nullable), but a
+    // SqlConstantExpression can hold a null value with .NET type 'bool' and renders as NULL. Keeping the .NET type
+    // 'bool' (rather than bool?) is what lets the result flow through callers that wrap it in '!' without the
+    // ExpressionVisitor rejecting a bool -> bool? rewrite.
+    static readonly Expression NullBool = new SqlConstantExpression(null, typeof(bool));
+
+    // CASE WHEN anyNull THEN NULL WHEN match THEN true ELSE false END  (nominated from nested Conditionals).
+    // A NULL 'match' (different active types) falls through to the ELSE => FALSE, so negation is safe.
+    static Expression ThreeValued(Expression anyNull, Expression match)
+    {
+        var inner = match is ConstantExpression { Value: false } // no overlapping/matching type: never TRUE
+            ? (Expression)False
+            : Expression.Condition(match, True, False);
+
+        return Expression.Condition(anyNull, NullBool, inner);
     }
 
     static Expression IbIbaEquals(ImplementedByExpression ib, ImplementedByAllExpression iba)

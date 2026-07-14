@@ -62,6 +62,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   autoRefreshPeriod: number | null;
   displayName: string;
   hideDisplayName: boolean;
+  showTitleAsBreadcrumb: boolean;
   combineSimilarRows: boolean;
   cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
@@ -101,6 +102,8 @@ export namespace DashboardMessage {
   export const InteractiveDashboard: MessageKey = new MessageKey("DashboardMessage", "InteractiveDashboard");
   export const SelectIcon: MessageKey = new MessageKey("DashboardMessage", "SelectIcon");
   export const Close: MessageKey = new MessageKey("DashboardMessage", "Close");
+  export const IncompatibleEntityType: MessageKey = new MessageKey("DashboardMessage", "IncompatibleEntityType");
+  export const NotFilteringBy0: MessageKey = new MessageKey("DashboardMessage", "NotFilteringBy0");
 }
 
 export namespace DashboardOperation {
@@ -174,6 +177,7 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
 export const PanelPartEmbedded: Type<PanelPartEmbedded> = new Type<PanelPartEmbedded>("PanelPartEmbedded");
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
+  guid: string /*Guid*/;
   title: string | null;
   tooltip: string | null;
   iconName: string | null;

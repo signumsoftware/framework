@@ -1,9 +1,6 @@
-using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace Signum.Upgrade.Upgrades;
 
@@ -107,6 +104,7 @@ global using System.Threading.Tasks;");
                             {
                                 page.SetDefaultTimeout(10000);
                                 await browserProxy.LoginAsync(username, username);
+                                CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = await browserProxy.GetCultureFromLoginDropdownAsync();
                                 await action(browserProxy);
                             }
                             finally

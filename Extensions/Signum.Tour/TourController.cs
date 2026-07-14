@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.Basics;
-using Signum.UserAssets;
+using Signum.Dashboard;
+using Signum.UserQueries;
 
 namespace Signum.Tour;
 
@@ -25,6 +26,20 @@ public class TourController : ControllerBase
             return null;
 
         var tour = TourLogic.ToursByTrigger.Value.TryGetC(symbol.ToLite());
+
+        return tour == null ? null : ToDTO(tour);
+    }
+
+    [HttpGet("api/tour/byLite")]
+    public TourDTO? GetTourByLite([FromQuery] string liteKey)
+    {
+        var lite = Lite.Parse(liteKey);
+
+        if (lite.EntityType != typeof(DashboardEntity)
+            && lite.EntityType != typeof(UserQueryEntity))
+            return null;
+
+        var tour = TourLogic.ToursByTrigger.Value.TryGetC(lite);
 
         return tour == null ? null : ToDTO(tour);
     }
@@ -72,6 +87,14 @@ public class TourController : ControllerBase
                     var lite = step.ToolbarContent!;
                     var key = lite is Lite<QueryEntity> q ? q.RetrieveFromCache().Key : lite.Key();
                     selectors.Add($"[data-toolbar-content='{key}']");
+                    break;
+
+                case CssStepType.DashboardPart:
+                    selectors.Add($"[data-part-content='{step.DashboardPart}']");
+                    break;
+
+                case CssStepType.TableColumn:
+                    selectors.Add($"[data-column-name='{step.TableColumn}']");
                     break;
             }
         }

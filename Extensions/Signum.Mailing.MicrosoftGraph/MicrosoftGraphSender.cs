@@ -1,4 +1,3 @@
-using Signum.Mailing;
 using Microsoft.Graph;
 using System.IO;
 using Microsoft.Graph.Users.Item.Messages.Item.Attachments.CreateUploadSession;
@@ -6,8 +5,6 @@ using Microsoft.Graph.Models;
 using Azure.Identity;
 using Azure.Core;
 using Microsoft.Graph.Models.ODataErrors;
-using Microsoft.Kiota.Abstractions.Extensions;
-using Signum.Authorization;
 using Signum.Files;
 using Signum.Utilities.Synchronization;
 using Signum.Authorization.AzureAD;

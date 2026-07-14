@@ -10,7 +10,6 @@ import { Dropdown } from 'react-bootstrap';
 import { Operations } from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
-import { onImportFromExcel } from './Templates/ImportExcelModel'
 import { isPermissionAuthorized } from '@framework/AppContext'
 
 
@@ -49,8 +48,9 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
     selectPagination(p.searchControl).then(req => req && ExcelClient.API.generatePlainExcel(req));
   }
 
-  function handleImportFromExcel() {
-    onImportFromExcel(p.searchControl);
+  async function handleImportFromExcel() {
+    const ImportExcelModel = await import("./Templates/ImportExcelModel")
+    ImportExcelModel.onImportFromExcel(p.searchControl);
   }
 
   function handleCreate() {

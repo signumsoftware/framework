@@ -265,3 +265,7 @@ background: var(--bs-body-bg);
 .modal-header {
     background: var(--bs-secondary-bg);
 }
+
+.spinner-grow, .spinner-border {
+    border-radius: 50% !important;
+}

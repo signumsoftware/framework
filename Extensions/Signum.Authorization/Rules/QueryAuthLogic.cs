@@ -24,6 +24,7 @@ public static class QueryAuthLogic
         QueryLogic.Queries.AllowQuery += new Func<object, bool, bool>(dqm_AllowQuery);
 
         sb.Include<RuleQueryEntity>()
+            .WithCascadeDeleteBy(a=>a.Role)
             .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
 
         cache = new QueryCache(sb);
@@ -34,7 +35,6 @@ public static class QueryAuthLogic
         AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
         sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query => Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, query);
         sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommand(Database.Query<RuleQueryEntity>().Where(a => a.Role.Is(role)));
-        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleQueryEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
     }
 
     public static void SetMaxAutomaticUpgrade(object queryName, QueryAllowed allowed)

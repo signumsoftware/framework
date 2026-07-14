@@ -16,7 +16,7 @@ function LoginDropdown(p: {
   profileVisible?: boolean;
   extraMenuItems?: (user: UserEntity) => React.ReactNode | undefined | null;
 }): React.JSX.Element {
-  const currentCulture = CultureClient.currentCulture;
+  const currentCulture = CultureClient.getCurrentCulture();
   const user = AuthClient.currentUser();
 
   if (!user)

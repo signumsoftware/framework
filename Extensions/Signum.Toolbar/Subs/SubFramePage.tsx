@@ -20,8 +20,9 @@ import { useTitle } from '@framework/AppContext'
 import { FunctionalAdapter } from '@framework/Modals'
 import { QueryString } from '@framework/QueryString'
 import { classes } from '@framework/Globals'
-import FramePage, { useLooseChanges } from '../../../Signum/React/Frames/FramePage'
+import FramePage from '../../../Signum/React/Frames/FramePage'
 import { SubsClient } from './SubsClient'
+import MessageModal from '@framework/Modals/MessageModal'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
@@ -55,7 +56,27 @@ export default function SubFramePage(): React.ReactElement {
 
   useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
 
-  useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
+  const blocker = useBlocker(() => {
+    const s = stateRef.current;
+    return !!s && hasChanges(s);
+  });
+
+  React.useEffect(() => {
+    if (blocker.state === "blocked") {
+      MessageModal.show({
+        title: JavascriptMessage.loseCurrentChanges.niceToString(),
+        message: JavascriptMessage.loseCurrentChanges.niceToString(),
+        buttons: "yes_no",
+        style: "warning",
+        icon: "warning",
+      }).then(result => {
+        if (result === "yes")
+          blocker.proceed?.();
+        else
+          blocker.reset?.();
+      });
+    }
+  }, [blocker]);
 
   function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement }) {
     return setState({
@@ -256,6 +277,10 @@ function hasChanges(state: FramePageState) {
     return false;
 
   const entity = state.pack.entity;
+
+  if (entity.isNew)
+    return true;
+
   const ge = GraphExplorer.propagateAll(entity);
   if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
     return true

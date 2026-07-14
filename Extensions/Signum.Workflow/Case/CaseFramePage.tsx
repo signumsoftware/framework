@@ -255,7 +255,7 @@ function CaseFramePage(): React.JSX.Element {
     };
 
     const widgets = renderWidgets(wc, settings?.stickyHeader);
-    const subTitle = CaseFramePage.showSubTitle ? Navigator.getTypeSubTitle(pack.activity, undefined) : undefined;
+    const subTitle = CaseFramePage.Options.showSubTitle ? Navigator.getTypeSubTitle(pack.activity, undefined) : undefined;
     var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
 
     return (
@@ -274,7 +274,7 @@ function CaseFramePage(): React.JSX.Element {
 }
 
 namespace CaseFramePage {
-  export let showSubTitle = true;
+  export const Options = { showSubTitle: true };
 }
 
 export default CaseFramePage;

@@ -122,7 +122,7 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
               aria-required="false"
               aria-readonly="false"
               aria-disabled="false">
-              {PaginationSelector.onGetPaginationModes().map(mode =>
+              {PaginationSelector.Options.onGetPaginationModes().map(mode =>
                 <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
             </select>,
 
@@ -135,7 +135,7 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
               aria-required="false"
               aria-readonly="false"
               aria-disabled="false">
-              {PaginationSelector.onGetPaginationSizes().map(elem =>
+              {PaginationSelector.Options.onGetPaginationSizes().map(elem =>
                 <option key={elem} value={elem.toString()}>{elem}</option>)}
             </select>
           )
@@ -230,13 +230,14 @@ export function PaginationComponent(p: PaginationComponentProps): React.ReactEle
 }
 
 export namespace PaginationSelector {
-  export let onGetPaginationModes = (): PaginationMode[] => {
-    return ["Paginate", "Firsts", "All"];
-  }
-
-  export let onGetPaginationSizes = (): number[] => {
-    return [5, 10, 20, 50, 100, 200];
-  }
+  export const Options = {
+    onGetPaginationModes: (): PaginationMode[] => {
+      return ["Paginate", "Firsts", "All"];
+    },
+    onGetPaginationSizes: (): number[] => {
+      return [5, 10, 20, 50, 100, 200];
+    },
+  };
 }
 
 export default PaginationSelector;

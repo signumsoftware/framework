@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faStop } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
@@ -62,6 +62,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   const generalExceptionRef = React.useRef<Lite<ExceptionEntity> | null>(null);
   const questionRef = React.useRef<string>("");
   const recoverRef = React.useRef<RecoverKind | null>(null);
+  const assistantChunkTargetRef = React.useRef<"content" | "reasoning">("content");
   const forceUpdate = useForceUpdate();
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
@@ -246,8 +247,18 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               setAnswer("System");
               break;
             }
+            case "AssistantStarted": {
+              if (!answerRef.current) setAnswer("Assistant");
+              break;
+            }
             case "AssistantAnswer": {
-              setAnswer("Assistant");
+              if (!answerRef.current) setAnswer("Assistant");
+              assistantChunkTargetRef.current = "content";
+              break;
+            }
+            case "AssistantReasoning": {
+              if (!answerRef.current) setAnswer("Assistant");
+              assistantChunkTargetRef.current = "reasoning";
               break;
             }
             case "AssistantTool": {
@@ -312,6 +323,8 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
               ans.toolCalls.single().element.arguments += chunk;
             else if (ans.exception)
               ans.exception.model += chunk;
+            else if (assistantChunkTargetRef.current == "reasoning")
+              ans.reasoningContent += chunk;
             else
               ans.content += chunk;
           } else if (generalExceptionRef.current)
@@ -379,7 +392,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       </div>
       <h4 className="px-3 pt-2">
         <React.Suspense fallback={null}>
-          {currentSessionRef.current && ChatbotClient.renderMarkdown(getToString(currentSessionRef.current))}
+          {currentSessionRef.current && ChatbotClient.Options.renderMarkdown(getToString(currentSessionRef.current))}
         </React.Suspense>
       </h4>
       {/* Chat History */}
@@ -435,6 +448,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       role: role,
       chatSession: currentSessionRef!.current!,
       content: "",
+      reasoningContent: "",
     });
   }
 }
@@ -492,4 +506,5 @@ async function* getWordsOrCommands(reader: ReadableStreamDefaultReader<Uint8Arra
     }
   }
 }
+
 

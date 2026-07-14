@@ -156,6 +156,7 @@
     <Member Name="Logout" Description="Logout" />
     <Member Name="MyProfile" Description="Mein Profil" />
     <Member Name="NewPassword" Description="Neues Passwort" />
+    <Member Name="NoLocalUserFound" Description="Kein lokaler Benutzer gefunden" />
     <Member Name="NotUserLogged" Description="Kein angemeldeter Benutzer" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="PasswordChanged" Description="Passwort geändert" />
@@ -328,6 +329,7 @@
     <Member Name="DisabledOn" Description="Deaktiviert auf" />
     <Member Name="Email" Description="E-Mail" />
     <Member Name="EmailOwnerData" Description="E-Mailbesitzerdaten" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="LoginFailedCounter" Description="fehlgeschlagener Login-Zähler" />
     <Member Name="MustChangePassword" Description="Passwort muss geändert werden" />
     <Member Name="PasswordHash" Description="Passwort-Hash" />
@@ -336,10 +338,12 @@
     <Member Name="State" Description="Status" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>
+  <Type Name="UserExternalIdMessage">
+    <Member Name="TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit einem externen Anbieter verbunden und kann kein lokales Kennwort festlegen" />
+  </Type>
   <Type Name="UserLiteModel" Description="Benutzer-Lite">
-    <Member Name="OID" Description="OID" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="PhotoSuffix" Description="Foto-Suffix" />
-    <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
     <Member Name="UserName" Description="Benutzername" />
   </Type>

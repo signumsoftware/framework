@@ -203,7 +203,9 @@ IMPORTANT: Always set the appropiate `columnOptionsMode`; when grouping use `Rep
 Each column has:
 * `token`: the expression to use, can not use `Any`, `All`.
 * `displayName`: optional, if not specified the default name will be used.
-* `summaryToken`: optional, only used to shown and aggregate in the header of the column. Can be used even if the `FindOptions` does not set `groupResults`. You can not aggregate twice (avoid `Count.Sum`, just use `Count`), but you can sum the number of elements in a collection (`Friends.Count.Sum`). 
+* `summaryToken`: optional, executes a separated query with the same filters to shown and aggregate in the header of the column. Can be used even if the `FindOptions` does not set `groupResults`. IMPORTANT: 
+    * You can not aggregate twice, like `Count.Sum`, bacause `Count` is an aggegate, just use `Count`. 
+	* But you can sum the number of elements in a collection, like `Friends.Count.Sum`, because `Friends.Count` is a property of the `Friends` collection.
 * `hiddenColumn`: optional, if true the column will not be shown, only usefull for hiding the real grouping key if `groupResults` is true.
 * `combineRows`: optional, if specified consecutive rows with the same value in this column will be combined in one row with rowspan in the html table. `EqualValue` compares similar values, `EqualEntity` compares the entity ids.
 

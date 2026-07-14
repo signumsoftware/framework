@@ -592,7 +592,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 <table aria-multiselectable="true" role="grid"
                   aria-label={this.createCaption()}
                   className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
-                  {AccessibleTable.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
+                  {AccessibleTable.Options.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
                     {this.renderHeaders()}
                   </thead>
@@ -1893,7 +1893,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   getEntityFormatter(): Finder.EntityFormatter {
     const qs = this.props.querySettings;
-    return (this.state.resultFindOptions?.groupResults ? null : this.props.entityFormatter ?? qs?.entityFormatter) 
+    return (this.state.resultFindOptions?.groupResults ? null : this.props.entityFormatter ?? qs?.entityFormatter)
       ?? Finder.entityFormatRules.filter(a => a.isApplicable(this)).last("EntityFormatRules").formatter;
   }
 
@@ -2155,6 +2155,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return (
       <AutoFocus disabled={!this.props.enableAutoFocus}>
         <PinnedFilterBuilder
+          queryDescription={this.props.queryDescription}
           filterOptions={fo.filterOptions}
           pinnedFilterVisible={this.props.pinnedFilterVisible}
           onFiltersChanged={this.handlePinnedFilterChanged}
@@ -2465,7 +2466,8 @@ function CountEntities(p: { fop: FindOptionsParsed, tis: TypeInfo[] }): React.Re
       columnOptions: [
         { token: "Count" },
         { token: "Entity.Type" },
-      ]
+      ],
+      includeDefaultFilters: false,
     }), []);
 
   return counts == undefined ? <span>…</span> :

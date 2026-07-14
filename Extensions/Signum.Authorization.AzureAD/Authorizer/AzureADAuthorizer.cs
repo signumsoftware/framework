@@ -3,7 +3,7 @@ using Signum.API.Filters;
 #pragma warning disable CA1416 // Validate platform compatibility
 namespace Signum.Authorization.AzureAD.Authorizer;
 
-public class AzureADAuthorizer : ICustomAuthorizer
+public class AzureADAuthorizer : ICustomAuthorizer, IDirectoryInviter
 { 
     public Func<string? /*adVariant*/, AzureADConfigurationEmbedded?> GetConfig;
 
@@ -55,13 +55,13 @@ public class AzureADAuthorizer : ICustomAuthorizer
     {
         var config = (AzureADConfigurationEmbedded)ctx.Config;
 
-        if (ctx.OID != null && config != null)
+        if (ctx.ExternalId != null && config != null)
         {
             if (config.RoleMapping.Any())
             {
-                var groups = ctx is AzureClaimsAutoCreateUserContext ac && config.UseDelegatedPermission ? 
+                var groups = ctx is AzureClaimsAutoCreateUserContext ac && config.UseDelegatedPermission ?
                     AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
-                    AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
+                    AzureADLogic.CurrentADGroupsInternal(Guid.Parse(ctx.ExternalId));
 
                 var roles = config.RoleMapping.Where(m =>
                 {
@@ -118,10 +118,10 @@ public class AzureADAuthorizer : ICustomAuthorizer
             user.DisabledOn = null;
         }
 
-        if (ctx.OID != null)
+        if (ctx.ExternalId != null)
         {
-            user.Mixin<UserAzureADMixin>().OID = ctx.OID;
-            if (!UserAzureADMixin.AllowPasswordForAzureADUsers)
+            user.ExternalId = ctx.ExternalId;
+            if (!UserEntity.AllowPasswordForUserWithExternalId)
             {
                 user.PasswordHash = null;
                 user.MustChangePassword = false;
@@ -157,12 +157,12 @@ public class AzureADAuthorizer : ICustomAuthorizer
 
     }
 
-    public Task<List<ActiveDirectoryUser>> FindUser(string subString, int count, CancellationToken token)
+    public Task<List<ExternalUser>> FindUser(string subString, int count, CancellationToken token)
     {
         return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
     }
 
-    public UserEntity CreateADUser(ActiveDirectoryUser user)
+    public UserEntity CreateFromExternalUser(ExternalUser user)
     {
         return AzureADLogic.CreateUserFromAD(user);
     }

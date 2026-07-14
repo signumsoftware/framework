@@ -50,8 +50,8 @@ export default function UserQueryPage(): React.JSX.Element | null {
     if (containerDiv) {
 
       const marginTop = containerDiv.offsetTop;
-      const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
-      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
+      const maxHeight = (window.innerHeight - (marginTop + SearchPage.Options.marginDown));
+      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.Options.minHeight) + "px";
     }
   }
 

@@ -19,8 +19,7 @@ public static class RemoteEmailsLogic
 
     public static MessageMicrosoftGraphQueryConverter Converter = new MessageMicrosoftGraphQueryConverter();
 
-    public static Func<Lite<UserEntity>, Guid> GetMailbox = user => user.Model is UserLiteModel um && um.OID != null ? um.OID.Value :
-        throw new ApplicationException(RemoteEmailMessageMessage.User0HasNoMailbox.NiceToString(user));
+    public static Func<Lite<UserEntity>, Guid> GetMailbox = user => (user.Model as UserLiteModel)?.ExternalId?.ToGuid() ?? throw new ApplicationException(RemoteEmailMessageMessage.User0HasNoMailbox.NiceToString(user));
 
     public static void Start(SchemaBuilder sb)
     {

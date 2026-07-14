@@ -3,7 +3,6 @@ using Signum.Playwright.Frames;
 using Signum.Playwright.Search;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 
 namespace Signum.Playwright;
 

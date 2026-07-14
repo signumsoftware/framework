@@ -63,6 +63,7 @@ public static class DashboardLogic
         });
 
         sb.Include<DashboardEntity>()
+            .WithCascadeDeleteMListBy(a => a.Parts, p => p.Content)
             .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
             .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
             .WithQuery(() => cp => new

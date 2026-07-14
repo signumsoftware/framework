@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AutoLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
@@ -22,6 +22,7 @@ import { DynamicViewEntity, DynamicViewOperation } from '../Signum.Dynamic.Views
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;
   initialDynamicView: DynamicViewEntity;
+  ref?: React.Ref<unknown>;
   //...extraProps
 }
 
@@ -31,7 +32,6 @@ export interface DynamicViewComponentState {
   selectedNode: DesignerNode<BaseNode>;
   dynamicView: DynamicViewEntity;
   viewOverrides?: ViewOverride<ModifiableEntity>[];
-  
 }
 
 export default function DynamicViewComponent(p: DynamicViewComponentProps): React.JSX.Element | null {
@@ -44,10 +44,10 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps): Reac
   const selectedNodeRef = useUpdatedRef(selectedNode);
   const [dynamicView, setDynamicView] = React.useState<DynamicViewEntity>(p.initialDynamicView);
 
-  const viewOverrides = useAPI(() => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
+  const viewOverrides = useAPI(() => Navigator.getViewDispatcher().getViewOverrides(p.ctx.value.Type), []);
 
   function getZeroNode() {
-    var { ctx, initialDynamicView, ...extraProps } = p;
+    var { ctx, initialDynamicView, ref, ...extraProps } = p;
 
     var context: DesignerContext = {
       onClose: handleClose,
@@ -243,4 +243,5 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
     </div>
   );
 }
+
 

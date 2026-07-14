@@ -31,7 +31,7 @@ public class AzureADAuthenticationServer
                     _ => throw new UnexpectedValueException($"Unexpected AzureADType {config.Type}")
                 };
 
-                UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserAzureADMixin>().OID == ctx.OID);
+                UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.ExternalId == ctx.ExternalId);
 
                 if (user == null)
                 {
@@ -42,7 +42,9 @@ public class AzureADAuthenticationServer
                 if (user == null)
                 {
                     if (!config.AutoCreateUsers)
-                        return false;
+                    {
+                        return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.NoLocalUserFound.NiceToString()) : false;
+                    }
 
                     user = ada.OnCreateUser(ctx);
                 }

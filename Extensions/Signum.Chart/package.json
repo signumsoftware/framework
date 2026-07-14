@@ -9,6 +9,6 @@
   "resolutions": {
   },
   "dependencies": {
-    "@types/google.maps": "3.58.1"
+    "@types/google.maps": "3.64.0"
   }
 }

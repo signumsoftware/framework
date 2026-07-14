@@ -696,6 +696,7 @@ export namespace WorkflowMessage {
   export const YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0: MessageKey = new MessageKey("WorkflowMessage", "YouAreNotMemberOfAnyLaneContainingAnStartEventInWorkflow0");
   export const EvaluationOrderOfTheConnectionForIfElse: MessageKey = new MessageKey("WorkflowMessage", "EvaluationOrderOfTheConnectionForIfElse");
   export const SaveAsSVG: MessageKey = new MessageKey("WorkflowMessage", "SaveAsSVG");
+  export const _0Operations: MessageKey = new MessageKey("WorkflowMessage", "_0Operations");
 }
 
 export const WorkflowModel: Type<WorkflowModel> = new Type<WorkflowModel>("WorkflowModel");

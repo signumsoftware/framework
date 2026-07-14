@@ -697,7 +697,7 @@ export namespace ChartClient {
   
   export namespace Decoder {
   
-    export let DefaultMaxRows = 1000;
+    export const DefaultMaxRows = 1000;
   
     export function parseChartRequest(queryName: string, query: any): Promise<ChartRequestModel> {
   

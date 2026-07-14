@@ -3,8 +3,6 @@ using Signum.UserAssets;
 using Signum.Eval;
 using System.Text.RegularExpressions;
 using Signum.Toolbar;
-using Signum.Eval.TypeHelp;
-using Signum.API;
 using System.Collections.Frozen;
 
 namespace Signum.Workflow;
@@ -53,6 +51,14 @@ public static class WorkflowLogic
     public static IEnumerable<WorkflowGatewayEntity> WorkflowGatewaysFromCache(this WorkflowEntity e)
     {
         return GetWorkflowNodeGraph(e.ToLite()).NextGraph.OfType<WorkflowGatewayEntity>();
+    }
+
+
+    public static bool CurrentUserInLaneOf<T>() where T : ICaseMainEntity
+    {
+        var type = typeof(T).ToTypeEntity();
+        var user = UserEntity.Current;
+        return WorkflowLogic.WorkflowGraphLazy.Value.Values.Where(a => a.Workflow.MainEntityType.Is(type)).Any(a => a.Lanes.Any(l => l.Actors.Contains(user)));
     }
 
     [AutoExpressionField]

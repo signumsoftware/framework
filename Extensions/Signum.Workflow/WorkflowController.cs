@@ -3,10 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.API.Json;
-using Signum.Basics;
-using Signum.Processes;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static Signum.API.Controllers.OperationController;
@@ -275,6 +272,28 @@ public class WorkflowController : Controller
             .NextConnectionsFromCache(request.connectionType)
             .Select(a => a.To.ToLite())
             .ToList();
+    }
+
+    [HttpPost("api/workflow/mainEntitiesFromCaseActivities")]
+    public List<CaseActivityMainEntityPair> MainEntitiesFromCaseActivities([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
+    {
+        return caseActivitiesLites.Chunk(100).SelectMany(cas =>
+        {
+            return Database.Query<CaseActivityEntity>()
+                .Where(ca => cas.Contains(ca.ToLite()))
+                .Select(ca => new CaseActivityMainEntityPair
+                {
+                    CaseActivity = ca.ToLite(),
+                    MainEntity = ca.Case.MainEntity.ToLite(),
+                })
+                .ToList();
+        }).ToList();
+    }
+
+    public class CaseActivityMainEntityPair
+    {
+        public Lite<CaseActivityEntity> CaseActivity { get; set; } = null!;
+        public Lite<ICaseMainEntity> MainEntity { get; set; } = null!;
     }
 
     [HttpPost("api/workflow/onlyWorkflowActivity")]

@@ -1,6 +1,4 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
-using Signum.Utilities.Synchronization;
 
 namespace Signum.Playwright.Search;
 
@@ -219,14 +217,12 @@ public class ResultTableProxy
 
     public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite, int? subRowIndex = null)
     {
-        var col = await GetColumnIndexAsync("Entity");
-        return Row(lite, subRowIndex).EntityLink(col);
+        return Row(lite, subRowIndex).EntityLink();
     }
 
     public async Task<ILocator> EntityLinkAsync(int rowIndex)
     {
-        var col = await GetColumnIndexAsync("Entity");
-        return Row(rowIndex).EntityLink(col);
+        return Row(rowIndex).EntityLink();
     }
 
     // ---------------- CONTEXT MENU ----------------
@@ -294,9 +290,21 @@ public class ResultRowProxy
 
     public ILocator SelectedCheckbox => Locator.Locator("input.sf-td-selection");
 
-    public ILocator CellElement(int columnIndex) => Locator.Locator($"td:nth-child({columnIndex + 1})");
+    public ILocator CellElement(int columnIndex) => Locator.Locator($"td[data-column-index={columnIndex}]");
 
-    public ILocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).Locator("> a");
+    public ILocator EntityLink() => Locator.Locator($"td:nth-child(2):not([data-column-index])").Locator("a");
+
+    private Task<string?> GetEntityKeyAsync() => Locator.GetAttributeAsync("data-entity");
+    public async Task<Lite<Entity>?> GetEntityAsync()
+    {
+        var liteKey = await GetEntityKeyAsync();
+
+        if (liteKey == null)
+            return null;
+     
+        return Lite.Parse<Entity>(liteKey);
+    }
+
 }
 
 

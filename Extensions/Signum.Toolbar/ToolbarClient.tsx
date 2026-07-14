@@ -47,13 +47,27 @@ export namespace ToolbarClient {
   
   
   export const configs: { [type: string]: ToolbarConfig<any>[] } = {};
-  
+
   export function registerConfig<T extends Entity>(config: ToolbarConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
   }
-  
+
   export function getConfig(res: ToolbarResponse<any>): ToolbarConfig<any> | null {
     return configs[res.content!.EntityType]?.filter(c => c.isApplicableTo(res)).singleOrNull();
+  }
+
+  /**
+   * Per-EntityType filter for entity-scoped toolbar menus (menus with EntityType set).
+   * Returns the set of toolbar-element Guid strings that should be hidden for the given entity,
+   * or `null` to apply no filtering. Called when the user picks an entity in
+   * `ToolbarMenuItemsEntityType`; elements whose `guid` is in the returned set are dropped.
+   */
+  export type EntityElementFilter = (entity: Lite<Entity>) => Promise<Set<string> | null> | Set<string> | null;
+
+  export const entityElementFilters: { [entityType: string]: EntityElementFilter } = {};
+
+  export function registerEntityElementFilter(entityType: string, filter: EntityElementFilter): void {
+    entityElementFilters[entityType] = filter;
   }
   
   export namespace API {
@@ -69,6 +83,7 @@ export namespace ToolbarClient {
 }
 
 export interface ToolbarResponse<T extends Entity> {
+  guid?: string;
   type: ToolbarElementType;
   label?: string;
   content?: Lite<T>;

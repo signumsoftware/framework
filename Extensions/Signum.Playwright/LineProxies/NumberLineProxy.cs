@@ -14,7 +14,7 @@ public class NumberLineProxy : BaseLineProxy
     {
     }
 
-    public ILocator InputLocator => Element.Locator("input[type=text].numeric");
+    public ILocator InputLocator => Element.Locator("input.numeric");
 
     public override async Task<object?> GetValueUntypedAsync()
         => await GetValueAsync();

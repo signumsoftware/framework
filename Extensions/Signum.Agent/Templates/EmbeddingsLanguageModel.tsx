@@ -3,7 +3,7 @@ import { AutoLine, EntityCombo, EnumLine,NumberLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmbeddingsLanguageModelEntity } from '../Signum.Agent';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
-import { ChatbotClient } from '../ChatbotClient';
+import { LanguageModelClient } from '../LanguageModelClient';
 
 export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<EmbeddingsLanguageModelEntity> }): React.JSX.Element {
   const ctx = p.ctx;
@@ -11,7 +11,7 @@ export default function EmbeddingsLanguageModel(p: { ctx: TypeContext<Embeddings
   const forceUpdate = useForceUpdate();
   const provider = ctx.value.provider;
 
-  const models = useAPI(() => provider && ChatbotClient.API.getEmbeddingModels(provider), [provider]);
+  const models = useAPI(() => provider && LanguageModelClient.API.getEmbeddingModels(provider), [provider]);
 
   return (
     <div>

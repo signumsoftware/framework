@@ -102,10 +102,14 @@ public interface IFromXmlContext
     QueryEntity GetQuery(string queryKey);
 
     Lite<TypeEntity> GetTypeLite(string cleanName);
+    Lite<TypeEntity>? TryGetTypeLite(string cleanName);
 
     TypeEntity GetType(string cleanName);
 
     IUserAssetEntity GetEntity(Guid guid);
+
+    Lite<Entity> RetrieveUserAssetLite(Type type, Guid guid) =>
+        UserAssetsImporter.RetrieveUserAssetLite(type, guid);
 
     DynamicQuery.QueryDescription GetQueryDescription(QueryEntity Query);
 
@@ -121,6 +125,7 @@ public interface IFromXmlContext
     public T RetrieveLite<T>(Lite<T> lite) where T : class, IEntity;
 
     public T GetSymbol<T>(string value) where T : Symbol;
+    public T? TryGetSymbol<T>(string value) where T : Symbol;
     PropertyRouteEntity? GetPropertyRoute(TypeEntity typeEntity, string value);
 
     public Dictionary<Guid, ModelEntity?> CustomResolutionModel { get; }

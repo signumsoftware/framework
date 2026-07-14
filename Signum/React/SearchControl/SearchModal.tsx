@@ -156,7 +156,7 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
       const marginTop = rect.top + marginModal;
       const marginButton = (modalContent!.offsetHeight - rect.bottom) + marginModal;
       const maxHeight = window.innerHeight - marginTop - marginButton;
-      containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.minHeight) + "px";
+      containerDiv.style.maxHeight = Math.max(maxHeight, SearchModal.Options.minHeight) + "px";
     }
   }
 
@@ -215,7 +215,7 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
 
 
 namespace SearchModal {
-  export let minHeight = 400;
+  export const Options = { minHeight: 400 };
 
   export function open(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 

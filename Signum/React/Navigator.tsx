@@ -371,7 +371,9 @@ export namespace Navigator {
     }
   }
 
-  export let viewDispatcher: ViewDispatcher = new AutoViewDispatcher();
+  let viewDispatcher: ViewDispatcher = new AutoViewDispatcher();
+
+  export function getViewDispatcher(): ViewDispatcher { return viewDispatcher; }
 
   export function getViewPromise<T extends ModifiableEntity>(entity: T, viewName?: string): ViewPromise<T> {
     return viewDispatcher.getViewPromise(entity, viewName);
@@ -826,6 +828,30 @@ export namespace Navigator {
       [lite && liteKey(lite)], options);
   }
 
+  export function useFetchEntities<T extends Entity>(lites: Lite<T>[]): Map<string, T> {
+
+    const [entities, setEntities] = React.useState<Map<string, T>>(new Map());
+
+    const listKey = lites.map(liteKey).join(",");
+
+    React.useEffect(() => {
+      const unfetched = lites.filter(l => !entities.has(liteKey(l)));
+      if (unfetched.length == 0)
+        return;
+
+      Promise.all(unfetched.map(l => API.fetch(l)))
+        .then(fetched => {
+          setEntities(prev => {
+            const next = new Map(prev);
+            fetched.forEach(e => next.set(liteKey(toLite(e)), e));
+            return next;
+          });
+        });
+    }, [listKey]);
+
+    return entities;
+  }
+
   export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {
 
     const forceUpdate = useForceUpdate();
@@ -1217,7 +1243,7 @@ export class ViewPromise<T extends ModifiableEntity> {
 
   applyViewOverrides(typeName: string, viewName?: string): ViewPromise<T> {
     this.promise = this.promise.then(func =>
-      Navigator.viewDispatcher.getViewOverrides(typeName, viewName).then(vos => {
+      Navigator.getViewDispatcher().getViewOverrides(typeName, viewName).then(vos => {
 
         if (vos.length == 0)
           return func;

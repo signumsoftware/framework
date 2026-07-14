@@ -2,10 +2,6 @@ using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
-using Signum.Mailing;
-using DocumentFormat.OpenXml.Vml.Office;
-using Signum.Engine.Sync;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Authorization.WindowsAD.Authorizer;
 using Signum.Authorization.BaseAD;
 
@@ -32,7 +28,7 @@ public static class WindowsADLogic
         {
             UserName = u.UserName,
             ToStringValue = u.ToString(),
-            SID = u.Mixin<UserWindowsADMixin>().SID,
+            ExternalId = u.ExternalId,
         });
 
         if (deactivateUsersTask)
@@ -53,7 +49,7 @@ public static class WindowsADLogic
                         {
                             if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been deactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been deactivated in AD");
                                 u.Execute(UserOperation.Deactivate);
                             }
                             else
@@ -63,7 +59,7 @@ public static class WindowsADLogic
 
                             if (foundUser == null && u.PasswordHash == null)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been deactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been deactivated in AD");
                                 u.Execute(UserOperation.Deactivate);
                             }
 
@@ -73,7 +69,7 @@ public static class WindowsADLogic
                         {
                             if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == true)
                             {
-                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserWindowsADMixin>().SID} has been reactivated in AD");
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.ExternalId} has been reactivated in AD");
                                 u.Execute(UserOperation.Reactivate);
                             }
                         }
@@ -95,7 +91,7 @@ public static class WindowsADLogic
             return new PrincipalContext(ContextType.Domain, config.DomainName);
     }
 
-    public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName, int limit)
+    public static Task<List<ExternalUser>> SearchUser(string searchUserName, int limit)
     {
         using (var pc = GetPrincipalContext())
         {
@@ -128,25 +124,24 @@ public static class WindowsADLogic
                 // Perform the search
                 var results = searcher.FindAll();
 
-                // Map results to ActiveDirectoryUser objects
-                var activeDirectoryUsers = new List<ActiveDirectoryUser>();
+                // Map results to ExternalUser objects
+                var externalUsers = new List<ExternalUser>();
                 foreach (SearchResult result in results)
                 {
-                    var user = new ActiveDirectoryUser
+                    var user = new ExternalUser
                     {
                         UPN = result.Properties["userPrincipalName"]?.Count > 0 ? result.Properties["userPrincipalName"][0].ToString()! : "",
                         DisplayName = result.Properties["displayName"]?.Count > 0 ? result.Properties["displayName"][0].ToString()! : "",
                         JobTitle = result.Properties["description"]?.Count > 0 ? result.Properties["description"][0].ToString()! : "",
-                        SID = result.Properties["objectSid"]?.Count > 0 ? new System.Security.Principal.SecurityIdentifier((byte[])result.Properties["objectSid"][0], 0).ToString() : null,
-                        ObjectID = null
+                        ExternalId = result.Properties["objectSid"]?.Count > 0 ? new System.Security.Principal.SecurityIdentifier((byte[])result.Properties["objectSid"][0], 0).ToString() : null,
                     };
 
-                    activeDirectoryUsers.Add(user);
+                    externalUsers.Add(user);
                 }
 
                 // Return distinct results
-                var distinctUsers = activeDirectoryUsers
-                    .DistinctBy(a => a.SID)
+                var distinctUsers = externalUsers
+                    .DistinctBy(a => a.ExternalId)
                     .OrderBy(a => a.UPN)
                     .ToList();
 
@@ -206,7 +201,7 @@ public static class WindowsADLogic
     //    }
     //}
 
-    public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
+    public static UserEntity CreateUserFromAD(ExternalUser adUser)
     {
         var ada = (WindowsADAuthorizer)AuthLogic.Authorizer!;
 
@@ -228,7 +223,7 @@ public static class WindowsADLogic
             using (ExecutionMode.Global())
             using (var tr = new Transaction())
             {
-                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserWindowsADMixin>().SID == userPc.Sid.ToString());
+                var user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.ExternalId == userPc.Sid.ToString());
 
                 if (user == null)
                 {

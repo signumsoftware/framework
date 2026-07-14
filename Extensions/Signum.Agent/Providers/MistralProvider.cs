@@ -53,7 +53,7 @@ public class MistralProvider : IChatbotModelProvider, IEmbeddingsProvider
 
     static string GetApiKey()
     {
-        var apiKey = ChatbotLogic.GetConfig().MistralAPIKey;
+        var apiKey = LanguageModelLogic.GetConfig().MistralAPIKey;
 
         if (apiKey.IsNullOrEmpty())
             throw new InvalidOperationException("No API Key for Mistral configured!");

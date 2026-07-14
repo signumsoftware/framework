@@ -81,6 +81,7 @@ export namespace LoginAuthMessage {
   export const SignUpWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignUpWithAzureB2C");
   export const SignInWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "SignInWithAzureB2C");
   export const LoginWithAzureB2C: MessageKey = new MessageKey("LoginAuthMessage", "LoginWithAzureB2C");
+  export const NoLocalUserFound: MessageKey = new MessageKey("LoginAuthMessage", "NoLocalUserFound");
 }
 
 export const MergeStrategy: EnumType<MergeStrategy> = new EnumType<MergeStrategy>("MergeStrategy");
@@ -122,6 +123,11 @@ export interface UserEntity extends Entities.Entity, Basics.IEmailOwnerEntity, S
   mustChangePassword: boolean;
   state: UserState;
   loginFailedCounter: number;
+  externalId: string | null;
+}
+
+export namespace UserExternalIdMessage {
+  export const TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserExternalIdMessage", "TheUser0IsConnectedToAnExternalProviderAndCanNotHaveALocalPasswordSet");
 }
 
 export const UserLiteModel: Type<UserLiteModel> = new Type<UserLiteModel>("UserLiteModel");
@@ -129,8 +135,7 @@ export interface UserLiteModel extends Entities.ModelEntity {
   Type: "UserLiteModel";
   userName: string;
   toStringValue: string | null;
-  oID: string /*Guid*/ | null;
-  sID: string | null;
+  externalId: string | null;
   photoSuffix: string | null;
 }
 

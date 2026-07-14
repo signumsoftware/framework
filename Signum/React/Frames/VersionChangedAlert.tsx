@@ -26,7 +26,7 @@ export const VersionChangedAlert: {
     location.reload();
   }
 
-  if (VersionFilter.latestVersion == VersionFilter.initialVersion)
+  if (VersionFilter.getLatestVersion() == VersionFilter.getInitialVersion())
     return null;
 
   return (
@@ -61,11 +61,11 @@ export function VersionInfo(p: { extraInformation?: string }): React.ReactElemen
 
 export function VersionInfoTooltip(p: { extraInformation?: string}): React.ReactElement {
 
-  var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
+  var bt = DateTime.fromISO(VersionFilter.getInitialBuildTime()!);
 
   return (
     <div style={{ whiteSpace: "nowrap" }}>
-      Version {VersionFilter.initialVersion}
+      Version {VersionFilter.getInitialVersion()}
       <br/>
       {bt.toFormat("DDDD")}
       <br />

@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Office2010.Drawing;
-using Microsoft.Playwright;
 using Signum.Playwright.LineProxies;
 
 namespace Signum.Playwright.ModalProxies;

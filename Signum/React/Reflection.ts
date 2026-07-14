@@ -294,12 +294,14 @@ export function toLuxonDurationFormat(netFormat: string | undefined): string | u
 }
 
 export namespace NumberFormatSettings {
-  export let defaultNumberFormatLocale: string = null!;
+  export const Options = {
+    defaultNumberFormatLocale: null! as string
+  };
 }
 
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
 export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
-  let loc = locale ?? NumberFormatSettings.defaultNumberFormatLocale;
+  let loc = locale ?? NumberFormatSettings.Options.defaultNumberFormatLocale;
   if (loc.startsWith("es-")) {
     loc = "de-DE"; //fix problem for Intl formatting "es" numbers for 4 digits over decimal point 
   }

@@ -4,7 +4,7 @@ import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
 import { SearchControl, SearchControlHandler, SearchValue, SearchValueController } from '@framework/Search'
 import { UserQueryClient } from '../../UserQueryClient'
-import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
+import { classes, getContrastingTextColorWCAG, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
 import { useAPI, useVersion } from '@framework/Hooks'
@@ -33,11 +33,11 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
 
       if (dashboardPinnedFilters.length) {
         Finder.getQueryDescription(fo.queryName)
-          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd))
-          .then(fops => {
-            p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), fops));
-            p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
-          });
+          .then(qd => Finder.parseFilterOptions(dashboardPinnedFilters, fo!.groupResults ?? false, qd)
+            .then(fops => {
+              p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, getQueryKey(fo!.queryName), qd, fops));
+              p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
+            }));
       } else {
         p.dashboardController.clearPinnesFilter(p.partEmbedded);
         p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());

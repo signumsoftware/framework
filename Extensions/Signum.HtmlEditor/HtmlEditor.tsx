@@ -39,7 +39,7 @@ export interface HtmlEditorProps {
   mandatory?: boolean | "warning";
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  extensions?: HtmlEditorExtension[];
+  extensionsMemo?: HtmlEditorExtension[];
   handleKeybindings?: (event: KeyboardEvent) => boolean;
   toolbarButtons?: (c: HtmlEditorController) => React.ReactNode;
   placeholder?: React.ReactNode;
@@ -60,7 +60,7 @@ function HtmlEditor(
     converter,
     innerRef,
     toolbarButtons,
-    extensions,
+    extensionsMemo,
     htmlAttributes,
     mandatory,
     initiallyFocused,
@@ -78,7 +78,7 @@ function HtmlEditor(
     converter,
     innerRef,
     initiallyFocused,
-    extensions,
+    extensionsMemo,
     handleKeybindings,
     editableId
   });
@@ -87,7 +87,7 @@ function HtmlEditor(
 
   const error = binding.getError();
 
-  const imageHandler = extensions?.filter(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() == null;
+  const imageHandler = extensionsMemo?.filter(a => a instanceof ImageExtension ? a.imageHandler : null).notNull().singleOrNull() == null;
 
   return (
     <div

@@ -1,4 +1,3 @@
-using Microsoft.Playwright;
 using Signum.Playwright.Frames;
 using Signum.Playwright.LineProxies;
 using Signum.Playwright.ModalProxies;
@@ -68,6 +67,7 @@ public class CaseFrameModalProxy<T> : ModalProxy, ILineContainer<T>, IEntityButt
 
     private ILocator MainControl => Modal.Locator("div.sf-main-control");
 
+    ILocator IEntityButtonContainer.MainControl => MainControl;
 
     public Task<EntityInfoProxy> GetEntityInfoAsync() => EntityInfoProxy.GetFromMainEntityAsync(MainControl);
 }

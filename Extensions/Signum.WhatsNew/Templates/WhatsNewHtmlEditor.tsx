@@ -22,10 +22,7 @@ export default function WhatsNewHtmlEditor(p: {
 
   return (
     <ErrorBoundary>
-      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} extensions={[
-        new LinkExtension(),
-        new ImageExtension(new WhatsNewImageHandler())
-      ]} />
+      <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} extensionsMemo={whatsNewExtensions} />
     </ErrorBoundary>
   );
 }
@@ -37,10 +34,7 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
   return (
     <div className="html-viewer" >
       <ErrorBoundary>
-        <HtmlEditor readOnly binding={binding} small extensions={[
-          new LinkExtension(),
-          new ImageExtension(new WhatsNewImageHandler())
-        ]} />
+        <HtmlEditor readOnly binding={binding} small extensionsMemo={whatsNewExtensions} />
       </ErrorBoundary>
     </div>
   );
@@ -120,3 +114,5 @@ export class WhatsNewImageHandler implements ImageHandlerBase {
     return undefined;
   }
 }
+
+const whatsNewExtensions = [new LinkExtension(), new ImageExtension(new WhatsNewImageHandler())];

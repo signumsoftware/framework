@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
 using Signum.Basics;
+using Signum.Dashboard;
 using Signum.UserAssets;
+using Signum.UserQueries;
 using System.Collections.Frozen;
 using System.IO;
 
@@ -50,6 +52,9 @@ public static class TourLogic
                 e.ShowCloseButton,
             });
 
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommandMList((TourStepEntity ts) => ts.CssSteps, Database.MListQuery((TourStepEntity ts) => ts.CssSteps).Where(mle => mle.Element.Property.Is(property)));
+
         SymbolLogic<TourTriggerSymbol>.Start(sb, () => RegisteredTourTriggers.ToHashSet());
 
         ToursByTrigger = sb.GlobalLazy(() =>
@@ -67,5 +72,34 @@ public static class TourLogic
         }
 
         UserAssetsImporter.Register<TourEntity>("Tour", TourOperation.Save);
+
+        sb.Schema.EntityEvents<DashboardEntity>().Saved += (dashboard, args) =>
+        {
+            if (args.WasNew)
+                return;
+
+            var dashboardLite = dashboard.ToLite();
+            var validGuids = dashboard.Parts.Select(p => p.Guid).ToHashSet();
+
+            // Drop CssStep rows whose part-Guid no longer exists in the saved dashboard.
+            Database.MListQuery((TourStepEntity ts) => ts.CssSteps)
+                .Where(mle => mle.Parent.Tour.Entity.Trigger.Is(dashboardLite)
+                    && mle.Element.Type == CssStepType.DashboardPart
+                    && mle.Element.DashboardPart != null
+                    && !validGuids.Contains(mle.Element.DashboardPart.Value))
+                .UnsafeDeleteMList();
+        };
+
+        sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
+        {
+            query.SelectMany(d => Database.Query<TourEntity>().Where(t => t.Trigger.Is(d.ToLite()))).UnsafeDelete();
+            return null;
+        };
+
+        sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
+        {
+            query.SelectMany(uq => Database.Query<TourEntity>().Where(t => t.Trigger.Is(uq.ToLite()))).UnsafeDelete();
+            return null;
+        };
     }
 }

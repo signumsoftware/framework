@@ -104,6 +104,9 @@ public static class PlainExcelGenerator
             Dictionary<DynamicQuery.Column, (DefaultStyle defaultStyle, UInt32Value styleIndex)> styleIndexes =
                 request.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
 
+            Dictionary<DynamicQuery.Column, string?> columnFormats =
+                request.Columns.ToDictionary(c => c, c => c.Token.GetPropertyRoute()?.PropertyInfo?.GetCustomAttribute<FormatAttribute>()?.Format);
+
             var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet!;
             {
                 var maxIndex = ss.NumberingFormats!.ChildElements.Cast<NumberingFormat>()
@@ -147,7 +150,19 @@ public static class PlainExcelGenerator
                         ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
                         r[rt];
 
-                    var cell = CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
+                    var fmt = columnFormats.GetOrThrow(c);
+                    var isHtmlOrMarkdown = fmt == FormatAttribute.Html || fmt == FormatAttribute.Markdown;
+                    if (value is string strValue)
+                    {
+                        if (fmt == FormatAttribute.Html)
+                            value = Signum.HtmlEditor.HtmlToPlainText.HtmlToText(strValue);
+                        else if (fmt == FormatAttribute.Markdown)
+                            value = Signum.Markdown.MarkdownToPlainText.MarkdownToText(strValue);
+                    }
+
+                    var effectiveStyle = isHtmlOrMarkdown ? DefaultStyle.Multiline : t.defaultStyle;
+                    var effectiveStyleIndex = isHtmlOrMarkdown ? CellBuilder.DefaultStyles[DefaultStyle.Multiline] : t.styleIndex;
+                    var cell = CellBuilder.Cell(value, effectiveStyle, effectiveStyleIndex, forImport);
 
                     if ((cta != null && (cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct) == false))
                         ApplyWrapTextStyle(workbookPart, cell);

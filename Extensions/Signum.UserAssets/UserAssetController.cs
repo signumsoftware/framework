@@ -7,6 +7,8 @@ using Signum.API.Controllers;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.Files;
+using Signum.DynamicQuery.Tokens;
+using System.Text.Json.Serialization;
 
 namespace Signum.UserAssets;
 
@@ -63,11 +65,12 @@ public class UserAssetController : ControllerBase
 
                 var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-                var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList());
+                var value = FilterValueConverter.Parse(filter.valueString, token.Type, filter.operation!.Value.IsList(), filter.operation!.Value.IsPair());
 
                 return new FilterNode
                 {
                     token = new QueryTokenTS(token, true),
+                    realToken = token,
                     operation = filter.operation.Value,
                     value = value,
                     pinned = filter.pinned,
@@ -80,7 +83,19 @@ public class UserAssetController : ControllerBase
 
                 var token = group.tokenString == null ? null : QueryUtils.Parse(group.tokenString!, qd, options);
 
-                var value = FilterValueConverter.Parse(group.valueString, typeof(string), false);
+                var subFilters = ParseFilterInternal(gr, qd, options, indent + 1).ToList();
+
+                object? value = null;
+                if (group.valueString.HasText())
+                {
+                    var filterConditions = subFilters.SelectMany(f => f.FilterConditions()).ToList();
+
+                    var types = filterConditions.Select(a => a.realToken!.Type).Distinct().ToList();
+
+                    var commonType = types.Only() ?? (types.All(a => a.IsLite()) ? typeof(Lite<Entity>) : typeof(string));
+
+                    value = FilterValueConverter.Parse(group.valueString, commonType, filterConditions.Any(a => a.operation?.IsList() == true));
+                }
 
                 return new FilterNode
                 {
@@ -88,7 +103,8 @@ public class UserAssetController : ControllerBase
                     token = token == null ? null : new QueryTokenTS(token, true),
                     pinned = group.pinned,
                     dashboardBehaviour = group.dashboardBehaviour,
-                    filters = ParseFilterInternal(gr, qd, options, indent + 1).ToList()
+                    filters = subFilters,
+                    value = value
                 };
             }
         }).ToList();
@@ -124,7 +140,7 @@ public class UserAssetController : ControllerBase
         {
             var token = QueryUtils.Parse(filter.tokenString!, qd, options);
 
-            var expectedValueType = filter.operation!.Value.IsList() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
+            var expectedValueType = filter.operation!.Value.IsList() || filter.operation!.Value.IsPair() ? typeof(ObservableCollection<>).MakeGenericType(token.Type.Nullify()) : token.Type;
             
             var val = filter.value is JsonElement jtok ?
                  jtok.ToObject(expectedValueType, SignumServer.JsonSerializerOptions) :
@@ -154,7 +170,7 @@ public class UserAssetController : ControllerBase
                 pinned = filter.pinned,
             };
 
-            foreach (var f in filter.filters)
+            foreach (var f in filter.filters!)
             {
                 foreach (var fe in ToQueryFiltersEmbedded(f, qd, options, ident + 1))
                 {
@@ -191,12 +207,36 @@ public class UserAssetController : ControllerBase
     {
         public FilterGroupOperation? groupOperation;
         public string? tokenString; //For Request
+
+        [JsonIgnore]
+        public QueryToken? realToken; //For internal
+        
         public QueryTokenTS? token; //For response
         public FilterOperation? operation;
         public object? value;
-        public List<FilterNode> filters;
+        public List<FilterNode>? filters;
         public PinnedFilter pinned;
         public DashboardBehaviour? dashboardBehaviour;
+
+        internal IEnumerable<FilterNode> FilterConditions()
+        {
+            if (filters.IsNullOrEmpty())
+                return new[] { this };
+
+            return filters.SelectMany(f => f.FilterConditions());
+        }
+
+        public override string ToString()
+        {
+            if (operation != null)
+            {
+                return "{0} {1} {2}".FormatWith(token, operation, value);
+            }
+            else
+            {
+                return "{0} ({1})".FormatWith(groupOperation, filters!.Count + "filters");
+            }
+        }
     }
 
     public class FilterElement

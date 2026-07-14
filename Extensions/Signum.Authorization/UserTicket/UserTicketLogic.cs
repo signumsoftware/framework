@@ -26,6 +26,8 @@ public static class UserTicketLogic
                 ut.Device,
             });
 
+        UserGraph.OnDeactivated += u => UserTicketLogic.RemoveTickets(u);
+
         QueryLogic.Expressions.Register((UserEntity u) => u.UserTickets(), () => typeof(UserTicketEntity).NicePluralName());
 
         sb.Schema.EntityEvents<UserEntity>().Saving += UserTicketLogic_Saving;

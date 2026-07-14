@@ -36,8 +36,8 @@ function SearchPage(): React.ReactElement {
     const containerDiv = scl?.containerDiv;
     if (containerDiv) {
       const marginTop = containerDiv.offsetTop;
-      const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
-      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
+      const maxHeight = (window.innerHeight - (marginTop + SearchPage.Options.marginDown));
+      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.Options.minHeight) + "px";
     }
   }
 
@@ -90,7 +90,7 @@ function SearchPage(): React.ReactElement {
         allowSelection={qs && qs.allowSelection}
         hideFullScreenButton={true}
         largeToolbarButtons={true}
-        showFilters={SearchPage.showFilters(fo, qd, qs)}
+        showFilters={SearchPage.Options.showFilters(fo, qd, qs)}
         showGroupButton={true}
         showSystemTimeButton={true}
         showFooter={true}
@@ -108,11 +108,15 @@ function SearchPage(): React.ReactElement {
 }
 
 namespace SearchPage {
-  export let marginDown = 70;
-  export let minHeight = 600;
-  export let showFilters = (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => {
-    return false;
-  }
+  export const Options: {
+    marginDown: number;
+    minHeight: number;
+    showFilters: (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => boolean;
+  } = {
+    marginDown: 70,
+    minHeight: 600,
+    showFilters: () => false
+  };
 }
 
 export default SearchPage;

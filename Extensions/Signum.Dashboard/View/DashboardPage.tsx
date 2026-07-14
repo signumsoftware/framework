@@ -2,7 +2,8 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, translated } from '@framework/Signum.Entities'
+import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, translated, toLite } from '@framework/Signum.Entities'
+import { EntityLink } from '@framework/Search'
 import { Navigator } from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Dashboard'
 import DashboardView from './DashboardView'
@@ -50,31 +51,39 @@ export default function DashboardPage(): React.JSX.Element {
             {entityKey ?
               <div>
                 {!entity ? <h1 className="h3">{JavascriptMessage.loading.niceToString()}</h1> :
-                  <h1 tabIndex={0} className="h3" aria-label={getToString(entity) + (entity ? "" : " " + Navigator.getTypeSubTitle(entity, undefined))}>
-                    <span className="display-6">{getToString(entity)}</span>
-                    {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
-                      <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
-                    }
-                    <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
-                  </h1>
+                  dashboard.showTitleAsBreadcrumb ?
+                    <h4 className="mb-3 mt-2">
+                      <EntityLink lite={toLite(entity)} inPlaceNavigation />
+                      <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+                      {DashboardClient.Options.customTitle(dashboard)}
+                    </h4> :
+                    <>
+                      <h1 tabIndex={0} className="h3" aria-label={getToString(entity) + (entity ? "" : " " + Navigator.getTypeSubTitle(entity, undefined))}>
+                        <span className="display-6">{getToString(entity)}</span>
+                        {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
+                          <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
+                        }
+                        <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
+                      </h1>
+                      <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>
+                    </>
                 }
-                <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>
               </div> :
               <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
             }
           </div>
-          {!Navigator.isReadOnly(DashboardEntity) &&
-            <div className="ms-auto">
-              {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
-                DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
-                <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
-              </span> : null}
-              {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
+          <div className="ms-auto">
+            {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +
+              DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
+              <FontAwesomeIcon aria-hidden={true} icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
+            </span> : null}
+            {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
+            {!Navigator.isReadOnly(DashboardEntity) &&
               <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)} title={DashboardMessage.Edit.niceToString()}>
                 <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
               </Link>
-            </div>
-          }
+            }
+          </div>
         </div>}
 
       {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} cachedQueries={cachedQueries!} entity={entity || undefined} deps={[refreshCounter, entity]} reload={reloadDashboard} hideEditButton={true} />}

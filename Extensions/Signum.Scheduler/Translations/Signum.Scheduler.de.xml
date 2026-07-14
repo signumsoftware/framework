@@ -62,6 +62,7 @@
     <Member Name="ApplicationName" Description="Anwendungsname" />
     <Member Name="AvailableTasks" Description="Verfügbare Aufgaben" />
     <Member Name="Cancel" Description="Abbrechen" />
+    <Member Name="Dates" Description="Daten" />
     <Member Name="InitialDelayMilliseconds" Description="Anfangsverzögerung in Millisekunden" />
     <Member Name="InMemoryQueue" Description="Speicher Warteschlange" />
     <Member Name="MachineName" Description="Maschinenname" />

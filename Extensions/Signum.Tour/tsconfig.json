@@ -10,6 +10,9 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.UserAssets" },
-    { "path": "../Signum.CodeMirror" }
+    { "path": "../Signum.CodeMirror" },
+    { "path": "../Signum.Dashboard" },
+    { "path": "../Signum.UserQueries" },
+    { "path": "../Signum.Markdown" }
   ]
 }

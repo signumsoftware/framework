@@ -14,6 +14,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         BindParent();
     }
 
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
     [StringLengthValidator(Min = 3, Max = 100), Translatable]
     public string? Title { get; set; }
 
@@ -88,7 +90,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconName = IconName,
             TitleColor = TitleColor,
             CustomColor = CustomColor,
-        };
+        }; // Guid is intentionally fresh — a clone is a new instance
     }
 
     internal void NotifyRowColumn()
@@ -100,6 +102,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     internal XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("Part",
+            new XAttribute("Guid", Guid),
             new XAttribute("Row", Row),
             new XAttribute("StartColumn", StartColumn),
             new XAttribute("Columns", Columns),
@@ -115,6 +118,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     internal void FromXml(XElement x, IFromXmlContext ctx)
     {
+        Guid = x.Attribute("Guid")?.Let(a => Guid.Parse(a.Value)) ?? Guid.NewGuid();
         Row = int.Parse(x.Attribute("Row")!.Value);
         StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
         Columns = int.Parse(x.Attribute("Columns")!.Value);

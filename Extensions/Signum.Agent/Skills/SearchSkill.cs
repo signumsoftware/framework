@@ -14,16 +14,13 @@ using System.Web;
 
 namespace Signum.Agent.Skills;
 
-public class SearchSkill : AgentSkill
+public class SearchSkill : SkillCode
 {
-    public Func<object, bool> InlineQueryName = q => false; 
+    [SkillProperty_QueryList]
+    public HashSet<object> InlineQueryName { get; set; } = new HashSet<object>();
 
-    public SearchSkill(params HashSet<object> queries) : this(q => queries.Contains(q))
+    public SearchSkill()
     {
-    }  
-    public SearchSkill(Func<object, bool> inlineQueryName)
-    {
-        InlineQueryName = inlineQueryName;
         ShortDescription = "Explores the database schema and queries any information in the database";
         IsAllowed = () => true;
         Replacements = new Dictionary<string, Func<object?, string>>()
@@ -34,7 +31,7 @@ public class SearchSkill : AgentSkill
                 .GroupBy(a => a is Type t? t.Namespace : a is Enum e ? e.GetType().Namespace : "Unknown")
                 .ToString(gr =>
                 {
-                    var inlineQueries = gr.Where(InlineQueryName).ToString(qn =>
+                    var inlineQueries = gr.Where(InlineQueryName.Contains).ToString(qn =>
                     {
                         var imp = QueryLogic.Queries.GetEntityImplementations(qn);
                         var impStr = imp.Types.Only() == qn as Type ? "" : $" (ImplementedBy {imp.Types.ToString(t => t.Name, ", ")})";

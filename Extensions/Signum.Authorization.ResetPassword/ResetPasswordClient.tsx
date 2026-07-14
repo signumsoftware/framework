@@ -17,7 +17,7 @@ export namespace ResetPasswordClient {
     options.routes.push({ path: "/auth/forgotPasswordEmail", element: <ImportComponent onImport={() => import("./ForgotPasswordEmailPage")} /> });
     options.routes.push({ path: "/auth/resetPassword", element: <ImportComponent onImport={() => import("./ResetPassword")} /> });
   
-    LoginPage.resetPasswordControl = () => <span>
+    AuthClient.LoginOptions.resetPasswordControl = () => <span>
       &nbsp;
       &nbsp;
       <Link to="/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
@@ -54,3 +54,4 @@ export namespace ResetPasswordClient {
     }
   }
 }
+

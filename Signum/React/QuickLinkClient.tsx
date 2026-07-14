@@ -160,7 +160,9 @@ export namespace QuickLinkClient {
       }));
   }
 
-  export var ignoreErrors = false;
+  let ignoreErrors = false;
+
+  export function getIgnoreErrors(): boolean { return ignoreErrors; }
 
   export function setIgnoreErrors(value: boolean): void {
     ignoreErrors = value;

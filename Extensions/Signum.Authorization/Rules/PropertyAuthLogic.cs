@@ -25,6 +25,7 @@ public static class PropertyAuthLogic
         PropertyRouteLogic.Start(sb);
 
         sb.Include<RulePropertyEntity>()
+            .WithCascadeDeleteBy(a => a.Role)
             .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
             .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleProperty);
 
@@ -40,7 +41,6 @@ public static class PropertyAuthLogic
         AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
         sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
-        sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
         sb.Schema.EntityEvents<RoleEntity>().PreDeleteSqlSync += role => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Role.Is(role)));
         sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
         sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
