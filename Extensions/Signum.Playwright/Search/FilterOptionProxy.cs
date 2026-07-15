@@ -38,7 +38,7 @@ public class FilterConditionProxy : FilterProxy
     public QueryTokenBuilderProxy QueryToken => new QueryTokenBuilderProxy(Element.Locator(".sf-query-token-builder"));
 
     public ILocator OperationElement => Element.Locator("td.sf-filter-operation select");
-    public ILocator ValueElement => Element.Locator("td.sf-filter-value *");
+    public ILocator ValueElement => Element.Locator("td.sf-filter-value > *");
 
     public async Task<FilterOperation> GetOperationAsync()
     {

@@ -104,13 +104,8 @@ public class ResultTableProxy
 
     public async Task<string[]> GetColumnTokensAsync()
     {
-        var headers = await Element.Locator("thead > tr > th").AllAsync();
-        var result = new List<string>();
-
-        foreach (var h in headers)
-            result.Add(await h.GetAttributeAsync("data-column-name") ?? "");
-
-        return result.ToArray();
+        return await Element.Locator("thead > tr > th")
+            .EvaluateAllAsync<string[]>("els => els.map(el => el.getAttribute('data-column-name') ?? '')");
     }
 
     public async Task<ILocator> CellElementAsync(int rowIndex, string token)
