@@ -404,7 +404,7 @@ export function getStackOffset(curveName: string): ((series: d3.Series<any, any>
 
 
 
-export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => Iterable<number>) | undefined {
   switch (schemeName) {
     case "none": return d3.stackOrderNone;
     case "ascending": return d3.stackOrderAscending;

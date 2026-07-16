@@ -1,4 +1,5 @@
 using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
 using System.ComponentModel;
 using System.Data;
 
@@ -23,9 +24,12 @@ public abstract class TreeEntity : Entity
     [AutoExpressionField]
     public string RouteToString => As.Expression(() => Route.ToString());
 
-    [NotNullValidator(Disabled = true)]
-    [DbType(Size = 255, SqlDbType = SqlDbType.VarChar)]
+     [NotNullValidator(Disabled = true)]
+     [DbType( SqlDbType = SqlDbType.VarChar, NpgsqlDbType = NpgsqlDbType.Varchar)]
     public string ParentRoute { get; set; }
+
+   
+
 
     static Expression<Func<TreeEntity, short?>> LevelExpression = @this => (short?)@this.Route.GetLevel();
     [Ignore]
