@@ -62,6 +62,7 @@ export namespace TranslationMessage {
   export const InstanceRouteConflictsOverview: MessageKey = new MessageKey("TranslationMessage", "InstanceRouteConflictsOverview");
   export const TranslationFor0_: MessageKey = new MessageKey("TranslationMessage", "TranslationFor0_");
   export const OnlyNeutralCultures: MessageKey = new MessageKey("TranslationMessage", "OnlyNeutralCultures");
+  export const OnlyRecommendedInstances: MessageKey = new MessageKey("TranslationMessage", "OnlyRecommendedInstances");
   export const From0using1_: MessageKey = new MessageKey("TranslationMessage", "From0using1_");
   export const SelectAxlsxFileWithTheTranslations: MessageKey = new MessageKey("TranslationMessage", "SelectAxlsxFileWithTheTranslations");
   export const NoRoutesMarkedForTranslationConsiderUsing: MessageKey = new MessageKey("TranslationMessage", "NoRoutesMarkedForTranslationConsiderUsing");

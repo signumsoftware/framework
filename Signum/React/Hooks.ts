@@ -386,12 +386,14 @@ export const Breakpoints = {
 }
 
 export function getBreakpoint(): number {
-  var width = window.innerWidth;
-  if (width <= Breakpoints.sm) return 0;
-  if (width <= Breakpoints.md) return Breakpoints.sm;
-  if (width <= Breakpoints.lg) return Breakpoints.md;
-  if (width <= Breakpoints.xl) return Breakpoints.lg;
-  if (width <= Breakpoints.xxl) return Breakpoints.xl;
+  // Use matchMedia (CSS viewport, scrollbar-excluded) instead of window.innerWidth
+  // so JS breakpoints stay in sync with CSS @media rules and don't flip when a
+  // scrollbar appears/disappears as content width changes.
+  if (window.matchMedia(`(max-width: ${Breakpoints.sm}px)`).matches) return 0;
+  if (window.matchMedia(`(max-width: ${Breakpoints.md}px)`).matches) return Breakpoints.sm;
+  if (window.matchMedia(`(max-width: ${Breakpoints.lg}px)`).matches) return Breakpoints.md;
+  if (window.matchMedia(`(max-width: ${Breakpoints.xl}px)`).matches) return Breakpoints.lg;
+  if (window.matchMedia(`(max-width: ${Breakpoints.xxl}px)`).matches) return Breakpoints.xl;
   return Breakpoints.xxl;
 }
 

@@ -25,6 +25,21 @@ public static class UserQueryLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
     As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uq.ToLite())));
 
+    [AutoExpressionField]
+    public static IQueryable<DashboardEntity> Dashboards(this UserQueryEntity uq) =>
+        As.Expression(() => Database.Query<DashboardEntity>().Where(d =>
+            TypeLogic.IsIncluded<UserQueryPartEntity>() && d.Parts.Any(p => ((UserQueryPartEntity)p.Content).UserQuery.Is(uq)) ||
+            TypeLogic.IsIncluded<BigValuePartEntity>() && d.Parts.Any(p => ((BigValuePartEntity)p.Content).UserQuery.Is(uq)) ||
+            TypeLogic.IsIncluded<ValueUserQueryListPartEntity>() && d.Parts.Any(p => ((ValueUserQueryListPartEntity)p.Content).UserQueries.Any(e => e.UserQuery.Is(uq)))));
+
+    [AutoExpressionField]
+    public static bool InToolbar(this UserQueryEntity uq) =>
+        As.Expression(() => 
+        Database.Query<ToolbarEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq))) ||
+        Database.Query<ToolbarMenuEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq)))
+        );
+
+
     public static void Start(SchemaBuilder sb)
     {
         
@@ -75,6 +90,8 @@ public static class UserQueryLogic
                 },
                 GetRelatedQuery = lite => lite.RetrieveUserQuery().Query,
             }.Register();
+
+            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.InToolbar());
         });
 
         sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
@@ -86,6 +103,8 @@ public static class UserQueryLogic
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserQueryPartEntity));
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(ValueUserQueryListPartEntity));
+
+            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.Dashboards(), () => typeof(DashboardEntity).NicePluralName());
 
             DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
             {

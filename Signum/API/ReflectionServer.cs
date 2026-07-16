@@ -338,6 +338,8 @@ public static class ReflectionServer
         var kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum;
 
+        var settings = Schema.Current.Settings;
+
         var result = new TypeInfoTS
         {
             Kind = kind,
@@ -349,7 +351,7 @@ public static class ReflectionServer
                           .Select(fi => KeyValuePair.Create(fi.Name, OnFieldInfoExtension(new MemberInfoTS
                           {
                               NiceName = fi.NiceName(),
-                              IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
+                              IsIgnoredEnum = kind == KindOfType.Enum && settings.EnumAttribute<IgnoreAttribute>(fi) != null
                           }, fi)!))
                           .Where(a => a.Value != null)
                           .ToDictionaryEx("query"),

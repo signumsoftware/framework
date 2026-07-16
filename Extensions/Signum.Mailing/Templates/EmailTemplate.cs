@@ -45,7 +45,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public bool GroupResults { get; set; }
 
-    [PreserveOrder]
+    [PreserveOrder, Translatable(false)]
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]

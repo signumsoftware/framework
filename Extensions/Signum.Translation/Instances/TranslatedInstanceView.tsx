@@ -32,9 +32,11 @@ export default function TranslationInstanceView(): React.JSX.Element {
 
   const [onlyNeutral, setOnlyNeutral] = React.useState<boolean>(true);
 
+  const [applyFilter, setApplyFilter] = React.useState<boolean>(QueryString.parse(location.search).applyFilter != "false");
+
   const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(location.search).filter);
 
-  const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : TranslatedInstanceClient.API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
+  const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : TranslatedInstanceClient.API.viewTranslatedInstanceData(type, culture, filter, applyFilter), [type, culture, filter, applyFilter]);
 
   function renderTable() {
     if (result == undefined || cultures == undefined)
@@ -88,6 +90,9 @@ export default function TranslationInstanceView(): React.JSX.Element {
       <div className="mb-2">
         <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
         <TranslateSearchBox setFilter={setFilter} filter={filter ?? ""} />
+        <label style={{ float: 'right' }} className="ms-3">
+          <input type="checkbox" checked={applyFilter} onChange={e => setApplyFilter(e.currentTarget.checked)} /> {TranslationMessage.OnlyRecommendedInstances.niceToString()}
+        </label>
         {culture == null && <label style={{ float: 'right' }}>
           <input type="checkbox" checked={onlyNeutral} onChange={e => setOnlyNeutral(e.currentTarget.checked)} /> {TranslationMessage.OnlyNeutralCultures.niceToString()}
         </label>

@@ -83,6 +83,7 @@
     <Member Name="TypeRules" Description="Typregeln" />
     <Member Name="Uncheck" Description="Deaktivieren" />
     <Member Name="UsedByRoles" Description="Verwendet von Rollen" />
+    <Member Name="UsersIncludingInheritedAndMergedRoles" Description="Benutzer (inklusive geerbter und zusammengeführter Rollen)" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />

@@ -9,6 +9,7 @@ using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.TokenMigrations;
 using Signum.Utilities.DataStructures;
+using Signum.Word.Spreedsheet;
 using System.Collections.Frozen;
 using System.Data;
 using System.Globalization;
@@ -406,6 +407,12 @@ public static class WordTemplateLogic
 
                             p.Switch("AssertClean");
                             renderer.AssertClean();
+
+                            if (document is SpreadsheetDocument ssd && ssd.WorkbookPart is { } workbookPart)
+                            {
+                                p.Switch("FinalizeSpreadsheet");
+                                SpreadsheetUtils.Finalize(workbookPart, parser.SpreadsheetForeachBlocks); Dump(document, "3b.Spreadsheet.txt");
+                            }
 
                             p.Switch("FixDocument");
                             FixDocument(document); Dump(document, "4.Fixed.txt");

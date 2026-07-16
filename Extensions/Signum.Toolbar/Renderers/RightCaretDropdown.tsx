@@ -5,6 +5,7 @@ import { JSX } from "react/jsx-runtime";
 import "./RightCaretDropdown.css";
 import { ToolbarResponse } from "../ToolbarClient";
 import { liteKeyOrQuery } from "./ToolbarRenderer";
+import { Breakpoints, useBreakpoint } from "@framework/Hooks";
 export interface RightCaretDropdownOption {
   value: ToolbarResponse<any>;
   label: string;
@@ -28,8 +29,10 @@ export function RightCaretDropdown({
 }: RightCaretDropdownProps): JSX.Element {
   const selected = options.find((o) => o.value === value);
 
+  const isMobile = useBreakpoint() <= Breakpoints.sm;
+
   return (
-    <Dropdown style={{ width: "100%" }} drop="end">
+    <Dropdown style={{ width: "100%" }} drop={isMobile ? "down" : "end"}>
       <Dropdown.Toggle
         variant="tertiary"
         disabled={disabled}

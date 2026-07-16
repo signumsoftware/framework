@@ -21,7 +21,21 @@ public static class UserChartLogic
     [AutoExpressionField]
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserChartEntity uc) =>
         As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uc.ToLite())));
-    
+
+    [AutoExpressionField]
+    public static IQueryable<DashboardEntity> Dashboards(this UserChartEntity uc) =>
+        As.Expression(() => Database.Query<DashboardEntity>().Where(d =>
+            TypeLogic.IsIncluded<UserChartPartEntity>() && d.Parts.Any(p => ((UserChartPartEntity)p.Content).UserChart.Is(uc)) ||
+            TypeLogic.IsIncluded<CombinedUserChartPartEntity>() && d.Parts.Any(p => ((CombinedUserChartPartEntity)p.Content).UserCharts.Any(e => e.UserChart.Is(uc)))));
+
+
+    [AutoExpressionField]
+    public static bool InToolbar(this UserChartEntity uq) =>
+    As.Expression(() =>
+        Database.Query<ToolbarEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq))) ||
+        Database.Query<ToolbarMenuEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq)))
+    );
+
     public static void Start(SchemaBuilder sb)
     {
         if (sb.AlreadyDefined(MethodInfo.GetCurrentMethod()))
@@ -63,6 +77,8 @@ public static class UserChartLogic
                 },
                 GetRelatedQuery = lite => lite.RetrieveUserChart().Query,
             }.Register();
+
+            QueryLogic.Expressions.Register((UserChartEntity uc) => uc.InToolbar());
         });
 
         sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
@@ -74,6 +90,8 @@ public static class UserChartLogic
         {
             
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserChartPartEntity));
+
+            QueryLogic.Expressions.Register((UserChartEntity uc) => uc.Dashboards(), () => typeof(DashboardEntity).NicePluralName());
 
             DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
             {
