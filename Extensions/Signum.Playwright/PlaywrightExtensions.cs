@@ -44,6 +44,19 @@ public static class PlaywrightExtensions
 
     #endregion
 
+    #region Focus and Input
+    
+    /// <summary>
+    /// Simulates losing focus by pressing the Tab key, mimicking Selenium's LoseFocus behavior.
+    /// This is crucial for triggering onBlur events in React components like DateTimeLine.
+    /// </summary>
+    public static async Task LoseFocusAsync(this ILocator locator)
+    {
+        await locator.PressAsync("Tab");
+    }
+    
+    #endregion
+
     #region Wait Methods
 
     /// <summary>
