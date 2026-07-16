@@ -1764,9 +1764,9 @@ export class QueryTokenString<T> {
   }
 
   /** Builds a filter condition option on this token. The value type depends on the operation. */
-  filter(operation: "IsIn" | "IsNotIn", value: AddToLite<T>[], options?: ExtraFilterConditionOptions): FilterConditionOption;
-  filter(operation: "Between" | "BetweenNoEnd", value: [AddToLite<T>, AddToLite<T>], options?: ExtraFilterConditionOptions): FilterConditionOption;
-  filter(operation: FilterOperation, value: AddToLite<T>, options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: "IsIn" | "IsNotIn", value: FilterValue<T>[], options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: "Between" | "BetweenNoEnd", value: [FilterValue<T>, FilterValue<T>], options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: FilterOperation, value: FilterValue<T>, options?: ExtraFilterConditionOptions): FilterConditionOption;
   filter(operation: FilterOperation, value: any, options?: ExtraFilterConditionOptions): FilterConditionOption {
     return { token: this, operation, value, ...options };
   }
@@ -1777,8 +1777,12 @@ export class QueryTokenString<T> {
   }
 
   /** Builds a column option on this token. */
-  column(displayName?: string | (() => string), options?: ColumnDisplayOptions): ColumnOption {
-    return { token: this, displayName, ...options };
+  column(displayName?: string | (() => string), options?: ColumnDisplayOptions): ColumnOption;
+  column(options: ColumnDisplayOptions & { displayName?: string | (() => string) }): ColumnOption;
+  column(displayNameOrOptions?: string | (() => string) | (ColumnDisplayOptions & { displayName?: string | (() => string) }), options?: ColumnDisplayOptions): ColumnOption {
+    if (displayNameOrOptions != null && typeof displayNameOrOptions == "object")
+      return { token: this, ...displayNameOrOptions };
+    return { token: this, displayName: displayNameOrOptions, ...options };
   }
 
   /**
@@ -1795,7 +1799,11 @@ export class QueryTokenString<T> {
   }
 }
 
-type AddToLite<T> = T extends Entity ? Lite<T> : T;
+/** Accepted filter value for a token of type `T`: a `Lite<E>` token also accepts the entity `E`, and vice-versa. */
+type FilterValue<T> =
+  T extends Lite<infer E> ? Lite<E> | E :
+  T extends Entity ? Lite<T> | T :
+  T;
 
 type AnonymousOf<T> = T extends ModifiableEntity ? Anonymous<T> : T;
 
