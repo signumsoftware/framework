@@ -20,7 +20,7 @@ export interface ValueFindOptionsParsed {
   filterOptions: FilterOptionParsed;
 }
 
-export interface ModalFindOptionsMany extends ModalFindOptions{
+export interface ModalFindOptionsMany extends ModalFindOptions {
   allowNoSelection?: boolean;
 }
 
@@ -45,9 +45,19 @@ export interface FindOptions {
   filterOptions?: (FilterOption | null | undefined)[];
   orderOptions?: (OrderOption | null | undefined)[];
   columnOptionsMode?: ColumnOptionsMode;
-  columnOptions?: (ColumnOption | null | undefined)[];
+  columnOptions?: (ColumnOption | QueryTokenString<any> | null | undefined)[];
   pagination?: Pagination;
   systemTime?: SystemTime;
+}
+
+/** Like {@link FindOptions} but with an optional queryName, defaulted by `Type.findOptions`. */
+export interface FindOptionsAutoQueryName extends Omit<FindOptions, "queryName"> {
+  queryName?: PseudoType | QueryKey;
+}
+
+/** Normalizes a bare {@link QueryTokenString} (accepted in `columnOptions`) into a {@link ColumnOption}. */
+export function toColumnOption(co: ColumnOption | QueryTokenString<any>): ColumnOption {
+  return co instanceof QueryTokenString ? { token: co } : co;
 }
 
 export interface FindOptionsParsed {
@@ -65,8 +75,8 @@ export type FilterOption = FilterConditionOption | FilterGroupOption;
 
 export function isFilterGroup(fo: FilterOptionParsed): fo is FilterGroupOptionParsed
 export function isFilterGroup(fo: FilterOption): fo is FilterGroupOption
-export function isFilterGroup(fr: FilterRequest): fr is FilterGroupRequest 
-export function isFilterGroup(fo: FilterOption | FilterOptionParsed | FilterRequest): boolean{
+export function isFilterGroup(fr: FilterRequest): fr is FilterGroupRequest
+export function isFilterGroup(fo: FilterOption | FilterOptionParsed | FilterRequest): boolean {
   return (fo as FilterGroupOptionParsed | FilterGroupOption | FilterGroupRequest).groupOperation != undefined;
 }
 
@@ -185,6 +195,30 @@ export interface ColumnOption {
   combineRows?: CombineRows;
 }
 
+/** Extra pinned / frozen state for the {@link QueryTokenString.filter} builder method. */
+export interface ExtraFilterConditionOptions {
+  frozen?: boolean;
+  removeElementWarning?: boolean;
+  pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
+}
+
+/** Extra pinned / frozen state for the `filterGroup` builder methods. */
+export interface ExtraFilterGroupOptions {
+  frozen?: boolean;
+  pinned?: PinnedFilter;
+  dashboardBehaviour?: DashboardBehaviour;
+  value?: any; /*For search in multiple columns*/
+}
+
+/** Extra summary / display state for the {@link QueryTokenString.column} builder method. */
+export interface ColumnDisplayOptions {
+  displayName?: string | (() => string)
+  summaryToken?: string | QueryTokenString<any>;
+  hiddenColumn?: boolean;
+  combineRows?: CombineRows;
+}
+
 export interface ColumnOptionParsed {
   token?: QueryToken;
   displayName?: string;
@@ -203,7 +237,7 @@ export const DefaultPagination: Pagination = {
 export type FindMode = "Find" | "Explore";
 
 
-export interface QueryTokenWithoutParent extends Omit<QueryToken,  | "parent"> {
+export interface QueryTokenWithoutParent extends Omit<QueryToken, | "parent"> {
   subTokens?: { [name: string]: QueryTokenWithoutParent };
   parent: "fake";
 }
@@ -235,7 +269,7 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     return undefined;
   }
 
-  if (fop.value != null && (fop.pinned && fop.pinned.splitValue || isFilterGroup(fop))) 
+  if (fop.value != null && (fop.pinned && fop.pinned.splitValue || isFilterGroup(fop)))
     return fop; //otherwise change meaning
 
   if (isFilterGroup(fop)) {
@@ -266,8 +300,8 @@ export function canSplitValue(fo: FilterOptionParsed): boolean | undefined {
   }
 }
 
-export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {
-  
+export function mapFilterTokens(fo: FilterOption, mapToken: (token: string) => string): FilterOption {
+
   if (isFilterGroup(fo)) {
     return {
       ...fo,
@@ -556,7 +590,7 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
     "TsQuery_Phrase",
     "TsQuery_WebSearch",
   ],
-  
+
   "Vector": [
     "SmartSearch",
   ]

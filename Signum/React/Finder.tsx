@@ -15,7 +15,8 @@ import {
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
   toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
   QueryDescriptionDTO,
-  QueryTokenWithoutParent
+  QueryTokenWithoutParent,
+  toColumnOption
 } from './FindOptions';
 import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
@@ -313,7 +314,7 @@ export namespace Finder {
 
     Encoder.encodeFilters(query, fo.filterOptions?.notNull());
     Encoder.encodeOrders(query, fo.orderOptions?.notNull());
-    Encoder.encodeColumns(query, fo.columnOptions?.notNull());
+    Encoder.encodeColumns(query, fo.columnOptions?.notNull().map(toColumnOption));
 
     return query;
   }
@@ -821,7 +822,7 @@ export namespace Finder {
   export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     const fo = autoRemoveTrivialColumns(findOptions);
 
-    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
+    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull().map(toColumnOption) ?? []);
 
     var qs: QuerySettings | undefined = querySettings[qd.queryKey];
     const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -856,8 +857,8 @@ export namespace Finder {
       fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString()));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString()));
-      fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).forEach(co => completer.request(co.token.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
     }
 
     return completer.finished().then(() => {
@@ -868,7 +869,7 @@ export namespace Finder {
         pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
         systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
-        columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => {
+        columnOptions: (fo.columnOptions?.notNull().map(toColumnOption) ?? []).map(co => {
 
           const token = completer.get(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries);
 
