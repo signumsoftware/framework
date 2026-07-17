@@ -16,7 +16,8 @@ import {
   toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
   QueryDescriptionDTO,
   QueryTokenWithoutParent,
-  toColumnOption
+  toColumnOption,
+  FetchOptions
 } from './FindOptions';
 import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
@@ -1201,9 +1202,9 @@ export namespace Finder {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
   }
 
-  export async function fetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<Lite<T>[]> {
+  export async function fetchLites<T extends Entity>(fo: FetchOptions<T>): Promise<Lite<T>[]> {
 
-    var qd = await getQueryDescription(fo.queryName);
+    var qd = await getQueryDescription(fo.queryName!);
     var filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     var orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1224,8 +1225,8 @@ export namespace Finder {
     return result as Lite<T>[];
   }
 
-  export async function fetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<T[]> {
-    const qd = await getQueryDescription(fo.queryName);
+  export async function fetchEntities<T extends Entity>(fo: FetchOptions<T>): Promise<T[]> {
+    const qd = await getQueryDescription(fo.queryName!);
     const filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     const orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1800,23 +1801,13 @@ export namespace Finder {
 
   }
 
-  interface FetchEntitiesOptions<T extends Entity = any> {
-    queryName: Type<T> | QueryKey | PseudoType;
-    filterOptions?: (FilterOption | null | undefined)[];
-    orderOptions?: (OrderOption | null | undefined)[];
-    count?: number | null;
-  }
-
-
-
-
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
     return useAPI(() => fo && fetchLites(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
@@ -1827,13 +1818,13 @@ export namespace Finder {
     );
   }
 
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
     return useAPI(() => fo && fetchEntities(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }

@@ -55,6 +55,13 @@ export interface FindOptionsAutoQueryName extends Omit<FindOptions, "queryName">
   queryName?: PseudoType | QueryKey;
 }
 
+export interface FetchOptions<T extends Entity = any> {
+  queryName?: Type<T> | QueryKey | PseudoType; //Automatically set in Type.fetchOptions, mandatory otherwise
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
+  count?: number | null;
+}
+
 /** Normalizes a bare {@link QueryTokenString} (accepted in `columnOptions`) into a {@link ColumnOption}. */
 export function toColumnOption(co: ColumnOption | QueryTokenString<any>): ColumnOption {
   return co instanceof QueryTokenString ? { token: co } : co;
