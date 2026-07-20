@@ -14,10 +14,9 @@ import {
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
   toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
-  QueryDescriptionDTO,
-  QueryTokenWithoutParent,
-  toColumnOption,
-  FetchOptions
+  QueryDescriptionDTO, QueryTokenWithoutParent, toColumnOption, FetchOptions,
+  TypedResultsOptions,
+  ResultObject,
 } from './FindOptions';
 import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
@@ -1836,24 +1835,27 @@ export namespace Finder {
   }
 
 
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
-    var fo2: FindOptions | null = fo && {
+  function typedResultsFindOptions(options: TypedResultsOptions<any>): FindOptions {
+    const { resultObject, ...fo } = options;
+    return {
       pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
+      ...(fo as FindOptions),
+      columnOptions: getAllColumns(resultObject),
       columnOptionsMode: "ReplaceAll",
     };
+  }
 
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined {
     return useAPI(async signal => {
-      if (!fo2)
+      if (!options)
         return null;
 
-      var rt = await getResultTable(fo2, signal);
+      var rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
-    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+      return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
+    }, [options && findOptionsPath(typedResultsFindOptions(options)), ...(additionalDeps || [])], apiOptions);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
@@ -1889,31 +1891,19 @@ export namespace Finder {
     }) as ExtractTokensObject<TO>;
   }
 
-  export async function getResultTableTyped<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
-    var fo2: FindOptions = {
-      pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<ExtractTokensObject<RO>[]> {
+    const rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-    const rt = await getResultTable(fo2);
-
-    return rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row));
+    return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
   }
 
-  export async function getResultTableTypedWithPagination<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
-    var fo2: FindOptions = {
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResultsWithPagination<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<RO>[] }> {
 
-    const rt = await getResultTable(fo2);
+    const rt = await getResultTable(typedResultsFindOptions(options));
 
     return ({
       totalElements: rt.totalElements,
-      rows: rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row))
+      rows: rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row))
     });
   }
 
@@ -2309,7 +2299,7 @@ export namespace Finder {
               groupOperation: FilterGroupOperation.assertDefined(parts[1]),
               value: ignoreValues ? null :
                 isGroupList({ filters }) ? parts.slice(2).map(a => unscapeTildes(a)).notNull() :
-                unscapeTildes(parts[2]),
+                  unscapeTildes(parts[2]),
               pinned: pinned,
               filters,
             }) as FilterGroupOption;

@@ -62,6 +62,23 @@ export interface FetchOptions<T extends Entity = any> {
   count?: number | null;
 }
 
+/** Column tokens for a typed result, keyed by the field name each produces in the returned row. */
+export interface ResultObject {
+  [name: string]: QueryTokenString<any> | string | ResultObject | undefined;
+}
+
+/** Like {@link FindOptions} but the columns come from `resultObject` (no columnOptions); built by `Type.typedResultsOptions`. */
+export interface TypedResultsOptions<RO extends ResultObject = ResultObject> {
+  queryName?: PseudoType | QueryKey; //Automatically set in Type.typedResultsOptions
+  groupResults?: boolean;
+  includeDefaultFilters?: boolean;
+  filterOptions?: (FilterOption | null | undefined)[];
+  orderOptions?: (OrderOption | null | undefined)[];
+  pagination?: Pagination;
+  systemTime?: SystemTime;
+  resultObject: RO;
+}
+
 /** Normalizes a bare {@link QueryTokenString} (accepted in `columnOptions`) into a {@link ColumnOption}. */
 export function toColumnOption(co: ColumnOption | QueryTokenString<any>): ColumnOption {
   return co instanceof QueryTokenString ? { token: co } : co;

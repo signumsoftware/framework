@@ -16,6 +16,10 @@ namespace Signum.Upgrade.Upgrades;
 /// the receiver and an explicit <c>queryName</c> is kept. If no entity is referenced, the literal is left untouched.
 /// When the object is the first argument of <c>fetchLites/fetchEntities/useFetchLites/useFetchEntities</c> it becomes
 /// <c>X.fetchOptions(...)</c> (validated against FetchOptions keys) instead of <c>X.findOptions(...)</c>.
+/// A second pass rewrites <c>getResultTableTyped(X.findOptions(token => ({..})), tokensObject, ..)</c> into
+/// <c>getTypedResults(X.typedResultsOptions(token => ({.., resultObject: tokensObject })), ..)</c> (and the
+/// <c>useResultTableTyped</c> → <c>useTypedResults</c> variant); when the first argument isn't an <c>X.findOptions</c>
+/// builder it falls back to <c>getTypedResults({ ...arg1, resultObject: tokensObject })</c>.
 ///
 /// Uses <see cref="Regex.Replace(string, MatchEvaluator)"/> with .NET balancing capturing groups to match balanced
 /// {} , [] and () (the JS grammar the regex needs). Root filter groups (a <c>groupOperation</c> with no anchor
@@ -50,6 +54,8 @@ class Upgrade_20260716_FindOptionsBuilder : CodeUpgradeBase
     static readonly Regex EntityTokenRx = new(@"(?<e>\w[\w.]*Entity)\.token\(", RegexOptions.Compiled);
     // EnumType.value("X") is just the string "X" -> unwrap it in values
     static readonly Regex EnumValueRx = new(@"\b[\w.]+\.value\(\s*(?<lit>['""][^'""]*['""])\s*\)", RegexOptions.Compiled);
+    // getResultTableTyped(fo, tokensObject, ...) / useResultTableTyped(...) call, with a balanced argument list
+    static readonly Regex TypedResultsCallRx = new(@"(?<pre>(?:\w+\.)?)(?<fn>getResultTableTyped|useResultTableTyped)\s*(?<call>" + Paren + ")", RegexOptions.Compiled);
 
     // The exact set of properties an object must be a subset of to be migrated (FindOptions vs FetchOptions).
     static readonly string[] FindOptionsKeys = { "queryName", "groupResults", "includeDefaultFilters", "filterOptions", "orderOptions", "columnOptionsMode", "columnOptions", "pagination", "systemTime" };
@@ -62,14 +68,22 @@ class Upgrade_20260716_FindOptionsBuilder : CodeUpgradeBase
     {
         uctx.ForeachCodeFile(@"*.tsx", file =>
         {
-            if (!file.Content.Contains("queryName"))
+            var content = file.Content;
+            var hasQueryName = content.Contains("queryName");
+            var hasTypedResults = content.Contains("getResultTableTyped") || content.Contains("useResultTableTyped");
+            if (!hasQueryName && !hasTypedResults)
                 return;
 
-            var newContent = FindOptionsObjectRx.Replace(file.Content, ConvertFindOptions);
-            if (newContent == file.Content)
+            if (hasQueryName) // {queryName: X, ...} -> X.findOptions/fetchOptions(...)  (runs first so it also normalizes typed-results args)
+                content = FindOptionsObjectRx.Replace(content, ConvertFindOptions);
+
+            if (hasTypedResults) // Finder.getResultTableTyped(fo, tokensObject) -> Finder.getTypedResults(X.typedResultsOptions(...))
+                content = TypedResultsCallRx.Replace(content, ConvertTypedResults);
+
+            if (content == file.Content)
                 return;
 
-            file.Content = newContent;
+            file.Content = content;
 
             // root groups become the standalone filterGroup(...) helper: make sure it is imported
             if (Regex.IsMatch(file.Content, @"(?<![.\w])filterGroup\(") &&
@@ -131,6 +145,75 @@ class Upgrade_20260716_FindOptionsBuilder : CodeUpgradeBase
             return fetch + entity + "." + method + "()";
 
         return fetch + entity + "." + method + "(token => (" + body + "))";
+    }
+
+    // getResultTableTyped(ARG1, tokensObject, REST?) -> getTypedResults(ARG1.with resultObject, REST?)  (and use* variant)
+    static string ConvertTypedResults(Match m)
+    {
+        var call = m.Groups["call"].Value;
+        var args = SplitTopLevel(call.Substring(1, call.Length - 2));
+        if (args.Count < 2)
+            return m.Value;
+
+        var arg1 = args[0].Trim();
+        var arg2 = args[1].Trim(); // the tokensObject -> becomes resultObject
+        if (!arg2.StartsWith("{"))
+            return m.Value;
+
+        var newFn = m.Groups["fn"].Value == "getResultTableTyped" ? "getTypedResults" : "useTypedResults";
+        var rest = args.Skip(2).Select(a => a.Trim()).Where(a => a.Length > 0).ToList();
+        var restStr = rest.Count == 0 ? "" : ", " + string.Join(", ", rest);
+
+        // ARG1 = X.findOptions(token => ({ BODY })) -> fold tokensObject into the builder body as resultObject
+        var fo = Regex.Match(arg1, @"^(?<recv>[\w.]+)\.findOptions\(\s*(?<param>\w+)\s*=>\s*\(\s*(?<obj>" + Brace + @")\s*\)\s*\)$");
+        string newArg1;
+        if (fo.Success)
+        {
+            var recv = fo.Groups["recv"].Value;
+            var resultObject = new Regex(@"\b" + Regex.Escape(recv) + @"\.token\(").Replace(arg2, "token(");
+            var merged = InjectResultObject(fo.Groups["obj"].Value, resultObject);
+            newArg1 = recv + ".typedResultsOptions(" + fo.Groups["param"].Value + " => (" + merged + "))";
+        }
+        else
+        {
+            newArg1 = "{ ..." + arg1 + ", resultObject: " + arg2 + " }"; // ARG1 is a plain FindOptions expression / variable
+        }
+
+        return m.Groups["pre"].Value + newFn + "(" + newArg1 + restStr + ")";
+    }
+
+    static string InjectResultObject(string obj, string resultObject)
+    {
+        var inner = obj.Substring(1, obj.Length - 2).TrimEnd(); // strip { } (keep leading whitespace)
+        var sep = inner.Trim().Length == 0 ? "" : inner.EndsWith(",") ? "" : ",";
+        return "{" + inner + sep + " resultObject: " + resultObject + " }";
+    }
+
+    static List<string> SplitTopLevel(string s)
+    {
+        var parts = new List<string>();
+        int depth = 0, last = 0;
+        for (int i = 0; i < s.Length; i++)
+        {
+            var c = s[i];
+            if (c == '"' || c == '\'' || c == '`') { i = SkipString(s, i); continue; }
+            if (c == '(' || c == '[' || c == '{') depth++;
+            else if (c == ')' || c == ']' || c == '}') depth--;
+            else if (c == ',' && depth == 0) { parts.Add(s.Substring(last, i - last)); last = i + 1; }
+        }
+        parts.Add(s.Substring(last));
+        return parts;
+    }
+
+    static int SkipString(string s, int i)
+    {
+        var q = s[i];
+        for (int j = i + 1; j < s.Length; j++)
+        {
+            if (s[j] == '\\') { j++; continue; }
+            if (s[j] == q) return j;
+        }
+        return s.Length - 1;
     }
 
     static string ConvertArray(string body, string name, Func<Match, string?> convertElement)

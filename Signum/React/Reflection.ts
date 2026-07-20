@@ -7,7 +7,7 @@ import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
 import type { FilterOperation, FilterGroupOperation, OrderType, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery'; //ONLY TYPES or Cyclic problems in Webpack!
-import type { FindOptions, FindOptionsAutoQueryName, FetchOptions, FilterOption, FilterConditionOption, FilterGroupOption, OrderOption, ColumnOption, ExtraFilterConditionOptions, ExtraFilterGroupOptions, ColumnDisplayOptions } from './FindOptions'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { FindOptions, FindOptionsAutoQueryName, FetchOptions, TypedResultsOptions, ResultObject, FilterOption, FilterConditionOption, FilterGroupOption, OrderOption, ColumnOption, ExtraFilterConditionOptions, ExtraFilterGroupOptions, ColumnDisplayOptions } from './FindOptions'; //ONLY TYPES or Cyclic problems in Webpack!
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -1608,6 +1608,22 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
       fo.queryName = this;
 
     return fo;
+  }
+
+  /**
+   * Builds a {@link TypedResultsOptions} rooted at this type, for `Finder.getTypedResults` / `useTypedResults`.
+   * The `resultObject` map names the fields of each returned row; `queryName` defaults to this type.
+   * @example Finder.getTypedResults(OrderEntity.typedResultsOptions(token => ({
+   *   filterOptions: [token(a => a.state).filter("EqualTo", "Open")],
+   *   resultObject: { id: token(a => a.id), total: token(a => a.entity.totalPrice) },
+   * })))
+   */
+  typedResultsOptions<RO extends ResultObject>(builder: (token: TokenFunction<T>) => TypedResultsOptions<RO>): TypedResultsOptions<RO> {
+    const to = builder(createTokenFunction<T>(new QueryTokenString<T>("")));
+    if (!to.queryName)
+      to.queryName = this;
+
+    return to;
   }
 
   parseId(txt: string): string | number {
