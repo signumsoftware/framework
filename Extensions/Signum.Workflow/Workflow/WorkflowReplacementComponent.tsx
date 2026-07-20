@@ -25,13 +25,12 @@ export default function WorkflowReplacementComponent(p: { ctx: TypeContext<Workf
                 <td>
                   <SearchValueLine ctx={ectx}
                     label={getToString(ectx.value.oldNode)}
-                    findOptions={{
-                      queryName: CaseActivityEntity,
+                    findOptions={CaseActivityEntity.findOptions(token => ({
                       filterOptions: [
-                        { token: CaseActivityEntity.token(e => e.workflowActivity), value: ectx.value.oldNode },
-                        { token: CaseActivityEntity.token(e => e.doneDate), value: null }
+                        token(e => e.workflowActivity).filter("EqualTo", ectx.value.oldNode),
+                        token(e => e.doneDate).filter("EqualTo", null)
                       ]
-                    }} />
+                    }))} />
                 </td>
                 <td>
                   <WorkflowReplacementItemCombo

@@ -271,10 +271,9 @@ function ScriptComponent(p : { ctx: TypeContext<WorkflowScriptPartEmbedded>, mai
   return (
     <fieldset>
       <legend>{ctx.niceName()}</legend>
-      <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={{
-        queryName: WorkflowScriptEntity,
-        filterOptions: [{ token: WorkflowScriptEntity.token(e => e.entity.mainEntityType), value: p.mainEntityType}]
-      }} />
+      <EntityLine ctx={ctx.subCtx(p => p.script)} findOptions={WorkflowScriptEntity.findOptions(token => ({
+        filterOptions: [token(e => e.entity.mainEntityType).filter("EqualTo", p.mainEntityType)]
+      }))} />
       <EntityLine ctx={ctx.subCtx(s => s.retryStrategy)} />
     </fieldset>
   );

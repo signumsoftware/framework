@@ -10,7 +10,7 @@ export default function Package(p : { ctx: TypeContext<PackageEntity> }): React.
   return (
     <div>
       <AutoLine ctx={e.subCtx(f => f.name)} />
-      <SearchControl title={PackageLineEntity.nicePluralName()} showTitle="display-6" findOptions={{ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [{ token: PackageLineEntity.token(e => e.package), value: e.value }] }} />
+      <SearchControl title={PackageLineEntity.nicePluralName()} showTitle="display-6" findOptions={PackageLineEntity.findOptions(token => ({ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [token(e => e.package).filter("EqualTo", e.value)] }))} />
     </div>
   );
 }

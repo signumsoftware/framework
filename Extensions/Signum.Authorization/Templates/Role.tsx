@@ -37,15 +37,13 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
       </div>
 
 
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: UserEntity,
-        filterOptions: [{ token: UserEntity.token(u => u.entity.role), value: ctx.value }]
-      }} />
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={UserEntity.findOptions(token => ({
+        filterOptions: [token(u => u.entity.role).filter("EqualTo", ctx.value)]
+      }))} />
       }
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: RoleEntity,
-        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.inheritsFrom).any(), value: ctx.value }]
-      }} />
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={RoleEntity.findOptions(token => ({
+        filterOptions: [token(a => a.entity).append(u => u.inheritsFrom).any().filter("EqualTo", ctx.value)]
+      }))} />
       }
 
     </div>

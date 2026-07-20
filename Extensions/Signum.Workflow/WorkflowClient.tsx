@@ -125,13 +125,13 @@ export namespace WorkflowClient {
       { path: "/workflow/activityMonitor/:workflowId", element: <ImportComponent onImport={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} /> },
     );
 
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowEventTaskEntity });
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowLaneEntity.findOptions(token => ({ filterOptions: [token(e => e.entity.actorsEval).filter("DistinctTo", null)] })));
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowConditionEntity.findOptions());
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowScriptEntity.findOptions());
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowActivityEntity.findOptions(token => ({ filterOptions: [token(e => e.entity.subWorkflow).filter("DistinctTo", null)] })));
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowActionEntity.findOptions());
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowTimerConditionEntity.findOptions());
+    EvalClient.Options.checkEvalFindOptions.push(WorkflowEventTaskEntity.findOptions());
 
     Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Workflow/TimeSpan')));
     Constructor.registerConstructor(TimeSpanEmbedded, () => TimeSpanEmbedded.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
@@ -202,7 +202,7 @@ export namespace WorkflowClient {
         type: WorkflowEntity,
         key: getQueryKey(CaseEntity),
         generator: {
-          factory: ctx => new QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] }),
+          factory: ctx => new QuickLinkExplore(CaseEntity.findOptions(token => ({ filterOptions: [token(e => e.workflow).filter("EqualTo", ctx.lite)] }))),
           options: {
             text: () => getQueryNiceName(CaseEntity),
             icon: "list-check", iconColor: "blue"
@@ -211,7 +211,7 @@ export namespace WorkflowClient {
       });*/
 
     /*  QuickLinkClient.registerQuickLink_New(WorkflowEntity,
-        new QuickLinkExplore(CaseEntity, ctx => ({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] })));*/
+        new QuickLinkExplore(CaseEntity, ctx => (CaseEntity.findOptions(token => ({ filterOptions: [token(e => e.workflow).filter("EqualTo", ctx.lite)] })))));*/
 
     OmniboxSpecialAction.registerSpecialAction({
       allowed: () => isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
@@ -641,14 +641,10 @@ export namespace WorkflowClient {
   }
 
   export function getDefaultInboxUrl(): string {
-    return Finder.findOptionsPath({
+    return Finder.findOptionsPath(CaseNotificationEntity.findOptions(token => ({
       queryName: CaseActivityQuery.Inbox,
-      filterOptions: [{
-        token: CaseNotificationEntity.token(e => e.state),
-        operation: "IsIn",
-        value: ["New", "Opened", "InProgress"]
-      }]
-    });
+      filterOptions: [token(e => e.state).filter("IsIn", ["New", "Opened", "InProgress"])]
+    })));
   }
 
   export function showWorkflowTransitionContextCodeHelp(): void {
@@ -755,10 +751,9 @@ export namespace WorkflowClient {
 
   function getWorkflowFreeJump(workflow: WorkflowEntity): Promise<Lite<WorkflowEntity> | undefined> {
 
-    return Finder.find({
-      queryName: WorkflowActivityEntity,
-      filterOptions: [{ token: WorkflowActivityEntity.token(w => w.entity.lane.pool.workflow), value: workflow }]
-    }, {
+    return Finder.find(WorkflowActivityEntity.findOptions(token => ({
+      filterOptions: [token(w => w.entity.lane.pool.workflow).filter("EqualTo", workflow)]
+    })), {
       message: <span className="text-danger">FreeJump is an unrestricted but dangerous operation! If you don't know what you're doing... don't do it!</span>
     });
   }

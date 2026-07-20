@@ -275,26 +275,25 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
             }} > 
               <Toast className="w-100 mt-2">
                 <Toast.Body style={{ textAlign: "center" }}>
-                  <Link onClick={() => setIsOpen(false)} to={Finder.findOptionsPath({
-                    queryName: AlertEntity,
+                  <Link onClick={() => setIsOpen(false)} to={Finder.findOptionsPath(AlertEntity.findOptions(token => ({
                     filterOptions: [
-                      { token: AlertEntity.token(a => a.entity.recipient), value: AuthClient.currentUser() },
+                      token(a => a.entity.recipient).filter("EqualTo", AuthClient.currentUser()),
                     ],
                     orderOptions: [
-                      { token: AlertEntity.token(a => a.entity.alertDate), orderType: "Descending" },
+                      token(a => a.entity.alertDate).order("Descending"),
                     ],
                     columnOptions: [
-                      { token: AlertEntity.token(a => a.entity.id) },
-                      { token: AlertEntity.token(a => a.entity.alertDate) },
-                      { token: AlertEntity.token(a => a.entity.alertType) },
-                      { token: AlertEntity.token("Text") },
-                      { token: AlertEntity.token(a => a.entity.target) },
-                      { token: AlertEntity.token(a => a.entity).expression("CurrentState") },
-                      { token: AlertEntity.token(a => a.entity.createdBy) },
-                      { token: AlertEntity.token(a => a.entity.recipient) },
+                      token(a => a.entity.id),
+                      token(a => a.entity.alertDate),
+                      token(a => a.entity.alertType),
+                      token("Text"),
+                      token(a => a.entity.target),
+                      token(a => a.entity).expression("CurrentState"),
+                      token(a => a.entity.createdBy),
+                      token(a => a.entity.recipient),
                     ],
                     columnOptionsMode: "ReplaceAll"
-                  })}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
+                  })))}>{AlertMessage.AllMyAlerts.niceToString()}</Link>
                 </Toast.Body>
               </Toast>
             </div>

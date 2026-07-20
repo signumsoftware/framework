@@ -33,12 +33,11 @@ export namespace SMSClient {
   
   function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
     return Finder.find(
-      {
-        queryName: SMSMessageEntity,
+      SMSMessageEntity.findOptions(token => ({
         filterOptions: [{ token: "Referred", value: referred}],
         columnOptionsMode: "Remove",
         columnOptions: [{ token: "Referred" }],
-      });
+      })));
   }
   
   export namespace API {

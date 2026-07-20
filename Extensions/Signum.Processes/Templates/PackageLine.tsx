@@ -15,10 +15,9 @@ export default function Package(p : { ctx: TypeContext<PackageLineEntity> }): Re
       <AutoLine ctx={ctx.subCtx(f => f.finishTime)} />
       <SearchValueLine ctx={ctx}
         badgeColor="danger"
-        findOptions={{
-          queryName: ProcessExceptionLineEntity,
-          filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.line), value: ctx.value}]
-        }} />
+        findOptions={ProcessExceptionLineEntity.findOptions(token => ({
+          filterOptions: [token(e => e.line).filter("EqualTo", ctx.value)]
+        }))} />
     </div>
   );
 }

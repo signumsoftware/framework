@@ -52,13 +52,12 @@ export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponen
       <EntityLine ctx={ctx.subCtx(wet => wet.workflow)} onChange={handleWorkflowChange} />
       {ctx.value.workflow && ctx.value.workflow.entity &&
         <div>
-        <EntityCombo ctx={ctx.subCtx(wet => wet.event)} findOptions={{
-          queryName: WorkflowEventEntity,
+        <EntityCombo ctx={ctx.subCtx(wet => wet.event)} findOptions={WorkflowEventEntity.findOptions(token => ({
           filterOptions: [
-            { token: WorkflowEventEntity.token(a => a.entity.lane!.pool!.workflow), value: ctx.value.workflow },
-            { token: WorkflowEventEntity.token(e => e.type), operation: "EqualTo", value: WorkflowEventType.value("ScheduledStart") }
+            token(a => a.entity.lane!.pool!.workflow).filter("EqualTo", ctx.value.workflow),
+            token(e => e.type).filter("EqualTo", "ScheduledStart")
           ]
-        }} />
+        }))} />
 
           <AutoLine ctx={ctx.subCtx(wet => wet.triggeredOn)} onChange={handleTriggeredOnChange} />
 

@@ -59,10 +59,9 @@ export default function Process({ ctx }: { ctx: TypeContext<ProcessEntity> }): R
       <SearchValueLine ctx={ctx3}
         badgeColor="danger"
         ref={vscl}
-        findOptions={{
-          queryName: ProcessExceptionLineEntity,
-          filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.process), value: ctx3.value}]
-        }} />
+        findOptions={ProcessExceptionLineEntity.findOptions(token => ({
+          filterOptions: [token(e => e.process).filter("EqualTo", ctx3.value)]
+        }))} />
     </div>
   );
 }

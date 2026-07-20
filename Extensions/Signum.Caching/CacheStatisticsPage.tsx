@@ -60,12 +60,11 @@ export default function CacheStatisticsPage(): React.JSX.Element {
 
         {state.serverBroadcast &&
           <Tab title={CacheMessage.InvalidationExceptions.niceToString()} eventKey="exceptions">
-            <SearchControl findOptions={{
-              queryName: ExceptionEntity,
+            <SearchControl findOptions={ExceptionEntity.findOptions(token => ({
               filterOptions: [
-                { token: ExceptionEntity.token(a => a.entity.controllerName), value: state.serverBroadcast.before("(") }
+                token(a => a.entity.controllerName).filter("EqualTo", state!.serverBroadcast!.before("("))
               ]
-            }} />
+            }))} />
           </Tab>
         }
       </Tabs>
@@ -96,7 +95,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
             <td> {lazy.sumLoadTime} </td>
           </tr>)}
         </tbody>
-        </AccessibleTable>);
+      </AccessibleTable>);
   }
 
   function renderTables(state: CacheClient.CacheState) {
@@ -145,7 +144,7 @@ export default function CacheStatisticsPage(): React.JSX.Element {
           <td> {table.loads}</td>
           <td> {table.sumLoadTime} </td>
         </AccessibleRow>
-        {table.subTables && table.subTables.map(st => <RenderTree table={st} depth={depth+1} />)}
+        {table.subTables && table.subTables.map(st => <RenderTree table={st} depth={depth + 1} />)}
       </>
     );
   }

@@ -1,3 +1,4 @@
+import { filterGroup } from '@framework/Reflection'
 import * as React from 'react'
 import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
@@ -105,26 +106,14 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
 }
 
 export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
-    queryName: UserChartEntity,
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>(UserChartEntity.findOptions(token => ({
     filterOptions: [
-      {
-        groupOperation: "Or",
-        filters: [
-          {
-            token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-            operation: "IsIn",
-            value: [...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)]
-          },
-          {
-            token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-            operation: "EqualTo",
-            value: null
-          }
-        ]
-      }
+      filterGroup("Or", {}, [
+          token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)]),
+          token(a => a.entity!.entityType!.entity!.cleanName).filter("EqualTo", null)
+        ])
     ]
-  }).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
+  }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
     var text = "UserChart:" + uce.guid;
 
     if ((uce.chartScript.key.contains("Multi") || uce.chartScript.key.contains("Stacked")) && uce.columns[1].element.token != null /*Split*/)
@@ -135,14 +124,9 @@ export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.El
 }
 
 export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
-    queryName: UserQueryEntity,
-    filterOptions: [{
-      token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-      operation: "IsIn",
-      value: [null, ...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)]
-    }]
-  }).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.guid)))
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>(UserQueryEntity.findOptions(token => ({
+    filterOptions: [token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [null, ...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)])]
+  }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.guid)))
 }
 
 function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {

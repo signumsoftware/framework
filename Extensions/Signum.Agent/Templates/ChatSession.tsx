@@ -37,60 +37,39 @@ export default function ChatSession(p: { ctx: TypeContext<ChatSessionEntity> }):
 
       <Tabs>
         <Tab title={ChatMessageEntity.nicePluralName()} eventKey="messages">
-          <SearchControl findOptions={{
-            queryName: ChatMessageEntity,
-            filterOptions: [{
-              token: ChatMessageEntity.token(a => a.chatSession),
-              value: ctx.value,
-              frozen: true,
-            }, 
-            {
-              token: ChatMessageEntity.token(a => a.role),
-              operation: "DistinctTo",
-              value: ChatMessageRole.value("System"),
-              pinned: { active: "NotCheckbox_Unchecked", column: 1, label: ChatbotMessage.ShowSystem.niceToString() }
-            }],
+          <SearchControl findOptions={ChatMessageEntity.findOptions(token => ({
+            filterOptions: [token(a => a.chatSession).filter("EqualTo", ctx.value, { frozen: true }), 
+            token(a => a.role).filter("DistinctTo", "System", { pinned: { active: "NotCheckbox_Unchecked", column: 1, label: ChatbotMessage.ShowSystem.niceToString() } })],
             columnOptionsMode: "ReplaceAll",
             columnOptions: [
-              { token: ChatMessageEntity.token(a => a.id) },
-              { token: ChatMessageEntity.token(a => a.role) },
-              { token: ChatMessageEntity.token(a => a.toolID) },
-              { token: ChatMessageEntity.token(a => a.entity.toolCalls).count(), displayName: "# Tools" },
-              { token: ChatMessageEntity.token(a => a.content) },
-              { token: ChatMessageEntity.token(a => a.entity.exception) },
+              token(a => a.id),
+              token(a => a.role),
+              token(a => a.toolID),
+              token(a => a.entity.toolCalls).count().column({ displayName: "# Tools" }),
+              token(a => a.content),
+              token(a => a.entity.exception),
             ],
-            orderOptions: [{
-              token: ChatMessageEntity.token(a => a.id),
-              orderType: "Ascending"
-            }]
-          }} />
+            orderOptions: [token(a => a.id).order("Ascending")]
+          }))} />
         </Tab>
 
         <Tab title={ChatbotMessage.Price.niceToString()} eventKey="stats">
-          <SearchControl findOptions={{
-            queryName: ChatMessageEntity,
-            filterOptions: [{
-              token: ChatMessageEntity.token(a => a.chatSession),
-              value: ctx.value,
-              frozen: true,
-            }],
+          <SearchControl findOptions={ChatMessageEntity.findOptions(token => ({
+            filterOptions: [token(a => a.chatSession).filter("EqualTo", ctx.value, { frozen: true })],
             columnOptionsMode: "ReplaceAll",
             columnOptions: [
-              { token: ChatMessageEntity.token(a => a.id) },
-              { token: ChatMessageEntity.token(a => a.role) },
-              { token: ChatMessageEntity.token(a => a.toolID) },
-              { token: ChatMessageEntity.token(a => a.entity.toolCalls).count(), displayName: "# Tools", summaryToken: ChatMessageEntity.token(a => a.entity.toolCalls).count().sum() },
-              { token: ChatMessageEntity.token(a => a.entity.inputTokens), summaryToken: ChatMessageEntity.token(a => a.entity.inputTokens).sum() },
-              { token: ChatMessageEntity.token(a => a.entity.cachedInputTokens), summaryToken: ChatMessageEntity.token(a => a.entity.cachedInputTokens).sum() },
-              { token: ChatMessageEntity.token(a => a.entity.outputTokens), summaryToken: ChatMessageEntity.token(a => a.entity.outputTokens).sum() },
-              { token: ChatMessageEntity.token(a => a.entity.reasoningOutputTokens), summaryToken: ChatMessageEntity.token(a => a.entity.reasoningOutputTokens).sum() },
-              { token: ChatMessageEntity.token(a => a.entity).expression<number>("Price"), summaryToken: ChatMessageEntity.token(a => a.entity).expression<number>("Price").sum() },
+              token(a => a.id),
+              token(a => a.role),
+              token(a => a.toolID),
+              token(a => a.entity.toolCalls).count().column({ displayName: "# Tools", summaryToken: token(a => a.entity.toolCalls).count().sum() }),
+              token(a => a.entity.inputTokens).column({ summaryToken: token(a => a.entity.inputTokens).sum() }),
+              token(a => a.entity.cachedInputTokens).column({ summaryToken: token(a => a.entity.cachedInputTokens).sum() }),
+              token(a => a.entity.outputTokens).column({ summaryToken: token(a => a.entity.outputTokens).sum() }),
+              token(a => a.entity.reasoningOutputTokens).column({ summaryToken: token(a => a.entity.reasoningOutputTokens).sum() }),
+              token(a => a.entity).expression<number>("Price").column({ summaryToken: token(a => a.entity).expression<number>("Price").sum() }),
             ],
-            orderOptions: [{
-              token: ChatMessageEntity.token(a => a.id),
-              orderType: "Ascending"
-            }]
-          }} />
+            orderOptions: [token(a => a.id).order("Ascending")]
+          }))} />
         </Tab>
 
 

@@ -81,25 +81,24 @@ export default function CaseComponent(p: CaseComponentProps): React.JSX.Element 
         <Tab eventKey={"CaseActivities" as CaseTab} title={CaseActivityEntity.nicePluralName()}>
             <SearchControl
               view={false}
-              findOptions={{
-                queryName: CaseActivityEntity,
+              findOptions={CaseActivityEntity.findOptions(token => ({
                 filterOptions: [
-                  { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
-                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, pinned: { active: "Checkbox_Unchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } },
+                  token(e => e.case).filter("EqualTo", ctx.value),
+                  token(e => e.doneDate).filter("EqualTo", null, { pinned: { active: "Checkbox_Unchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } }),
                 ],
                 columnOptionsMode: "ReplaceAll",
                 columnOptions: [
-                  { token: CaseActivityEntity.token(e => e.id) },
-                  { token: CaseActivityEntity.token(e => e.workflowActivity) },
-                  { token: CaseActivityEntity.token(e => e.startDate) },
-                  { token: CaseActivityEntity.token(e => e.doneDate) },
-                  { token: CaseActivityEntity.token(e => e.doneBy) },
-                  { token: CaseActivityEntity.token(a => a.previous).expression("ToString") },
+                  token(e => e.id),
+                  token(e => e.workflowActivity),
+                  token(e => e.startDate),
+                  token(e => e.doneDate),
+                  token(e => e.doneBy),
+                  token(a => a.previous).expression("ToString"),
                 ],
                 orderOptions: [
-                  { token: CaseActivityEntity.token(e => e.startDate), orderType: "Ascending" },
+                  token(e => e.startDate).order("Ascending"),
                 ],
-              }}
+              }))}
               extraButtons={sc => [
                 { order: -1.1, button: <CaseActivityStatsButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} /> },
                 { order: -1.2, button: <WorkflowActivityLocateButtonComponent sc={sc} caseFlowViewer={caseFlowViewerComponentRef.current!} onLocated={handleOnDiagramNodeLocated} /> },

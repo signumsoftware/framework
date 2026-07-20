@@ -42,15 +42,14 @@ export interface MixinComboProps {
 export function MixinCombo(p : MixinComboProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleGetItems(query: string) {
-    return Finder.fetchLites({
-      queryName: DynamicTypeEntity,
+    return Finder.fetchLites(DynamicTypeEntity.fetchOptions(token => ({
       filterOptions: [
-        { token: DynamicTypeEntity.token(e => e.entity.baseType), operation: "EqualTo", value: "MixinEntity" },
-        { token: DynamicTypeEntity.token(e => e.entity.typeName), operation: "StartsWith", value: query },
+        token(e => e.entity.baseType).filter("EqualTo", "MixinEntity"),
+        token(e => e.entity.typeName).filter("StartsWith", query),
       ],
       orderOptions: [],
       count: 5
-    }).then(lites => lites?.map(a => getToString(a)));
+    }))).then(lites => lites?.map(a => getToString(a)));
   }
 
   function handleOnChange(newValue: string) {

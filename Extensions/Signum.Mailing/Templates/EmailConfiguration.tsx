@@ -14,10 +14,9 @@ export default function EmailConfiguration(p : { ctx: TypeContext<EmailConfigura
       <AutoLine ctx={sc.subCtx(ca => ca.reciveEmails)} />
       <AutoLine ctx={sc.subCtx(ca => ca.sendEmails)} />
       <AutoLine ctx={sc.subCtx(ca => ca.overrideEmailAddress)} />
-      <EntityCombo ctx={sc.subCtx(ca => ca.defaultCulture)} findOptions={{
-        queryName: CultureInfoEntity,
-        filterOptions: [{ token: CultureInfoEntity.token(a => a.entity).expression<boolean>("IsNeutral"), value: false }]
-      }} />
+      <EntityCombo ctx={sc.subCtx(ca => ca.defaultCulture)} findOptions={CultureInfoEntity.findOptions(token => ({
+        filterOptions: [token(a => a.entity).expression<boolean>("IsNeutral").filter("EqualTo", false)]
+      }))} />
       <AutoLine ctx={sc.subCtx(ca => ca.urlLeft)} />
 
       <fieldset>

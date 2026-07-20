@@ -220,13 +220,13 @@ export function Predictor({ ctx, ref }: { ctx: TypeContext<PredictorEntity>, ref
           </Tab>
           {
             ctx.value.state != "Draft" && <Tab eventKey="codifications" title={PredictorMessage.Codifications.niceToString()}>
-              <SearchControl findOptions={{ queryName: PredictorCodificationEntity, filterOptions: [{ token: PredictorCodificationEntity.token(e => e.predictor), value: ctx.value }] }} />
+              <SearchControl findOptions={PredictorCodificationEntity.findOptions(token => ({ filterOptions: [token(e => e.predictor).filter("EqualTo", ctx.value)] }))} />
             </Tab>
           }
           {
             ctx.value.state != "Draft" && <Tab eventKey="progress" title={PredictorMessage.Progress.niceToString()}>
               {ctx.value.state == "Trained" && <EpochProgressComponent ctx={ctx} />}
-              <SearchControl findOptions={{ queryName: PredictorEpochProgressEntity, filterOptions: [{ token: PredictorEpochProgressEntity.token(e => e.predictor), value: ctx.value }] }} />
+              <SearchControl findOptions={PredictorEpochProgressEntity.findOptions(token => ({ filterOptions: [token(e => e.predictor).filter("EqualTo", ctx.value)] }))} />
             </Tab>
           }
           {
