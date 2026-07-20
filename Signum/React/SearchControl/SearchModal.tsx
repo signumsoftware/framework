@@ -189,6 +189,7 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
           throwIfNotFindable={true}
           findOptions={p.findOptions}
           defaultIncludeDefaultFilters={true}
+          allowSelection={p.isMany ? undefined : "single"}
           onSelectionChanged={handleSelectionChanged}
           showGroupButton={p.findMode == "Explore"}
           showSystemTimeButton={p.findMode == "Explore"}

@@ -107,10 +107,37 @@ public static class IsolationLogic
             a => a,
             (a, b) => 0);
 
-        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n");
+        var allMissingAndExtra = result.Extra.Concat(result.Missing).ToHashSet();
+
+        var referencedBy = Schema.Current.Tables.Values
+            .SelectMany(t => t.Fields.SelectMany(kvp =>
+            {
+                if (kvp.Value.Field is FieldReference fr && allMissingAndExtra.Contains(fr.FieldType.CleanType()))
+                    return new[] { (ReferencedType: fr.FieldType.CleanType(), Info: t.Type.Name + "." + kvp.Key) };
+                if (kvp.Value.Field is FieldImplementedBy fib)
+                    return fib.ImplementationColumns.Keys
+                        .Where(k => allMissingAndExtra.Contains(k.CleanType()))
+                        .Select(k => (ReferencedType: k.CleanType(), Info: t.Type.Name + "." + kvp.Key))
+                        .ToArray();
+                return Array.Empty<(Type ReferencedType, string Info)>();
+            }))
+            .GroupBy(x => x.ReferencedType)
+            .ToDictionary(gr => gr.Key, gr => gr.Select(x => x.Info).ToList());
+
+        var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t =>
+        {
+            var refs = referencedBy.TryGetC(t);
+            var refsText = refs.HasItems() ? " // referenced by: " + refs.ToString(", ") : "";
+            return "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);{1}".FormatWith(t.Name, refsText);
+        }, "\n");
 
         var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\n".FormatWith(gr.Key) +
-            gr.ToString(t => "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);".FormatWith(t.Name), "\n"), "\n\n");
+            gr.ToString(t =>
+            {
+                var refs = referencedBy.TryGetC(t);
+                var refsText = refs.HasItems() ? " // referenced by: " + refs.ToString(", ") : "";
+                return "  IsolationLogic.Register<{0}>(IsolationStrategy.XXX);{1}".FormatWith(t.Name, refsText);
+            }, "\n"), "\n\n");
 
         if (extra.HasText() || lacking.HasText())
             throw new InvalidOperationException("IsolationLogic's strategies are not synchronized with the Schema.\n" +

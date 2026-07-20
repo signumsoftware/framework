@@ -759,7 +759,7 @@ interface TypesInDomain {
 }
 
 export let typeInDomain: TypesInDomain | undefined;
-export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, write = false) : boolean {
+export function typeAllowedInDomain(type: PseudoType, domain: Lite<Entity>, write = false): boolean {
   var ti = tryGetTypeInfo(type);
   if (!ti)
     return false;
@@ -792,7 +792,7 @@ export function setTypes(types: TypeInfoDictionary): void {
     t.name = k;
     if (t.members) {
       Dic.foreach(t.members, (k2, t2) => t2.name = k2);
-      
+
       if (t.kind == "Enum") {
         t.membersById = Dic.getValues(t.members).toObject(a => a.name);
       }
@@ -1033,7 +1033,7 @@ export class MListElementBinding<T> implements IBinding<T> {
   }
 
   getIsReadonly() {
-    return false; 
+    return false;
   }
 
   getIsHidden() {
@@ -1117,7 +1117,7 @@ export function getLambdaMembers(lambda: Function): LambdaMember[] {
       result.push({ name: m[2], type: "Member" });
       body = m[1];
     }
-    else if ( m = memberIndexerRegex.exec(body)) {
+    else if (m = memberIndexerRegex.exec(body)) {
       result.push({ name: m[3], type: "Member" });
       body = m[1];
     }
@@ -1255,7 +1255,7 @@ function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
 
 
 // https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
-export function newGuid() : string {
+export function newGuid(): string {
   return (`${[1e7]}-${1e3}-${4e3}-${8e3}-${1e11}`).replace(/[018]/g, (c: any) =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
@@ -1889,9 +1889,14 @@ export class EnumType<T extends string> {
     return getTypeInfo(this.typeName);
   }
 
-  _values: T[] | undefined; 
+  #values: T[] | undefined;
   values(): T[] {
-    return (this._values ??= Dic.getKeys(this.typeInfo().members) as T[]);
+    return (this.#values ??= Dic.getKeys(this.typeInfo().members) as T[]);
+  }
+
+  #notIgnoredValues: T[] | undefined;
+  notIgnoredValues(): T[] {
+    return (this.#notIgnoredValues ??= Dic.getValues(this.typeInfo().members).filter(a => !a.isIgnoredEnum).map(a => a.name) as T[]);
   }
 
   isDefined(val: any): val is T {
@@ -1913,7 +1918,7 @@ export class EnumType<T extends string> {
     return this.values().indexOf(val);
   }
 
-  min(a: T, b: T): T{
+  min(a: T, b: T): T {
     return this.index(a) < this.index(b) ? a : b;
   }
 

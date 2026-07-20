@@ -99,7 +99,13 @@ public static class EnumEntity
 
     public static IEnumerable<Enum> GetValues(Type enumType)
     {
-        return EnumFieldCache.Get(enumType).Where(a => !a.Value.HasAttribute<IgnoreAttribute>()).Select(a => a.Key);
+        // Consult SchemaSettings.EnumAttributes overrides (e.g. Starter.OverrideAttributes) when a Schema is
+        // available; otherwise (code generation, tooling) fall back to the raw member attributes.
+        var settings = Connector.Current?.Schema.Settings;
+
+        return EnumFieldCache.Get(enumType)
+            .Where(a => (settings != null ? settings.EnumAttribute<IgnoreAttribute>(a.Value) : a.Value.GetCustomAttribute<IgnoreAttribute>()) == null)
+            .Select(a => a.Key);
     }
 
     public static IEnumerable<Entity> GetEntities(Type enumType)

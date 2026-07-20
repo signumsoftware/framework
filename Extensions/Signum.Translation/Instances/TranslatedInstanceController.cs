@@ -11,18 +11,18 @@ namespace Signum.Translation.Instances;
 public class TranslatedInstanceController : ControllerBase
 {
     [HttpGet("api/translatedInstance")]
-    public List<TranslatedTypeSummaryTS> Status()
+    public List<TranslatedTypeSummaryTS> Status(bool applyFilter = true)
     {
-        return TranslatedInstanceLogic.TranslationInstancesStatus().Select(a => new TranslatedTypeSummaryTS(a)).ToList();
+        return TranslatedInstanceLogic.TranslationInstancesStatus(applyFilter).Select(a => new TranslatedTypeSummaryTS(a)).ToList();
     }
 
     [HttpGet("api/translatedInstance/view/{type}")]
-    public TranslatedInstanceViewTypeTS View(string type, string? culture, string filter)
+    public TranslatedInstanceViewTypeTS View(string type, string? culture, string filter, bool applyFilter = true)
     {
         Type t = TypeLogic.GetType(type);
         var c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
-        var master = TranslatedInstanceLogic.FromEntities(t);
+        var master = TranslatedInstanceLogic.FromEntities(t, applyFilter);
 
         var support = TranslatedInstanceLogic.TranslationsForType(t, culture: c);
 
@@ -89,7 +89,7 @@ public class TranslatedInstanceController : ControllerBase
     }
 
     [HttpGet("api/translatedInstance/sync/{type}")]
-    public TypeInstancesChangesTS Sync(string type, string culture)
+    public TypeInstancesChangesTS Sync(string type, string culture, bool applyFilter = true)
     {
         Type t = TypeLogic.GetType(type);
 
@@ -98,7 +98,7 @@ public class TranslatedInstanceController : ControllerBase
         var c = CultureInfo.GetCultureInfo(culture);
 
         int totalInstances;
-        var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationLogic.Translators, t, c, out totalInstances);
+        var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChangesTranslated(TranslationLogic.Translators, t, c, out totalInstances, applyFilter);
 
         var sd = new StringDistance();
 
@@ -217,23 +217,23 @@ public class TranslatedInstanceController : ControllerBase
     }
 
     [HttpGet("api/translatedInstance/viewFile/{type}")]
-    public FileStreamResult ViewFile(string type, string culture)
+    public FileStreamResult ViewFile(string type, string culture, bool applyFilter = true)
     {
         Type t = TypeLogic.GetType(type);
         var c = CultureInfo.GetCultureInfo(culture);
 
-        var file = TranslatedInstanceLogic.ExportExcelFile(t, c);
+        var file = TranslatedInstanceLogic.ExportExcelFile(t, c, applyFilter);
 
         return MimeMapping.GetFileStreamResult(file);
     }
 
     [HttpGet("api/translatedInstance/syncFile/{type}")]
-    public FileStreamResult SyncFile(string type, string culture)
+    public FileStreamResult SyncFile(string type, string culture, bool applyFilter = true)
     {
         Type t = TypeLogic.GetType(type);
         var c = CultureInfo.GetCultureInfo(culture);
 
-        var file = TranslatedInstanceLogic.ExportExcelFileSync(t, c);
+        var file = TranslatedInstanceLogic.ExportExcelFileSync(t, c, applyFilter);
 
         return MimeMapping.GetFileStreamResult(file);
     }
