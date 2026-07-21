@@ -61,7 +61,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
   }
 
   function handleAdmnister() {
-    Finder.explore({ queryName: ExcelReportEntity, filterOptions: [{ token: ExcelReportEntity.token(a => a.query!.key), value: p.searchControl.props.findOptions.queryKey }]})
+    Finder.explore(ExcelReportEntity.findOptions(token => ({ filterOptions: [token(a => a.query!.key).filter("EqualTo", p.searchControl.props.findOptions.queryKey)]})))
       .then(() => reloadExcelReports());
   }
 

@@ -85,10 +85,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   }
 
   async function handleOpenSession() {
-    const session = await Finder.find<ChatSessionEntity>({
-      queryName: ChatSessionEntity,
-      filterOptions: [{ token: ChatSessionEntity.token(a => a.user), value: AuthClient.currentUser() }]
-    });
+    const session = await Finder.find<ChatSessionEntity>(ChatSessionEntity.findOptions(token => ({
+      filterOptions: [token(a => a.user).filter("EqualTo", AuthClient.currentUser())]
+    })));
     if (session == null)
       return;
 

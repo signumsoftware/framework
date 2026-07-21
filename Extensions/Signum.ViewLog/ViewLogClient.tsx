@@ -15,7 +15,7 @@ export namespace ViewLogClient {
   
     if (Finder.isFindable(ViewLogEntity, false)) {
       QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([
-        new QuickLinkExplore(ViewLogEntity, ctx => ({ queryName: ViewLogEntity, filterOptions: [{ token: ViewLogEntity.token(e => e.target), value: ctx.lite }] }),
+        new QuickLinkExplore(ViewLogEntity, ctx => (ViewLogEntity.findOptions(token => ({ filterOptions: [token(e => e.target).filter("EqualTo", ctx.lite)] }))),
           {
             text: () => ViewLogEntity.nicePluralName(),
             isVisible: options.showQuickLink == null || options.showQuickLink(entityType),

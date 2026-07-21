@@ -15,11 +15,10 @@ export namespace DynamicValidationClient {
     Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
     Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
   
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
-    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
-      queryName: DynamicValidationEntity,
-      filterOptions: [{ token: DynamicValidationEntity.token(a => a.entityType!.cleanName), value: type}]
-    }} />);
+    EvalClient.Options.checkEvalFindOptions.push(DynamicValidationEntity.findOptions());
+    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={DynamicValidationEntity.findOptions(token => ({
+      filterOptions: [token(a => a.entityType!.cleanName).filter("EqualTo", type)]
+    }))} />);
     EvalClient.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
       { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
       { token: t.append(p => p.entity.name), type: "Text" },

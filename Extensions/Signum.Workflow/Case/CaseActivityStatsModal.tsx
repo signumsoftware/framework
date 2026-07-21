@@ -82,7 +82,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
     return (
       <div>
         <h3>{CaseNotificationEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: CaseNotificationEntity, filterOptions: [{ token: CaseNotificationEntity.token(e => e.caseActivity), value: p.stats.caseActivity }]}} />
+        <SearchControl findOptions={CaseNotificationEntity.findOptions(token => ({ filterOptions: [token(e => e.caseActivity).filter("EqualTo", p.stats.caseActivity)]}))} />
       </div>
     );
   }
@@ -91,20 +91,19 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
     return (
       <div>
         <h3>{OperationLogEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: p.stats.caseActivity }]}} />
+        <SearchControl findOptions={OperationLogEntity.findOptions(token => ({ filterOptions: [token(e => e.target).filter("EqualTo", p.stats.caseActivity)]}))} />
       </div>
     );
   }
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
 
-    Finder.find<CaseEntity>({
-      queryName: CaseEntity,
+    Finder.find<CaseEntity>(CaseEntity.findOptions(token => ({
       filterOptions: [
-        { token: CaseEntity.token(e => e.entity.parentCase), value: p.caseEntity, frozen: true },
-        { token: CaseEntity.token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity"), value: p.stats.caseActivity },
+        token(e => e.entity.parentCase).filter("EqualTo", p.caseEntity, { frozen: true }),
+        token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity").filter("EqualTo", p.stats.caseActivity),
       ]
-    }, { autoSelectIfOne: true })
+    })), { autoSelectIfOne: true })
       .then(c => c && Navigator.view(c));
   }
 

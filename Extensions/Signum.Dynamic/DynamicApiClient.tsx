@@ -12,7 +12,7 @@ export namespace DynamicApiClient {
   export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(DynamicApiEntity, w => import('./Api/DynamicApi')));
     Constructor.registerConstructor(DynamicApiEntity, () => DynamicApiEntity.New({ eval: DynamicApiEval.New() }));
-    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicApiEntity }} />);
+    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicApiEntity.findOptions()} />);
     EvalClient.Options.registerDynamicPanelSearch(DynamicApiEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
       { token: t.append(p => p.entity.eval!.script), type: "Code" },

@@ -43,23 +43,21 @@ export default function PrintPanelPage(p: {}): React.JSX.Element {
             <SearchValueLine ctx={ctx} key={i} initialValue={s.count}
               label={getToString(s.fileType).after(".")}
               extraButtons={vsc => renderStateButton(vsc, s.fileType)}
-              findOptions={{
-                queryName: PrintLineEntity,
+              findOptions={PrintLineEntity.findOptions(token => ({
                 filterOptions: [
-                  { token: PrintLineEntity.token(e => e.state), value: "ReadyToPrint" as PrintLineState },
-                  { token: PrintLineEntity.token(a => a.file!.fileType), value: s.fileType },
+                  token(e => e.state).filter("EqualTo", "ReadyToPrint" as PrintLineState),
+                  token(a => a.file!.fileType).filter("EqualTo", s.fileType),
                 ]
-              }} />)
+              }))} />)
           }
         </fieldset>
       </div>
 
       <h3>{ProcessEntity.nicePluralName()}</h3>
-      <SearchControl findOptions={{
-        queryName: ProcessEntity,
-        filterOptions: [{ token: ProcessEntity.token(e => e.entity.data).cast(PrintPackageEntity), operation: "DistinctTo", value: undefined }],
+      <SearchControl findOptions={ProcessEntity.findOptions(token => ({
+        filterOptions: [token(e => e.entity.data).cast(PrintPackageEntity).filter("DistinctTo", undefined)],
         pagination: { elementsPerPage: 10, mode: "Paginate", currentPage: 1 },
-      }}
+      }))}
       />
     </div>
   );

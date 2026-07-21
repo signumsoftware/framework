@@ -20,29 +20,24 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
       <AutoLine ctx={ctx.subCtx(n => n.ignoreNotificationsOlderThan)} labelColumns={4} onChange={forceUpdate} valueColumns={2}/>
       <AutoLine ctx={ctx.subCtx(n => n.sendBehavior)} labelColumns={4} onChange={forceUpdate} />
       {(ctx.value.sendBehavior == "Exclude" || ctx.value.sendBehavior == "Include") && < EntityCheckboxList ctx={ctx.subCtx(n => n.alertTypes)} columnCount={1} onChange={forceUpdate}/>}
-      <SearchValueLine ctx={ctx} findOptions={{
-        queryName: AlertEntity,
+      <SearchValueLine ctx={ctx} findOptions={AlertEntity.findOptions(token => ({
         filterOptions: [
-          { token: AlertEntity.token(a => a.entity.state), value: AlertState.value("Saved") },
-          { token: AlertEntity.token(a => a.entity.emailNotificationsSent), value: false },
-          { token: AlertEntity.token(a => a.entity.recipient), operation: "DistinctTo", value: null },
+          token(a => a.entity.state).filter("EqualTo", "Saved"),
+          token(a => a.entity.emailNotificationsSent).filter("EqualTo", false),
+          token(a => a.entity.recipient).filter("DistinctTo", null),
           ctx.value.sendBehavior == "All" ? null :
-            {
-              token: AlertEntity.token(a => a.entity.alertType),
-              operation: ctx.value.sendBehavior == "Include" ? "IsIn" : "IsNotIn",
-              value: ctx.value.alertTypes.map(at => toLite(at.element))
-            },
-          { token: AlertEntity.token(a => a.entity.alertDate), operation: "LessThan", value: maxValue },
+            token(a => a.entity.alertType).filter(ctx.value.sendBehavior == "Include" ? "IsIn" : "IsNotIn", ctx.value.alertTypes.map(at => toLite(at.element))),
+          token(a => a.entity.alertDate).filter("LessThan", maxValue),
           minValue == null ? null :
-            { token: AlertEntity.token(a => a.entity.alertDate), operation: "GreaterThan", value: minValue },
+            token(a => a.entity.alertDate).filter("GreaterThan", minValue),
         ],
         groupResults: true,
         columnOptions: [
-          { token: AlertEntity.token().count() },
-          { token: AlertEntity.token(a => a.recipient) },
+          token().count(),
+          token(a => a.recipient),
         ],
         columnOptionsMode: "ReplaceAll"
-      }} />
+      }))} />
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default function PackageOperation(p : { ctx: TypeContext<PackageOperation
 
       <fieldset>
         <legend>{PackageLineEntity.nicePluralName()}</legend>
-        <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [{ token: PackageLineEntity.token(e => e.package), value: e.value }]}} />
+        <SearchControl findOptions={PackageLineEntity.findOptions(token => ({ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [token(e => e.package).filter("EqualTo", e.value)]}))} />
       </fieldset>
     </div>
   );

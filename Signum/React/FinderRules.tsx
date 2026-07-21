@@ -724,10 +724,9 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       name: "Lite_TypeEntity",
       applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Lite" && f.token.key == "[EntityType]" && f.token.parent!.type.name != IsByAll,
       renderValue: (f, ffc) => {
-        return <EntityCombo ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} findOptions={{
-          queryName: TypeEntity,
-          filterOptions: [{ token: TypeEntity.token(a => a.cleanName), operation: "IsIn", value: f.token!.parent!.type.name.split(", ") }]
-        }} />
+        return <EntityCombo ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} findOptions={TypeEntity.findOptions(token => ({
+          filterOptions: [token(a => a.cleanName).filter("IsIn", f.token!.parent!.type.name.split(", "))]
+        }))} />
       }
     },
     {

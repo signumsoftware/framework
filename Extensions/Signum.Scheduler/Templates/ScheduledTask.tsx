@@ -15,10 +15,9 @@ export default function ScheduledTask(p: { ctx: TypeContext<ScheduledTaskEntity>
       {!ctx.value.isNew && <AutoLine ctx={ctx.subCtx(f => f.machineName)} />}
       {!ctx.value.isNew && <AutoLine ctx={ctx.subCtx(f => f.applicationName)} />}
       <AutoLine ctx={ctx.subCtx(f => f.suspended)} />
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: ScheduledTaskLogEntity,
-        filterOptions: [{ token: ScheduledTaskLogEntity.token(a => a.scheduledTask), value: ctx.value }]
-      }} />
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={ScheduledTaskLogEntity.findOptions(token => ({
+        filterOptions: [token(a => a.scheduledTask).filter("EqualTo", ctx.value)]
+      }))} />
       }
     </div>
   );

@@ -18,21 +18,12 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
           property: p => p.userChart,
           template: (ectx) =>
             <EntityLine ctx={ectx.subCtx(p => p.userChart)}
-              findOptions={{
-                queryName: UserChartEntity,
+              findOptions={UserChartEntity.findOptions(token => ({
                 filterOptions: [
-                  {
-                    token: UserChartEntity.token(a => a.entity.chartScript.key),
-                    operation: "IsIn",
-                    value: [D3ChartScript.Columns.key, D3ChartScript.Line.key]
-                  },
-                  ...(dashboardEntityType ? [{
-                    token: UserChartEntity.token(a => a.entity.entityType),
-                    value: dashboardEntityType,
-                    pinned: { active: "Checkbox_Checked" as const }
-                  }] : [])
+                  token(a => a.entity.chartScript.key).filter("IsIn", [D3ChartScript.Columns.key, D3ChartScript.Line.key]),
+                  ...(dashboardEntityType ? [token(a => a.entity.entityType).filter("EqualTo", dashboardEntityType, { pinned: { active: "Checkbox_Checked" as const } })] : [])
                 ]
-              }}
+              }))}
               helpText={getEntityTypeHelpText(dashboardEntityType, ectx.value.userChart?.entityType)}
             />,
           headerHtmlAttributes: { style: { width: "70%" } },

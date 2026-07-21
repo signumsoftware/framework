@@ -13,8 +13,8 @@ export namespace DynamicExpressionClient {
   export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicExpressionEntity, w => import('./Expression/DynamicExpression')));
-    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity }} />);
-    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicExpressionEntity, filterOptions: [{ token: DynamicExpressionEntity.token(e => e.fromType), value: type + "Entity" }]}} />);
+    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicExpressionEntity.findOptions()} />);
+    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={DynamicExpressionEntity.findOptions(token => ({ filterOptions: [token(e => e.fromType).filter("EqualTo", type + "Entity")]}))} />);
     EvalClient.Options.registerDynamicPanelSearch(DynamicExpressionEntity, t => [
       { token: t.append(p => p.entity.body), type: "Code" },
       { token: t.append(p => p.name), type: "Text" },

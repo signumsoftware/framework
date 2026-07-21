@@ -16,8 +16,8 @@ export default function EmailReception(p: { ctx: TypeContext<EmailReceptionEntit
       <AutoLine ctx={sc.subCtx(s => s.endDate)} />
       <AutoLine ctx={sc.subCtx(s => s.newEmails)} />
       <EntityLine ctx={sc.subCtx(s => s.exception)} />
-      <SearchValueLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, filterOptions: [{ token: EmailMessageEntity.token(a => a.entity).mixin(EmailReceptionMixin).append(a => a.receptionInfo!.reception), value: sc.value }]}} />
-      <SearchValueLine ctx={sc} findOptions={{ queryName: ExceptionEntity, filterOptions: [{ token: ExceptionEntity.token(a => a.entity).expression("Pop3Reception"), value: sc.value }]}} />
+      <SearchValueLine ctx={sc} findOptions={EmailMessageEntity.findOptions(token => ({ filterOptions: [token(a => a.entity).mixin(EmailReceptionMixin).append(a => a.receptionInfo!.reception).filter("EqualTo", sc.value)]}))} />
+      <SearchValueLine ctx={sc} findOptions={ExceptionEntity.findOptions(token => ({ filterOptions: [token(a => a.entity).expression("Pop3Reception").filter("EqualTo", sc.value)]}))} />
     </div>
   );
 }
