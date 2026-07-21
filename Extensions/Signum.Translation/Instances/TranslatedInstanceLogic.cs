@@ -4,6 +4,7 @@ using System.IO;
 using Signum.Engine.Sync;
 using Signum.Excel;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Translation.Instances;
 
@@ -604,15 +605,24 @@ public static class TranslatedInstanceLogic
 
     public static void SaveRecordsByOriginalText(List<TranslationRecord> records, Type type, bool isSync, CultureInfo? c)
     {
+        Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
+
         Dictionary<(PropertyRoute route, string originalText), Dictionary<CultureInfo, string>> excelTranslations = records
             .Where(a => !isSync || a.TranslatedText.HasText())
             .GroupBy(a => (a.Key.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
             .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), 
-                gr.GroupAggregateToDictionary(a => a.Culture, a => 
-                    a.Select(a => a.TranslatedText).Distinct().Only() ?? 
-                    throw new InvalidOperationException($"There are more than one translations for '{gr.Key.OriginalText}':\n" + a.Select(a => a.TranslatedText).Distinct().ToString(a => "* " + a, "\n"))
-                ))
+                gr.GroupAggregateToDictionary(a => a.Culture, a =>
+                {
+                    var only = a.Select(a => a.TranslatedText).Distinct().Only();
+                    if (only != null)
+                        return only;
+                    errors.Add(gr.Key.OriginalText, a.Select(a => a.TranslatedText).Distinct().ToList());
+                    return null!;
+                }))
             ).ToDictionary();
+
+        if (errors.Any())
+            throw new InvalidOperationException($"There are more than one translations for:\n {errors.ToString(a => "* " + a.Key + ":" + a.Value.ToString(", "), "\n")}");
 
         Dictionary<LocalizedInstanceKey, List<TranslatedInstanceEntity>> databaseTranslations =
             Database.Query<TranslatedInstanceEntity>()
