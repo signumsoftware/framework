@@ -688,6 +688,7 @@ public static class TranslatedInstanceLogic
                             merge: (ci, translatedText, dbTr) =>
                             {
                                 dbTr.TranslatedText = translatedText; // Only translation changed
+                                dbTr.OriginalText = k.originalText;
                                 dbTr.Save();
                             });
                     }
