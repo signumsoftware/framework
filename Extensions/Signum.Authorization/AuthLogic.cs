@@ -946,7 +946,7 @@ public static class AuthLogic
         {
             var doc = ExportRules();
             doc.Save(fileName);
-            Console.WriteLine("Sucesfully exported to {0}".FormatWith(fileName));
+            Console.WriteLine("Successfully exported to {0}".FormatWith(fileName));
 
             var info = new DirectoryInfo("../../../");
 
