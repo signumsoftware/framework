@@ -85,10 +85,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   }
 
   async function handleOpenSession() {
-    const session = await Finder.find<ChatSessionEntity>({
-      queryName: ChatSessionEntity,
-      filterOptions: [{ token: ChatSessionEntity.token(a => a.user), value: AuthClient.currentUser() }]
-    });
+    const session = await Finder.find(ChatSessionEntity.findOptions(token => ({
+      filterOptions: [token(a => a.user).filter("EqualTo", AuthClient.currentUser())]
+    })));
     if (session == null)
       return;
 
@@ -376,7 +375,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     }
   }
 
-   const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
+  const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
 
   const showRecoverBar = recoverRef.current != null && (recoverRef.current.kind === "tool" || recoverRef.current.kind === "continue" || recoverRef.current.kind === "uitool-widget");
 

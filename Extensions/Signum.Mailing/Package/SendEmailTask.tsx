@@ -59,7 +59,7 @@ export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity>
             optionItems={pair?.type == null ? [EmaiTemplateTargetFrom.value("NoTarget")] : [EmaiTemplateTargetFrom.value("Unique"), EmaiTemplateTargetFrom.value("UserQuery")]} />}
         </div>
         <div className="col-sm-6">
-          {pair?.type && sc.value.targetFrom == "UserQuery" && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery)} findOptions={{ queryName: UserQueryEntity, filterOptions: [{ token: UserQueryEntity.token(a => a.query.key), value: pair.type! }] }} />}
+          {pair?.type && sc.value.targetFrom == "UserQuery" && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery)} findOptions={UserQueryEntity.findOptions(token => ({ filterOptions: [token(a => a.query.key).filter("EqualTo", pair.type!)] }))} />}
           {pair?.type && sc.value.targetFrom == "Unique" && <EntityLine ctx={sc.subCtx(s => s.uniqueTarget)} type={{ isLite: true, name: pair.type! }} />}
         </div>
       </div>

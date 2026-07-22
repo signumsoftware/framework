@@ -188,8 +188,8 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
             </div>
             {!ctx.value.isNew && <div className="col-sm-3">
               <h2 className="mt-3 h5">{UserAssetMessage.UsedBy.niceToString()}</h2>
-              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
-              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+              <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+              <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
             </div>
             }
             <div className="col-sm-6">
@@ -212,7 +212,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
                     </div>
                     <div className="row">
                       <div className="col-sm-4">
-                        {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+                        {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={CachedQueryEntity.findOptions(token => ({ filterOptions: [token(a => a.dashboard).filter("EqualTo", ctxBasic.value)] }))} />}
                       </div>
                       <div className="col-sm-4 pt-4">
                         {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}

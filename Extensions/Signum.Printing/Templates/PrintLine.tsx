@@ -19,7 +19,7 @@ export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }): Re
       {!e.value.isNew &&
         <fieldset>
           <legend>{ProcessExceptionLineEntity.nicePluralName()}</legend>
-          <SearchControl findOptions={{ queryName: ProcessExceptionLineEntity, filterOptions: [{ token: ProcessExceptionLineEntity.token(e => e.line), value: e.value }]}} />
+          <SearchControl findOptions={ProcessExceptionLineEntity.findOptions(token => ({ filterOptions: [token(e => e.line).filter("EqualTo", e.value)]}))} />
         </fieldset>
       }
     </div>

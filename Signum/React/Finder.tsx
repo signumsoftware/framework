@@ -14,8 +14,9 @@ import {
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
   toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
-  QueryDescriptionDTO,
-  QueryTokenWithoutParent
+  QueryDescriptionDTO, QueryTokenWithoutParent, toColumnOption, FetchOptions,
+  TypedResultsOptions,
+  ResultObject,
 } from './FindOptions';
 import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
@@ -132,7 +133,7 @@ export namespace Finder {
     return isFindableEvent.every(f => f(queryKey, fullScreen, context));
   }
 
-  export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
+  export function find<T extends Entity = Entity>(findOptions: FindOptions<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
   export function find<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
   export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
@@ -211,7 +212,7 @@ export namespace Finder {
   }
 
 
-  export function findMany<T extends Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+  export function findMany<T extends Entity>(findOptions: FindOptions<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
   export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
   export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
@@ -313,7 +314,7 @@ export namespace Finder {
 
     Encoder.encodeFilters(query, fo.filterOptions?.notNull());
     Encoder.encodeOrders(query, fo.orderOptions?.notNull());
-    Encoder.encodeColumns(query, fo.columnOptions?.notNull());
+    Encoder.encodeColumns(query, fo.columnOptions?.notNull().map(toColumnOption));
 
     return query;
   }
@@ -821,7 +822,7 @@ export namespace Finder {
   export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     const fo = autoRemoveTrivialColumns(findOptions);
 
-    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
+    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull().map(toColumnOption) ?? []);
 
     var qs: QuerySettings | undefined = querySettings[qd.queryKey];
     const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -856,8 +857,8 @@ export namespace Finder {
       fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString()));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString()));
-      fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).forEach(co => completer.request(co.token.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
     }
 
     return completer.finished().then(() => {
@@ -868,7 +869,7 @@ export namespace Finder {
         pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
         systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
-        columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => {
+        columnOptions: (fo.columnOptions?.notNull().map(toColumnOption) ?? []).map(co => {
 
           const token = completer.get(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries);
 
@@ -1200,9 +1201,9 @@ export namespace Finder {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
   }
 
-  export async function fetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<Lite<T>[]> {
+  export async function fetchLites<T extends Entity>(fo: FetchOptions<T>): Promise<Lite<T>[]> {
 
-    var qd = await getQueryDescription(fo.queryName);
+    var qd = await getQueryDescription(fo.queryName!);
     var filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     var orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1223,8 +1224,8 @@ export namespace Finder {
     return result as Lite<T>[];
   }
 
-  export async function fetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<T[]> {
-    const qd = await getQueryDescription(fo.queryName);
+  export async function fetchEntities<T extends Entity>(fo: FetchOptions<T>): Promise<T[]> {
+    const qd = await getQueryDescription(fo.queryName!);
     const filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     const orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1799,23 +1800,13 @@ export namespace Finder {
 
   }
 
-  interface FetchEntitiesOptions<T extends Entity = any> {
-    queryName: Type<T> | QueryKey | PseudoType;
-    filterOptions?: (FilterOption | null | undefined)[];
-    orderOptions?: (OrderOption | null | undefined)[];
-    count?: number | null;
-  }
-
-
-
-
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
     return useAPI(() => fo && fetchLites(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
@@ -1826,13 +1817,13 @@ export namespace Finder {
     );
   }
 
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
     return useAPI(() => fo && fetchEntities(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
@@ -1844,24 +1835,27 @@ export namespace Finder {
   }
 
 
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
-    var fo2: FindOptions | null = fo && {
+  function typedResultsFindOptions(options: TypedResultsOptions<any>): FindOptions {
+    const { resultObject, ...fo } = options;
+    return {
       pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
+      ...(fo as FindOptions),
+      columnOptions: getAllColumns(resultObject),
       columnOptionsMode: "ReplaceAll",
     };
+  }
 
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined {
     return useAPI(async signal => {
-      if (!fo2)
+      if (!options)
         return null;
 
-      var rt = await getResultTable(fo2, signal);
+      var rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
-    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+      return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
+    }, [options && findOptionsPath(typedResultsFindOptions(options)), ...(additionalDeps || [])], apiOptions);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
@@ -1897,31 +1891,19 @@ export namespace Finder {
     }) as ExtractTokensObject<TO>;
   }
 
-  export async function getResultTableTyped<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
-    var fo2: FindOptions = {
-      pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<ExtractTokensObject<RO>[]> {
+    const rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-    const rt = await getResultTable(fo2);
-
-    return rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row));
+    return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
   }
 
-  export async function getResultTableTypedWithPagination<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
-    var fo2: FindOptions = {
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResultsWithPagination<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<RO>[] }> {
 
-    const rt = await getResultTable(fo2);
+    const rt = await getResultTable(typedResultsFindOptions(options));
 
     return ({
       totalElements: rt.totalElements,
-      rows: rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row))
+      rows: rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row))
     });
   }
 
@@ -2317,7 +2299,7 @@ export namespace Finder {
               groupOperation: FilterGroupOperation.assertDefined(parts[1]),
               value: ignoreValues ? null :
                 isGroupList({ filters }) ? parts.slice(2).map(a => unscapeTildes(a)).notNull() :
-                unscapeTildes(parts[2]),
+                  unscapeTildes(parts[2]),
               pinned: pinned,
               filters,
             }) as FilterGroupOption;

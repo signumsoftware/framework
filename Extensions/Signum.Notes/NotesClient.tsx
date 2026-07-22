@@ -22,7 +22,7 @@ export namespace NotesClient {
     }));
   
     if (Navigator.isViewable(NoteEntity)) {
-      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(NoteEntity, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
+      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(NoteEntity, ctx => (NoteEntity.findOptions(token => ({ filterOptions: [token(e => e.target).filter("EqualTo", ctx.lite)] }))),
         {
           isVisible: couldHaveNotes(entityType),
           icon: "note-sticky",

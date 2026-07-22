@@ -1,11 +1,16 @@
-import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { Dic, softCast } from './Globals';
-import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
-import { ajaxGet, ThrowErrorFilter } from './Services';
+import type {
+  ModifiableEntity, Entity, Lite, MListElement,
+  ModelState, MixinEntity, ModelEntity
+} from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
+import type { FilterOperation, FilterGroupOperation, OrderType, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { FindOptions, FetchOptions, TypedResultsOptions, ResultObject, FilterOption, FilterConditionOption, FilterGroupOption, OrderOption, ColumnOption, ExtraFilterConditionOptions, ExtraFilterGroupOptions, ColumnDisplayOptions, OptionalQueryName } from './FindOptions'; //ONLY TYPES or Cyclic problems in Webpack!
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -1566,6 +1571,64 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
       return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
 
+  /**
+   * Builds a strongly-typed {@link FindOptions} rooted at this type. The `token` factory produces
+   * {@link QueryTokenString} tokens (`token(a => a.date)`) that chain into `.filter`/`.order`/`.column`/`.filterGroup`;
+   * use the standalone {@link filterGroup} for a root filter group. `queryName` defaults to this type when omitted.
+   * Called without arguments it returns just `{ queryName: this }`.
+   * @example
+   * WorkLogEntity.findOptions(token => ({
+   *   filterOptions: [token(a => a.user).filter("EqualTo", currentUser)],
+   *   orderOptions: [token(a => a.startTime).order("Ascending")],
+   *   columnOptions: [token(a => a.id), token(a => a.state).column("State")],
+   * }))
+   */
+  findOptions(builder?: (token: TokenFunction<T>) => OptionalQueryName<FindOptions<T>>): FindOptions<T> {
+    if (builder == null)
+      return { queryName: this };
+
+    const fo = builder(createTokenFunction<T>(new QueryTokenString<T>("")));
+    if (!fo.queryName)
+      fo.queryName = this;
+
+    return fo as FindOptions<T>;
+  }
+
+  /**
+   * Builds a {@link FetchOptions} rooted at this type, for `Finder.fetchLites` / `fetchEntities` (and the
+   * `useFetch*` hooks). Same typed `token` factory as {@link findOptions}; `queryName` defaults to this type.
+   * @example Finder.fetchLites(TransportmittelEntity.fetchOptions(token => ({
+   *   filterOptions: [token(a => a.name).filter("EqualTo", "Taxi")],
+   *   count: 1,
+   * })))
+   */
+  fetchOptions(builder?: (token: TokenFunction<T>) => OptionalQueryName<FetchOptions<T>>): FetchOptions<T> {
+    if (builder == null)
+      return { queryName: this };
+
+    const fo = builder(createTokenFunction<T>(new QueryTokenString<T>("")));
+    if (!fo.queryName)
+      fo.queryName = this;
+
+    return fo as FetchOptions<T>;
+  }
+
+  /**
+   * Builds a {@link TypedResultsOptions} rooted at this type, for `Finder.getTypedResults` / `useTypedResults`.
+   * The `resultObject` map names the fields of each returned row; `queryName` defaults to this type.
+   * @example Finder.getTypedResults(OrderEntity.typedResultsOptions(token => ({
+   *   filterOptions: [token(a => a.state).filter("EqualTo", "Open")],
+   *   resultObject: { id: token(a => a.id), total: token(a => a.entity.totalPrice) },
+   * })))
+   */
+  typedResultsOptions<RO extends ResultObject>(builder: (token: TokenFunction<T>) => OptionalQueryName<TypedResultsOptions<RO>>): TypedResultsOptions<RO> {
+    const to = builder(createTokenFunction<T>(new QueryTokenString<T>("")));
+    if (!to.queryName)
+      to.queryName = this;
+
+    return to as TypedResultsOptions<RO>;
+  }
+
   parseId(txt: string): string | number {
     var miId = this.typeInfo().members["Id"]!;
 
@@ -1744,6 +1807,71 @@ export class QueryTokenString<T> {
   mlistElementProperty(property: "RowId" | "RowOrder" | "RowPartitionId"): QueryTokenString<string | number> {
     return new QueryTokenString<string | number>(this.token + "." + property);
   }
+
+  /** Builds a filter condition option on this token. The value type depends on the operation. */
+  filter(operation: "IsIn" | "IsNotIn", value: FilterValue<T>[] | null | undefined, options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: "Between" | "BetweenNoEnd", value: [FilterValue<T>, FilterValue<T>], options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: FilterOperation, value: FilterValue<T>, options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: FilterOperation, value: any, options?: ExtraFilterConditionOptions): FilterConditionOption {
+    return { token: this, operation, value, ...options };
+  }
+
+  /** Builds an order option on this token. */
+  order(orderType: OrderType): OrderOption {
+    return { token: this, orderType };
+  }
+
+  /** Builds a column option on this token. */
+  column(displayName?: string | (() => string), options?: ColumnDisplayOptions): ColumnOption;
+  column(options: ColumnDisplayOptions & { displayName?: string | (() => string) }): ColumnOption;
+  column(displayNameOrOptions?: string | (() => string) | (ColumnDisplayOptions & { displayName?: string | (() => string) }), options?: ColumnDisplayOptions): ColumnOption {
+    if (displayNameOrOptions != null && typeof displayNameOrOptions == "object")
+      return { token: this, ...displayNameOrOptions };
+    return { token: this, displayName: displayNameOrOptions, ...options };
+  }
+
+  /**
+   * Builds a filter group anchored on this token; the inner filters are scoped to this token's value
+   * through the `t` factory (typically used after `.any()` / `.all()` / `.element()`).
+   */
+  filterGroup(groupOperation: FilterGroupOperation, options: ExtraFilterGroupOptions, selector: (t: TokenFunction<T>) => (FilterOption | null | undefined)[]): FilterGroupOption {
+    return {
+      token: this,
+      groupOperation,
+      filters: selector(createTokenFunction<T>(this)),
+      ...options,
+    };
+  }
+}
+
+/** Accepted filter value for a token of type `T`: a `Lite<E>` token also accepts the entity `E`, and vice-versa. */
+type FilterValue<T> =
+  T extends Lite<infer E> ? Lite<E> | E | null | undefined :
+  T extends Entity ? Lite<T> | T | null | undefined :
+  T | null | undefined;
+
+type AnonymousOf<T> = T extends ModifiableEntity ? Anonymous<T> : T;
+
+/** A {@link QueryTokenString} factory scoped to `T`, provided by {@link Type.findOptions} and anchored filter groups. */
+export interface TokenFunction<T> {
+  /** `token()` — the token this factory is rooted at (the entity, or the collection element after any()/all()/element()). */
+  (): QueryTokenString<T>;
+  /** `token(a => a.name)` — navigates the entity graph; the accessed property path becomes the token. */
+  <S>(lambdaToColumn: (v: AnonymousOf<T>) => S): QueryTokenString<S>;
+  /** `token<V>("Key")` — escape hatch for a query-only column with no entity-graph home. */
+  <S = unknown>(columnName: string): QueryTokenString<S>;
+}
+
+function createTokenFunction<T>(base: QueryTokenString<any>): TokenFunction<T> {
+  return ((arg?: ((v: any) => any) | string): QueryTokenString<any> =>
+    arg == null ? base :
+      typeof arg == "string" ? base.expression(arg) :
+        base.append(arg)) as TokenFunction<T>;
+}
+
+/** Builds a root filter group (AND / OR of the given filters), for use in `filterOptions`. */
+export function filterGroup(groupOperation: FilterGroupOperation, options: ExtraFilterGroupOptions, filters: (FilterOption | null | undefined)[]): FilterGroupOption {
+  return { groupOperation, filters, ...options };
 }
 
 type ArrayElement<ArrayType> = ArrayType extends (infer ElementType)[] ? RemoveMListElement<ElementType> : never;
