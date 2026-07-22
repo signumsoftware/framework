@@ -931,7 +931,7 @@ public class SchemaBuilder
 
         var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(
             FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()),
-            type: nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t), 
+            type: idNullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t), 
             preName.ToString())
         {
             Nullable = idNullable,
