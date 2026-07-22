@@ -35,7 +35,7 @@ function CaseActivityStatsModal(p: CaseActivityStatsModalProps): React.JSX.Eleme
     <Modal size="lg" onHide={handleCloseClicked} show={show} onExited={handleOnExited}>
       <div className="modal-header">
         <h5 className="modal-title">{getToString(caseActivityStats.first().workflowActivity)} ({caseActivityStats.length} {caseActivityStats.length == 1 ? CaseActivityEntity.niceName() : CaseActivityEntity.nicePluralName()})</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
       <div className="modal-body">
         {
@@ -63,7 +63,7 @@ function CaseActivityStatsModal(p: CaseActivityStatsModalProps): React.JSX.Eleme
   );
 }
 
-namespace CaseActivityStatsModal{
+namespace CaseActivityStatsModal {
   export function show(caseEntity: CaseEntity, caseActivityStats: WorkflowClient.CaseActivityStats[]): Promise<any> {
     return openModal<any>(<CaseActivityStatsModal case={caseEntity} caseActivityStats={caseActivityStats} />);
   };
@@ -76,13 +76,13 @@ interface CaseActivityStatsComponentProps {
   stats: WorkflowClient.CaseActivityStats;
 }
 
-export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps): React.JSX.Element {
+export function CaseActivityStatsComponent(p: CaseActivityStatsComponentProps): React.JSX.Element {
 
   function renderTaskExtra() {
     return (
       <div>
         <h3>{CaseNotificationEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: CaseNotificationEntity, filterOptions: [{ token: CaseNotificationEntity.token(e => e.caseActivity), value: p.stats.caseActivity }]}} />
+        <SearchControl findOptions={CaseNotificationEntity.findOptions(token => ({ filterOptions: [token(e => e.caseActivity).filter("EqualTo", p.stats.caseActivity)] }))} />
       </div>
     );
   }
@@ -91,20 +91,19 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
     return (
       <div>
         <h3>{OperationLogEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: p.stats.caseActivity }]}} />
+        <SearchControl findOptions={OperationLogEntity.findOptions(token => ({ filterOptions: [token(e => e.target).filter("EqualTo", p.stats.caseActivity)] }))} />
       </div>
     );
   }
 
   function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
 
-    Finder.find<CaseEntity>({
-      queryName: CaseEntity,
+    Finder.find(CaseEntity.findOptions(token => ({
       filterOptions: [
-        { token: CaseEntity.token(e => e.entity.parentCase), value: p.caseEntity, frozen: true },
-        { token: CaseEntity.token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity"), value: p.stats.caseActivity },
+        token(e => e.entity.parentCase).filter("EqualTo", p.caseEntity, { frozen: true }),
+        token(e => e.entity).expression<CaseActivityEntity>("DecompositionSurrogateActivity").filter("EqualTo", p.stats.caseActivity),
       ]
-    }, { autoSelectIfOne: true })
+    })), { autoSelectIfOne: true })
       .then(c => c && Navigator.view(c));
   }
 
@@ -113,7 +112,7 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
       <FormGroup ctx={ctx} >
         {() => <button className="btn btn-light" onClick={handleClick}>
           <FontAwesomeIcon icon="shuffle" color="green" /> {WorkflowActivityMessage.CaseFlow.niceToString()}
-        </button>}      
+        </button>}
       </FormGroup>
     );
   }
@@ -148,12 +147,12 @@ export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps):
         {() => formatMinutes(stats.duration)}
       </FormGroup>
       {stats.workflowActivityType && <FormGroup ctx={ctx} label={WorkflowActivityType.niceTypeName()}>
-          {() => stats.workflowActivityType && WorkflowActivityType.niceToString(stats.workflowActivityType)}
-        </ FormGroup>
+        {() => stats.workflowActivityType && WorkflowActivityType.niceToString(stats.workflowActivityType)}
+      </ FormGroup>
       }
       {stats.workflowEventType && <FormGroup ctx={ctx} label={WorkflowEventType.niceTypeName()}>
         {() => stats.workflowEventType && WorkflowEventType.niceToString(stats.workflowEventType)}
-        </FormGroup>
+      </FormGroup>
       }
       {
         stats.workflowActivityType == "Task" || stats.workflowActivityType == "Decision" ? renderTaskExtra() :

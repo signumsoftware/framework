@@ -13,14 +13,9 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
   return (
     <div >
       <EntityLine ctx={ctx.subCtx(p => p.userChart)} create={false}
-        findOptions={dashboardEntityType ? {
-          queryName: UserChartEntity,
-          filterOptions: [{
-            token: UserChartEntity.token(a => a.entity.entityType),
-            value: dashboardEntityType,
-            pinned: { active: "Checkbox_Checked" }
-          }]
-        } : undefined}
+        findOptions={dashboardEntityType ? UserChartEntity.findOptions(token => ({
+          filterOptions: [token(a => a.entity.entityType).filter("EqualTo", dashboardEntityType, { pinned: { active: "Checkbox_Checked" } })]
+        })) : undefined}
         helpText={getEntityTypeHelpText(dashboardEntityType, ctx.value.userChart?.entityType)}
         onChange={() => ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate()} />
 

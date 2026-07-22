@@ -41,23 +41,21 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
         <div className="col-sm-6">
           {ctx.value.needCondition ?
             ctx.value.mainEntityType ?
-              <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={{
-                queryName: WorkflowConditionEntity,
+              <EntityLine ctx={ctx.subCtx(e => e.condition)} findOptions={WorkflowConditionEntity.findOptions(token => ({
                 filterOptions: [
-                  { token: WorkflowConditionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
+                  token(e => e.entity.mainEntityType).filter("EqualTo", ctx.value.mainEntityType)
                 ]
-              }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
+              }))} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
             : undefined}
           {ctx.value.needOrder && <AutoLine ctx={ctx.subCtx(e => e.order)} helpText={WorkflowMessage.EvaluationOrderOfTheConnectionForIfElse.niceToString()} />}
         </div>
         <div className="col-sm-6">
           {ctx.value.mainEntityType ?
-            <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={{
-              queryName: WorkflowActionEntity,
+            <EntityLine ctx={ctx.subCtx(e => e.action)} findOptions={WorkflowActionEntity.findOptions(token => ({
               filterOptions: [
-                { token: WorkflowActionEntity.token(e => e.entity.mainEntityType), operation: "EqualTo", value: ctx.value.mainEntityType }
+                token(e => e.entity.mainEntityType).filter("EqualTo", ctx.value.mainEntityType)
               ]
-            }} />
+            }))} />
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}
 
         </div>

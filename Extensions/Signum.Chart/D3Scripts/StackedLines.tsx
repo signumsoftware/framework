@@ -76,8 +76,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var rowsByKey = pivot.rows.toObject(r => keyColumn.getKey(r.rowValue));
 
   var stack = d3.stack<unknown>()
-    .offset(ChartUtils.getStackOffset(pStack) as any)
-    .order(ChartUtils.getStackOrder(parameters["Order"]) as any)
+    .offset(ChartUtils.getStackOffset(pStack)!)
+    .order(ChartUtils.getStackOrder(parameters["Order"])!)
     .keys(pivot.columns.map(d => d.key))
     .value((r, k) => rowsByKey[keyColumn.getKey(r)]?.values[k]?.value ?? 0);
 

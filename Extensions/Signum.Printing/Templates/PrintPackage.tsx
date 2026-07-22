@@ -12,7 +12,7 @@ export default function PrintPackage(p : { ctx: TypeContext<PrintPackageEntity> 
       <AutoLine ctx={e.subCtx(f => f.name)} />
       <fieldset>
         <legend>{PrintLineEntity.nicePluralName()}</legend>
-        <SearchControl findOptions={{ queryName: PrintLineEntity, filterOptions: [{ token: PrintLineEntity.token(e => e.package), value: e.value }]}} />
+        <SearchControl findOptions={PrintLineEntity.findOptions(token => ({ filterOptions: [token(e => e.package).filter("EqualTo", e.value)]}))} />
       </fieldset>
     </div>
   );

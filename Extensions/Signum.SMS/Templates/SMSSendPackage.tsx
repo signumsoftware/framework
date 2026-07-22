@@ -10,9 +10,8 @@ export default function SMSSendPackage(p: { ctx: TypeContext<SMSSendPackageEntit
     <div>
       <AutoLine ctx={p.ctx.subCtx(a => a.name)} />
       <SearchControl
-        findOptions={{
-          queryName: SMSMessageEntity,
+        findOptions={SMSMessageEntity.findOptions(token => ({
           filterOptions: [{ token: "Entity.SendPackage", value: p.ctx.value}],
-        }} />
+        }))} />
     </div>);
 }

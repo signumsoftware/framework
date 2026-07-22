@@ -305,20 +305,18 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
           {!dt.isNew && dt.baseType == "MixinEntity" &&
             <Tab eventKey="connections" title="Apply To">
-              <SearchControl findOptions={{
-                queryName: DynamicMixinConnectionEntity,
-                filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.mixinName), value: dt.typeName}]
-              }} />
+              <SearchControl findOptions={DynamicMixinConnectionEntity.findOptions(token => ({
+                filterOptions: [token(e => e.mixinName).filter("EqualTo", dt.typeName)]
+              }))} />
             </Tab>
           }
 
         {!dt.isNew && dt.baseType == "Entity" && typeEntity != null &&
             <Tab eventKey="connections" title="Mixins">
             {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
-                <SearchControl findOptions={{
-                  queryName: DynamicMixinConnectionEntity,
-                  filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.entityType), value: typeEntity}]
-                }} />
+                <SearchControl findOptions={DynamicMixinConnectionEntity.findOptions(token => ({
+                  filterOptions: [token(e => e.entityType).filter("EqualTo", typeEntity)]
+                }))} />
               }
             </Tab>
           }

@@ -47,16 +47,15 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
   function handleAlertsClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    var fo: FindOptions = {
-      queryName: AlertEntity,
+    var fo: FindOptions = AlertEntity.findOptions(token => ({
       filterOptions: [
-        { token: AlertEntity.token(a => a.target), value: p.data.caseActivity },
-        { token: AlertEntity.token(e => e.entity.recipient), value: AppContext.currentUser },
-        { token: AlertEntity.token(a => a.entity).expression("CurrentState"), value: "Alerted" }
+        token(a => a.target).filter("EqualTo", p.data.caseActivity),
+        token(e => e.entity.recipient).filter("EqualTo", AppContext.currentUser),
+        token(a => a.entity).expression("CurrentState").filter("EqualTo", "Alerted")
       ],
-      columnOptions: [{ token: AlertEntity.token(e => e.target) }],
+      columnOptions: [token(e => e.target)],
       columnOptionsMode: "Remove",
-    };
+    }));
 
     Finder.exploreOrView(fo)
       .then(() => Finder.getQueryValue(fo.queryName, fo.filterOptions!.notNull()))
