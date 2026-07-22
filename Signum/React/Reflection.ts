@@ -1,13 +1,16 @@
-import { DateTime, DateTimeFormatOptions, Duration, DurationObjectUnits, Settings } from 'luxon';
+import { DateTime, Duration } from 'luxon';
 import { Dic, softCast } from './Globals';
-import type { ModifiableEntity, Entity, Lite, MListElement, ModelState, MixinEntity, ModelEntity } from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
-import { ajaxGet, ThrowErrorFilter } from './Services';
+import type {
+  ModifiableEntity, Entity, Lite, MListElement,
+  ModelState, MixinEntity, ModelEntity
+} from './Signum.Entities'; //ONLY TYPES or Cyclic problems in Webpack!
+import { ajaxGet } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
 import type { FilterOperation, FilterGroupOperation, OrderType, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery'; //ONLY TYPES or Cyclic problems in Webpack!
-import type { FindOptions, FindOptionsAutoQueryName, FetchOptions, TypedResultsOptions, ResultObject, FilterOption, FilterConditionOption, FilterGroupOption, OrderOption, ColumnOption, ExtraFilterConditionOptions, ExtraFilterGroupOptions, ColumnDisplayOptions } from './FindOptions'; //ONLY TYPES or Cyclic problems in Webpack!
+import type { FindOptions, FetchOptions, TypedResultsOptions, ResultObject, FilterOption, FilterConditionOption, FilterGroupOption, OrderOption, ColumnOption, ExtraFilterConditionOptions, ExtraFilterGroupOptions, ColumnDisplayOptions, OptionalQueryName } from './FindOptions'; //ONLY TYPES or Cyclic problems in Webpack!
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -1580,7 +1583,7 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
    *   columnOptions: [token(a => a.id), token(a => a.state).column("State")],
    * }))
    */
-  findOptions(builder?: (token: TokenFunction<T>) => FindOptionsAutoQueryName): FindOptions {
+  findOptions(builder?: (token: TokenFunction<T>) => OptionalQueryName<FindOptions<T>>): FindOptions<T> {
     if (builder == null)
       return { queryName: this };
 
@@ -1588,7 +1591,7 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
     if (!fo.queryName)
       fo.queryName = this;
 
-    return fo as FindOptions;
+    return fo as FindOptions<T>;
   }
 
   /**
@@ -1599,7 +1602,7 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
    *   count: 1,
    * })))
    */
-  fetchOptions(builder?: (token: TokenFunction<T>) => FetchOptions<T & Entity>): FetchOptions<T & Entity> {
+  fetchOptions(builder?: (token: TokenFunction<T>) => OptionalQueryName<FetchOptions<T>>): FetchOptions<T> {
     if (builder == null)
       return { queryName: this };
 
@@ -1607,7 +1610,7 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
     if (!fo.queryName)
       fo.queryName = this;
 
-    return fo;
+    return fo as FetchOptions<T>;
   }
 
   /**
@@ -1618,12 +1621,12 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
    *   resultObject: { id: token(a => a.id), total: token(a => a.entity.totalPrice) },
    * })))
    */
-  typedResultsOptions<RO extends ResultObject>(builder: (token: TokenFunction<T>) => TypedResultsOptions<RO>): TypedResultsOptions<RO> {
+  typedResultsOptions<RO extends ResultObject>(builder: (token: TokenFunction<T>) => OptionalQueryName<TypedResultsOptions<RO>>): TypedResultsOptions<RO> {
     const to = builder(createTokenFunction<T>(new QueryTokenString<T>("")));
     if (!to.queryName)
       to.queryName = this;
 
-    return to;
+    return to as TypedResultsOptions<RO>;
   }
 
   parseId(txt: string): string | number {
@@ -1806,7 +1809,7 @@ export class QueryTokenString<T> {
   }
 
   /** Builds a filter condition option on this token. The value type depends on the operation. */
-  filter(operation: "IsIn" | "IsNotIn", value: FilterValue<T>[], options?: ExtraFilterConditionOptions): FilterConditionOption;
+  filter(operation: "IsIn" | "IsNotIn", value: FilterValue<T>[] | null | undefined, options?: ExtraFilterConditionOptions): FilterConditionOption;
   filter(operation: "Between" | "BetweenNoEnd", value: [FilterValue<T>, FilterValue<T>], options?: ExtraFilterConditionOptions): FilterConditionOption;
   filter(operation: FilterOperation, value: FilterValue<T>, options?: ExtraFilterConditionOptions): FilterConditionOption;
   filter(operation: FilterOperation, value: any, options?: ExtraFilterConditionOptions): FilterConditionOption {
@@ -1844,7 +1847,7 @@ export class QueryTokenString<T> {
 /** Accepted filter value for a token of type `T`: a `Lite<E>` token also accepts the entity `E`, and vice-versa. */
 type FilterValue<T> =
   T extends Lite<infer E> ? Lite<E> | E | null | undefined :
-  T extends Entity ? Lite<T> | T | null | undefined:
+  T extends Entity ? Lite<T> | T | null | undefined :
   T | null | undefined;
 
 type AnonymousOf<T> = T extends ModifiableEntity ? Anonymous<T> : T;

@@ -11,16 +11,16 @@ interface WorkflowHelpComponentProps {
   mode: TypeHelpClient.TypeHelpMode;
 }
 
-export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps): React.JSX.Element {
+export default function WorkflowHelpComponent(p: WorkflowHelpComponentProps): React.JSX.Element {
 
   function handleActivityIsClick() {
-    Finder.find<WorkflowEntity>(WorkflowEntity.findOptions(token => ({
+    Finder.find(WorkflowEntity.findOptions(token => ({
       filterOptions: [token(a => a.entity.mainEntityType!.cleanName).filter("EqualTo", p.typeName)],
     }))).then(w => {
       if (!w)
         return;
 
-      Finder.findMany<WorkflowActivityEntity>(WorkflowActivityEntity.findOptions(token => ({
+      Finder.findMany(WorkflowActivityEntity.findOptions(token => ({
         filterOptions: [token(e => e.lane!.pool!.workflow).filter("EqualTo", w)]
       }))).then(acts => {
 

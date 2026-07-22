@@ -56,17 +56,15 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
 
       {!ctx.value.isNew && trivialMergeRoles && trivialMergeRoles.length > 0 && <SearchValueLine ctx={ctx}
         label={AuthAdminMessage.UsersIncludingInheritedAndMergedRoles.niceToString()}
-        findOptions={{
-          queryName: UserEntity,
-          filterOptions: [{ token: UserEntity.token(u => u.entity.role), operation: "IsIn", value: [toLite(ctx.value), ...trivialMergeRoles] }]
-        }} />
+        findOptions={UserEntity.findOptions(token => ({
+          filterOptions: [token(u => u.entity.role).filter("IsIn", [toLite(ctx.value), ...trivialMergeRoles])]
+        }))} />
       }
 
 
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: RoleEntity,
-        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.inheritsFrom).any(), value: ctx.value }]
-      }} />
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={RoleEntity.findOptions(token => ({
+        filterOptions: [token(a => a.entity).append(u => u.inheritsFrom).any().filter("EqualTo", ctx.value)]
+      }))} />
       }
 
 

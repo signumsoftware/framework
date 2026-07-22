@@ -1,5 +1,5 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType, isTypeEntity, isTypeModel, getTypeInfo, IsByAll } from './Reflection';
-import { Lite, Entity } from './Signum.Entities';
+import { Lite, Entity, ModifiableEntity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit, FilterType } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
@@ -37,8 +37,11 @@ export interface ModalFindOptions {
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
-export interface FindOptions {
-  queryName: PseudoType | QueryKey;
+export type OptionalQueryName<T extends { queryName: unknown }> =
+  Omit<T, "queryName"> & Partial<Pick<T, "queryName">>;
+
+export interface FindOptions<T extends ModifiableEntity /*Entity*/ = any> {
+  queryName: Type<T> | QueryKey | PseudoType;
   groupResults?: boolean;
 
   includeDefaultFilters?: boolean;
@@ -50,13 +53,8 @@ export interface FindOptions {
   systemTime?: SystemTime;
 }
 
-/** Like {@link FindOptions} but with an optional queryName, defaulted by `Type.findOptions`. */
-export interface FindOptionsAutoQueryName extends Omit<FindOptions, "queryName"> {
-  queryName?: PseudoType | QueryKey;
-}
-
-export interface FetchOptions<T extends Entity = any> {
-  queryName?: Type<T> | QueryKey | PseudoType; //Automatically set in Type.fetchOptions, mandatory otherwise
+export interface FetchOptions<T extends ModifiableEntity /*Entity*/> {
+  queryName: Type<T> | QueryKey | PseudoType;
   filterOptions?: (FilterOption | null | undefined)[];
   orderOptions?: (OrderOption | null | undefined)[];
   count?: number | null;
@@ -69,7 +67,7 @@ export interface ResultObject {
 
 /** Like {@link FindOptions} but the columns come from `resultObject` (no columnOptions); built by `Type.typedResultsOptions`. */
 export interface TypedResultsOptions<RO extends ResultObject = ResultObject> {
-  queryName?: PseudoType | QueryKey; //Automatically set in Type.typedResultsOptions
+  queryName: PseudoType | QueryKey;
   groupResults?: boolean;
   includeDefaultFilters?: boolean;
   filterOptions?: (FilterOption | null | undefined)[];

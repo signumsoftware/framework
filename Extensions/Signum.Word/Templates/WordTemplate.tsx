@@ -50,19 +50,19 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
         </div>
       </div>
 
-        <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
-          <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
-            <AutoLine ctx={ctx.subCtx(f => f.fileName)} />
-            <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
+      <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
+        <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
+          <AutoLine ctx={ctx.subCtx(f => f.fileName)} />
+          <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
             <div className="card-header" style={{ padding: "5px" }}>
               <TemplateControls queryKey={ctx.value.query?.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
-                  {UserChartEntity.tryTypeInfo() && qd && <UserChartTemplateButton qd={qd} />}
-                  {UserQueryEntity.tryTypeInfo() && qd && <UserQueryTemplateButton qd={qd} />}
-                </div>} />
-              </div>
+                {UserChartEntity.tryTypeInfo() && qd && <UserChartTemplateButton qd={qd} />}
+                {UserQueryEntity.tryTypeInfo() && qd && <UserQueryTemplateButton qd={qd} />}
+              </div>} />
             </div>
-            <FileLine ctx={ctx.subCtx(e => e.template)} />
-          </Tab>
+          </div>
+          <FileLine ctx={ctx.subCtx(e => e.template)} />
+        </Tab>
         {ctx.value.query &&
           <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
             {ctx.niceName(a => a.query)}
@@ -79,7 +79,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             </div>
             <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate}
-              queryKey={ctx.value.query!.key}/>
+              queryKey={ctx.value.query!.key} />
             <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
               {
                 property: a => a.token,
@@ -92,26 +92,26 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             ]} />
           </Tab>
         }
-          <Tab eventKey="applicable" title={
-            <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
-              {ctx.niceName(a => a.applicable)}
-            </span>}>
-            <EntityDetail ctx={ctx.subCtx(e => e.applicable)} onChange={forceUpdate}
-              getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
-          </Tab>
-        </Tabs>
+        <Tab eventKey="applicable" title={
+          <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
+            {ctx.niceName(a => a.applicable)}
+          </span>}>
+          <EntityDetail ctx={ctx.subCtx(e => e.applicable)} onChange={forceUpdate}
+            getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
+        </Tab>
+      </Tabs>
 
     </div>
   );
 }
 
-export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>(UserChartEntity.findOptions(token => ({
+export function UserChartTemplateButton(p: { qd: QueryDescription }): React.JSX.Element {
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find(UserChartEntity.findOptions(token => ({
     filterOptions: [
       filterGroup("Or", {}, [
-          token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)]),
-          token(a => a.entity!.entityType!.entity!.cleanName).filter("EqualTo", null)
-        ])
+        token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)]),
+        token(a => a.entity!.entityType!.entity!.cleanName).filter("EqualTo", null)
+      ])
     ]
   }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
     var text = "UserChart:" + uce.guid;
@@ -124,7 +124,7 @@ export function UserChartTemplateButton(p: {qd: QueryDescription}): React.JSX.El
 }
 
 export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.Element {
-  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>(UserQueryEntity.findOptions(token => ({
+  return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find(UserQueryEntity.findOptions(token => ({
     filterOptions: [token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [null, ...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)])]
   }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.guid)))
 }
