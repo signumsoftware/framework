@@ -1845,7 +1845,7 @@ export class QueryTokenString<T> {
 }
 
 /** Accepted filter value for a token of type `T`: a `Lite<E>` token also accepts the entity `E`, and vice-versa. */
-type FilterValue<T> =
+export type FilterValue<T> =
   T extends Lite<infer E> ? Lite<E> | E | null | undefined :
   T extends Entity ? Lite<T> | T | null | undefined :
   T | null | undefined;

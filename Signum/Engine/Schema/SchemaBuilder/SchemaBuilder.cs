@@ -927,15 +927,14 @@ public class SchemaBuilder
 
         var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
 
-        if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
-            nullable = IsNullable.Forced;
+        var idNullable = primaryKeyTypes.Count() > 1 && nullable == IsNullable.No ? IsNullable.Forced : nullable;
 
         var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(
             FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()),
-            type: nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t), 
+            type: idNullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t), 
             preName.ToString())
         {
-            Nullable = nullable,
+            Nullable = idNullable,
             Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
         });
 

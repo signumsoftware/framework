@@ -58,16 +58,11 @@ public class OperationController : ControllerBase
         {
             GraphExplorer.SetValidationErrors(GraphExplorer.FromRootVirtual(request.entity), ex);
             this.TryValidateModel(request, "request");
-           
-            if (this.ModelState.IsValid)
-                this.ModelState.AddModelError(string.Empty, ex.Message);
 
-            return BadRequest(new ValidationProblemDetails(this.ModelState)
-            {
-                Title = "Validation error",
-                Detail = ex.Message,
-                Status = StatusCodes.Status400BadRequest
-            });
+            if (this.ModelState.IsValid)
+                throw;
+
+            return BadRequest(this.ModelState);
         }
 
         return SignumServer.GetEntityPack(entity);
