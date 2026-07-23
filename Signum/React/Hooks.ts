@@ -86,10 +86,11 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(options?: { 
+export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
   initialTimeout?: number ,
-   resizeTimeout ? : number, 
-  autoResetOnHide?: boolean, 
+   resizeTimeout ? : number,
+  autoResetOnHide?: boolean,
+  avoidReset?: boolean,
   deps?: React.DependencyList
 }):
 
@@ -98,6 +99,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
   const initialTimeout = options?.initialTimeout  ?? 0;
   const resizeTimeout = options?.resizeTimeout  ?? 300;
   const autoResetOnHide = options?.autoResetOnHide  ?? false;
+  const avoidReset = options?.avoidReset  ?? false;
   const deps = options?.deps  ?? [];
 
   const [size, setSize] = React.useState<Size | undefined>();
@@ -112,8 +114,9 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
 
   React.useEffect(()=> {
     if(size&& deps.length)
-    { 
-      setSize(undefined);
+    {
+      if (!avoidReset)
+        setSize(undefined);
       setTimeout(() => {
         setNewSize();
       }, resizeTimeout);

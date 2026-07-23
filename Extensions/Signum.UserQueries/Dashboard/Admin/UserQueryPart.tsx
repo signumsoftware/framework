@@ -7,7 +7,7 @@ import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 import { getEntityTypeHelpText } from '../../../Signum.Dashboard/Admin/EntityTypeRelatedHelpText';
 
-export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity> }): React.JSX.Element {
+export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>, smallMode?: boolean }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
   const dashboardEntityType = ctx.findParentCtx(DashboardEntity).value.entityType;
@@ -21,13 +21,13 @@ export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity>
         helpText={getEntityTypeHelpText(dashboardEntityType, ctx.value.userQuery?.entityType)}
         onChange={() => ctx.findParentCtx(DashboardEntity).frame!.entityComponent!.forceUpdate()} />
       <div className="row">
-        <div className="col-sm-5">
+        <div className={p.smallMode ? "col-12" : "col-sm-5"}>
           <CheckboxLine ctx={ctx.subCtx(p => p.allowSelection)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.showFooter)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.allowMaxHeight)} inlineCheckbox="block" />
         </div>
-        <div className="col-sm-7">
+        <div className={p.smallMode ? "col-12" : "col-sm-7"}>
           <AutoLine ctx={ctx.subCtx(p => p.autoUpdate)} />
         </div>
       </div>

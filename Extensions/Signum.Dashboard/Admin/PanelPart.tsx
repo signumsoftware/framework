@@ -29,22 +29,9 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }): R
               icon={icon}
               style={{ color: ctx.value.iconColor ?? undefined, fontSize: "40px" }}
             />
-            <input
-              type="checkbox"
-              className="form-check-input ms-3"
-              title={settingsCtx.niceName(pp => pp.hideTitle)}
-              checked={!ctx.value.hideTitle}
-              onChange={e => {
-                ctx.value.hideTitle = !e.currentTarget.checked;
-                ctx.value.modified = true;
-                forceUpdate();
-              }}
-            />
-            {!ctx.value.hideTitle && (
-              <span className="ms-3" style={{ color: titleColor ?? undefined, fontSize: "18px", fontWeight: "500" }}>
-                {title}
-              </span>
-            )}
+            <span className="ms-3" style={{ color: titleColor ?? undefined, fontSize: "18px", fontWeight: "500" }}>
+              {title}
+            </span>
           </div>
         </div>
       )}

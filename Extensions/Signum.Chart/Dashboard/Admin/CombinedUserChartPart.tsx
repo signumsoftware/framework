@@ -7,8 +7,8 @@ import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 import { getEntityTypeHelpText } from '../../../Signum.Dashboard/Admin/EntityTypeRelatedHelpText';
 
-export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity> }): React.JSX.Element {
-  const ctx = p.ctx;
+export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity>, smallMode?: boolean }): React.JSX.Element {
+  const ctx = p.smallMode ? p.ctx.subCtx({ formGroupStyle: "Basic" }) : p.ctx;
   const dashboardEntityType = ctx.findParentCtx(DashboardEntity).value.entityType;
 
   return (
@@ -37,13 +37,13 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
       />
 
       <div className="row">
-        <div className="col-sm-6">
+        <div className={p.smallMode ? "col-12" : "col-sm-6"}>
           <CheckboxLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
         </div>
-        <div className="col-sm-6">
+        <div className={p.smallMode ? "col-12" : "col-sm-6"}>
             <AutoLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
         </div>
       </div>

@@ -253,7 +253,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" style={{ fontSize: "16px" }} />
   ) : null;
 
-  const title = !icon ? (
+  const title = part.hideTitle ? null : !icon ? (
     <>
       {titleText}
       {tooltipHtml && (
@@ -285,34 +285,36 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const cardContent = (
     <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
-      <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
-        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined }}
-      >
+      {title &&
+        <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
+          style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined }}
+        >
 
-        {renderer.handleTitleClick == undefined ? title :
-          <LinkButton title={undefined} className="sf-pointer"
-            style={{ color: part.titleColor ?? (part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined), textDecoration: "none" }}
-            onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
-            {title}
-          </LinkButton>
-        }
-        {
-          dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
-            {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
-          </span>
-        }
-
-        <div className="ms-auto">
-          {renderer.customTitleButtons?.(content, lite, customDataRef)}
-          {
-            renderer.handleEditClick &&
-            <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
-              <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
+          {renderer.handleTitleClick == undefined ? title :
+            <LinkButton title={undefined} className="sf-pointer"
+              style={{ color: part.titleColor ?? (part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined), textDecoration: "none" }}
+              onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
+              {title}
             </LinkButton>
           }
+          {
+            dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
+              {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
+              <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
+            </span>
+          }
+
+          <div className="ms-auto">
+            {renderer.customTitleButtons?.(content, lite, customDataRef)}
+            {
+              renderer.handleEditClick &&
+              <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
+                <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
+              </LinkButton>
+            }
+          </div>
         </div>
-      </div>
+      }
       <div data-part-content={partContentKey} className="card-body py-2 px-3 d-flex flex-column">
         <ErrorBoundary>
           {
