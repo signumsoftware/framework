@@ -179,6 +179,7 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
   guid: string /*Guid*/;
   title: string | null;
+  hideTitle: boolean;
   tooltip: string | null;
   iconName: string | null;
   iconColor: string | null;

@@ -95,6 +95,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
         tc.value.iconName = result.iconName;
         tc.value.iconColor = result.iconColor;
         tc.value.titleColor = result.titleColor;
+        tc.value.hideTitle = result.hideTitle;
         tc.value.customColor = result.customColor;
         tc.value.interactionGroup = result.interactionGroup;
         tc.value.tooltip = result.tooltip;

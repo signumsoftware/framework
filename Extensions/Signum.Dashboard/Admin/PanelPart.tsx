@@ -16,7 +16,7 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }): R
   const colors = ["#DFFF00", "#FFBF00", "#FF7F50", "#DE3163", "#9FE2BF", "#40E0D0", "#6495ED", "#CCCCFF"];
   
   const icon = parseIcon(ctx.value.iconName);
-  const title = ctx.value.title ?? getToString(ctx.value.content);
+  const title = (ctx.value.title || null) ?? getToString(ctx.value.content);
   const titleColor = ctx.value.titleColor;
 
   return (
@@ -24,14 +24,27 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }): R
       {icon && (
         <div className="mb-3 p-3 border rounded bg-tertiary">
           <div className="d-flex align-items-center">
-            <FontAwesomeIcon 
-              aria-hidden={true} 
-              icon={icon} 
-              style={{ color: ctx.value.iconColor ?? undefined, fontSize: "40px" }} 
+            <FontAwesomeIcon
+              aria-hidden={true}
+              icon={icon}
+              style={{ color: ctx.value.iconColor ?? undefined, fontSize: "40px" }}
             />
-            <span className="ms-3" style={{ color: titleColor ?? undefined, fontSize: "18px", fontWeight: "500" }}>
-              {title}
-            </span>
+            <input
+              type="checkbox"
+              className="form-check-input ms-3"
+              title={settingsCtx.niceName(pp => pp.hideTitle)}
+              checked={!ctx.value.hideTitle}
+              onChange={e => {
+                ctx.value.hideTitle = !e.currentTarget.checked;
+                ctx.value.modified = true;
+                forceUpdate();
+              }}
+            />
+            {!ctx.value.hideTitle && (
+              <span className="ms-3" style={{ color: titleColor ?? undefined, fontSize: "18px", fontWeight: "500" }}>
+                {title}
+              </span>
+            )}
           </div>
         </div>
       )}
