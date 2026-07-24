@@ -49,6 +49,10 @@ public class WordTemplateParser : ITemplateParser
             // the cells as inline strings first, so tokens (and specially @foreach/@if blocks) can be
             // resolved against the worksheet rows instead of the flat string pool.
             SpreadsheetUtils.InlineTokens(wb);
+
+            // Tokens can also be carried in a cell note (e.g. for cells with date validation); move a
+            // note's token into its anchored cell and drop the note.
+            SpreadsheetUtils.InlineNoteTokens(wb);
         }
 
         foreach (var part in document.AllParts().Where(p => p.RootElement != null))

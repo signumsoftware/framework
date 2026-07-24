@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Templating;
@@ -104,6 +105,64 @@ public static class SpreadsheetUtils
                 cell.AppendChild(inline);
             }
         }
+    }
+
+    /// <summary>
+    /// Uses cell notes (legacy comments) as token carriers: when a note contains a template keyword, its
+    /// text becomes the anchored cell's content (as an inline string) and the note is removed. This lets a
+    /// token live on a cell that couldn't hold it directly (e.g. a cell with date data validation). The
+    /// author-name prefix Excel prepends (up to the first line break) is dropped.
+    /// </summary>
+    public static void InlineNoteTokens(WorkbookPart wb)
+    {
+        foreach (var wsPart in wb.WorksheetParts)
+        {
+            var commentsPart = wsPart.WorksheetCommentsPart;
+            var commentList = commentsPart?.Comments?.CommentList;
+            if (commentList == null || wsPart.Worksheet == null)
+                continue;
+
+            var cellsByRef = wsPart.Worksheet.Descendants<S.Cell>()
+                .Where(c => c.CellReference?.Value != null)
+                .GroupBy(c => c.CellReference!.Value!)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            foreach (var comment in commentList.Elements<S.Comment>().ToList())
+            {
+                if (!TemplateUtils.KeywordsRegex.IsMatch(comment.InnerText))
+                    continue;
+
+                if (comment.Reference?.Value is not string reference || !cellsByRef.TryGetValue(reference, out var cell))
+                    continue;
+
+                cell.RemoveAllChildren();
+                cell.DataType = S.CellValues.InlineString;
+                cell.AppendChild(new S.InlineString(new S.Text(NoteBody(comment.InnerText)) { Space = SpaceProcessingModeValues.Preserve }));
+
+                comment.Remove();
+            }
+
+            //if every note was a token binding, drop the now-empty note infrastructure
+            if (!commentList.Elements<S.Comment>().Any())
+                RemoveNotes(wsPart, commentsPart!);
+        }
+    }
+
+    //Excel prepends "Author:\n" to a note; the meaningful body is what follows the first line break.
+    static string NoteBody(string commentText)
+    {
+        int nl = commentText.IndexOf('\n');
+        return (nl >= 0 ? commentText.Substring(nl + 1) : commentText).Trim();
+    }
+
+    static void RemoveNotes(WorksheetPart wsPart, WorksheetCommentsPart commentsPart)
+    {
+        wsPart.DeletePart(commentsPart);
+
+        //legacy notes also carry a VML drawing (the yellow box) referenced by a <legacyDrawing> element
+        wsPart.Worksheet!.GetFirstChild<S.LegacyDrawing>()?.Remove();
+        foreach (var vml in wsPart.VmlDrawingParts.ToList())
+            wsPart.DeletePart(vml);
     }
 
     // ================================================================= Cleanup
