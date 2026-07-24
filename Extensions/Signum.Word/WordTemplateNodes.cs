@@ -168,7 +168,7 @@ internal class SpreadsheetNodeProvider : INodeProvider
 
     public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
-        var textElement = new S.Text(text!);
+        var textElement = new S.Text(text!) { Space = spaceMode }; //preserve leading/trailing spaces (e.g. between two tokens)
         var result = new S.Run(runProps!, textElement);
 
         if (initialBr)
