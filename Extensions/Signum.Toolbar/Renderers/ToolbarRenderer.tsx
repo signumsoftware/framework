@@ -16,7 +16,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
 import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, tryGetTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
@@ -370,7 +370,10 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 
 export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
   const entityType = p.response.entityType;
-  if (entityType)
+  // Only render the entity-bound menu when the current user actually has UI access to the type.
+  // Otherwise the type is absent from the client reflection and getTypeInfo would throw, crashing
+  // the whole toolbar (and blocking login). Fall back to the plain, server-filtered elements.
+  if (entityType && tryGetTypeInfo(entityType))
     return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
 
   return <>
