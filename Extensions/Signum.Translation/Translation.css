@@ -69,6 +69,10 @@ table.st .monospaceCell pre {
     font-size: 14px;
 }
 
+.translation-raw-html {
+    font-family: monospace !important;
+}
+
 .auto-translate {
     font-size: small;
 }
