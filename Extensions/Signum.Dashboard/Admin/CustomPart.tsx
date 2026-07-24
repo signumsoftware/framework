@@ -3,8 +3,8 @@ import { CustomPartEntity, DashboardEntity, DashboardMessage } from '../Signum.D
 import { EnumLine, TypeContext } from '../../../Signum/React/Lines';
 import { DashboardClient } from '../DashboardClient';
 
-export default function CustomPart(p: { ctx: TypeContext<CustomPartEntity> }): React.JSX.Element {
-  const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
+export default function CustomPart(p: { ctx: TypeContext<CustomPartEntity>, smallMode?: boolean }): React.JSX.Element {
+  const ctx = p.ctx.subCtx(p.smallMode ? { formGroupStyle: "Basic" } : { formGroupStyle: "SrOnly", placeholderLabels: true });
 
   const entityType = ctx.findParentCtx(DashboardEntity).value.entityType;
 
