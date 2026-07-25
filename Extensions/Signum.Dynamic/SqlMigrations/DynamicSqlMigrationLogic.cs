@@ -77,7 +77,7 @@ public static class DynamicSqlMigrationLogic
                     return new Replacements.Selection(ctx.OldValue, null);
                 };
 
-                var script = Schema.Current.SynchronizationScript(interactive: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement, autoReplacement: autoReplacement);
+                var script = Schema.Current.SynchronizationScript(interactive: false, schemaOnly: false, replaceDatabaseName: SqlMigrationRunner.DatabaseNameReplacement, autoReplacement: autoReplacement);
 
                 return new DynamicSqlMigrationEntity
                 {

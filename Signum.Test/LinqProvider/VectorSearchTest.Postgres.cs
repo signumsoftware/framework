@@ -9,7 +9,7 @@ public class VectorSearchTest_Postgres
     {
         MusicStarter.StartAndLoad();
 
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
 
         if (!(Connector.Current is PostgreSqlConnector con))
             throw SkipException.ForSkip("Skipping tests because not Postgres.");

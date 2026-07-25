@@ -9,7 +9,7 @@ public class SelectNestedTest
     public SelectNestedTest()
     {
         MusicStarter.StartAndLoad();
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
     }
 
     [Fact]
