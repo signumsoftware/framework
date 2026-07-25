@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
@@ -749,7 +749,7 @@ export namespace WorkflowClient {
         }));
   }
 
-  function getWorkflowFreeJump(workflow: WorkflowEntity): Promise<Lite<WorkflowEntity> | undefined> {
+  function getWorkflowFreeJump(workflow: WorkflowEntity): Promise<Lite<WorkflowActivityEntity> | undefined> {
 
     return Finder.find(WorkflowActivityEntity.findOptions(token => ({
       filterOptions: [token(w => w.entity.lane.pool.workflow).filter("EqualTo", workflow)]
