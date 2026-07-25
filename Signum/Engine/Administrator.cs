@@ -961,6 +961,8 @@ public static class Administrator
                 PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
                 pg.ChangeConnectionStringDatabase(dbName);
+
+                SchemaSynchronizer.SyncPostgresDefaultTextLanguage()?.ExecuteLeaves();
             });
         }
         else 
@@ -981,6 +983,8 @@ public static class Administrator
             PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
             pg.ChangeConnectionStringDatabase(dbName);
+            
+            SchemaSynchronizer.SyncPostgresDefaultTextLanguage()?.ExecuteLeaves();
         }
         else
             throw new UnexpectedValueException(Connector.Current);
@@ -1041,10 +1045,7 @@ public static class Administrator
                 Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)};""");
             else
                 Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)} WITH TEMPLATE {fromTemplate.SqlEscape(true)};""");
-
         }
-
-      
 
         private static void CloseConnections(string dbName)
         {

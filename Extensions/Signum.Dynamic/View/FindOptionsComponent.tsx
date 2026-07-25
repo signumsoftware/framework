@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { Finder } from '@framework/Finder'
@@ -211,11 +211,11 @@ interface ViewNameComponentProps {
 export function ViewNameComponent(p: ViewNameComponentProps): React.JSX.Element {
 
   const viewNames = useAPI(() => p.typeName && !p.typeName.contains(", ") && !isTypeEntity(p.typeName) ? Promise.resolve(undefined) :
-    Promise.all(getTypeInfos(p.typeName ?? "").map(ti => Navigator.viewDispatcher.getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
+    Promise.all(getTypeInfos(p.typeName ?? "").map(ti => Navigator.getViewDispatcher().getViewNames(ti.name).then(array => [...array, (hastStaticView(ti) ? "STATIC" : undefined)])))
       .then(arrays => [...(arrays.flatMap(a => a).filter(a => a != null) as string[]), "NEW"]), [p.typeName]);
 
   return <ExpressionOrValueComponent dn={p.dn} binding={p.binding} type="string" defaultValue={null} options={viewNames}
-    exampleExpression={"e => modules.Navigator.viewDispatcher.getViewPromiseWithName(e, \"View Name\").withProps({ ... })"} />;
+    exampleExpression={"e => modules.Navigator.getViewDispatcher().getViewPromiseWithName(e, \"View Name\").withProps({ ... })"} />;
 }
 
 function hastStaticView(t: TypeInfo) {
@@ -621,3 +621,4 @@ function PaginationComponent(p : { findOptions: FindOptionsExpr, dn: DesignerNod
       </fieldset>
     );
 }
+

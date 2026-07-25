@@ -6,7 +6,7 @@ import { Operations } from '@framework/Operations'
 import { CultureClient } from '@framework/Basics/CultureClient'
 import { TranslatedInstanceClient } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
-import { useParams } from "react-router";
+import { useParams, useLocation } from "react-router";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
@@ -21,6 +21,7 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 import { CultureInfoEntity } from '@framework/Signum.Basics'
 import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { TranslatedHtmlEditor, TranslatedHtmlViewer } from './TranslatedHtml'
 
 export default function TranslatedInstanceSync(): React.JSX.Element {
   const params = useParams() as { type: string; culture: string; };
@@ -28,10 +29,18 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
   const type = params.type;
   const culture = params.culture;
 
+  const location = useLocation();
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const [isLocked, lock] = useLock();
+  const [applyFilter, setApplyFilter] = React.useState<boolean>(new URLSearchParams(location.search).get("applyFilter") != "false");
 
-  const [result, reloadResult] = useAPIWithReload(() => TranslatedInstanceClient.API.syncTranslatedInstance(type, culture), [type, culture]);
+  const [result, reloadResult] = useAPIWithReload(() => TranslatedInstanceClient.API.syncTranslatedInstance(type, culture, applyFilter), [type, culture, applyFilter]);
+
+  const filterToggle = (
+    <label className="d-block mb-2 text-end">
+      <input type="checkbox" checked={applyFilter} onChange={e => setApplyFilter(e.currentTarget.checked)} /> {TranslationMessage.OnlyRecommendedInstances.niceToString()}
+    </label>
+  );
 
   function renderTable() {
     if (result == undefined || cultures == undefined)
@@ -85,6 +94,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
         <div className="mb-2">
           <h1 className="h2"> {TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName)}</h1>
         </div>
+        {filterToggle}
         {deletedTranslations}
         {result && result.totalInstances == 0 && <Link to={`/translatedInstance/status`}>
           {TranslationMessage.BackToTranslationStatus.niceToString()}
@@ -99,6 +109,7 @@ export default function TranslatedInstanceSync(): React.JSX.Element {
       <div className="mb-2">
         <h1 className="h2"><Link to="/translatedInstance/status">{TranslationMessage.InstanceTranslations.niceToString()}</Link> {">"} {message}</h1>
       </div>
+      {filterToggle}
       {deletedTranslations}
       {result && result.totalInstances > 0 && renderTable()}
     </div>
@@ -134,11 +145,6 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
 
 export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInstancesChanges, cultures: { [culture: string]: Lite<CultureInfoEntity> }, currentCulture: string }): React.JSX.Element {
 
-  function getPropertyString(routeAndRowId: string) {
-    return !routeAndRowId.contains(";") ? routeAndRowId : routeAndRowId.before(";").replace("/", "[" + routeAndRowId.after(";") + "].");
-
-
-  }
   return (
     <>
       {p.data.instances.map(ins =>
@@ -146,7 +152,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
           <AccessibleTable
             aria-label={TranslationMessage.TranslationsOverview.niceToString()}
             className="table st"
-            mapCustomComponents={new Map([[AccessibleRow, "tr"]])}
+            mapCustomComponents={new Map<React.JSXElementConstructor<any>, string>([[SyncPropertyRows, "tr"], [AccessibleRow, "tr"]])}
             multiselectable={false}
             id="results"
             style={{ width: "100%", margin: "0px" }}>
@@ -157,41 +163,9 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
               </tr>
             </thead>
             <tbody>
-              {Dic.getKeys(ins.routeConflicts).flatMap(routeAndRowId => {
-                const mainRow = (
-                  <tr key={routeAndRowId + "-main"}>
-                    <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
-                    <th>{getPropertyString(routeAndRowId)}</th>
-                  </tr>
-                );
-
-                const supportRows = Dic.getKeys(ins.routeConflicts[routeAndRowId].support).map(c => {
-                  const rc = ins.routeConflicts[routeAndRowId].support[c];
-                  return (
-                    <tr key={routeAndRowId + "-" + c}>
-                      <td className="leftCell">{c}</td>
-                      <td className="monospaceCell">
-                        {rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original
-                          ? <pre className="mb-0">{rc.original}</pre>
-                          : <DiffDocumentSimple first={rc.oldOriginal} second={rc.original} />
-                        }
-                      </td>
-                    </tr>
-                  );
-                });
-
-                const translationRow = (
-                  <tr key={routeAndRowId + "-translation"}>
-                    <td className="leftCell">{p.currentCulture}</td>
-                    <td className="monospaceCell">
-                      <TranslationProperty property={ins.routeConflicts[routeAndRowId]} />
-                    </td>
-                  </tr>
-                );
-
-                return [mainRow, ...supportRows, translationRow];
-              })}
-
+              {Dic.getKeys(ins.routeConflicts).map(routeAndRowId =>
+                <SyncPropertyRows key={routeAndRowId} routeAndRowId={routeAndRowId} conflict={ins.routeConflicts[routeAndRowId]} data={p.data} currentCulture={p.currentCulture} />
+              )}
             </tbody>
           </AccessibleTable>
         </React.Fragment>
@@ -200,10 +174,75 @@ export function TranslatedInstances(p: { data: TranslatedInstanceClient.TypeInst
   );
 }
 
+function SyncPropertyRows(p: { routeAndRowId: string, conflict: TranslatedInstanceClient.PropertyChange, data: TranslatedInstanceClient.TypeInstancesChanges, currentCulture: string }): React.JSX.Element {
 
-export function TranslationProperty({ property }: { property: TranslatedInstanceClient.PropertyChange }): React.JSX.Element {
+  const { routeAndRowId, conflict } = p;
 
+  const propertyRoute = routeAndRowId.tryBefore(";") ?? routeAndRowId;
+  const propertyString = !routeAndRowId.contains(";") ? routeAndRowId : routeAndRowId.before(";").replace("/", "[" + routeAndRowId.after(";") + "].");
+  const isHtml = p.data.routes[propertyRoute] === "Html";
+
+  const [richView, setRichView] = React.useState(true);
+  const [richEdit, setRichEdit] = React.useState(true);
   const [avoidCombo, setAvoidCombo] = React.useState(false);
+
+  // The automatic-translations combo takes priority; the edit toggle is hidden while it is visible.
+  const canShowSelect = Dic.getKeys(conflict.support).some(c => conflict.support[c].automaticTranslations.length > 0 || conflict.support[c].oldTranslation != null);
+  const comboVisible = canShowSelect && !avoidCombo;
+
+  function toggleButton(value: boolean, setValue: (v: boolean) => void) {
+    return (
+      <LinkButton className="me-1 fw-normal" title={value ? "show code" : "show preview"} onClick={() => setValue(!value)}>
+        <FontAwesomeIcon role="img" icon={value ? "code" : "eye"} />
+      </LinkButton>
+    );
+  }
+
+  const rows: React.ReactElement[] = [
+    <AccessibleRow key={routeAndRowId + "-main"}>
+      <th className="leftCell">{TranslationMessage.Property.niceToString()}</th>
+      <th>{propertyString}</th>
+    </AccessibleRow>
+  ];
+
+  Dic.getKeys(conflict.support).forEach(c => {
+    const rc = conflict.support[c];
+    const showDiff = !(rc.oldOriginal == null || rc.original == null || rc.oldOriginal == rc.original);
+    const showRich = isHtml && richView && !showDiff;
+    rows.push(
+      <AccessibleRow key={routeAndRowId + "-" + c}>
+        <td className="leftCell">
+          {isHtml && !showDiff && toggleButton(richView, setRichView)}
+          {c}
+        </td>
+        <td className="monospaceCell">
+          {showDiff
+            ? <DiffDocumentSimple first={rc.oldOriginal!} second={rc.original} />
+            : (showRich ? <TranslatedHtmlViewer text={rc.original} /> : <pre className={isHtml ? "mb-0 translation-raw-html" : "mb-0"} style={{ whiteSpace: "pre-wrap" }}>{rc.original}</pre>)
+          }
+        </td>
+      </AccessibleRow>
+    );
+  });
+
+  rows.push(
+    <AccessibleRow key={routeAndRowId + "-translation"}>
+      <td className="leftCell">
+        {isHtml && !comboVisible && toggleButton(richEdit, setRichEdit)}
+        {p.currentCulture}
+      </td>
+      <td className="monospaceCell">
+        <TranslationProperty property={conflict} isHtml={isHtml} richEdit={richEdit} avoidCombo={avoidCombo} setAvoidCombo={setAvoidCombo} />
+      </td>
+    </AccessibleRow>
+  );
+
+  return <>{rows}</>;
+}
+
+
+export function TranslationProperty({ property, isHtml, richEdit, avoidCombo, setAvoidCombo }: { property: TranslatedInstanceClient.PropertyChange, isHtml?: boolean, richEdit?: boolean, avoidCombo?: boolean, setAvoidCombo?: (v: boolean) => void }): React.JSX.Element {
+
   const forceUpdate = useForceUpdate();
 
   const handleOnTextArea = React.useCallback(function (ta: HTMLTextAreaElement | null) {
@@ -217,13 +256,13 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
   }
 
   function handleAvoidCombo(e: React.FormEvent<any>) {
-    setAvoidCombo(true);
+    setAvoidCombo?.(true);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
     if (e.key == KeyNames.space || e.key == "F2") {
       e.preventDefault();
-      setAvoidCombo(true);
+      setAvoidCombo?.(true);
     }
   }
 
@@ -231,19 +270,25 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
     .flatMap(([c, rc]) => rc.automaticTranslations.map(at => ({ culture: c, text: at.text, translatorName: at.translatorName }))
       .concat(rc.oldTranslation ? [{ culture: c, text: rc.oldTranslation, translatorName: "Previous translation" }] : [])
     );
-  return (translations.length === 0 || avoidCombo) ? <>
-    <label className="sr-only" htmlFor={`translatedText-${property.translatedText}`}> {TranslationMessage.Description.niceToString()}</label>
-    <TextArea
-      id={`translatedText-${property.translatedText}`}
-      aria-label={TranslationMessage.Description.niceToString()}
-      style={{ height: "24px", width: "90%" }}
-      minHeight="24px"
-      value={property.translatedText ?? ""}
-      onChange={e => { property.translatedText = e.currentTarget.value; forceUpdate(); }}
-      onBlur={handleOnChange}
-      innerRef={handleOnTextArea}
-    />
-  </>
+  return (translations.length === 0 || avoidCombo) ? (
+    isHtml && richEdit ? (
+      <TranslatedHtmlEditor text={property.translatedText} onChange={v => { property.translatedText = v; forceUpdate(); }} />
+    ) : <>
+      <label className="sr-only" htmlFor={`translatedText-${property.translatedText}`}> {TranslationMessage.Description.niceToString()}</label>
+      <TextArea
+        id={`translatedText-${property.translatedText}`}
+        aria-label={TranslationMessage.Description.niceToString()}
+        className={isHtml ? "translation-raw-html" : undefined}
+        style={{ height: "24px", width: "90%" }}
+        minHeight="24px"
+        autoResize={true}
+        value={property.translatedText ?? ""}
+        onChange={e => { property.translatedText = e.currentTarget.value; forceUpdate(); }}
+        onBlur={handleOnChange}
+        innerRef={handleOnTextArea}
+      />
+    </>
+  )
     :
     <span>
       <label className="sr-only" htmlFor={`translationSelect-${property.translatedText}`}>
@@ -252,6 +297,7 @@ export function TranslationProperty({ property }: { property: TranslatedInstance
       <select
         id={`translationSelect-${property.translatedText}`}
         aria-label={TranslationMessage.Description.niceToString()}
+        style={{ maxWidth: "70vw" }}
         value={property.translatedText ?? ""}
         onChange={handleOnChange}
         onKeyDown={handleKeyDown}>

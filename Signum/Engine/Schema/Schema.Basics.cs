@@ -402,6 +402,10 @@ public class EntityField
     public Field Field { get; set; }
     public FieldInfo FieldInfo { get; private set; }
 
+    // When true (see AvoidSaveAttribute), the column is written on INSERT but excluded from UPDATE,
+    // so saving the entity never overrides the stored value.
+    public bool AvoidSave { get; set; }
+
     Type type;
     Func<object, object?>? getter;
     public Func<object, object?> Getter => getter ?? (getter = ReflectionTools.CreateGetter<object, object?>(FieldInfo)!);

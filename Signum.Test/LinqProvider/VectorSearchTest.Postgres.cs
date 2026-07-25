@@ -13,6 +13,9 @@ public class VectorSearchTest_Postgres
 
         if (!(Connector.Current is PostgreSqlConnector con))
             throw SkipException.ForSkip("Skipping tests because not Postgres.");
+
+        if(!con.SupportsVectors)
+            throw SkipException.ForSkip("Skipping tests because this Postgres does not have vector extension installed.");
     }
 
     [Fact]

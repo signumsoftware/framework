@@ -1,18 +1,20 @@
-using DocumentFormat.OpenXml.Packaging;
-using System.IO;
-using Signum.Utilities.DataStructures;
 using DocumentFormat.OpenXml;
-using W = DocumentFormat.OpenXml.Wordprocessing;
-using System.Data;
-using System.Globalization;
+using DocumentFormat.OpenXml.Packaging;
 using Signum.Engine.Sync;
-using Signum.UserAssets.QueryTokens;
-using Signum.Templating;
 using Signum.Files;
+using Signum.Mailing.Templates;
+using Signum.Templating;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
+using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.TokenMigrations;
+using Signum.Utilities.DataStructures;
+using Signum.Word.Spreedsheet;
 using System.Collections.Frozen;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Signum.Word;
 
@@ -406,6 +408,12 @@ public static class WordTemplateLogic
                             p.Switch("AssertClean");
                             renderer.AssertClean();
 
+                            if (document is SpreadsheetDocument ssd && ssd.WorkbookPart is { } workbookPart)
+                            {
+                                p.Switch("FinalizeSpreadsheet");
+                                SpreadsheetUtils.Finalize(workbookPart, parser.SpreadsheetForeachBlocks); Dump(document, "3b.Spreadsheet.txt");
+                            }
+
                             p.Switch("FixDocument");
                             FixDocument(document); Dump(document, "4.Fixed.txt");
 
@@ -500,7 +508,7 @@ public static class WordTemplateLogic
                     case UserAssetEntityActionType.Regenerate: RegenerateWordTemplateAndFile(ctx, wt); return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(wt, ex); return; }
+            catch (Exception ex) { ctx.LogError(wt, ex); return; }
         }
 
         Console.Write(".");
@@ -618,7 +626,7 @@ public static class WordTemplateLogic
                     {
                     retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, wt.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, modelType))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, wt.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, modelType))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.RemoveToken: wt.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
@@ -676,19 +684,14 @@ public static class WordTemplateLogic
                     try
                     {
                         SaveWordTemplate(wt, file, fileTouched, entityTouched);
-                        ctx.LogEntityChange(wt, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(wt, ex); }
-                }
-                else
-                {
-                    ctx.LogEntityChange(wt, changes.ToArray());
+                    catch (Exception ex) { ctx.LogError(wt, ex); }
                 }
             }
         }
         catch (Exception ex)
         {
-            ctx.LogEntityError(wt, ex);
+            ctx.LogError(wt, ex);
         }
     }
 
@@ -702,8 +705,6 @@ public static class WordTemplateLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Skip);
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Skip);
     }
 
     /// <summary>
@@ -726,8 +727,6 @@ public static class WordTemplateLogic
                 tr.Commit();
             }
         }
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Delete);
     }
 
     /// <summary>
@@ -739,7 +738,6 @@ public static class WordTemplateLogic
         if (ctx.Mode == TokenSyncMode.Record)
         {
             ctx.AddUserAssetAction(wt, UserAssetEntityActionType.Regenerate);
-            ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
             return;
         }
 
@@ -762,8 +760,6 @@ public static class WordTemplateLogic
             wt.Save();
             tr.Commit();
         }
-
-        ctx.LogEntityChange(wt, UserAssetEntityActionType.Regenerate);
     }
 
     /// <summary>
@@ -775,7 +771,8 @@ public static class WordTemplateLogic
         using (var tr = Transaction.ForceNew())
         {
             if (fileTouched) file.Save();
-            if (entityTouched) wt.Save();
+            using (OperationLogic.AllowSave<WordTemplateEntity>())
+                if (entityTouched) wt.Save();
             tr.Commit();
         }
     }

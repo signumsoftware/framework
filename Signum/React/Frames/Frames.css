@@ -104,6 +104,13 @@
     margin-top: 10px;
 }
 
+.sf-breadcrumb-title {
+    font-size: 1.5rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
 button.dropdown-item:not(:disabled):not(.disabled) {
     cursor: pointer;
 }
@@ -264,4 +271,8 @@ background: var(--bs-body-bg);
 
 .modal-header {
     background: var(--bs-secondary-bg);
+}
+
+.spinner-grow, .spinner-border {
+    border-radius: 50% !important;
 }

@@ -58,6 +58,7 @@ public class OperationController : ControllerBase
         {
             GraphExplorer.SetValidationErrors(GraphExplorer.FromRootVirtual(request.entity), ex);
             this.TryValidateModel(request, "request");
+
             if (this.ModelState.IsValid)
                 throw;
 
@@ -187,7 +188,7 @@ public class OperationController : ControllerBase
                 case JsonValueKind.Array:
                     var result = token.EnumerateArray().Select(t => ConvertObject(t, jsonOptions, operationSymbol)).ToList();
                     return result;
-                default: 
+                default:
                     throw new UnexpectedValueException(token.ValueKind);
             }
 
@@ -195,7 +196,7 @@ public class OperationController : ControllerBase
     }
 
     [HttpPost("api/operation/constructFromMany/{operationKey}"), ProfilerActionSplitter("operationKey")]
-    public EntityPackTS? ConstructFromMany(string operationKey, [Required, FromBody]MultiOperationRequest request)
+    public EntityPackTS? ConstructFromMany(string operationKey, [Required, FromBody] MultiOperationRequest request)
     {
         var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type!);
 
@@ -326,7 +327,7 @@ public class OperationController : ControllerBase
     }
 
     [HttpPost("api/operation/stateCanExecutes"), ValidateModelFilter]
-    public StateCanExecuteResponse StateCanExecutes([Required, FromBody]StateCanExecuteRequest request)
+    public StateCanExecuteResponse StateCanExecutes([Required, FromBody] StateCanExecuteRequest request)
     {
         var types = request.Lites.Select(a => a.EntityType).ToHashSet();
 
@@ -344,7 +345,7 @@ public class OperationController : ControllerBase
     }
 
 
-    public static Func<Lite<Entity>[], bool>? AnyReadonly; 
+    public static Func<Lite<Entity>[], bool>? AnyReadonly;
 
     public class StateCanExecuteRequest
     {
@@ -399,7 +400,7 @@ internal static class MultiSetter
                         {
                             var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
                             var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
-                                
+
                             SetSetters(item, setter.Setters!, normalizedPr, metadata);
                             ((IList)mlist).Add(item);
                         }
@@ -514,7 +515,7 @@ internal static class MultiSetter
 
 public static class ControllerProgressExtension
 {
-    public static async Task WithProgressProxy<T>(this ControllerBase controller,   Func<ProgressProxy, T> action, CancellationToken cancellationToken)
+    public static async Task WithProgressProxy<T>(this ControllerBase controller, Func<ProgressProxy, T> action, CancellationToken cancellationToken)
     {
         EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset);
 

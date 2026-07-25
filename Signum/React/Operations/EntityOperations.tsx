@@ -14,7 +14,9 @@ import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip,
 import { BsColor } from "../Components";
 
 export namespace EntityOperations {
-  export var onDeleteError: ((eoc: EntityOperationContext<any>, e: ServiceError) => Promise<boolean>) | undefined;
+  export const Options = {
+    onDeleteError: undefined as ((eoc: EntityOperationContext<any>, e: ServiceError) => Promise<boolean>) | undefined
+  };
   export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
     const ti = tryGetTypeInfo(ctx.pack.entity.Type);
 
@@ -209,7 +211,7 @@ export namespace EntityOperations {
         .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
         .catch(async e => {
           if (e instanceof ValidationError) { eoc.frame.setError(e.modelState, "entity"); return; }
-          if (onDeleteError) { const handled = await onDeleteError(eoc, e); if (handled) return; }
+          if (Options.onDeleteError) { const handled = await Options.onDeleteError!(eoc, e); if (handled) return; }
           throw e;
         });
     });
@@ -225,7 +227,7 @@ export namespace EntityOperations {
         .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
         .catch(async e => {
           if (e instanceof ValidationError) { eoc.frame.setError(e.modelState, "entity"); return; }
-          if (onDeleteError) { const handled = await onDeleteError(eoc, e); if (handled) return; }
+          if (Options.onDeleteError) { const handled = await Options.onDeleteError!(eoc, e); if (handled) return; }
           throw e;
         });
     });

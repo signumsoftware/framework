@@ -147,7 +147,7 @@ export namespace RemoteEmailsClient {
 
     var message = ctx.pack.entity;
 
-    var oid = (message.user?.model as UserLiteModel)?.oID!;
+    var oid = (message.user?.model as UserLiteModel)?.externalId!;
     if (oid == null)
       throw new Error("User has no OID");
 
@@ -277,7 +277,7 @@ export namespace RemoteEmailsClient {
     if (user == null)
       throw new Error("No User found in filters");
 
-    const oid = (user.model as UserLiteModel)?.oID;
+    const oid = (user.model as UserLiteModel)?.externalId;
     if (oid == null)
       throw new Error("User has no OID"); 
 
@@ -365,7 +365,7 @@ export namespace RemoteEmailsClient {
     if (messageId == null)
       throw new Error("No User found");
   
-    var oid = (user?.model as UserLiteModel).oID;
+    var oid = (user?.model as UserLiteModel).externalId;
     if (oid == null)
       throw new Error("User has no OID");
   

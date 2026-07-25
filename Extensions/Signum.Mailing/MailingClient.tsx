@@ -33,7 +33,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 export namespace MailingClient {
   
   
-  export var allTypes: string[] = [];
+  export const allTypes: string[] = [];
   
   export function start(options: {
     routes: RouteObject[],
@@ -44,7 +44,7 @@ export namespace MailingClient {
   
     ChangeLogClient.registerChangeLogModule("Signum.Mailing", () => import("./Changelog"));
   
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
+    EvalClient.Options.checkEvalFindOptions.push(EmailTemplateEntity.findOptions());
   
     options.routes.push({ path: "/asyncEmailSender/view", element: <ImportComponent onImport={() => import("./AsyncEmailSenderPage")} /> });
   
@@ -128,7 +128,7 @@ export namespace MailingClient {
       var cachedAllTypes: Promise<string[]>;
       QuickLinkClient.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
         .then(types => !types.contains(entityType) ? [] :
-          [new QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          [new QuickLinkExplore(EmailMessageEntity, ctx => (EmailMessageEntity.findOptions(token => ({ filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }))),
             {
               key: getQueryKey(EmailMessageEntity),
               text: () => EmailMessageEntity.nicePluralName(),

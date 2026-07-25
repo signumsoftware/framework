@@ -22,7 +22,7 @@ export interface ReactChartProps {
 
 function ReactChart(p: ReactChartProps): React.JSX.Element {
 
-  const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
+  const isSimple = p.data == null || p.data.rows.length < ReactChart.Options.maxRowsForAnimation;
   const oldData = useThrottle(p.data, 200, { enabled: isSimple });
   const initialLoad = oldData == null && p.data != null && isSimple;
 
@@ -31,7 +31,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
   const { size, setContainer } = useSize({deps: p.sizeDeps});
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 400) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 300) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,
@@ -52,7 +52,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
 }
 
 namespace ReactChart {
-   export let maxRowsForAnimation = 500;
+  export const Options = { maxRowsForAnimation: 500 };
 }
 
 export default ReactChart;

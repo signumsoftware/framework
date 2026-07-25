@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Combobox } from 'react-widgets-up'
 import { classes, Dic } from '@framework/Globals'
@@ -305,20 +305,18 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
           {!dt.isNew && dt.baseType == "MixinEntity" &&
             <Tab eventKey="connections" title="Apply To">
-              <SearchControl findOptions={{
-                queryName: DynamicMixinConnectionEntity,
-                filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.mixinName), value: dt.typeName}]
-              }} />
+              <SearchControl findOptions={DynamicMixinConnectionEntity.findOptions(token => ({
+                filterOptions: [token(e => e.mixinName).filter("EqualTo", dt.typeName)]
+              }))} />
             </Tab>
           }
 
         {!dt.isNew && dt.baseType == "Entity" && typeEntity != null &&
             <Tab eventKey="connections" title="Mixins">
             {typeEntity == false ? <p className="alert alert-warning">{DynamicTypeMessage.TheEntityShouldBeSynchronizedToApplyMixins.niceToString()}</p> :
-                <SearchControl findOptions={{
-                  queryName: DynamicMixinConnectionEntity,
-                  filterOptions: [{ token: DynamicMixinConnectionEntity.token(e => e.entityType), value: typeEntity}]
-                }} />
+                <SearchControl findOptions={DynamicMixinConnectionEntity.findOptions(token => ({
+                  filterOptions: [token(e => e.entityType).filter("EqualTo", typeEntity)]
+                }))} />
               }
             </Tab>
           }
@@ -644,10 +642,10 @@ public static class ${entityName}Operation2
           renderContent={e =>
             <div>
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                {dt.baseType == "Entity" && CustomCodeTab.suggestWorkflow &&
+                {dt.baseType == "Entity" && CustomCodeTab.Options.suggestWorkflow &&
                   <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWorkflowCustomInheritanceClick} />}
 
-                {dt.baseType == "Entity" && CustomCodeTab.suggestTree &&
+                {dt.baseType == "Entity" && CustomCodeTab.Options.suggestTree &&
                   <input type="button" className="btn btn-warning btn-xs sf-button" value="Tree" onClick={handleTreeCustomInheritanceClick} />}
                 {dt.baseType == "Entity" &&
                   <input type="button" className="btn btn-danger btn-xs sf-button" value="SMS" onClick={handleSMSInheritanceClick} />}
@@ -692,11 +690,11 @@ public static class ${entityName}Operation2
               {dt.baseType == "Entity" &&
                 <div>
                   <div className="btn-group" style={{ marginBottom: "3px" }}>
-                    {CustomCodeTab.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWithWorkflowClick} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={handleWithTreeClick} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={handleOverrideCreateRoot} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={handleOverrideCreateChild} />}
-                    {CustomCodeTab.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={handleOverrideNextSibling} />}
+                    {CustomCodeTab.Options.suggestWorkflow && <input type="button" className="btn btn-success btn-xs sf-button" value="Workflow" onClick={handleWithWorkflowClick} />}
+                    {CustomCodeTab.Options.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="Tree" onClick={handleWithTreeClick} />}
+                    {CustomCodeTab.Options.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateRoot" onClick={handleOverrideCreateRoot} />}
+                    {CustomCodeTab.Options.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="CreateChild" onClick={handleOverrideCreateChild} />}
+                    {CustomCodeTab.Options.suggestTree && <input type="button" className="btn btn-info btn-xs sf-button" value="NextSibling" onClick={handleOverrideNextSibling} />}
                     <input type="button" className="btn btn-warning btn-xs sf-button" value="Register Operations" onClick={handleRegisterOperationsClick} />
                     <input type="button" className="btn btn-danger btn-xs sf-button" value="Register Expressions" onClick={handleRegisterExpressionsClick} />
                     <input type="button" className="btn btn-info btn-xs sf-button" value="Add Unit" onClick={handleAddUnitClick} />
@@ -787,8 +785,7 @@ public static class ${entityName}Operation2
 }
 
 export namespace CustomCodeTab {
-  export let suggestWorkflow = true;
-  export let suggestTree = true;
+  export const Options = { suggestWorkflow: true, suggestTree: true };
 }
 
 
@@ -1572,3 +1569,4 @@ registerValidator<Validators.NumberIs>({
       </div>
     </div>
 });
+

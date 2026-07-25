@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
-import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, parseLite, translated, Entity, Lite } from '@framework/Signum.Entities'
 import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.UserQueries'
@@ -21,6 +21,7 @@ export default function UserQueryPage(): React.JSX.Element | null {
   const params = useParams() as { userQueryId: string; entity?: string };
 
   const [currentUserQuery, setCurrentUserQuery] = useState<UserQueryEntity | null>(null);
+  const [currentEntity, setCurrentEntity] = useState<Lite<Entity> | null>(null);
 
   const { userQueryId, entity } = params;
 
@@ -32,16 +33,16 @@ export default function UserQueryPage(): React.JSX.Element | null {
         setCurrentUserQuery(uq);
         const lite = entity == undefined ? undefined : parseLite(entity);
         return Navigator.API.fillLiteModels(lite)
-          .then(() => UserQueryClient.Converter.toFindOptions(uq, lite))
+          .then(() => {
+            setCurrentEntity(lite ?? null);
+            return UserQueryClient.Converter.toFindOptions(uq, lite);
+          })
       })
   }, [userQueryId, entity]);
 
   var searchControl = React.useRef<SearchControlHandler | null>(null);
 
-  var subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
-
-
-  useTitle(fo == null ? JavascriptMessage.loading.niceToString() : (getQueryNiceName(fo.queryName) + (subTitle ? (" - " + subTitle) : "")));
+  useTitle(fo == null ? JavascriptMessage.loading.niceToString() : (getQueryNiceName(fo.queryName) + (currentUserQuery ? (" - " + translated(currentUserQuery, a => a.displayName)) : "")));
 
   function onResize() {
     const sc = searchControl.current;
@@ -50,8 +51,8 @@ export default function UserQueryPage(): React.JSX.Element | null {
     if (containerDiv) {
 
       const marginTop = containerDiv.offsetTop;
-      const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
-      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
+      const maxHeight = (window.innerHeight - (marginTop + SearchPage.Options.marginDown));
+      containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.Options.minHeight) + "px";
     }
   }
 
@@ -67,20 +68,12 @@ export default function UserQueryPage(): React.JSX.Element | null {
   var qs = Finder.getSettings(fo.queryName);
   return (
     <div id="divSearchPage" className="sf-search-page">
-      <h1 className="display-6 sf-query-title h3">
-        <span>{getQueryNiceName(fo.queryName)}</span>
-        {searchControl.current?.searchControlLoaded?.pageSubTitle && <>
-          <small className="sf-type-nice-name text-muted"> - {searchControl.current?.searchControlLoaded?.pageSubTitle}</small>
-        </>
-        }
+      <h1 className="display-6 sf-query-title h3 d-flex align-items-center">
+        {SearchPage.renderTitle(searchControl.current?.searchControlLoaded, <span>{getQueryNiceName(fo.queryName)}</span>)}
+        {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
 
-      {currentUserQuery && <SearchControl ref={sc => {
-        searchControl.current = sc;
-        var scl = sc?.searchControlLoaded;
-        if (scl)
-          scl.getCurrentUserQuery = () => toLite(currentUserQuery);
-      }}
+      {currentUserQuery && <SearchControl ref={sc => { searchControl.current = sc; }}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="UserQueryPage"
@@ -96,12 +89,12 @@ export default function UserQueryPage(): React.JSX.Element | null {
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         extraOptions={{
           userQuery: newLite(UserQueryEntity, userQueryId),
-          entity: entity == undefined ? undefined : parseLite(entity),
+          entity: currentEntity ?? undefined,
         }}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
-        onPageSubTitleChanged={forceUpdate}
+        onPageTitleChanged={forceUpdate}
       />
       }
     </div>

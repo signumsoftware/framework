@@ -104,7 +104,7 @@ function WhatsNewDropdownImp() {
   return (
     <>
       <button
-        className="nav-link sf-bell-container"
+        className="nav-link sf-news-container"
         onClick={handleOnToggle}
         style={{ border: 0, backgroundColor: 'var(--bs-transparent)' }}
         title={(countResult ? WhatsNewEntity.niceCount(countResult.numWhatsNews) : WhatsNewEntity.nicePluralName())}      >

@@ -45,11 +45,11 @@ public enum OperationMessage
     [Description("{0} & New")]
     _0AndNew,
 
-    BulkModifications, 
+    BulkModifications,
     [Description("Please confirm that you would like to apply the above changes and execute {0} over {1} {2}")]
     PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12,
 
-    Condition, 
+    Condition,
     Setters,
     [Description("Add setter")]
     AddSetter,
@@ -207,10 +207,10 @@ public enum HtmlEditorMessage
 
 public enum MarkdownMessage
 {
-    [Description("{0} is currently editable")]
-    _0IsCurrentlyEditable,
-        [Description("{0} is currently viewable only")]
-    _0IsCurrentlyViewableOnly,
+    [Description("Edit {0}")]
+    Edit0,
+    [Description("Preview {0}")]
+    Preview0,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -427,6 +427,9 @@ public enum SearchMessage
     [Description("Select row {0}")]
     SelectRow0_,
     Enter,
+    Error,
+    [Description("This filter group contains some operations that require a list ('is in' / 'is not in') and some than not. Enable 'Split' or use operation consitently.")]
+    FilterGroupInvalidMixedOperations,
 }
 
 public enum SearchHelpMessage

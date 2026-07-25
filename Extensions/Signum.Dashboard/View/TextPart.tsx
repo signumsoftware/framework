@@ -1,8 +1,8 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { TextPartEntity } from '../Signum.Dashboard';
 import { DashboardClient, PanelPartContentProps } from '../DashboardClient';
 import Markdown from 'react-markdown';
-import { HtmlViewer } from '../Admin/TextPart';
+import HtmlViewer from '../../Signum.HtmlEditor/HtmlViewer';
 import { useForceUpdate } from '../../../Signum/React/Hooks';
 import { translated } from '@framework/Signum.Entities';
 
@@ -50,3 +50,5 @@ function LinkRenderer(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
     </a>
   );
 }
+
+

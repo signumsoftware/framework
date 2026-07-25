@@ -76,6 +76,7 @@ public static class TokenMigrationLogic
             return;
 
         var fullPath = Path.GetFileNameWithoutExtension(fullFileName) + QueryFileExtension;
+        file.Print();
         file.Save(fullPath);
         return;
     }
@@ -141,8 +142,6 @@ public static class TokenMigrationLogic
         public required string Comment;
         public required MigrationKind Kind;
         public bool IsExecuted;
-
-        public string FileExtension => Kind == MigrationKind.Tokens ? TokensFileExtension : QueryFileExtension;
 
         public override string ToString() => Version + " (" + Kind + ")";
     }

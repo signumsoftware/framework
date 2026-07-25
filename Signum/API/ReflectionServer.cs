@@ -338,6 +338,8 @@ public static class ReflectionServer
         var kind = type.Name.EndsWith("Query") ? KindOfType.Query :
                type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum;
 
+        var settings = Schema.Current.Settings;
+
         var result = new TypeInfoTS
         {
             Kind = kind,
@@ -349,7 +351,7 @@ public static class ReflectionServer
                           .Select(fi => KeyValuePair.Create(fi.Name, OnFieldInfoExtension(new MemberInfoTS
                           {
                               NiceName = fi.NiceName(),
-                              IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
+                              IsIgnoredEnum = kind == KindOfType.Enum && settings.EnumAttribute<IgnoreAttribute>(fi) != null
                           }, fi)!))
                           .Where(a => a.Value != null)
                           .ToDictionaryEx("query"),
@@ -409,8 +411,8 @@ public static class ReflectionServer
     }
 
    
-    //Query Context are entities that couold influence the query visibility
-    //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> context
+    //Domains are entities that couold influence the query visibility
+    //Example: query TaskEntity is visible depending of the Lite<ProjectEntity> (domain)
     public static Dictionary<Type /*DomainType*/, Func<Type /*ie. Task*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>?>> AllowedDomains = [];
 
     public static Dictionary<Type /*DomainType*/, Dictionary<Lite<Entity> /*Domain*/, DomainAccess>>? GetAllowedDomains(Type entityType)

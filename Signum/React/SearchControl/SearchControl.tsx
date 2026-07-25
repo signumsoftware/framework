@@ -73,7 +73,7 @@ export interface SearchControlProps {
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>;
-  onPageSubTitleChanged?: () => void;
+  onPageTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
   showTitle?: HeaderType;
@@ -92,15 +92,15 @@ export interface SearchControlHandler {
   searchControlLoaded: SearchControlLoaded | null;
 }
 
-export namespace SearchControlOptions {
-  export let showSelectedButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSelectedButton ?? true) && is_touch_device();
-  export let showSystemTimeButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSystemTimeButton ?? false);
-  export let showGroupButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showGroupButton ?? false);
-  export let showFilterButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showFilterButton ?? true);
-  export let allowChangeColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeColumns ?? true);
-  export let allowOrderColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeOrder ?? true);
-  export let showFooter = (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter;
-}
+export const SearchControlOptions = {
+  showSelectedButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSelectedButton ?? true) && is_touch_device(),
+  showSystemTimeButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSystemTimeButton ?? false),
+  showGroupButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showGroupButton ?? false),
+  showFilterButton: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showFilterButton ?? true),
+  allowChangeColumns: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeColumns ?? true),
+  allowOrderColumns: (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeOrder ?? true),
+  showFooter: (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter,
+};
 
 function SearchControl(p: SearchControlProps): React.JSX.Element | null {
 
@@ -257,7 +257,7 @@ function SearchControl(p: SearchControlProps): React.JSX.Element | null {
 
         ctx={p.ctx}
         customRequest={p.customRequest}
-        onPageTitleChanged={p.onPageSubTitleChanged}
+        onPageTitleChanged={p.onPageTitleChanged}
 
         selectionFormatter={p.selectionFromatter}
 

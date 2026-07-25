@@ -25,6 +25,21 @@ public static class UserQueryLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
     As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uq.ToLite())));
 
+    [AutoExpressionField]
+    public static IQueryable<DashboardEntity> Dashboards(this UserQueryEntity uq) =>
+        As.Expression(() => Database.Query<DashboardEntity>().Where(d =>
+            TypeLogic.IsIncluded<UserQueryPartEntity>() && d.Parts.Any(p => ((UserQueryPartEntity)p.Content).UserQuery.Is(uq)) ||
+            TypeLogic.IsIncluded<BigValuePartEntity>() && d.Parts.Any(p => ((BigValuePartEntity)p.Content).UserQuery.Is(uq)) ||
+            TypeLogic.IsIncluded<ValueUserQueryListPartEntity>() && d.Parts.Any(p => ((ValueUserQueryListPartEntity)p.Content).UserQueries.Any(e => e.UserQuery.Is(uq)))));
+
+    [AutoExpressionField]
+    public static bool InToolbar(this UserQueryEntity uq) =>
+        As.Expression(() => 
+        Database.Query<ToolbarEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq))) ||
+        Database.Query<ToolbarMenuEntity>().Any(t => t.Elements.Any(e => e.Content.Is(uq)))
+        );
+
+
     public static void Start(SchemaBuilder sb)
     {
         
@@ -75,6 +90,8 @@ public static class UserQueryLogic
                 },
                 GetRelatedQuery = lite => lite.RetrieveUserQuery().Query,
             }.Register();
+
+            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.InToolbar());
         });
 
         sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
@@ -86,6 +103,8 @@ public static class UserQueryLogic
         {
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserQueryPartEntity));
             sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(ValueUserQueryListPartEntity));
+
+            QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.Dashboards(), () => typeof(DashboardEntity).NicePluralName());
 
             DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
             {
@@ -353,7 +372,6 @@ public static class UserQueryLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(uq, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(uq, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteUserQuery(TokenSyncContext ctx, UserQueryEntity uq)
@@ -370,14 +388,14 @@ public static class UserQueryLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(uq, UserAssetEntityActionType.Delete);
     }
 
     static void SaveUserQuery(UserQueryEntity uq)
     {
         using (var tr = Transaction.ForceNew())
         {
-            uq.Save();
+            using (OperationLogic.AllowSave<UserQueryEntity>())
+                uq.Save();
             tr.Commit();
         }
     }
@@ -398,7 +416,7 @@ public static class UserQueryLogic
                         return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(uq, ex); return; }
+            catch (Exception ex) { ctx.LogError(uq, ex); return; }
         }
 
         Console.Write(".");
@@ -504,7 +522,7 @@ public static class UserQueryLogic
                 {
                 retry:
                     string? val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, entityType))
+                    switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, entityType))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
@@ -543,7 +561,7 @@ public static class UserQueryLogic
                     {
                     retryStart:
                         var date = uq.SystemTime.StartDate;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.StartDate", typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.StartDate", typeof(DateTime), ref date, allowRemoveToken: false, isListOrPair: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.Fix: uq.SystemTime.StartDate = date; entityTouched = true; goto retryStart;
@@ -558,7 +576,7 @@ public static class UserQueryLogic
                     {
                     retryEnd:
                         var date = uq.SystemTime.EndDate;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.EndDate", typeof(DateTime), ref date, allowRemoveToken: false, isList: false, fixInstead: false, null))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, uq.Query.Key, "SystemTime.EndDate", typeof(DateTime), ref date, allowRemoveToken: false, isListOrPair: false, fixInstead: false, null))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.Fix: uq.SystemTime.EndDate = date; entityTouched = true; goto retryEnd;
@@ -575,14 +593,12 @@ public static class UserQueryLogic
                     try
                     {
                         SaveUserQuery(uq);
-                        ctx.LogEntityChange(uq, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(uq, ex); }
+                    catch (Exception ex) { ctx.LogError(uq, ex); }
                 }
-                else ctx.LogEntityChange(uq, changes.ToArray());
             }
         }
-        catch (Exception ex) { ctx.LogEntityError(uq, ex); }
+        catch (Exception ex) { ctx.LogError(uq, ex); }
     }
 
 

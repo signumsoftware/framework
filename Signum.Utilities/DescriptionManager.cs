@@ -93,8 +93,9 @@ public class DefaultAssemblyCultureAttribute : Attribute
 public class FormatAttribute : Attribute
 {
     public const string Password = "Password";
-
     public const string Color = "Color";
+    public const string Html = "Html";
+    public const string Markdown = "Markdown";
 
     public string Format { get; private set; }
     public FormatAttribute(string format)

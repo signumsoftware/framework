@@ -15,9 +15,7 @@ public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
 
     public string LastName => GetUserPrincipal().Surname;
 
-    public Guid? OID => null;
-
-    public string? SID => GetUserPrincipal().Sid.Value;
+    public string? ExternalId => GetUserPrincipal().Sid.Value;
 
     public WindowsADConfigurationEmbedded Config {get; }
 

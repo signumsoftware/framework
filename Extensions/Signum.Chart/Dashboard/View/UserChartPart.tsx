@@ -15,6 +15,7 @@ import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboar
 import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart'
 import { DashboardFilter, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from '../../../Signum.Dashboard/View/DashboardFilterController'
 import { QueryToken, tokenStartsWith } from '@framework/QueryToken'
+import { Finder } from '@framework/Finder';
 
 export interface UserChartPartHandler {
   chartRequest: ChartRequestModel | undefined;
@@ -23,6 +24,7 @@ export interface UserChartPartHandler {
 
 export default function UserChartPart(p: PanelPartContentProps<UserChartPartEntity>): React.JSX.Element {
 
+  const queryDescription = useAPI(() => Finder.getQueryDescription(p.content.userChart.query.key), [p.content.userChart.query.key]);
   const chartRequest = useAPI(() => UserChartClient.Converter.toChartRequest(p.content.userChart, p.entity), [p.content.userChart, p.entity && liteKey(p.entity), ...p.deps ?? []]);
   const initialSelection = React.useMemo(() => chartRequest?.filterOptions.singleOrNull(a => a.dashboardBehaviour == "UseAsInitialSelection"), [chartRequest]);
   const dashboardPinnedFilters = React.useMemo(() => chartRequest?.filterOptions.filter(a => a.dashboardBehaviour == "PromoteToDasboardPinnedFilter"), [chartRequest]);
@@ -72,7 +74,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     }
 
     if (dashboardPinnedFilters) {
-      p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, chartRequest!.queryKey, dashboardPinnedFilters));
+      p.dashboardController.setPinnedFilter(new DashboardPinnedFilters(p.partEmbedded, chartRequest!.queryKey, queryDescription!, dashboardPinnedFilters));
     } else {
       p.dashboardController.clearPinnesFilter(p.partEmbedded);
     }
@@ -114,7 +116,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }, [p.partEmbedded])
 
   const [showData, setShowData] = React.useState(p.content.showData);
-  
+
   function renderError(e: any) {
     const se = e instanceof ServiceError ? (e as ServiceError) : undefined;
 
@@ -128,7 +130,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     );
   }
 
-  if (!chartRequest)
+  if (!chartRequest || !queryDescription)
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
   if (p.dashboardController.isLoading)
@@ -152,7 +154,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   return (
     <div className="d-flex flex-column flex-grow-1">
-      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={(fops, avoidSearch) => !avoidSearch && reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
+      <PinnedFilterBuilder queryDescription={queryDescription} filterOptions={chartRequest.filterOptions} onFiltersChanged={(fops, avoidSearch) => !avoidSearch && reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
       {p.content.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />

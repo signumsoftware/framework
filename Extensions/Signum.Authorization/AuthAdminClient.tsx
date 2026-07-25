@@ -37,21 +37,17 @@ import { getTokenParents, SubTokensOptions } from '@framework/QueryToken';
 
 export namespace AuthAdminClient {
   
-  export let types: boolean;
-  export let properties: boolean;
-  export let operations: boolean;
-  export let queries: boolean | "queryContext";
-  export let permissions: boolean;
+  export const Options: { types: boolean; properties: boolean; operations: boolean; queries: boolean | "queryContext"; permissions: boolean } = {} as any;
   
   export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean | "queryContext"; permissions: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
   
-    types = options.types;
-    properties = options.properties;
-    operations = options.operations;
-    queries = options.queries;
-    permissions = options.permissions;
+    Options.types = options.types;
+    Options.properties = options.properties;
+    Options.operations = options.operations;
+    Options.queries = options.queries;
+    Options.permissions = options.permissions;
   
     AppContext.clearSettingsActions.push(() => urlProviders.clear());
   
@@ -292,7 +288,7 @@ export namespace AuthAdminClient {
   
     var result = allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 
-    if (queries == "queryContext" && context != null)
+    if (Options.queries == "queryContext" && context != null)
       return result && typeAllowedInDomain(queryKey, context);
 
     return result;

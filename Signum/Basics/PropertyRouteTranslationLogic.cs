@@ -28,16 +28,30 @@ public static class PropertyRouteTranslationLogic
 
             var prs = (from t in s.Tables.Keys
                        from pr in PropertyRoute.GenerateRoutes(t)
-                       where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string) &&
-                       s.Settings.FieldAttribute<TranslatableAttribute>(pr) != null &&
-                       s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null
-                       select KeyValuePair.Create(pr, s.Settings.FieldAttribute<TranslatableAttribute>(pr)!.TranslatableRouteType)).ToList();
+                       where pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.FieldInfo != null && pr.FieldInfo.FieldType == typeof(string)
+                       let attr = s.Settings.FieldAttribute<TranslatableAttribute>(pr)
+                       where attr != null && attr.Translatable &&
+                       s.Settings.FieldAttribute<IgnoreAttribute>(pr) == null &&
+                       !IsTranslationDisabledByAncestor(s, pr)
+                       select KeyValuePair.Create(pr, attr.TranslatableRouteType)).ToList();
 
             foreach (var kvp in prs)
             {
                 RegisterRoute(kvp.Key, kvp.Value);
             }
         };
+    }
+
+    static bool IsTranslationDisabledByAncestor(Schema s, PropertyRoute route)
+    {
+        for (var pr = route.Parent; pr != null && pr.PropertyRouteType != PropertyRouteType.Root; pr = pr.Parent)
+        {
+            if (pr.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
+                s.Settings.FieldAttribute<TranslatableAttribute>(pr) is { Translatable: false })
+                return true;
+        }
+
+        return false;
     }
 
 
@@ -181,9 +195,26 @@ public struct TranslatableElement<T>
 
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class TranslatableAttribute(TranslatableRouteType translatableRouteType = TranslatableRouteType.Text) : Attribute
+public sealed class TranslatableAttribute : Attribute
 {
-    public TranslatableRouteType TranslatableRouteType = translatableRouteType;
+    public TranslatableRouteType TranslatableRouteType;
+
+    /// <summary>
+    /// When set to false on a field/property (typically an embedded or MList field), it disables translation
+    /// for that route and all its descendant routes, even if they are marked <see cref="TranslatableAttribute"/>.
+    /// </summary>
+    public bool Translatable;
+
+    public TranslatableAttribute(TranslatableRouteType translatableRouteType = TranslatableRouteType.Text)
+    {
+        TranslatableRouteType = translatableRouteType;
+        Translatable = true;
+    }
+
+    public TranslatableAttribute(bool translatable)
+    {
+        Translatable = translatable;
+    }
 }
 
 [InTypeScript(true)]

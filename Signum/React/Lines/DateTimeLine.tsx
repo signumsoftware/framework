@@ -35,7 +35,7 @@ export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null 
 
   const c = useController(DateTimeLineController, props);
 
-  let rdat = DateTimeLineOptions.useRenderDay();
+  let rdat = DateTimeLineOptions.Options.useRenderDay();
 
   rdat = props.renderDayAndTitle ?? rdat;
 
@@ -140,14 +140,15 @@ export interface RenderDayAndTitle {
 
 export namespace DateTimeLineOptions {
 
-
-  export let useRenderDay: () => RenderDayAndTitle = () => ({
-    renderDay: defaultRenderDay,
-    getHolidayTitle: (d) => isWeekend(d) ? {
-      type: "weekend",
-      text: d.weekdayLong!
-    } : undefined,
-  });
+  export const Options = {
+    useRenderDay: (() => ({
+      renderDay: defaultRenderDay,
+      getHolidayTitle: (d: DateTime) => isWeekend(d) ? {
+        type: "weekend" as const,
+        text: d.weekdayLong!
+      } : undefined,
+    })) as () => RenderDayAndTitle,
+  };
 
   export function isWeekend(date: DateTime): boolean {
     return date.weekday == 6 || date.weekday == 7;

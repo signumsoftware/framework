@@ -15,7 +15,7 @@ export default function CultureDropdown(p: { fullName?: boolean; isMobile?: bool
   if (!cultures)
     return null;
 
-  const current = CultureClient.currentCulture;
+  const current = CultureClient.getCurrentCulture();
 
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);
@@ -59,7 +59,7 @@ export function CultureDropdownMenuItem(props: {
   if (!cultures)
     return null;
 
-  const current = CultureClient.currentCulture;
+  const current = CultureClient.getCurrentCulture();
 
   function handleSelect(c: Lite<CultureInfoEntity>) {
     CultureClient.changeCurrentCulture(c);

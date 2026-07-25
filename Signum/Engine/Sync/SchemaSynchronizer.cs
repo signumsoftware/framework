@@ -883,13 +883,29 @@ public static class SchemaSynchronizer
                 return AddColumnWithHistory(sqlBuilder, table, column, withHistory);
             }
 
-            var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
+            SqlPreCommandSimple UpdateWithHasValueDefault(bool forHistory = false)
+            {
+                var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
+                            return new SqlPreCommandSimple($@"UPDATE {(forHistory ? table.SystemVersioned!.TableName : table.Name)} SET
+                {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
+            WHERE {where};");
 
-            return SqlPreCommand.Combine(Spacing.Simple,
+            }
+
+            if (!withHistory)
+                return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
-WHERE {where};"))!;
+                UpdateWithHasValueDefault())!;
+
+            return new SqlPreCommand_WithHistory(
+                normal: SqlPreCommand.Combine(Spacing.Simple,
+                    sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                    UpdateWithHasValueDefault()),
+                history: SqlPreCommand.Combine(Spacing.Simple,
+                    sqlBuilder.AlterTableAddColumn(table, column, forHistory: true).Do(a => a.GoAfter = true),
+                    UpdateWithHasValueDefault(forHistory: true))
+            );
+
         }
         else if (column is FieldPartitionId)
         {
@@ -1011,7 +1027,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
-            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID") :
+            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID()") :
             column.DbType.IsTime() ? "'00:00'" :
             column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
@@ -1297,18 +1313,20 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
     }
 
 
-    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements replacements)
+    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements? replacements = null)
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
         var culture = (string)Executor.ExecuteScalar("SHOW default_text_search_config;")!;
 
-        if(culture.StartsWith("pg_catalog."))
+        if (culture.StartsWith("pg_catalog."))
             culture = culture.After("pg_catalog.");
 
         if (culture != FullTextTableIndex.PostgresOptions.DefaultLanguage())
+        {
             return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+        }
 
         return null;
     }

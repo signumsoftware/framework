@@ -7,9 +7,9 @@ public static class TokenMigrationRunner
 {
     public static void TokenMigrations(bool autoRun)
     {
+        Schema.Current.Initialize();
         Console.WriteLine();
-        if (!(autoRun || SafeConsole.Ask("SQL Migrations is finished... run Token Migrations now?")))
-            return;
+        SafeConsole.WriteLineColor(ConsoleColor.Cyan, "..:: Token Migrations ::..");
 
         while (true)
         {
@@ -25,9 +25,6 @@ public static class TokenMigrationRunner
                     return;
 
                 ApplyPending(pending);
-
-                if (autoRun)
-                    return;
             }
             else
             {
@@ -41,7 +38,8 @@ public static class TokenMigrationRunner
                 if (!SafeConsole.Ask("Create new Token Migration?"))
                     return;
 
-                RecordNewMigration();
+                if (!RecordNewMigration())
+                    return;
             }
         }
     }
@@ -79,7 +77,7 @@ public static class TokenMigrationRunner
     /// <c>TokenSynchronizing</c> fire. Both .tokens.json (full rename data + entity actions) and
     /// .query.json (Types only) contribute to the History pool. The chained walk inside FixToken
     /// / FixValue / AskRename traverses them per-file and consults each file's era-name (computed
-    /// from later files' Types) when looking up TokensColumn / TokensType / FilterValues — so
+    /// from later files' Types) when looking up TokensByQuery / TokensByType / FilterValues — so
     /// V1.Tokens recorded under the pre-rename query key still matches when the live key is the
     /// post-rename name from V2.Types, without ever mutating the loaded files.
     /// </summary>
@@ -89,17 +87,12 @@ public static class TokenMigrationRunner
 
         var ctx = new TokenSyncContext(TokenSyncMode.Apply, loaded, recording: null);
 
-        try
-        {
-            QueryLogic.AssertLoaded();
-            TypeLogic.AssertLoaded();
+      
+        QueryLogic.AssertLoaded();
+        TypeLogic.AssertLoaded();
 
-            TokenMigrationLogic.FireTokenSynchronizing(ctx);
-        }
-        finally
-        {
-            PrintReport(ctx);
-        }
+        TokenMigrationLogic.FireTokenSynchronizing(ctx);
+
 
         using (var tr = Transaction.ForceNew())
         {
@@ -118,9 +111,8 @@ public static class TokenMigrationRunner
 
     public static void AfterSynchronize(string? fileName, Replacements? rep)
     {
-        if (!SafeConsole.Ask("Synchronize tokens now?"))
-            return;
-
+        Console.WriteLine();
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "..:: Tokens Synchronizer ::..");
         QueryLogic.AssertLoaded();
         TypeLogic.AssertLoaded();
         var recording = new TokenMigrationFile();
@@ -128,8 +120,7 @@ public static class TokenMigrationRunner
         if (rep != null)
             recording.LoadTypes(rep);
 
-        var ctx = new TokenSyncContext(TokenSyncMode.Record, [], recording);
-        TokenMigrationLogic.FireTokenSynchronizing(ctx);
+        TokenMigrationLogic.FireTokenSynchronizing(new TokenSyncContext(TokenSyncMode.Record, [], recording));
 
         if (recording.IsEmpty)
         {
@@ -137,20 +128,28 @@ public static class TokenMigrationRunner
             return;
         }
 
+        recording.Print();
+
         var newFileName = Path.GetFileNameWithoutExtension(fileName) + ".tokens.json";
 
         recording.Save(newFileName);
+
+        if (SafeConsole.Ask("Run now?"))
+        {
+            TokenMigrationLogic.FireTokenSynchronizing(new TokenSyncContext(TokenSyncMode.Apply, [recording], recording: null));
+        }
     }
 
-    static void RecordNewMigration()
+    static bool RecordNewMigration()
     {
         // History = every committed migration file (both .tokens.json and .query.json), regardless
         // of whether applied to the dev DB. Files are loaded as-is; era-aware subKey resolution
         // inside FixToken / FixValue / AskRename takes care of any earlier files whose outer keys
         // pre-date later Types renames.
         var allCommitted = TokenMigrationLogic.ReadMigrationsDirectory(silent: true);
+        SetExecuted(allCommitted);
         var loaded = allCommitted
-            .Where(p => p.FileName != null)
+            .Where(p => p.FileName != null && !p.IsExecuted)
             .Select(p => TokenMigrationFile.Load(p.FileName!))
             .ToArray();
 
@@ -163,10 +162,17 @@ public static class TokenMigrationRunner
 
         TokenMigrationLogic.FireTokenSynchronizing(ctx);
 
-        PrintReport(ctx);
+       
 
         if (recording.IsEmpty)
-            SafeConsole.WriteLineColor(ConsoleColor.Green, "No new token decisions to record.");
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "No changes in tokens found!");
+            Console.WriteLine();
+            return false;
+        }
+
+
+        recording.Print();
 
         var version = DateTime.Now.ToString("yyyy.MM.dd-HH.mm.ss");
         var comment = SafeConsole.AskString("Comment for the new token migration? ", stringValidator: s => null).Trim();
@@ -180,40 +186,8 @@ public static class TokenMigrationRunner
 
         var fullPath = Path.Combine(migrationDirectory, fileName);
         recording.Save(fullPath);
-    }
 
-    static void PrintReport(TokenSyncContext ctx)
-    {
-        if (ctx.Reports.Count == 0)
-            return;
-
-        Console.WriteLine();
-        foreach (var r in ctx.Reports)
-        {
-            if (r.Error != null)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Red, $"{r.Entity.GetType().Name} {r.Entity}:");
-                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "  " + r.Error.Message);
-            }
-            else if (r.Action != null)
-            {
-                var color = r.Action switch
-                {
-                    UserAssetEntityActionType.Skip => ConsoleColor.DarkYellow,
-                    UserAssetEntityActionType.Delete => ConsoleColor.Red,
-                    UserAssetEntityActionType.Regenerate => ConsoleColor.Magenta,
-                    _ => ConsoleColor.Gray,
-                };
-                SafeConsole.WriteLineColor(color, $"{r.Entity.GetType().Name} {r.Entity}: {r.Action.ToString()!.ToLower()}");
-            }
-            else
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.White, $"{r.Entity.GetType().Name} {r.Entity}:");
-                foreach (var c in r.Changes)
-                    SafeConsole.WriteLineColor(ConsoleColor.Gray, "  " + c);
-            }
-        }
-        Console.WriteLine();
+        return true;
     }
 
     static void Draw(List<TokenMigrationLogic.MigrationInfo> infos)

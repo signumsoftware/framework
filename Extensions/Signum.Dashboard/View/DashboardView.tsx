@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
+import { classes, getContrastingTextColorWCAG } from '@framework/Globals'
 import { Entity, getToString, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { DashboardClient, PanelPartContentProps } from '../DashboardClient'
@@ -26,7 +26,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   function renderBasic() {
     const db = p.dashboard;
     const ctx = TypeContext.root(db);
-  
+
     return (
       <div>
         <div className="sf-dashboard-view">
@@ -95,16 +95,21 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   return (
     <div className={p.embedded ? "sf-dashboard-view-embedded" : undefined}>
-      {p.hideEditButton != true && !Navigator.isReadOnly(DashboardEntity) &&
-        <div className="d-flex flex-row-reverse m-1">
-          <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)} title={DashboardMessage.Edit.niceToString()}>
-            <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
-          </Link>
+      {p.hideEditButton != true &&
+        <div className="d-flex flex-row-reverse align-items-center m-1">
+          {DashboardClient.onDashboardPageActions.map((fn, i) => <React.Fragment key={i}>{fn(p.dashboard)}</React.Fragment>)}
+          {!Navigator.isReadOnly(DashboardEntity) &&
+            <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)} title={DashboardMessage.Edit.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" />
+            </Link>}
         </div>}
       <div>
-        {dashboardController.pinnedFilters.size > 0 && <PinnedFilterBuilder
-          filterOptions={Array.from(dashboardController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
-          onFiltersChanged={forceUpdate} />}
+        {Array.from(dashboardController.pinnedFilters.values())
+          .filter(pf => pf.pinnedFilters.length > 0)
+          .map((pf, i) => <PinnedFilterBuilder key={i}
+            queryDescription={pf.queryDescription}
+            filterOptions={pf.pinnedFilters}
+            onFiltersChanged={forceUpdate} />)}
         {
           p.dashboard.combineSimilarRows ?
             renderCombinedRows() :
@@ -215,21 +220,25 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const lite = p.entity ? toLite(p.entity) : undefined;
 
+  const partContentKey = p.ctx.value.guid;
+
   if (renderer.withPanel && !renderer.withPanel(content, lite)) {
     const tooltipHtml = translated(part, p => p.tooltip);
-    
+
     const partContent = (
-      <ErrorBoundary>
-        {React.createElement(state.component, {
-          partEmbedded: part,
-          content: content,
-          entity: lite,
-          deps: p.deps,
-          dashboardController: p.dashboardController,
-          cachedQueries: p.cachedQueries,
-          customDataRef: customDataRef,
-        } as PanelPartContentProps<IPartEntity>)}
-      </ErrorBoundary >
+      <div data-part-content={partContentKey}>
+        <ErrorBoundary>
+          {React.createElement(state.component, {
+            partEmbedded: part,
+            content: content,
+            entity: lite,
+            deps: p.deps,
+            dashboardController: p.dashboardController,
+            cachedQueries: p.cachedQueries,
+            customDataRef: customDataRef,
+          } as PanelPartContentProps<IPartEntity>)}
+        </ErrorBoundary >
+      </div>
     );
 
     return partContent;
@@ -244,7 +253,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" style={{ fontSize: "16px" }} />
   ) : null;
 
-  const title = !icon ? (
+  const title = part.hideTitle ? null : !icon ? (
     <>
       {titleText}
       {tooltipHtml && (
@@ -276,35 +285,37 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const cardContent = (
     <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
-      <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
-        style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined}}
-      >
+      {title &&
+        <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
+          style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined }}
+        >
 
-        {renderer.handleTitleClick == undefined ? title :
-          <LinkButton title={undefined} className="sf-pointer"
-            style={{ color: part.titleColor ?? (part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined), textDecoration: "none" }}
-            onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
-          {title}
-          </LinkButton>
-        }
-        {
-          dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
-            {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
-            <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
-          </span>
-        }
-
-        <div className="ms-auto">
-          {renderer.customTitleButtons?.(content, lite, customDataRef)}
-          {
-            renderer.handleEditClick &&
-            <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
-              <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
+          {renderer.handleTitleClick == undefined ? title :
+            <LinkButton title={undefined} className="sf-pointer"
+              style={{ color: part.titleColor ?? (part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined), textDecoration: "none" }}
+              onClick={e => { renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
+              {title}
             </LinkButton>
           }
+          {
+            dashboardFilter && <span className="badge bg-tertiary text-dark border ms-2 sf-filter-pill">
+              {dashboardFilter.rows.length} {DashboardMessage.RowsSelected.niceToString().forGenderAndNumber(dashboardFilter.rows.length)}
+              <button type="button" aria-label={DashboardMessage.Close.niceToString()} className="btn-close" onClick={handleClearFilter} />
+            </span>
+          }
+
+          <div className="ms-auto">
+            {renderer.customTitleButtons?.(content, lite, customDataRef)}
+            {
+              renderer.handleEditClick &&
+              <LinkButton className="sf-pointer sf-hide" onClick={e => { renderer.handleEditClick!(content, lite, customDataRef, e).then(v => v && p.reload()); }} title={DashboardMessage.Edit.niceToString()}>
+                <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
+              </LinkButton>
+            }
+          </div>
         </div>
-      </div>
-      <div className="card-body py-2 px-3 d-flex flex-column">
+      }
+      <div data-part-content={partContentKey} className="card-body py-2 px-3 d-flex flex-column">
         <ErrorBoundary>
           {
             React.createElement(state.component, {

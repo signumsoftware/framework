@@ -46,26 +46,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
 
       if (p.autocomplete === undefined) {
-
-        var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
-        if (avoidDuplicates) {
-          var types = tryGetTypeInfos(p.type).notNull();
-          if (types.length == 0)
-            return;
-
-          if (p.findOptions) {
-            p.findOptions = withAvoidDuplicates(p.findOptions, types.onlyOrNull()?.name);
-          }
-          else if (types.length == 1) {
-            var tn = types.single().name;
-            p.findOptions = withAvoidDuplicates(Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
-          }
-          else {
-            p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
-          }
-        }
-
-        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create!, p.showType);
+        p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary, p.ctx, p.create! || p.createOnFind!, p.showType);
       }
       if (p.iconStart == undefined && p.vertical)
         p.iconStart = true;

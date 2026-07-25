@@ -104,13 +104,8 @@ public class ResultTableProxy
 
     public async Task<string[]> GetColumnTokensAsync()
     {
-        var headers = await Element.Locator("thead > tr > th").AllAsync();
-        var result = new List<string>();
-
-        foreach (var h in headers)
-            result.Add(await h.GetAttributeAsync("data-column-name") ?? "");
-
-        return result.ToArray();
+        return await Element.Locator("thead > tr > th")
+            .EvaluateAllAsync<string[]>("els => els.map(el => el.getAttribute('data-column-name') ?? '')");
     }
 
     public async Task<ILocator> CellElementAsync(int rowIndex, string token)
@@ -217,14 +212,12 @@ public class ResultTableProxy
 
     public async Task<ILocator> EntityLinkAsync(Lite<IEntity> lite, int? subRowIndex = null)
     {
-        var col = await GetColumnIndexAsync("Entity");
-        return Row(lite, subRowIndex).EntityLink(col);
+        return Row(lite, subRowIndex).EntityLink();
     }
 
     public async Task<ILocator> EntityLinkAsync(int rowIndex)
     {
-        var col = await GetColumnIndexAsync("Entity");
-        return Row(rowIndex).EntityLink(col);
+        return Row(rowIndex).EntityLink();
     }
 
     // ---------------- CONTEXT MENU ----------------
@@ -292,9 +285,21 @@ public class ResultRowProxy
 
     public ILocator SelectedCheckbox => Locator.Locator("input.sf-td-selection");
 
-    public ILocator CellElement(int columnIndex) => Locator.Locator($"td:nth-child({columnIndex + 1})");
+    public ILocator CellElement(int columnIndex) => Locator.Locator($"td[data-column-index={columnIndex}]");
 
-    public ILocator EntityLink(int entityColumnIndex) => CellElement(entityColumnIndex).Locator("> a");
+    public ILocator EntityLink() => Locator.Locator($"td:nth-child(2):not([data-column-index])").Locator("a");
+
+    private Task<string?> GetEntityKeyAsync() => Locator.GetAttributeAsync("data-entity");
+    public async Task<Lite<Entity>?> GetEntityAsync()
+    {
+        var liteKey = await GetEntityKeyAsync();
+
+        if (liteKey == null)
+            return null;
+     
+        return Lite.Parse<Entity>(liteKey);
+    }
+
 }
 
 

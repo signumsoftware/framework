@@ -48,6 +48,10 @@
   <Type Name="QueryTokenEmbedded" Description="Abfrage Token">
     <Member Name="TokenString" Description="Token string" />
   </Type>
+  <Type Name="TokenMigrationEntity" Description="Token-Migration">
+    <Member Name="Comment" Description="Kommentar" />
+    <Member Name="VersionNumber" Description="Versionsnummer" />
+  </Type>
   <Type Name="UserAssetMessage">
     <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
     <Member Name="Advanced" Description="Fortschrittlich" />

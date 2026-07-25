@@ -38,11 +38,18 @@ public class TokenSyncContext
     /// </summary>
     public TokenMigrationFile? Recording { get; }
 
-    /// <summary>
-    /// Per-entity log of which entities were touched and what changed. Used by the runner to print
-    /// an end-of-run summary in the same style as the existing sync log.
-    /// </summary>
-    public List<TokenSyncEntityReport> Reports { get; } = new();
+    public int HistoryAndRecordingsCount => History.Length + (Recording == null ? 0 : 1);
+
+    public TokenMigrationFile GetHistoryAndRecording(int index)
+    {
+        if (index < History.Length)
+            return History[index];
+        if (Recording != null && index == History.Length)
+            return Recording;
+
+        throw new IndexOutOfRangeException($"Index {index} is out of range for history and recording");
+    }
+
 
     public TokenSyncContext(TokenSyncMode mode, TokenMigrationFile[] history, TokenMigrationFile? recording)
     {
@@ -60,7 +67,7 @@ public class TokenSyncContext
         var typeName = entity.GetType().Name;
         foreach (var file in History)
         {
-            var match = file.UserAssetActions.FirstOrDefault(a => a.EntityType == typeName && a.Guid == entity.Guid);
+            var match = file.UserAssetActions?.FirstOrDefault(a => a.EntityType == typeName && a.Guid == entity.Guid);
             if (match != null)
             {
                 action = match.Action;
@@ -80,30 +87,13 @@ public class TokenSyncContext
         if (Recording == null)
             throw new InvalidOperationException("AddUserAssetAction is only valid in Record mode.");
 
-        Recording.UserAssetActions.Add(new UserAssetEntityAction
+        (Recording.UserAssetActions ??= new()).Add(new UserAssetEntityAction
         {
             EntityType = entity.GetType().Name,
             Guid = entity.Guid,
             Action = action,
         });
     }
-
-    /// <summary>
-    /// Free-form change log entry (token rename, FileName rewrite, message rendered…). Rendered in
-    /// neutral gray by the runner.
-    /// </summary>
-    public void LogEntityChange(Entity entity, params string[] changes)
-        => Reports.Add(new TokenSyncEntityReport(entity, changes.ToList(), action: null, error: null));
-
-    /// <summary>
-    /// Action-typed log entry (Skip / Delete / Regenerate). Rendered with a colour matching the
-    /// action so an operator scanning the log can immediately spot destructive operations.
-    /// </summary>
-    public void LogEntityChange(Entity entity, UserAssetEntityActionType action)
-        => Reports.Add(new TokenSyncEntityReport(entity, new List<string>(), action, error: null));
-
-    public void LogEntityError(Entity entity, Exception error)
-        => Reports.Add(new TokenSyncEntityReport(entity, new List<string>(), action: null, error));
 
     /// <summary>
     /// Walks <see cref="History"/> file by file, chaining renames at the given bucket+subKey.
@@ -126,9 +116,9 @@ public class TokenSyncContext
 
         // Per-file chained walk: at each file, if the current working value has a rename, advance.
         string current = oldValue;
-        for (int fi = 0; fi < History.Length; fi++)
+        for (int fi = 0; fi < HistoryAndRecordingsCount; fi++)
         {
-            var file = History[fi];
+            var file = GetHistoryAndRecording(fi);
             var effectiveSubKey = eraSubKeys?[fi] ?? subKey;
             var d = file.TryGetDictionary(bucket, effectiveSubKey);
             if (d != null && d.TryGetValue(current, out var v))
@@ -203,13 +193,13 @@ public class TokenSyncContext
     /// </summary>
     public string[] ComputeEraSubKeys(string liveSubKey)
     {
-        var eras = new string[History.Length];
+        var eras = new string[HistoryAndRecordingsCount];
         string running = liveSubKey;
-        for (int fi = History.Length - 1; fi >= 0; fi--)
+        for (int fi = HistoryAndRecordingsCount - 1; fi >= 0; fi--)
         {
             eras[fi] = running;
             // Unwind: if this file's Types maps X → running, then files prior to this used X.
-            foreach (var (oldT, newT) in History[fi].Types)
+            foreach (var (oldT, newT) in GetHistoryAndRecording(fi).Types.EmptyIfNull())
             {
                 if (newT == running)
                 {
@@ -219,6 +209,12 @@ public class TokenSyncContext
             }
         }
         return eras;
+    }
+
+    public void LogError(Entity entity, Exception ex)
+    {
+        SafeConsole.WriteLineColor(ConsoleColor.Red, $"{entity.GetType().Name} {entity}:");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "  " + ex.Message);
     }
 }
 

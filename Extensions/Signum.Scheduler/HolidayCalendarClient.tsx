@@ -18,7 +18,7 @@ export namespace HolidayCalendarClient {
     Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
 
     if (Navigator.isViewable(HolidayCalendarEntity))
-      DateTimeLineOptions.useRenderDay = HolidayCalendarClient.useRenderHoliday;
+      DateTimeLineOptions.Options.useRenderDay = HolidayCalendarClient.useRenderHoliday;
   }
 
   export type CalendarDictionary = { [key: string]: string };
@@ -35,10 +35,9 @@ export namespace HolidayCalendarClient {
   let defaultHolidayCalendar: Promise<CalendarDictionary | null> | undefined = undefined;
   export function getDefaultHolidayCalendar(): Promise<CalendarDictionary | null> | undefined {
 
-    return defaultHolidayCalendar ??= Finder.fetchEntities({
-      queryName: HolidayCalendarEntity,
-      filterOptions: [{ token: HolidayCalendarEntity.token(hc => hc.isDefault), value: true }]
-    }).then(list => list.singleOrNull()?.holidays.toObject(d => d.element.date, d => d.element.name ?? SchedulerMessage.Holiday.niceToString()) ?? null)
+    return defaultHolidayCalendar ??= Finder.fetchEntities(HolidayCalendarEntity.fetchOptions(token => ({
+      filterOptions: [token(hc => hc.isDefault).filter("EqualTo", true)]
+    }))).then(list => list.singleOrNull()?.holidays.toObject(d => d.element.date, d => d.element.name ?? SchedulerMessage.Holiday.niceToString()) ?? null)
       .catch(e => { defaultHolidayCalendar = undefined; throw e; });
   }
 

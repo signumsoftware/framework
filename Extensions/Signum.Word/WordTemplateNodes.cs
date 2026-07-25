@@ -3,11 +3,14 @@ using W = DocumentFormat.OpenXml.Wordprocessing;
 using D = DocumentFormat.OpenXml.Drawing;
 using S = DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
 using System.IO;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Signum.DynamicQuery.Tokens;
 using Signum.Templating;
+using Signum.Excel;
 
 namespace Signum.Word;
 
@@ -15,6 +18,7 @@ public interface INodeProvider
 {
     OpenXmlLeafTextElement NewText(string text);
     OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false);
+    IEnumerable<OpenXmlElement> NewRunWithLeadingBreak(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null);
     bool IsRun(OpenXmlElement? element);
     bool IsText(OpenXmlElement? element);
     string GetText(OpenXmlElement run);
@@ -44,6 +48,11 @@ public class WordprocessingNodeProvider : INodeProvider
         return result;
     }
 
+    public IEnumerable<OpenXmlElement> NewRunWithLeadingBreak(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null)
+    {
+        yield return NewRun(runProps, text, spaceMode, initialBr: true);
+    }
+
     public string GetText(OpenXmlElement run)
     {
         if (run is W.Text t)
@@ -66,7 +75,7 @@ public class WordprocessingNodeProvider : INodeProvider
     {
         return a is W.Text;
     }
-    
+
     public OpenXmlCompositeElement GetRunProperties(OpenXmlCompositeElement run)
     {
         return ((W.Run)run).RunProperties!;
@@ -98,13 +107,15 @@ public class DrawingNodeProvider : INodeProvider
     public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
         var textElement = new D.Text(text!);
+        return new D.Run(runProps!, textElement);
+    }
 
-        var result = new D.Run(runProps!, textElement);
-        
-        if (initialBr)
-            result.InsertBefore(new D.Break(), textElement);
-
-        return result;
+    public IEnumerable<OpenXmlElement> NewRunWithLeadingBreak(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null)
+    {
+        // In DrawingML <a:br> must be a paragraph-level sibling of <a:r>, not inside it
+        var brProps = (D.RunProperties?)runProps?.CloneNode(true);
+        yield return brProps != null ? new D.Break(brProps) : new D.Break();
+        yield return NewRun(runProps, text, spaceMode);
     }
 
     public OpenXmlLeafTextElement NewText(string text)
@@ -157,13 +168,18 @@ internal class SpreadsheetNodeProvider : INodeProvider
 
     public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
-        var textElement = new S.Text(text!);
+        var textElement = new S.Text(text!) { Space = spaceMode }; //preserve leading/trailing spaces (e.g. between two tokens)
         var result = new S.Run(runProps!, textElement);
-        
+
         if (initialBr)
             result.InsertBefore(new S.Break(), textElement);
 
         return result;
+    }
+
+    public IEnumerable<OpenXmlElement> NewRunWithLeadingBreak(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null)
+    {
+        yield return NewRun(runProps, text, spaceMode, initialBr: true);
     }
 
     public OpenXmlLeafTextElement NewText(string text)
@@ -289,7 +305,7 @@ public abstract class BaseNode : AlternateContent
     }
 
     public BaseNode(INodeProvider nodeProvider)
-{
+    {
         this.NodeProvider = nodeProvider;
     }
 
@@ -330,7 +346,7 @@ public class TokenNode : BaseNode
     public readonly ValueProviderBase ValueProvider;
     public readonly string Format;
 
-    internal TokenNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, string format): base(nodeProvider)
+    internal TokenNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, string format) : base(nodeProvider)
     {
         this.ValueProvider = valueProvider;
         this.Format = format;
@@ -352,6 +368,9 @@ public class TokenNode : BaseNode
         p.CurrentTokenNode = this;
         object? obj = ValueProvider.GetValue(p);
         p.CurrentTokenNode = null;
+
+        if (this.NodeProvider is SpreadsheetNodeProvider && TrySetSpreadsheetCellValue(obj))
+            return;
 
         if (obj is OpenXmlElement oxe)
         {
@@ -401,7 +420,9 @@ public class TokenNode : BaseNode
             if (text != null && text.Contains('\n'))
             {
                 var replacements = text.Lines()
-                    .Select((line, i) => NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line, initialBr: i > 0));
+                    .SelectMany((line, i) => i == 0
+                        ? [(OpenXmlElement)NodeProvider.NewRun((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line)]
+                        : NodeProvider.NewRunWithLeadingBreak((OpenXmlCompositeElement?)RunProperties?.CloneNode(true), line));
 
                 this.ReplaceBy(replacements);
             }
@@ -412,8 +433,43 @@ public class TokenNode : BaseNode
         }
     }
 
+    // In a spreadsheet, a date or number must become a real typed cell value (not text) so that
+    // number formats apply and formulas like SUM/SUMIFS see numbers. Only done when this token is the
+    // cell's sole content; mixed text (e.g. "@[a] @[b]") stays a string. The cell's style (and thus its
+    // number format, e.g. TT.MM.JJJJ) is preserved.
+    private bool TrySetSpreadsheetCellValue(object? obj)
+    {
+        if (obj == null)
+            return false;
+
+        string? numeric =
+            obj is DateTime dt ? ExcelExtensions.ToExcelDate(dt) :
+            obj is DateOnly don ? ExcelExtensions.ToExcelDate(don.ToDateTime()) :
+            ReflectionTools.IsNumber(obj.GetType()) ? Convert.ToDecimal(obj, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture) :
+            null;
+
+        if (numeric == null)
+            return false;
+
+        var cell = this.Ancestors<S.Cell>().FirstOrDefault();
+        var inline = cell?.GetFirstChild<S.InlineString>();
+        if (cell == null || inline == null)
+            return false;
+
+        if (inline.Descendants<S.Text>().Any(t => !string.IsNullOrWhiteSpace(t.Text)))
+            return false; //not the sole content of the cell
+
+        cell.RemoveAllChildren();
+        cell.DataType = null; //numeric cell; keeps its StyleIndex (date/number format)
+        cell.Append(new S.CellValue(numeric));
+        return true;
+    }
+
     static string SafeFormat(IFormattable fo, string? format, IFormatProvider provider)
     {
+        if (format != null && format.StartsWith("K"))
+            return fo.ToString(null, provider); // Fallback to default formatting
+
         try
         {
             return fo.ToString(format, provider);
@@ -459,7 +515,7 @@ public class DeclareNode : BaseNode
 {
     public readonly ValueProviderBase ValueProvider;
 
-    internal DeclareNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, Action<bool, string> addError): base(nodeProvider)
+    internal DeclareNode(INodeProvider nodeProvider, ValueProviderBase valueProvider, Action<bool, string> addError) : base(nodeProvider)
     {
         if (valueProvider != null && !valueProvider.Variable.HasText())
             addError(true, "declare {0} should end with 'as $someVariable'".FormatWith(valueProvider.ToString()));
@@ -493,7 +549,7 @@ public class DeclareNode : BaseNode
 
     protected internal override void RenderNode(WordTemplateParameters p)
     {
-        if (this.NodeProvider.IsParagraph(this.Parent) && 
+        if (this.NodeProvider.IsParagraph(this.Parent) &&
             !this.Parent!.ChildElements.Any(a => BlockContainerNode.IsImportant(a, NodeProvider) && a != this))
             this.Parent.Remove();
         else
@@ -518,7 +574,7 @@ public class DeclareNode : BaseNode
 
 public class BlockNode : BaseNode
 {
-    public BlockNode(INodeProvider nodeProvider): base(nodeProvider) { }
+    public BlockNode(INodeProvider nodeProvider) : base(nodeProvider) { }
 
     public BlockNode(BlockNode original) : base(original) { }
 
@@ -545,12 +601,12 @@ public class BlockNode : BaseNode
         var parent = this.Parent!;
         int index = parent.ChildElements.IndexOf(this);
         parent.RemoveChild(this);
-  
+
         foreach (var item in this.ChildElements.ToList())
         {
             item.Remove();
             parent.InsertAt(item, index++);
-        }   
+        }
     }
 
     protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
@@ -572,7 +628,7 @@ public class BlockNode : BaseNode
 
 public abstract class BlockContainerNode : BaseNode
 {
-    public BlockContainerNode(INodeProvider nodeProvider): base(nodeProvider) { }
+    public BlockContainerNode(INodeProvider nodeProvider) : base(nodeProvider) { }
 
     public BlockContainerNode(BlockContainerNode original) : base(original) { }
 
@@ -666,7 +722,7 @@ public abstract class BlockContainerNode : BaseNode
             if (important.Any())
             {
                 string hint = errorHintParent != errorHint1 && errorHintParent != errorHint2 ? " in " + errorHintParent.Match : "";
-                
+
                 throw new InvalidOperationException($"Node {errorHint1.Match} is not at the same level than {errorHint2.Match}{hint}. Important nodes could be removed in the chain:\n\n" +
                     chain.Skip(chain.IndexOf(openXmlElement)).Select((a, p) => (a.GetType().Name + " with text:" + a.InnerText).Indent(p * 4)).ToString("\n\n"));
             }
@@ -685,7 +741,7 @@ public abstract class BlockContainerNode : BaseNode
             if (nodeProvider.IsText(text) && string.IsNullOrWhiteSpace(nodeProvider.GetText(text!)))
                 return false;
 
-            return true; 
+            return true;
         }
 
         if (c is BaseNode)
@@ -825,7 +881,7 @@ public class AnyNode : BlockContainerNode
     public AnyNode(AnyNode original)
         : base(original)
     {
-        this.Condition= original.Condition.Clone();
+        this.Condition = original.Condition.Clone();
 
         this.AnyToken = CloneToken(original.AnyToken);
         this.NotAnyToken = CloneOptionalToken(original.NotAnyToken);

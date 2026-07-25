@@ -1,12 +1,13 @@
-using System.Globalization;
+using Signum.Authorization;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using Signum.Templating;
-using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
+using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.TokenMigrations;
-using Signum.Authorization;
+using Signum.UserQueries;
 using System.Collections.Frozen;
+using System.Globalization;
 
 namespace Signum.Mailing.Templates;
 
@@ -380,7 +381,6 @@ public static class EmailTemplateLogic
     {
         if (ctx.Mode == TokenSyncMode.Record)
             ctx.AddUserAssetAction(et, UserAssetEntityActionType.Skip);
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Skip);
     }
 
     static void DeleteEmailTemplate(TokenSyncContext ctx, EmailTemplateEntity et)
@@ -397,7 +397,6 @@ public static class EmailTemplateLogic
                 tr.Commit();
             }
         }
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Delete);
     }
 
     static void RegenerateEmailTemplate(TokenSyncContext ctx, EmailTemplateEntity et)
@@ -405,7 +404,6 @@ public static class EmailTemplateLogic
         if (ctx.Mode == TokenSyncMode.Record)
         {
             ctx.AddUserAssetAction(et, UserAssetEntityActionType.Regenerate);
-            ctx.LogEntityChange(et, UserAssetEntityActionType.Regenerate);
             return;
         }
 
@@ -421,15 +419,14 @@ public static class EmailTemplateLogic
             newTemplate.Save();
             tr.Commit();
         }
-
-        ctx.LogEntityChange(et, UserAssetEntityActionType.Regenerate);
     }
 
     static void SaveEmailTemplate(EmailTemplateEntity et)
     {
         using (var tr = Transaction.ForceNew())
         {
-            et.Save();
+            using (OperationLogic.AllowSave<EmailTemplateEntity>())
+                et.Save();
             tr.Commit();
         }
     }
@@ -447,7 +444,7 @@ public static class EmailTemplateLogic
                     case UserAssetEntityActionType.Regenerate: RegenerateEmailTemplate(ctx, et); return;
                 }
             }
-            catch (Exception ex) { ctx.LogEntityError(et, ex); return; }
+            catch (Exception ex) { ctx.LogError(et, ex); return; }
         }
 
         Console.Write(".");
@@ -548,7 +545,7 @@ public static class EmailTemplateLogic
                     {
                     retry:
                         string? val = item.ValueString;
-                        switch (QueryTokenSynchronizer.FixValue(ctx, et.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation!.Value.IsList(), fixInstead: true, modelType))
+                        switch (QueryTokenSynchronizer.FixValue(ctx, et.Query!.Key, item.Token!.TokenString, item.Token!.Token.Type, ref val, allowRemoveToken: true, isListOrPair: item.Operation!.Value.IsListOrPair(), fixInstead: true, modelType))
                         {
                             case FixTokenResult.Nothing: break;
                             case FixTokenResult.RemoveToken: et.Filters.Remove(item); entityTouched = true; changes.Add("filter value removed"); break;
@@ -607,14 +604,12 @@ public static class EmailTemplateLogic
                     try
                     {
                         SaveEmailTemplate(et);
-                        ctx.LogEntityChange(et, changes.ToArray());
                     }
-                    catch (Exception ex) { ctx.LogEntityError(et, ex); }
+                    catch (Exception ex) { ctx.LogError(et, ex); }
                 }
-                else ctx.LogEntityChange(et, changes.ToArray());
             }
         }
-        catch (Exception ex) { ctx.LogEntityError(et, ex); }
+        catch (Exception ex) { ctx.LogError(et, ex); }
     }
 
 

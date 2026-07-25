@@ -1,4 +1,4 @@
-import { ErrorBoundary } from "@framework/Components";
+﻿import { ErrorBoundary } from "@framework/Components";
 import * as React from "react";
 import { ChatbotMessage, ChatMessageEntity, ToolCallEmbedded, UserFeedback } from "./Signum.Agent";
 import { FontAwesomeIcon } from "@framework/Lines";
@@ -42,7 +42,7 @@ export function SystemMessage(p: { msg: ChatMessageEntity }): React.ReactElement
       {isOpen &&
         <div className={`chat-bubble system`}>
           <React.Suspense fallback={null}>
-            {ChatbotClient.renderMarkdown(p.msg.content!)}
+            {ChatbotClient.Options.renderMarkdown(p.msg.content!)}
           </React.Suspense>
         </div>
       }
@@ -116,13 +116,13 @@ export function AssistantMessage(p: { msg: ChatMessageEntity, sendToolResponse: 
         </a>
         {isReasoningOpen && <div className="chat-bubble reasoning mt-1">
           <React.Suspense fallback={null}>
-            {ChatbotClient.renderMarkdown(p.msg.reasoningContent)}
+            {ChatbotClient.Options.renderMarkdown(p.msg.reasoningContent)}
           </React.Suspense>
         </div>}
       </div>}
       {
         p.msg.content && <React.Suspense fallback={null}>
-          {ChatbotClient.renderMarkdown(p.msg.content)}
+          {ChatbotClient.Options.renderMarkdown(p.msg.content)}
         </React.Suspense>
       }
       {p.msg.toolCalls.map(tc => <ToolCall toolCall={tc.element} sendToolResponse={p.sendToolResponse} />)}
@@ -224,7 +224,7 @@ export function MarkdownOrJson(p: { content: string | null | undefined, formatJs
 
   return (
     <React.Suspense fallback={null}>
-      {ChatbotClient.renderMarkdown(tryParseJsonString(p.content!))}
+      {ChatbotClient.Options.renderMarkdown(tryParseJsonString(p.content!))}
     </React.Suspense>
   );
 }
@@ -296,9 +296,10 @@ export function UserMessage(p: { msg: ChatMessageEntity }): React.ReactElement {
     <div className={`mb-2 d-flex justify-content-end justify-content-start"`}>
       <div className={`chat-bubble ${p.msg.role == "User" ? "user" : "bot"}`}>
         <React.Suspense fallback={null}>
-          {ChatbotClient.renderMarkdown(p.msg.content!)}
+          {ChatbotClient.Options.renderMarkdown(p.msg.content!)}
         </React.Suspense>
       </div>
     </div>
   );
 }
+

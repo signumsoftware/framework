@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AutoLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
@@ -44,7 +44,7 @@ export default function DynamicViewComponent(p: DynamicViewComponentProps): Reac
   const selectedNodeRef = useUpdatedRef(selectedNode);
   const [dynamicView, setDynamicView] = React.useState<DynamicViewEntity>(p.initialDynamicView);
 
-  const viewOverrides = useAPI(() => Navigator.viewDispatcher.getViewOverrides(p.ctx.value.Type), []);
+  const viewOverrides = useAPI(() => Navigator.getViewDispatcher().getViewOverrides(p.ctx.value.Type), []);
 
   function getZeroNode() {
     var { ctx, initialDynamicView, ref, ...extraProps } = p;
@@ -243,4 +243,5 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
     </div>
   );
 }
+
 

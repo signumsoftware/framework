@@ -21,12 +21,12 @@ export function DiffDocument(p: { first: string, second: string }): React.JSX.El
     <div>
       <div>
         <label>
-          <input type="checkbox" className="form-check-input" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
+          <input type="checkbox" className="form-check-input" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.Options.defaultMarginLines : null)} />
           <span className="mx-2">Show only</span><NumberBox format={toNumberFormat("0")} value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
             validateKey={isNumberKey} /> lines arround each change</label>
       </div>
       <div>
-        {(p.first.length > DiffDocument.maxSize || p.second.length >  DiffDocument.maxSize) && !force ?
+        {(p.first.length > DiffDocument.Options.maxSize || p.second.length >  DiffDocument.Options.maxSize) && !force ?
           <div className="alert alert-warning mt-2" role="alert">
             The two strings are too big ({formatter.format(p.first.length)} ch. and {formatter.format(p.second.length)} ch.) and could freeze your browser...
             <br />
@@ -40,8 +40,10 @@ export function DiffDocument(p: { first: string, second: string }): React.JSX.El
 }
 
 export namespace DiffDocument {
-  export let defaultMarginLines = 4 as (number | null);
-  export let maxSize = 300000;
+  export const Options = {
+    defaultMarginLines: 4 as number | null,
+    maxSize: 300000,
+  };
 }
 
 

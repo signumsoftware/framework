@@ -13,6 +13,7 @@ import { LinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension'
 import { LinkButton } from '@framework/Basics/LinkButton';
 import { HelpImageHandler } from './HelpImageNode';
 
+const helpHtmlExtensions = [new LinkExtension(), new ImageExtension(new HelpImageHandler())];
 
 export function EditableHtml({ ctx, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
 
@@ -37,10 +38,7 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
       <HtmlEditor
         binding={p.binding}
         readOnly={p.readOnly}
-        extensions={[
-          new LinkExtension(),
-          new ImageExtension(new HelpImageHandler())
-        ]} />
+        extensionsMemo={helpHtmlExtensions} />
     </ErrorBoundary>
   );
 }
@@ -60,10 +58,7 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
           binding={binding as any}
           htmlAttributes={p.htmlAttributes}
           small
-          extensions={[
-            new LinkExtension(),
-            new ImageExtension(new HelpImageHandler())
-          ]} />
+          extensionsMemo={helpHtmlExtensions} />
       </ErrorBoundary>
     </div>
   );

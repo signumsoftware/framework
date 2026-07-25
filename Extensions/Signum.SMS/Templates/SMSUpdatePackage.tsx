@@ -11,9 +11,8 @@ export default function SMSSendPackage(p: { ctx: TypeContext<SMSUpdatePackageEnt
       <AutoLine ctx={p.ctx.subCtx(a => a.name)} />
       <SearchControl
         searchOnLoad={true}
-        findOptions={{
-          queryName: SMSMessageEntity,
+        findOptions={SMSMessageEntity.findOptions(token => ({
           filterOptions: [{ token: "Entity.UpdatePackage", value: p.ctx.value}],
-        }} />
+        }))} />
     </div>);
 }

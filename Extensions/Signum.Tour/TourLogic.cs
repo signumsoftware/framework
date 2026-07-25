@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
 using Signum.Basics;
+using Signum.Dashboard;
 using Signum.UserAssets;
+using Signum.UserQueries;
 using System.Collections.Frozen;
 using System.IO;
 
@@ -11,24 +13,8 @@ public static class TourLogic
 {
     public static ResetLazy<FrozenDictionary<Lite<Entity>, TourEntity>> ToursByTrigger = null!;
 
-    public static IEnumerable<TourTriggerSymbol> RegisteredTourTriggers
-    {
-        get { return tourTriggers; }
-    }
-
-    static HashSet<TourTriggerSymbol> tourTriggers = new HashSet<TourTriggerSymbol>();
-
-    public static void RegisterTourTriggers(params TourTriggerSymbol[] tours)
-    {
-        foreach (var t in tours)
-        {
-            if (t == null)
-                throw AutoInitAttribute.ArgumentNullException(typeof(TourTriggerSymbol), nameof(tours));
-
-            TourLogic.tourTriggers.Add(t);
-        }
-    }
-
+    // Trigger registration lives in the framework (Signum.Basics.TourTriggerLogic) so modules can
+    // declare and register triggers without referencing this extension.
 
     public static void Start(SchemaBuilder sb)
     {
@@ -50,7 +36,10 @@ public static class TourLogic
                 e.ShowCloseButton,
             });
 
-        SymbolLogic<TourTriggerSymbol>.Start(sb, () => RegisteredTourTriggers.ToHashSet());
+        sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+            Administrator.UnsafeDeletePreCommandMList((TourStepEntity ts) => ts.CssSteps, Database.MListQuery((TourStepEntity ts) => ts.CssSteps).Where(mle => mle.Element.Property.Is(property)));
+
+        SymbolLogic<TourTriggerSymbol>.Start(sb, () => TourTriggerLogic.RegisteredTourTriggers.ToHashSet());
 
         ToursByTrigger = sb.GlobalLazy(() =>
             Database.Query<TourEntity>().ToFrozenDictionaryEx(a => a.Trigger),
@@ -61,11 +50,39 @@ public static class TourLogic
             EntityPackTS.AddExtension += pack =>
             {
                 var tour = ToursByTrigger.Value.TryGetC(pack.entity.GetType().ToTypeEntity().ToLite());
-                if (tour != null)
-                    pack.extension.Add("hasTour", true);
+                pack.extension.Add("hasTour", tour != null);
             };
         }
 
         UserAssetsImporter.Register<TourEntity>("Tour", TourOperation.Save);
+
+        sb.Schema.EntityEvents<DashboardEntity>().Saved += (dashboard, args) =>
+        {
+            if (args.WasNew)
+                return;
+
+            var dashboardLite = dashboard.ToLite();
+            var validGuids = dashboard.Parts.Select(p => p.Guid).ToHashSet();
+
+            // Drop CssStep rows whose part-Guid no longer exists in the saved dashboard.
+            Database.MListQuery((TourStepEntity ts) => ts.CssSteps)
+                .Where(mle => mle.Parent.Tour.Entity.Trigger.Is(dashboardLite)
+                    && mle.Element.Type == CssStepType.DashboardPart
+                    && mle.Element.DashboardPart != null
+                    && !validGuids.Contains(mle.Element.DashboardPart.Value))
+                .UnsafeDeleteMList();
+        };
+
+        sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
+        {
+            query.SelectMany(d => Database.Query<TourEntity>().Where(t => t.Trigger.Is(d.ToLite()))).UnsafeDelete();
+            return null;
+        };
+
+        sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
+        {
+            query.SelectMany(uq => Database.Query<TourEntity>().Where(t => t.Trigger.Is(uq.ToLite()))).UnsafeDelete();
+            return null;
+        };
     }
 }

@@ -21,11 +21,10 @@ export namespace DynamicTypeConditionClient {
     }))
   
     Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
-    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
-    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
-      queryName: DynamicTypeConditionEntity,
-      filterOptions: [{ token: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName), value: type}]
-    }} />);
+    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicTypeConditionEntity.findOptions()} />);
+    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={DynamicTypeConditionEntity.findOptions(token => ({
+      filterOptions: [token(a => a.entityType!.cleanName).filter("EqualTo", type)]
+    }))} />);
     EvalClient.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
       { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
       { token: t.append(p => p.entity.symbolName.name), type: "Text" },

@@ -41,17 +41,16 @@ const [show, setShow] = React.useState<boolean>(true);
         <h3>{CaseActivityEntity.nicePluralName()}</h3>
         <SearchControl
           showGroupButton={true}
-          findOptions={{
-            queryName: CaseActivityEntity,
+          findOptions={CaseActivityEntity.findOptions(token => ({
             filterOptions: [
-              { token: CaseActivityEntity.token(e => e.entity.workflowActivity), value: stats.workflowActivity },
+              token(e => e.entity.workflowActivity).filter("EqualTo", stats.workflowActivity),
               ...Finder.toFilterOptions(p.config.filters.filter(f => !Finder.isAggregate(f)))
             ],
             columnOptionsMode: "Add",
             columnOptions: p.config.columns
               .filter(c => c.token && c.token.fullKey.contains("."))
               .map(c => ({ token: c.token!.fullKey.beforeLast(".") }) as ColumnOption),
-          }} />
+          }))} />
       </div>
     );
   }

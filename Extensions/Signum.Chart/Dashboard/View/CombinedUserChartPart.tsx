@@ -11,6 +11,8 @@ import { CombinedUserChartPartEntity, UserChartEntity } from '../../UserChart/Si
 import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { ChartClient } from '../../ChartClient'
 import ChartRendererCombined from '../../Templates/ChartRendererCombined'
+import { Finder } from '@framework/Finder'
+import { QueryDescription } from '@framework/FindOptions'
 
 
 export interface CombinedUserChartInfoTemp {
@@ -18,6 +20,7 @@ export interface CombinedUserChartInfoTemp {
   chartScript?: ChartClient.ChartScript;
   parameters?: { [parameter: string]: string } | undefined;
   chartRequest?: ChartRequestModel;
+  queryDescription?: QueryDescription;
   memo: MemoRepository;
   result?: ChartClient.API.ExecuteChartResult;
   makeQuery?: () => Promise<void>;
@@ -32,7 +35,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   const [showData, setShowData] = React.useState(p.content.showData);
 
-  
+
 
   React.useEffect(() => {
     var abortController = new AbortController();
@@ -40,9 +43,12 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
     infos.forEach(c => {
 
-      UserChartClient.Converter.toChartRequest(c.userChart, p.entity)
-        .then(chartRequest => {
+      Promise.all([
+        UserChartClient.Converter.toChartRequest(c.userChart, p.entity),
+        Finder.getQueryDescription(c.userChart.query.key),
+      ]).then(([chartRequest, queryDescription]) => {
           c.chartRequest = chartRequest;
+          c.queryDescription = queryDescription;
           var originalFilters = chartRequest.filterOptions.length;
           c.memo = new MemoRepository();
           forceUpdate();
@@ -127,7 +133,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
   }
 
-  if (infos.some(a => a.chartRequest == null || a.chartScript == null))
+  if (infos.some(a => a.chartRequest == null || a.chartScript == null || a.queryDescription == null))
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
   if (infos.some(a => a.error != null)) {
@@ -146,6 +152,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
   return (
     <div>
       {infos.map((info, i) => <PinnedFilterBuilder key={i}
+        queryDescription={info.queryDescription!}
         filterOptions={info.chartRequest!.filterOptions}
         pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
         onFiltersChanged={(fpo, avoidSearch) => !avoidSearch && info.makeQuery!()} extraSmall={true} />
@@ -153,7 +160,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       {p.content.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />
-        {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
+          {" "}{CombinedUserChartPartEntity.nicePropertyName(a => a.showData)}
         </label>}
       {showData ?
         infos.map((c, i) => c.result == null ? <span key={i}>{JavascriptMessage.loading.niceToString()}</span> :

@@ -194,6 +194,64 @@ public class WhereTest
                       select a.ToLite()).ToList();
     }
 
+    // Entity != IB, TYPE MISMATCH: a different-type reference (Band author vs an Artist) must be TRUE (row
+    // included), not NULL. The old code emitted only 'authorArtistId = michaelId', which is NULL when the author
+    // is a Band, so '!= michael' wrongly excluded all band-authored albums.
+    [Fact]
+    public void WhereEntityIbNotEqual()
+    {
+        ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
+
+        var notMichael = Database.Query<AlbumEntity>().Where(a => a.Author != michael).Select(a => a.Author).ToList();
+
+        Assert.DoesNotContain(notMichael, a => a.Is(michael));     // michael's own albums excluded
+        Assert.Contains(notMichael, a => a is BandEntity);         // band-authored albums INCLUDED (the fix)
+
+        // No nulls in the seed data, so == and != must partition the table exactly.
+        var total = Database.Query<AlbumEntity>().Count();
+        var eq = Database.Query<AlbumEntity>().Count(a => a.Author == michael);
+        var ne = Database.Query<AlbumEntity>().Count(a => a.Author != michael);
+        Assert.Equal(total, eq + ne);
+    }
+
+    // IB != IB: comparing two ImplementedBy columns. Two different bands (same active type, different id)
+    // would naively give 'bandId_L = bandId_R' OR 'artistId_L = artistId_R' = FALSE OR (null=null) = NULL,
+    // so '!=' wrongly excluded them. Must be FALSE -> '!=' TRUE -> included.
+    [Fact]
+    public void WhereIbIbNotEqual()
+    {
+        var smashing = Database.Query<BandEntity>().SingleEx(b => b.Name == "Smashing Pumpkins");
+        var sigurRos = Database.Query<BandEntity>().SingleEx(b => b.Name == "Sigur Ros");
+        ArtistEntity michael = Database.Query<ArtistEntity>().SingleEx(a => a.Dead);
+
+        var differentFromSmashing = (from a1 in Database.Query<AlbumEntity>()
+                                     where a1.Author == smashing
+                                     from a2 in Database.Query<AlbumEntity>()
+                                     where a1.Author != a2.Author
+                                     select a2.Author).Distinct().ToList();
+
+        Assert.Contains(differentFromSmashing, a => a.Is(sigurRos)); // Band vs Band, different id -> included (the fix)
+        Assert.Contains(differentFromSmashing, a => a.Is(michael));  // Artist vs Band -> included
+        Assert.DoesNotContain(differentFromSmashing, a => a.Is(smashing));
+    }
+
+    // IB !=, NULL REFERENCE: a genuinely null reference stays three-valued (NULL), so '!=' excludes it -- matching
+    // the Entity/ImplementedByAll paths and in keeping with the existing default that DistinctNull opts out of.
+    // (Distinguishes this design from a two-valued one, which would wrongly INCLUDE the null-Award nomination.)
+    [Fact]
+    public void WhereIbNotEqualNullReference()
+    {
+        var grammy = Database.Query<GrammyAwardEntity>().FirstEx().ToLite();
+
+        Assert.True(Database.Query<AwardNominationEntity>().Any(n => n.Award == null)); // the seed has one
+
+        var notGrammy = Database.Query<AwardNominationEntity>().Where(n => !n.Award.Is(grammy)).Select(n => n.Award).ToList();
+
+        Assert.DoesNotContain(notGrammy, a => a == null);                     // null reference -> NULL -> excluded
+        Assert.DoesNotContain(notGrammy, a => a.Is(grammy));                  // matching -> excluded
+        Assert.Contains(notGrammy, a => a != null && !a.Is(grammy));         // different-type award -> included
+    }
+
 
     [Fact]
     public void WhereRefersTo1()

@@ -559,7 +559,7 @@ public class CodeFile
         ProcessLines(lines =>
         {
 
-            var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"""));
+            var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"":"));
             if (pos == -1)
             {
                 Warning(@$"Unable to find a line with ""{packageName}"" to upgrade it to {version}");
@@ -580,7 +580,7 @@ public class CodeFile
 
         ProcessLines(lines =>
         {
-            var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"""));
+            var pos = lines.FindIndex(a => a.Contains(@$"""{packageName}"":"));
             if (pos == -1)
             {
                 Warning(@$"Unable to find a line with ""{packageName}"" to remove it");

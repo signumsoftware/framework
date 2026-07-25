@@ -400,6 +400,7 @@ public static class ToolbarLogic
 
         var result = new ToolbarResponse
         {
+            guid = element.Guid,
             type = element.Type,
             content = element.Content,
             url = element.Url,
@@ -430,6 +431,7 @@ public static class ToolbarLogic
 
                 return new ToolbarExtraIcon
                 {
+                    guid = extraElement.Guid,
                     type = extraElement.Type,
                     content = extraElement.Content,
                     url = extraElement.Url,
@@ -564,6 +566,7 @@ public class ToolbarExtraIcon : ToolbarResponseBase
 
 public class ToolbarResponseBase
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public Guid guid;
     public ToolbarElementType type;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? label;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Lite<Entity>? content;

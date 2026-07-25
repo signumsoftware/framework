@@ -16,7 +16,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
 import { LayoutMessage, ToolbarEntity, ToolbarMenuEntity, ToolbarSwitcherEntity } from '../Signum.Toolbar';
-import { Binding, getTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
+import { Binding, getTypeInfo, tryGetTypeInfo, newLite, typeAllowedInDomain } from '../../../Signum/React/Reflection';
 import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
@@ -370,7 +370,10 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
 
 export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {
   const entityType = p.response.entityType;
-  if (entityType)
+  // Only render the entity-bound menu when the current user actually has UI access to the type.
+  // Otherwise the type is absent from the client reflection and getTypeInfo would throw, crashing
+  // the whole toolbar (and blocking login). Fall back to the plain, server-filtered elements.
+  if (entityType && tryGetTypeInfo(entityType))
     return <ToolbarMenuItemsEntityType response={p.response} ctx={p.ctx} selectedEntity={p.selectedEntity} />
 
   return <>
@@ -467,6 +470,17 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   const ctx = new TypeContext<Lite<Entity> | null>(undefined, undefined, undefined, new RefBinding(selEntityRef, "current"));
   var ti = getTypeInfo(entityType);
+
+  const filter = ToolbarClient.entityElementFilters[entityType];
+  const hiddenGuids = useAPI(
+    async () => {
+      if (!filter || !selEntityRef.current)
+        return null;
+      return await filter(selEntityRef.current);
+    },
+    [entityType, selEntityRef.current && liteKey(selEntityRef.current)]
+  );
+
   return (
     <>
       {entityType && (
@@ -480,22 +494,25 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
         </Nav.Item>
       )}
       {selEntityRef.current ?
-        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
+        simplifyForEntity(p.response.elements!.filter(sr => sr.withEntity), selEntityRef.current, hiddenGuids ?? undefined).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity)) :
         p.response.elements!.filter(sr => !sr.withEntity).map((sr, i) => renderNavItem(sr, i, p.ctx, selEntityRef.current ?? p.selectedEntity))
       }
     </>
   );
 }
 
-function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>): ToolbarResponse<any>[] {
+function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, hiddenGuids?: Set<string>): ToolbarResponse<any>[] {
   var result = resp
     .map(tr => {
+
+      if (hiddenGuids && tr.guid && hiddenGuids.has(tr.guid))
+        return null;
 
       if (tr.queryKey != null && !typeAllowedInDomain(tr.queryKey, selectedEntity))
         return null;
 
       if (tr.elements && tr.elements.length > 0) {
-        const inner = simplifyForEntity(tr.elements, selectedEntity);
+        const inner = simplifyForEntity(tr.elements, selectedEntity, hiddenGuids);
         if (inner.length == 0)
           return null;
 
@@ -503,7 +520,7 @@ function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<En
       }
 
       if (tr.extraIcons && tr.extraIcons.length > 0) {
-        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity);
+        const extraIcons = simplifyForEntity(tr.extraIcons, selectedEntity, hiddenGuids);
 
         tr = { ...tr, extraIcons };
       }

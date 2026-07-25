@@ -88,7 +88,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
                 {
                     var parent = TryGetParentEntity<ModifiableEntity>() as IHasEntityType;
 
-                    var result = FilterValueConverter.IsValidExpression(ValueString, Token!.Token.Type, Operation!.Value.IsList(), parent?.EntityType?.ToType());
+                    var result = FilterValueConverter.IsValidExpression(ValueString, Token!.Token.Type, Operation!.Value.IsListOrPair(), parent?.EntityType?.ToType());
                     return result is Result<Type>.Error e ? e.ErrorText : null;
                 }
             }

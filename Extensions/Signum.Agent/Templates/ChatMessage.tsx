@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { AutoLine, EntityLine, EntityTable, EntityTabRepeater, NumberLine, TextAreaLine, FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Tabs, Tab, CloseButton } from 'react-bootstrap';
@@ -72,11 +72,11 @@ export default function ChatMessage(p: { ctx: TypeContext<ChatMessageEntity> }):
         <MarkdownOrJson content={ctx4.value.content}/>
       </> : <>
           {ctx4.value.reasoningContent && <FormGroup ctx={ctx4.subCtx(n => n.reasoningContent)}>
-            {id =>  ChatbotClient.renderMarkdown(ctx4.value.reasoningContent!)}
+            {id =>  ChatbotClient.Options.renderMarkdown(ctx4.value.reasoningContent!)}
           </FormGroup>
           }
           <FormGroup ctx={ctx4.subCtx(n => n.content)}>
-          {id => ctx4.value.content && ChatbotClient.renderMarkdown(ctx4.value.content)}
+          {id => ctx4.value.content && ChatbotClient.Options.renderMarkdown(ctx4.value.content)}
         </FormGroup>
         {ctx.value.role == "Assistant" && ctx4.value.toolCalls.length > 0 &&
           <EntityTable ctx={ctx4.subCtx(n => n.toolCalls)} columns={[
@@ -113,3 +113,4 @@ function LinkRenderer(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
     </a>
   );
 }
+

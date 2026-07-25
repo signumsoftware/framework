@@ -8,7 +8,7 @@ import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 
 export namespace SMSClient {
   
-  export var allTypes: string[] = [];
+  export const allTypes: string[] = [];
   
   export function start(options: { routes: RouteObject[] }): void {
   
@@ -33,12 +33,11 @@ export namespace SMSClient {
   
   function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {
     return Finder.find(
-      {
-        queryName: SMSMessageEntity,
+      SMSMessageEntity.findOptions(token => ({
         filterOptions: [{ token: "Referred", value: referred}],
         columnOptionsMode: "Remove",
         columnOptions: [{ token: "Referred" }],
-      });
+      })));
   }
   
   export namespace API {

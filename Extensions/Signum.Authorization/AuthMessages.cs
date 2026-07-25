@@ -106,6 +106,7 @@ public enum LoginAuthMessage
     SignInWithAzureB2C,
     [Description("Login with Azure B2C")]
     LoginWithAzureB2C,
+    NoLocalUserFound,
 }
 
 [AllowUnauthenticated]

@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faStop } from "@fortawesome/free-solid-svg-icons";
 import "./ChatbotModal.css";
@@ -85,10 +85,9 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
   }
 
   async function handleOpenSession() {
-    const session = await Finder.find<ChatSessionEntity>({
-      queryName: ChatSessionEntity,
-      filterOptions: [{ token: ChatSessionEntity.token(a => a.user), value: AuthClient.currentUser() }]
-    });
+    const session = await Finder.find(ChatSessionEntity.findOptions(token => ({
+      filterOptions: [token(a => a.user).filter("EqualTo", AuthClient.currentUser())]
+    })));
     if (session == null)
       return;
 
@@ -376,7 +375,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
     }
   }
 
-   const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
+  const waitingForWidget = messagesRef.current?.lastOrNull()?.msg.toolCalls.some(a => a.element.isUITool && ChatbotClient.getUITool(a.element.toolId)?.renderWidget) == true;
 
   const showRecoverBar = recoverRef.current != null && (recoverRef.current.kind === "tool" || recoverRef.current.kind === "continue" || recoverRef.current.kind === "uitool-widget");
 
@@ -392,7 +391,7 @@ export default function ChatModal(p: { onClose: () => void }): React.ReactElemen
       </div>
       <h4 className="px-3 pt-2">
         <React.Suspense fallback={null}>
-          {currentSessionRef.current && ChatbotClient.renderMarkdown(getToString(currentSessionRef.current))}
+          {currentSessionRef.current && ChatbotClient.Options.renderMarkdown(getToString(currentSessionRef.current))}
         </React.Suspense>
       </h4>
       {/* Chat History */}
@@ -506,4 +505,5 @@ async function* getWordsOrCommands(reader: ReadableStreamDefaultReader<Uint8Arra
     }
   }
 }
+
 

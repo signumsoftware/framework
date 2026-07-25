@@ -19,7 +19,8 @@ import { LinkButton } from '@framework/Basics/LinkButton'
 
 export default function TranslationCodeStatus(): React.JSX.Element {
 
-  const [result, reload] = useAPIWithReload(() => TranslatedInstanceClient.API.status(), []);
+  const [applyFilter, setApplyFilter] = React.useState<boolean>(true);
+  const [result, reload] = useAPIWithReload(() => TranslatedInstanceClient.API.status(applyFilter), [applyFilter]);
   const [file, setFile] = React.useState<TranslatedInstanceClient.API.FileUpload | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0);
 
@@ -58,16 +59,19 @@ export default function TranslationCodeStatus(): React.JSX.Element {
   return (
     <div>
       <h1 className="h2">{TranslationMessage.InstanceTranslations.niceToString()}</h1>
+      <label className="d-block mb-2 text-end">
+        <input type="checkbox" checked={applyFilter} onChange={e => setApplyFilter(e.currentTarget.checked)} /> {TranslationMessage.OnlyRecommendedInstances.niceToString()}
+      </label>
       {result == undefined ? <p><strong>{JavascriptMessage.loading.niceToString()}</strong></p> :
         result.length == 0 ? <p>{TranslationMessage.NoRoutesMarkedForTranslationConsiderUsing.niceToString()} <code>TranslatedInstanceLogic.AddRoute()</code></p> :
-          <TranslationTable result={result} onRefreshView={reload} />}
+          <TranslationTable result={result} onRefreshView={reload} applyFilter={applyFilter} />}
       {result && result.length > 0 && renderFileInput()}
     </div>
   );
 }
 
 
-function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanceClient.TranslatedTypeSummary[], onRefreshView?: () => void }) {
+function TranslationTable({ result, onRefreshView, applyFilter }: { result: TranslatedInstanceClient.TranslatedTypeSummary[], onRefreshView?: () => void, applyFilter: boolean }) {
   const tree = result.groupBy(a => a.type)
     .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
@@ -101,7 +105,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
           <tr key={type}>
             <th> {getTypeInfo(type).nicePluralName}</th>
             <td>
-              <Link to={`/translatedInstance/view/${type}`}>{TranslationMessage.View.niceToString()}</Link>
+              <Link to={`/translatedInstance/view/${type}${applyFilter ? "" : "?applyFilter=false"}`}>{TranslationMessage.View.niceToString()}</Link>
             </td>
             {cultures.map(culture => {
 
@@ -117,11 +121,11 @@ function TranslationTable({ result, onRefreshView }: { result: TranslatedInstanc
 
               return (
                 <td key={culture}>
-                  <Link to={`/translatedInstance/view/${type}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                  <LinkButton title={TranslationMessage.Download.niceToString()} className="ms-2" onClick={e => { TranslatedInstanceClient.API.downloadView(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
+                  <Link to={`/translatedInstance/view/${type}/${culture}${applyFilter ? "" : "?applyFilter=false"}`}>{TranslationMessage.View.niceToString()}</Link>
+                  <LinkButton title={TranslationMessage.Download.niceToString()} className="ms-2" onClick={e => { TranslatedInstanceClient.API.downloadView(type, culture, applyFilter); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
                   <br />
-                  <Link to={`/translatedInstance/sync/${type}/${culture}`} className={"status-" + typeSummary.state}>{TranslationMessage.Sync.niceToString()}</Link>
-                  <LinkButton title={TranslationMessage.Download.niceToString()} className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { TranslatedInstanceClient.API.downloadSync(type, culture); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
+                  <Link to={`/translatedInstance/sync/${type}/${culture}${applyFilter ? "" : "?applyFilter=false"}`} className={"status-" + typeSummary.state}>{TranslationMessage.Sync.niceToString()}</Link>
+                  <LinkButton title={TranslationMessage.Download.niceToString()} className={classes("status-" + typeSummary.state, "ms-2")} onClick={e => { TranslatedInstanceClient.API.downloadSync(type, culture, applyFilter); }}><FontAwesomeIcon aria-hidden="true" icon="download" /></LinkButton>
                   {typeSummary.state != "Completed" &&
                     <>
                       <br />

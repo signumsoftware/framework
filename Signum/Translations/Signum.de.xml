@@ -17,6 +17,16 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
+  <Type Name="CascadeDeleteMessage">
+    <Member Name="_0MoreNotVisibleForYou" Description="{0} mehr nicht sichtbar für Sie" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="ErrorDetails" Description="Fehlerdetails" />
+    <Member Name="NoReferencesFoundYouCanNowDeleteThisEntity" Description="Keine Referenzen gefunden. Sie können diese Entität jetzt löschen." />
+    <Member Name="ReferencedVia" Description="verlinkt über" />
+    <Member Name="Refresh" Description="Aktualisieren" />
+    <Member Name="TheFollowingEntitiesStillReference0RemoveThemBeforeDeleting" Description="Die folgenden Elemente verweisen noch auf {0}. Entfernen Sie diese vor dem Löschen." />
+    <Member Name="ThisEntityIsStillReferenced" Description="Auf diese Entität wird weiterhin verwiesen" />
+  </Type>
   <Type Name="ChangeLogMessage">
     <Member Name="_0ImplementedOn1WithFollowingChanges2" Description="{0}, implementiert am {1} mit folgenden Änderungen: {2}" />
     <Member Name="ChangeLogEntries" Description="Änderungsprotokolleinträge" />
@@ -144,10 +154,10 @@
     <Member Name="Enabled" Description="Aktiviert" />
   </Type>
   <Type Name="EmailOwnerData" Description="E-Mail-Eigentümerdaten">
-    <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
     <Member Name="CultureInfo" Description="Kultur" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="Email" Description="E-Mail" />
+    <Member Name="ExternalId" Description="Externe ID" />
     <Member Name="Owner" Description="Eigentümer" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
@@ -274,6 +284,8 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
+    <Member Name="Between" Description="zwischen" />
+    <Member Name="BetweenNoEnd" Description="zwischen (ohne Ende)" />
     <Member Name="ComplexCondition" Description="komplexe Bedingung" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
@@ -389,8 +401,8 @@
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
   </Type>
   <Type Name="MarkdownMessage">
-    <Member Name="_0IsCurrentlyEditable" Description="{0} ist derzeit bearbeitbar" />
-    <Member Name="_0IsCurrentlyViewableOnly" Description="{0} ist derzeit nur einsehbar" />
+    <Member Name="Edit0" Description="Edit {0}" />
+    <Member Name="Preview0" Description="Vorschau {0}" />
   </Type>
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
@@ -693,8 +705,10 @@
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
     <Member Name="Enter" Description="Eingabe" />
     <Member Name="Equal0" Description="Gleich {0}" />
+    <Member Name="Error" Description="Fehler" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
+    <Member Name="FilterGroupInvalidMixedOperations" Description="Diese Filtergruppe enthält gemischte Operationen (einige 'ist in / ist nicht in' und einige nicht). Aktivieren Sie 'Aufteilen' oder verwenden Sie denselben Operationstyp für alle Unterbedingungen." />
     <Member Name="FilterMenu" Description="Filter Menü" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="FilterTypeSelection" Description="Auswahl des Filtertyps" />
@@ -731,7 +745,7 @@
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
-    <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
+    <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elementen" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinFilter" Description="Pin-Filter" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
@@ -841,6 +855,7 @@
     <Member Name="Week" Description="Woche" />
     <Member Name="Year" Description="Jahr" />
   </Type>
+  <Type Name="TourTriggerSymbol" Description="Tour-Trigger" Gender="n" />
   <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />

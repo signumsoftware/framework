@@ -108,18 +108,16 @@ export default function SchedulerPanelPage(): React.JSX.Element {
         </div>
         <h2 className="h4">{ScheduledTaskEntity.niceName()}</h2>
         <SearchControl
-          findOptions={{
-            queryName: ScheduledTaskEntity,
+          findOptions={ScheduledTaskEntity.findOptions(token => ({
             pagination: { elementsPerPage: 10, mode: "Firsts" }
-          }} />
+          }))} />
 
         <h2 className="h4">{ScheduledTaskLogEntity.niceName()}</h2>
         <SearchControl
-          findOptions={{
-            queryName: ScheduledTaskLogEntity,
-            orderOptions: [{ token: ScheduledTaskLogEntity.token(e => e.startTime), orderType: "Descending" }],
+          findOptions={ScheduledTaskLogEntity.findOptions(token => ({
+            orderOptions: [token(e => e.startTime).order("Descending")],
             pagination: { elementsPerPage: 10, mode: "Firsts" }
-          }} />
+          }))} />
       </div>
     </div>
   );

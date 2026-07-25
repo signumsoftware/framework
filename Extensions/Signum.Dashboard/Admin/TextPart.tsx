@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { AutoLine, Binding, } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { TextPartEntity, TextPartType } from '../Signum.Dashboard';
@@ -10,9 +10,10 @@ import { ErrorBoundary } from '@framework/Components/ErrorBoundary';
 import { ReadonlyBinding } from '@framework/Lines'
 import { useForceUpdate } from '../../../Signum/React/Hooks';
 import { LinkButton } from '@framework/Basics/LinkButton';
+import HtmlViewer from '../../Signum.HtmlEditor/HtmlViewer';
 
-export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
-  const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
+export default function TextPart(p: { ctx: TypeContext<TextPartEntity>, smallMode?: boolean }): React.JSX.Element {
+  const ctx = p.ctx.subCtx(p.smallMode ? { formGroupStyle: "Basic" } : { formGroupStyle: "SrOnly", placeholderLabels: true });
 
   const [isPreview, setIsPreview] = React.useState(false);
   React.useEffect(() => {
@@ -58,10 +59,10 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
       <div style={{ marginBottom: "20px" }}>
       </div>
       <div className="row">
-        <div className="col-sm-4">
+        <div className={p.smallMode ? "col-12" : "col-sm-4"}>
           <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => forceUpdate()} />
         </div>
-        <div className="col-sm-4">
+        <div className={p.smallMode ? "col-12" : "col-sm-4"}>
           {p.ctx.value.textPartType == "Markdown" ? <LinkButton title={undefined} onClick={e => { setIsPreview(!isPreview); }}>
             <FontAwesomeIcon aria-hidden icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
           </LinkButton> : null}
@@ -77,18 +78,4 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
   );
 }
 
-export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttributes<HTMLDivElement> }): React.JSX.Element {
 
-  var binding = new ReadonlyBinding(p.text, "");
-
-  return (
-    <div className="html-viewer" >
-      <HtmlEditor readOnly
-        binding={binding}
-        htmlAttributes={p.htmlAttributes}
-        small
-        extensions={[]}
-      />
-    </div>
-  );
-}

@@ -1,3 +1,4 @@
+using Azure.Core;
 using Signum.Mailing;
 using Signum.Mailing.Templates;
 
@@ -89,8 +90,10 @@ public static class ResetPasswordRequestLogic
         }.Register();
     }
 
-    public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string code, string password)
+    public static ResetPasswordRequestEntity? ResetPasswordRequestExecute(string code, string password, out string? passwordError)
     {
+        passwordError = null;
+
         using (AuthLogic.Disable())
         {
             var rpr = Database.Query<ResetPasswordRequestEntity>()
@@ -101,8 +104,14 @@ public static class ResetPasswordRequestLogic
                 throw new ResetPasswordException(ResetPasswordMessage.TheCodeOfYourLinkIsIncorrect.NiceToString());
 
             var error = rpr.Validate();
+
             if (error.HasText())
                 throw new ResetPasswordException(error);
+
+            passwordError = UserEntity.OnValidatePassword(password, rpr.User);
+
+            if (passwordError != null)
+                return null;
 
 			RemoveOtherRequests(rpr);
             

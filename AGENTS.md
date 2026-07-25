@@ -58,4 +58,4 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
 - Allow imperative modification of entities in React components; do not enforce strict immutability.
 - Messages for the end user MUST be localized. See [Localization](Skills/Localization.md).
 ### SQL
-- **Never create or modify SQL migration files.** They are generated automatically by the framework and probably already executed in the database. Do not create, edit, or delete any `.sql` files under `Souwhtind.Terminal/Migrations/` if not explicitly requested by user. 
+- **Never create or modify SQL migration files unless explicitly requested by the user.** They are generated automatically by the framework and are likely already executed in the database. Do not create, edit, or delete any `.sql` files under any `*.Terminal/Migrations/` folder unless the user explicitly asks for it.

@@ -1,10 +1,12 @@
 import * as React from 'react'
 import { RoleEntity, UserEntity, MergeStrategy } from '../Signum.Authorization'
 import { AutoLine, EntityStrip, TypeContext } from '@framework/Lines'
-import { useForceUpdate } from '@framework/Hooks'
+import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { SearchValue, SearchValueLine } from '@framework/Search';
-import { getToString } from '@framework/Signum.Entities';
+import { getToString, toLite } from '@framework/Signum.Entities';
+import { Finder } from '@framework/Finder';
 import { AuthMessage } from '../Signum.Authorization';
+import { AuthAdminMessage } from '../Rules/Signum.Authorization.Rules';
 
 export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -15,7 +17,16 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
         r.inheritsFrom.length == 1 ? AuthMessage.SameAs0.niceToString(getToString(r.inheritsFrom.single().element)) :
           (r.mergeStrategy == "Union" ? AuthMessage.MaximumOfThe0 : AuthMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }
+
   const ctx = p.ctx.subCtx({ readOnly: p.ctx.value.isTrivialMerge ? true : undefined });
+
+  const trivialMergeRoles = Finder.useFetchLites(ctx.value.isNew ? null : RoleEntity.fetchOptions(token => ({
+      filterOptions: [
+        token(a => a.entity.isTrivialMerge).filter("EqualTo", true),
+        token(a => a.entity).append(u => u.inheritsFrom).any().filter("EqualTo", ctx.value)
+      ]
+    })), [ctx.value.id]);
+
   return (
     <div>
       <AutoLine ctx={ctx.subCtx(e => e.name)} />
@@ -37,16 +48,25 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
       </div>
 
 
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: UserEntity,
-        filterOptions: [{ token: UserEntity.token(u => u.entity.role), value: ctx.value }]
-      }} />
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={UserEntity.findOptions(token => ({
+        filterOptions: [token(u => u.entity.role).filter("EqualTo", ctx.value)]
+      }))} />
       }
-      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={{
-        queryName: RoleEntity,
-        filterOptions: [{ token: RoleEntity.token(a => a.entity).append(u => u.inheritsFrom).any(), value: ctx.value }]
-      }} />
+
+
+      {!ctx.value.isNew && trivialMergeRoles && trivialMergeRoles.length > 0 && <SearchValueLine ctx={ctx}
+        label={AuthAdminMessage.UsersIncludingInheritedAndMergedRoles.niceToString()}
+        findOptions={UserEntity.findOptions(token => ({
+          filterOptions: [token(u => u.entity.role).filter("IsIn", [toLite(ctx.value), ...trivialMergeRoles])]
+        }))} />
       }
+
+
+      {!ctx.value.isNew && <SearchValueLine ctx={ctx} findOptions={RoleEntity.findOptions(token => ({
+        filterOptions: [token(a => a.entity).append(u => u.inheritsFrom).any().filter("EqualTo", ctx.value)]
+      }))} />
+      }
+
 
     </div>
   );

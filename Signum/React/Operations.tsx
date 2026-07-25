@@ -41,9 +41,8 @@ export namespace Operations {
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
-    QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => ({
-      queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
-    }),
+    QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => (OperationLogEntity.findOptions(token => ({ filterOptions: [token(e => e.target).filter("EqualTo", ctx.lite)]
+    }))),
       {
         key: getQueryKey(OperationLogEntity),
         text: () => OperationLogEntity.nicePluralName(),
@@ -119,7 +118,7 @@ export namespace Operations {
   }
 
   export function notifySuccess(message?: string, timeout?: number): void {
-    Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 }, timeout);
+    Notify.getSingleton()?.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 }, timeout);
   }
 
   /**

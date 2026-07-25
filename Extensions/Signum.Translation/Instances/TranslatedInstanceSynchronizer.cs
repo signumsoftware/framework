@@ -7,13 +7,13 @@ public static class TranslatedInstanceSynchronizer
 {
     public static int MaxTotalSyncCharacters = 4000;
 
-    public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator[] translators, Type type, CultureInfo targetCulture, out int totalInstances)
+    public static TypeInstancesChanges GetTypeInstanceChangesTranslated(ITranslator[] translators, Type type, CultureInfo targetCulture, out int totalInstances, bool applyFilter = true)
     {
         var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
         cultures.Remove(targetCulture);
 
-        var instances = TranslatedInstanceLogic.GetInstanceChanges(type, targetCulture, cultures);
+        var instances = TranslatedInstanceLogic.GetInstanceChanges(type, targetCulture, cultures, applyFilter);
 
         totalInstances = instances.Count;
         if (instances.Sum(a => a.TotalOriginalLength()) > MaxTotalSyncCharacters)

@@ -6,7 +6,7 @@ import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded, DashboardMessage } from '../Signum.Dashboard'
-import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
+import { EntityGridRepeater, EntityGridItem, EntityGridItemProps } from './EntityGridRepeater'
 import { DashboardClient } from "../DashboardClient";
 import { fallbackIcon, iconToString, parseIcon } from "@framework/Components/IconTypeahead";
 import "../Dashboard.css"
@@ -66,76 +66,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
   var colors = ["#DFFF00", "#FFBF00", "#FF7F50", "#DE3163", "#9FE2BF", "#40E0D0", "#6495ED", "#CCCCFF"]
 
   function renderPart(tc: TypeContext<PanelPartEmbedded>) {
-    const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
-
-    var icon = parseIcon(tc.value.iconName) ?? "border-none";
-
-    var avoidDrag: React.HTMLAttributes<any> = {
-      draggable: true,
-      onDragStart: e => {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    function handleSettingsClick(e: React.MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    Navigator.view(tc.value, {
-      propertyRoute: tc.propertyRoute,
-      getViewPromise: e => new ViewPromise(import("./PanelPart")),
-      modalSize: "lg",
-      buttons: "ok_cancel",
-      isOperationVisible: e => false,
-      requiresSaveOperation: false,
-    }).then(result => {
-      if (result) {
-        // Copy all modified properties from the modal back to the original entity
-        tc.value.iconName = result.iconName;
-        tc.value.iconColor = result.iconColor;
-        tc.value.titleColor = result.titleColor;
-        tc.value.customColor = result.customColor;
-        tc.value.interactionGroup = result.interactionGroup;
-        tc.value.tooltip = result.tooltip;
-        tc.value.modified = true;
-        forceUpdate();
-      }
-    });
-  }
-
-    const title = (
-      <div>
-        <div className="d-flex">
-          {icon && <div className="mx-2">
-            <button
-              type="button"
-              style={{ background: "none", border: "none", padding: 0 }}
-              aria-label={DashboardMessage.SelectIcon.niceToString()}
-              onClick={handleSettingsClick}>
-              <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any} />
-            </button>
-          </div>}
-          <div style={{ flexGrow: 1 }} className="me-2">
-
-            <TextBoxLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag} />
-            {tc.value.interactionGroup && (
-              <div className="mt-1">
-                <span className="badge" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(tc.value.interactionGroup)] }}>
-                  {tc.value.interactionGroup}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-
-    return (
-      <EntityGridItem title={title} customColor={tc.value.customColor ?? undefined}>
-        <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: ctx.value }} />
-      </EntityGridItem>
-    );
+    return <DashboardPart tc={tc} dashboardCtx={p.ctx} colors={colors} />;
   }
 
   const ctx = p.ctx;
@@ -168,7 +99,10 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
         <div className="row">
           <div className="col-sm-8">
             <EntityLine ctx={ctx.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} labelColumns={3}
-              helpText={ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+              helpText={ctx.value.entityType && <div className="d-flex gap-3">
+                <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />
+                <CheckboxLine ctx={ctx.subCtx(e => e.showTitleAsBreadcrumb)} inlineCheckbox />
+              </div>}
             />
           </div>
           {ctx.value.entityType && <div className="col-sm-4">
@@ -185,8 +119,8 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
             </div>
             {!ctx.value.isNew && <div className="col-sm-3">
               <h2 className="mt-3 h5">{UserAssetMessage.UsedBy.niceToString()}</h2>
-              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
-              <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
+              <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+              <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
             </div>
             }
             <div className="col-sm-6">
@@ -209,7 +143,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
                     </div>
                     <div className="row">
                       <div className="col-sm-4">
-                        {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={{ queryName: CachedQueryEntity, filterOptions: [{ token: CachedQueryEntity.token(a => a.dashboard), value: ctxBasic.value }] }} />}
+                        {!ctx.value.isNew && <SearchValueLine ctx={ectx} findOptions={CachedQueryEntity.findOptions(token => ({ filterOptions: [token(a => a.dashboard).filter("EqualTo", ctxBasic.value)] }))} />}
                       </div>
                       <div className="col-sm-4 pt-4">
                         {!ctx.value.isNew && <OperationButton eoc={EntityOperationContext.fromTypeContext(ctx, DashboardOperation.RegenerateCachedQueries)} hideOnCanExecute className="w-100" />}
@@ -273,4 +207,103 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
 export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }): React.JSX.Element {
   const forceUpate = useForceUpdate();
   return <CheckboxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
+}
+
+export function DashboardPart(p: {
+  tc: TypeContext<PanelPartEmbedded>;
+  dashboardCtx: TypeContext<DashboardEntity>;
+  colors: string[];
+} & Pick<EntityGridItemProps, "onResizerDragStart" | "onTitleDragStart" | "onTitleDragEnd" | "onRemove">): React.JSX.Element {
+
+  const forceUpdate = useForceUpdate();
+
+  const tc = p.tc;
+  const dashboard = p.dashboardCtx.value;
+  const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
+
+  const icon = parseIcon(tc.value.iconName) ?? "border-none";
+
+  const avoidDrag: React.HTMLAttributes<any> = {
+    draggable: true,
+    onDragStart: e => {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
+  function handleSettingsClick(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    Navigator.view(tc.value, {
+      propertyRoute: tc.propertyRoute,
+      getViewPromise: e => new ViewPromise(import("./PanelPart")),
+      modalSize: "lg",
+      buttons: "ok_cancel",
+      isOperationVisible: e => false,
+      requiresSaveOperation: false,
+    }).then(result => {
+      if (result) {
+        // Copy all modified properties from the modal back to the original entity
+        tc.value.iconName = result.iconName;
+        tc.value.iconColor = result.iconColor;
+        tc.value.titleColor = result.titleColor;
+        tc.value.customColor = result.customColor;
+        tc.value.interactionGroup = result.interactionGroup;
+        tc.value.tooltip = result.tooltip;
+        tc.value.modified = true;
+        forceUpdate();
+      }
+    });
+  }
+
+  function renderTitle(smallMode: boolean) {
+    const hideTitleCheckbox = (
+      <CheckboxLine ctx={tcs.subCtx(pp => pp.hideTitle)} inlineCheckbox onChange={() => forceUpdate()} labelHtmlAttributes={{ style: { whiteSpace: "nowrap" } }} />
+    );
+
+    return (
+      <div>
+        <div className="d-flex">
+          {icon && <div className="mx-2">
+            <button
+              type="button"
+              style={{ background: "none", border: "none", padding: 0 }}
+              aria-label={DashboardMessage.SelectIcon.niceToString()}
+              onClick={handleSettingsClick}>
+              <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} style={{ color: dashboard.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag as any} />
+            </button>
+          </div>}
+          <div style={{ flexGrow: 1 }} className="me-2">
+
+            {(smallMode || !tc.value.hideTitle) &&
+              <TextBoxLine ctx={tcs.subCtx(pp => pp.title)} label={getToString(tcs.value.content) ?? tcs.niceName(pp => pp.title)} valueHtmlAttributes={avoidDrag}
+                helpText={smallMode ? hideTitleCheckbox : undefined} />}
+            {tc.value.interactionGroup && (
+              <div className="mt-1">
+                <span className="badge" style={{ backgroundColor: p.colors[InteractionGroup.values().indexOf(tc.value.interactionGroup)] }}>
+                  {tc.value.interactionGroup}
+                </span>
+              </div>
+            )}
+          </div>
+          {!smallMode &&
+            <div className="me-2">
+              {hideTitleCheckbox}
+            </div>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <EntityGridItem title={renderTitle} customColor={tc.value.customColor ?? undefined}
+      sizeDeps={[tc.value.columns, tc.value.startColumn, tc.value.row]}
+      onResizerDragStart={p.onResizerDragStart}
+      onTitleDragStart={p.onTitleDragStart}
+      onTitleDragEnd={p.onTitleDragEnd}
+      onRemove={p.onRemove}>
+      {smallMode => <RenderEntity ctx={tc.subCtx(a => a.content)} extraProps={{ dashboard: dashboard, smallMode }} />}
+    </EntityGridItem>
+  );
 }

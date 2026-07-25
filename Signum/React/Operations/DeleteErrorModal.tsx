@@ -97,7 +97,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
           </div>
         )}
 
-        {p.serviceError && (
+        {p.serviceError && hasReferences && (
           <div className="mt-3">
             <button
               className="btn btn-link btn-sm p-0 text-muted"
@@ -107,7 +107,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
               {CascadeDeleteMessage.ErrorDetails.niceToString()}
             </button>
             {showDetails && (
-              <div className="mt-2 p-2 bg-light border rounded small font-monospace">
+              <div className="mt-2 p-2 bg-body-tertiary border rounded small font-monospace">
                 <div className="text-danger fw-bold mb-1">{p.serviceError.httpError.exceptionType}</div>
                 <div className="mb-2">{p.serviceError.httpError.exceptionMessage}</div>
                 {p.serviceError.httpError.stackTrace && (
@@ -215,8 +215,13 @@ function propertyRouteToQueryToken(route: string): string {
   let result = 'Entity';
   for (const p of pr.allParents(true)) {
     switch (p.propertyRouteType) {
-      case "Field": result += '.' + p.member!.name; break;
-      case "Mixin": result += '.(' + p.mixinName + ')'; break;
+      case "Field": {
+        const name = p.member!.name;
+        const lastSep = Math.max(name.lastIndexOf('/'), name.lastIndexOf('.'));
+        result += '.' + (lastSep >= 0 ? name.substring(lastSep + 1) : name);
+        break;
+      }
+      case "Mixin": break;
       case "MListItem": result += '.Any'; break;
       case "LiteEntity": result += '.Entity'; break;
     }
@@ -232,7 +237,7 @@ export namespace DeleteErrorModal {
   }
 
   export function register(): void {
-    EntityOperations.onDeleteError = async (eoc, e) => {
+    EntityOperations.Options.onDeleteError = async (eoc, e) => {
       if (!e.httpError.exceptionType?.endsWith("ForeignKeyException"))
         return false;
 

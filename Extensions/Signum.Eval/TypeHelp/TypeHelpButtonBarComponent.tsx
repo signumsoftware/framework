@@ -14,7 +14,7 @@ export function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps):
     <div className="btn-toolbar">
       {p.extraButtons}
       {
-        TypeHelpButtonBarComponent.getTypeHelpButtons
+        TypeHelpButtonBarComponent.Options.getTypeHelpButtons
           .flatMap(f => f(p))
           .orderBy(p => p.order)
           .map((p, i) => React.cloneElement(p.element, { key: i }))
@@ -24,7 +24,9 @@ export function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps):
 }
 
 export namespace TypeHelpButtonBarComponent {
-  export let getTypeHelpButtons: Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]> = [];
+  export const Options = {
+    getTypeHelpButtons: [] as Array<(props: TypeHelpButtonBarComponentProps) => ({ element: React.ReactElement<any>, order: number })[]>,
+  };
 }
 
 export default TypeHelpButtonBarComponent

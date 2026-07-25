@@ -30,6 +30,7 @@ public class SchemaSettings
     
     public ConcurrentDictionary<PropertyRoute, AttributeCollection?> FieldAttributesCache = new ConcurrentDictionary<PropertyRoute, AttributeCollection?>();
     public ConcurrentDictionary<Type, AttributeCollection> TypeAttributesCache = new ConcurrentDictionary<Type, AttributeCollection>();
+    public ConcurrentDictionary<FieldInfo, AttributeCollection> EnumAttributesCache = new ConcurrentDictionary<FieldInfo, AttributeCollection>();
 
     public Dictionary<Type, LambdaExpression> CustomOrder = new Dictionary<Type, LambdaExpression>();
 
@@ -179,6 +180,32 @@ public class SchemaSettings
 
             return new AttributeCollection(AttributeTargets.Class, list, () => AssertNotIncluded(entityType));
         });
+    }
+
+    public AttributeCollection EnumAttributes(Enum enumValue)
+    {
+        var type = enumValue.GetType();
+        var fi = type.GetField(enumValue.ToString()) ??
+            throw new InvalidOperationException($"{enumValue} is not a declared value of {type.Name}");
+
+        return EnumAttributes(fi);
+    }
+
+    public AttributeCollection EnumAttributes(FieldInfo fi)
+    {
+        return EnumAttributesCache.GetOrAdd(fi, f =>
+            new AttributeCollection(AttributeTargets.Field, f.GetCustomAttributes(false).Cast<Attribute>().ToList(), () => { }));
+    }
+
+    public A? EnumAttribute<A>(FieldInfo fi) where A : Attribute
+    {
+        using (HeavyProfiler.LogNoStackTrace("EnumAttribute"))
+        {
+            if (EnumAttributesCache.TryGetValue(fi, out var ac))
+                return (A?)ac.FirstOrDefault(a => a is A);
+
+            return fi.GetCustomAttribute<A>();
+        }
     }
 
 

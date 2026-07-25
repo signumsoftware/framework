@@ -177,6 +177,7 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
       label={label}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...p.formGroupHtmlAttributes, ...{ "data-value-query-key": getQueryKey(fo.queryName) } }}
+      ariaAttributes={{ 'aria-readonly': true }}
       helpText={p.helpText && svRef.current && p.helpText(svRef.current)}>
       {inputId => <div className={isFormControl ? ((unit || view || extra || find || create) ? p.ctx.inputGroupClass : undefined) : p.ctx.formControlPlainTextClass}>
         {svRef.current && renderTimeMachineIcon(svRef.current.hasHistoryChanges, `translate(-40%, -40%)`)}

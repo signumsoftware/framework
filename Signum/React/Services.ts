@@ -139,9 +139,9 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
     makeCall = () => ThrowErrorFilter.throwError(call, options.url);
   }
 
-  if (!options.avoidAuthToken && AuthTokenFilter.addAuthToken) {
+  if (!options.avoidAuthToken && AuthTokenFilter.Options.addAuthToken) {
     let call = makeCall;
-    makeCall = () => AuthTokenFilter.addAuthToken(options, call);
+    makeCall = () => AuthTokenFilter.Options.addAuthToken!(options, call);
   }
 
   if (!options.avoidNotifyPendingRequests) {
@@ -165,15 +165,23 @@ export namespace RetryFilter {
 }
 
 export namespace AuthTokenFilter {
-  export let addAuthToken: (options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>;
+  export const Options = {
+    addAuthToken: undefined as ((options: AjaxOptions, makeCall: () => Promise<Response>) => Promise<Response>) | undefined
+  };
 }
 
 export namespace VersionFilter {
-  export let initialVersion: string | undefined;
-  export let initialBuildTime: string | undefined;
-  export let latestVersion: string | undefined;
+  let initialVersion: string | undefined;
+  let initialBuildTime: string | undefined;
+  let latestVersion: string | undefined;
 
-  export let versionHasChanged: () => void = () => console.warn("New Server version detected, handle VersionFilter.versionHasChanged to inform user");
+  export function getInitialVersion(): string | undefined { return initialVersion; }
+  export function getInitialBuildTime(): string | undefined { return initialBuildTime; }
+  export function getLatestVersion(): string | undefined { return latestVersion; }
+
+  export const Options = {
+    versionHasChanged: () => console.warn("New Server version detected, handle VersionFilter.Options.versionHasChanged to inform user") as void
+  };
 
   export function onVersionFilter(makeCall: () => Promise<Response>): Promise<Response> {
     function changeVersion(response: Response) {
@@ -192,8 +200,8 @@ export namespace VersionFilter {
       if (latestVersion != ver) {
         if (buildTime && initialBuildTime && DateTime.fromISO(buildTime) > DateTime.fromISO(initialBuildTime)) {
           latestVersion = ver;
-          if (versionHasChanged)
-            versionHasChanged();
+          if (Options.versionHasChanged)
+            Options.versionHasChanged();
         }
       }
     }
@@ -203,14 +211,16 @@ export namespace VersionFilter {
 }
 
 export namespace NotifyPendingFilter {
-  export let notifyPendingRequests: (pendingRequests: number) => void = () => { };
+  export const Options = {
+    notifyPendingRequests: (() => { }) as (pendingRequests: number) => void
+  };
   let pendingRequests: number = 0;
   export function onPendingRequest(makeCall: () => Promise<Response>): Promise<Response> {
 
-    notifyPendingRequests(++pendingRequests);
+    Options.notifyPendingRequests(++pendingRequests);
 
     return makeCall()
-      .finally(() => notifyPendingRequests(--pendingRequests));
+      .finally(() => Options.notifyPendingRequests(--pendingRequests));
   }
 }
 
@@ -396,7 +406,7 @@ export class ModelRequestedError {
 
 export namespace SessionSharing {
 
-  export let avoidSharingSession = false;
+  export const Options = { avoidSharingSession: false };
 
   //localStorage: Domain+Browser
   //sessionStorage: Browser tab, copied when Ctrl+Click from another tab, but not windows.open or just paste link
@@ -423,7 +433,7 @@ export namespace SessionSharing {
   //To share session storage between tabs for new tabs WITHOUT windows.opener
   window.addEventListener("storage", se => {
 
-    if (avoidSharingSession)
+    if (Options.avoidSharingSession)
       return;
 
     if (se.key == 'requestSessionStorage' + _appName) {

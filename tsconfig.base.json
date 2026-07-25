@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "isolatedDeclarations": true,
+    "isolatedModules": true,
     "sourceMap": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -14,7 +15,6 @@
     "strict": true,
     "noImplicitOverride": true,
     "declarationMap": true,
-    "disableSourceOfProjectReferenceRedirect": true,
     "noUncheckedSideEffectImports": false,
     "lib": [
       "ESNext",

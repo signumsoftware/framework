@@ -66,6 +66,14 @@ public static class Extensions
             return null;
     }
 
+    public static Guid? ToGuid(this string str)
+    {
+        if (Guid.TryParse(str, out Guid result))
+            return result;
+        else
+            return null;
+    }
+
     public static int ToInt(this string str, string error)
     {
         if (int.TryParse(str, out int result))

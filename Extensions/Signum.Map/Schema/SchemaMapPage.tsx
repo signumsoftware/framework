@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { OverlayTrigger, Popover } from 'react-bootstrap'
 import { Dic } from '@framework/Globals'
@@ -185,7 +185,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
       </div>
     );
   }
-  if (AppContext.Expander.onGetExpanded && !AppContext.Expander.onGetExpanded())
+  if (AppContext.Expander.Options.onGetExpanded && !AppContext.Expander.Options.onGetExpanded())
     return null;
 
   return (
@@ -323,6 +323,7 @@ export function SchemaMapRenderer(p: SchemaMapRendererProps): React.JSX.Element 
     </div>
   );
 }
+
 
 
 

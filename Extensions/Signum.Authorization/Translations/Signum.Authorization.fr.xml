@@ -47,6 +47,7 @@
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="{0} conditions de type pour {1} sont définies." />
     <Member Name="TheUserStateMustBeDisabled" Description="Le statut de l’utilisateur doit être désactivé." />
     <Member Name="TypeRules" Description="Règles de type" />
+    <Member Name="UsersIncludingInheritedAndMergedRoles" Description="Utilisateurs (y compris les rôles hérités et fusionnés)" />
   </Type>
   <Type Name="AuthThumbnail" Description="Vignette d’authentification">
     <Member Name="All" Description="Tout" />
@@ -247,8 +248,7 @@
     <Member Name="UserName" Description="Nom d'utilisateur" />
   </Type>
   <Type Name="UserLiteModel" Description="Utilisateur lite">
-    <Member Name="OID" Description="OID" />
-    <Member Name="SID" Description="SID" />
+    <Member Name="ExternalId" Description="ID externe" />
     <Member Name="ToStringValue" Description="Vers chaîne de caractères" />
     <Member Name="UserName" Description="Nom d'utilisateur" />
   </Type>

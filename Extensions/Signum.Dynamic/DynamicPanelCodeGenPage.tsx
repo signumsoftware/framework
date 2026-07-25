@@ -75,17 +75,17 @@ export default function DynamicPanelPage(): React.JSX.Element {
             refreshView={() => setRefreshKey(refreshKey + 1)} />
         </Tab>
 
-        {EvalClient.Options.getDynaicMigrationsStep &&
+        {EvalClient.Options.getDynaicMigrationsStep() &&
 
           <Tab eventKey="migrations" title="3. Sql Migrations">
-            {EvalClient.Options.getDynaicMigrationsStep()}
+            {EvalClient.Options.getDynaicMigrationsStep()!()}
           </Tab>
         }
-        <Tab eventKey="checkEvals" title={(EvalClient.Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
+        <Tab eventKey="checkEvals" title={(EvalClient.Options.getDynaicMigrationsStep() ? "4." : "3.") + " Check Evals"}>
           <CheckEvalsStep />
         </Tab>
 
-        <Tab eventKey="refreshClients" title={(EvalClient.Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
+        <Tab eventKey="refreshClients" title={(EvalClient.Options.getDynaicMigrationsStep() ? "5." : "6.") + " Refresh Clients"}>
           <RefreshClientsStep />
         </Tab>
       </Tabs>

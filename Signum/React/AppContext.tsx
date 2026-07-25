@@ -123,13 +123,15 @@ export function setResetUI(reset: () => void): void {
 }
 
 export namespace Expander {
-  export let onGetExpanded: () => boolean;
-  export let onSetExpanded: (isExpanded: boolean) => void;
+  export const Options = {
+    onGetExpanded: undefined as (() => boolean) | undefined,
+    onSetExpanded: undefined as ((isExpanded: boolean) => void) | undefined
+  };
 
   export function setExpanded(expanded: boolean): boolean {
-    let wasExpanded = onGetExpanded != null && onGetExpanded();;
-    if (onSetExpanded)
-      onSetExpanded(expanded);
+    let wasExpanded = Options.onGetExpanded != null && Options.onGetExpanded();;
+    if (Options.onSetExpanded)
+      Options.onSetExpanded(expanded);
 
     return wasExpanded;
   }

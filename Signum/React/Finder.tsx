@@ -10,12 +10,13 @@ import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
   ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
+  ResultTable, ResultRow, OrderOption, isList, isPair, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime,
-  toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, 
-  QueryDescriptionDTO,
-  QueryTokenWithoutParent
+  toPinnedFilterParsed, isActive, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, isFilterCondition, isGroupList,
+  QueryDescriptionDTO, QueryTokenWithoutParent, toColumnOption, FetchOptions,
+  TypedResultsOptions,
+  ResultObject,
 } from './FindOptions';
 import { completeToken, hasAggregate, hasAnyOrAll, hasElement, hasManual, hasNested, hasOperation, hasSnippet, hasTimeSeries, hasToArray, QueryToken, SubTokensOptions, Writable } from './QueryToken';
 
@@ -38,7 +39,7 @@ import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded, { SearchControlMobileOptions, ColumnParsed } from './SearchControl/SearchControlLoaded';
 import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
-import { EntityBaseController, TypeContext } from "./Lines";
+import { EntityBaseController, TypeContext, EntityLine, FormGroup } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
 import { clearManualSubTokens } from "./SearchControl/QueryTokenBuilder";
 import { APIHookOptions, useAPI } from "./Hooks";
@@ -55,9 +56,7 @@ import ProgressBar from "./Components/ProgressBar";
 import Notify, { NotifyOptions } from "./Frames/Notify";
 import Exception from "./Exceptions/Exception";
 
-
 export namespace Finder {
-
 
   export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
@@ -73,7 +72,13 @@ export namespace Finder {
     AppContext.clearSettingsActions.push(clearManualSubTokens);
     AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
     AppContext.clearSettingsActions.push(resetFormatRules);
+    AppContext.clearSettingsActions.push(cleanSearchPageTitleOptions);
     onReloadTypesActions.push(clearQueryDescriptionCache);
+  }
+
+  function cleanSearchPageTitleOptions() {
+    Options.onSearchPageRenderTitle = [];
+    Options.onSearchPageTitleElements = [];
   }
 
   export function addSettings(...settings: QuerySettings[]): void {
@@ -128,7 +133,7 @@ export namespace Finder {
     return isFindableEvent.every(f => f(queryKey, fullScreen, context));
   }
 
-  export function find<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
+  export function find<T extends Entity = Entity>(findOptions: FindOptions<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
   export function find<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptions): Promise<Lite<T> | undefined>;
   export function find(obj: FindOptions | Type<any>, modalOptions?: ModalFindOptions): Promise<Lite<Entity> | undefined> {
 
@@ -165,30 +170,38 @@ export namespace Finder {
     return getPromiseSearchModal();
   }
 
-  export namespace Options {
-    export function getSearchPage(): Promise<typeof import("./SearchControl/SearchPage")> {
+  export const Options = {
+    getSearchPage(): Promise<typeof import("./SearchControl/SearchPage")> {
       return import("./SearchControl/SearchPage");
-    }
-    export function getSearchModal(): Promise<typeof import("./SearchControl/SearchModal")> {
+    },
+    getSearchModal(): Promise<typeof import("./SearchControl/SearchModal")> {
       return import("./SearchControl/SearchModal");
-    }
+    },
 
-    export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
+    /** Extension point to override the leading content of the search page title (e.g. render it as a
+ * breadcrumb). Receives the SearchControlLoaded and the default title node; the first non-null
+ * result wins, otherwise the default title is used. Used by both SearchPage and UserQueryPage. */
+    onSearchPageRenderTitle: [] as ((scl: SearchControlLoaded, defaultTitle: React.ReactNode) => React.ReactNode | undefined)[],
 
-    export let tokenCanSetPropery = (qt: QueryToken): boolean =>
+    /** Extension point to render extra elements (e.g. a TourButton) on the right of the search page title.
+    * Used by both SearchPage and UserQueryPage. */
+    onSearchPageTitleElements: [] as ((scl: SearchControlLoaded) => React.ReactNode)[],
+
+    entityColumnHeader: (() => "") as () => React.ReactElement | string | null | undefined,
+
+    tokenCanSetPropery: (qt: QueryToken): boolean =>
       qt.filterType == "Lite" && qt.key != "Entity" ||
-      qt.filterType == "Enum" && !isState(qt.type) ||
-      qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly";
+      qt.filterType == "Enum" && !Options.isState(qt.type) ||
+      qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly",
 
-    export let isState = (ti: TypeReference): boolean => ti.name.endsWith("State");
+    isState: (ti: TypeReference): boolean => ti.name.endsWith("State"),
 
-    export let defaultPagination: Pagination = {
+    defaultPagination: {
       mode: "Paginate",
       elementsPerPage: 20,
       currentPage: 1,
-    };
-
-  }
+    } as Pagination,
+  };
 
   export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promise<{ row: ResultRow, searchControl: SearchControlLoaded } | undefined> {
 
@@ -199,7 +212,7 @@ export namespace Finder {
   }
 
 
-  export function findMany<T extends Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+  export function findMany<T extends Entity>(findOptions: FindOptions<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
   export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
   export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
@@ -301,7 +314,7 @@ export namespace Finder {
 
     Encoder.encodeFilters(query, fo.filterOptions?.notNull());
     Encoder.encodeOrders(query, fo.orderOptions?.notNull());
-    Encoder.encodeColumns(query, fo.columnOptions?.notNull());
+    Encoder.encodeColumns(query, fo.columnOptions?.notNull().map(toColumnOption));
 
     return query;
   }
@@ -530,7 +543,7 @@ export namespace Finder {
 
 
 
-  export async function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], options? : { avoidCustom?: boolean}): Promise<any> {
+  export async function getPropsFromFilters(type: PseudoType, filterOptionsParsed: FilterOptionParsed[], options?: { avoidCustom?: boolean }): Promise<any> {
 
     const ti = getTypeInfo(type);
     if (!(options?.avoidCustom) && querySettings[ti.name]?.customGetPropsFromFilter) {
@@ -809,7 +822,7 @@ export namespace Finder {
   export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     const fo = autoRemoveTrivialColumns(findOptions);
 
-    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
+    fo.columnOptions = mergeColumns(qd, fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull().map(toColumnOption) ?? []);
 
     var qs: QuerySettings | undefined = querySettings[qd.queryKey];
     const tis = tryGetTypeInfos(qd.columns["Entity"].type);
@@ -844,8 +857,8 @@ export namespace Finder {
       fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString()));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString()));
-      fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).forEach(co => completer.request(co.token.toString()));
+      fo.columnOptions.notNull().map(toColumnOption).filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString()));
     }
 
     return completer.finished().then(() => {
@@ -856,7 +869,7 @@ export namespace Finder {
         pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
         systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
-        columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => {
+        columnOptions: (fo.columnOptions?.notNull().map(toColumnOption) ?? []).map(co => {
 
           const token = completer.get(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries);
 
@@ -1034,6 +1047,7 @@ export namespace Finder {
 
   interface OverridenValue {
     value: any;
+    convertListToScalar?: boolean;
   }
 
 
@@ -1050,7 +1064,7 @@ export namespace Finder {
     if (fop.pinned && overridenValue == null) {
       if (fop.pinned.splitValue) {
 
-        if (!fop.value)
+        if (!fop.value || Array.isArray(fop.value) && fop.value.length == 0)
           return undefined;
 
         if (!canSplitValue(fop))
@@ -1078,10 +1092,18 @@ export namespace Finder {
             filters: parts.map(part => toFilterRequest({ ...fop, operation: newOperation }, { value: part })),
           }) as FilterGroupRequest;
         }
+
+        if (isFilterGroup(fop) && Array.isArray(fop.value)) {
+          const parts = fop.value as any[];
+          return ({
+            groupOperation: "And",
+            filters: parts.map(part => toFilterRequest(fop, { value: part, convertListToScalar: true })).filter(a => a != null)
+          }) as FilterGroupRequest;
+        }
       }
       else if (isFilterGroup(fop)) {
 
-        if (fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value == "")) {
+        if (fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value == "" || Array.isArray(fop.value) && fop.value.length == 0)) {
           return undefined;
         }
 
@@ -1107,6 +1129,10 @@ export namespace Finder {
       if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
         return undefined;
 
+      const effectiveOp: FilterOperation = overridenValue?.convertListToScalar && isList(fop.operation)
+        ? (fop.operation == "IsIn" ? "EqualTo" : "DistinctTo")
+        : fop.operation;
+
       const value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
@@ -1122,14 +1148,14 @@ export namespace Finder {
 
             return ({
               token: fop.token.fullKey,
-              operation: fop.operation,
+              operation: effectiveOp,
               value: undefined,
             } as FilterConditionRequest);
           }
 
           return ({
             token: fop.token.fullKey,
-            operation: fop.operation,
+            operation: effectiveOp,
             value: numVal,
           } as FilterConditionRequest);
         }
@@ -1141,14 +1167,14 @@ export namespace Finder {
 
             return ({
               token: fop.token.fullKey,
-              operation: fop.operation,
+              operation: effectiveOp,
               value: undefined,
             } as FilterConditionRequest);
           }
 
           return ({
             token: fop.token.fullKey,
-            operation: fop.operation,
+            operation: effectiveOp,
             value: value,
           } as FilterConditionRequest);
         }
@@ -1157,14 +1183,14 @@ export namespace Finder {
       if (Array.isArray(value)) {
         return ({
           token: fop.token.fullKey,
-          operation: fop.operation,
-          value: value.notNull(),
+          operation: effectiveOp,
+          value: isList(fop.operation) ? value.notNull() : value,
         } as FilterConditionRequest);
       }
 
       return ({
         token: fop.token.fullKey,
-        operation: fop.operation,
+        operation: effectiveOp,
         value: value,
       } as FilterConditionRequest);
     }
@@ -1175,9 +1201,9 @@ export namespace Finder {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
   }
 
-  export async function fetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<Lite<T>[]> {
+  export async function fetchLites<T extends Entity>(fo: FetchOptions<T>): Promise<Lite<T>[]> {
 
-    var qd = await getQueryDescription(fo.queryName);
+    var qd = await getQueryDescription(fo.queryName!);
     var filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     var orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1198,8 +1224,8 @@ export namespace Finder {
     return result as Lite<T>[];
   }
 
-  export async function fetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>): Promise<T[]> {
-    const qd = await getQueryDescription(fo.queryName);
+  export async function fetchEntities<T extends Entity>(fo: FetchOptions<T>): Promise<T[]> {
+    const qd = await getQueryDescription(fo.queryName!);
     const filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
     const orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
 
@@ -1233,6 +1259,7 @@ export namespace Finder {
     if (newFO.pagination == undefined) {
       newFO.pagination = count == undefined ? { mode: "All" } : { mode: "Firsts", elementsPerPage: count };
     }
+
 
     return newFO;
   }
@@ -1516,7 +1543,7 @@ export namespace Finder {
 
         return ({
           token: token,
-          operation: fo.operation ?? (token && getFilterOperations(token).orderBy(a=>a == "EqualTo" ? 0 : 1).firstOrNull()) ?? "EqualTo",
+          operation: fo.operation ?? (token && getFilterOperations(token).orderBy(a => a == "EqualTo" ? 0 : 1).firstOrNull()) ?? "EqualTo",
           value: fo.value,
           frozen: fo.frozen || false,
           removeElementWarning: fo.removeElementWarning,
@@ -1540,14 +1567,27 @@ export namespace Finder {
     const needsModel: Lite<any>[] = [];
 
     function parseFilterValue(fo: FilterOptionParsed) {
-      if (isFilterGroup(fo))
+      if (isFilterGroup(fo)) {
         fo.filters.forEach(f => parseFilterValue(f));
-      else {
+
+        if (isGroupList(fo)) {
+          const firstCond = fo.filters.first(f => isFilterCondition(f) && f.token != null);
+          if (!Array.isArray(fo.value))
+            fo.value = [fo.value].notNull();
+          fo.value = (fo.value as any[]).map(v => parseValue(firstCond.token!, v, needsModel));
+        }
+      } else {
         if (isList(fo.operation!)) {
           if (!Array.isArray(fo.value))
             fo.value = [fo.value].notNull();
 
           fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needsModel));
+        }
+        else if (isPair(fo.operation!)) {
+          if (!Array.isArray(fo.value))
+            fo.value = [fo.value ?? null, null];
+
+          fo.value = (fo.value as [any, any]).map(v => v == null ? null : parseValue(fo.token!, v, needsModel));
         }
         else {
           if (Array.isArray(fo.value))
@@ -1760,23 +1800,13 @@ export namespace Finder {
 
   }
 
-  interface FetchEntitiesOptions<T extends Entity = any> {
-    queryName: Type<T> | QueryKey | PseudoType;
-    filterOptions?: (FilterOption | null | undefined)[];
-    orderOptions?: (OrderOption | null | undefined)[];
-    count?: number | null;
-  }
-
-
-
-
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined;
+  export function useFetchLites<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | null | undefined {
     return useAPI(() => fo && fetchLites(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
@@ -1787,13 +1817,13 @@ export namespace Finder {
     );
   }
 
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
-  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined;
+  export function useFetchEntities<T extends Entity>(fo: FetchOptions<T> | null, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | null | undefined {
     return useAPI(() => fo && fetchEntities(fo),
       [
         fo && findOptionsPath({
-          queryName: fo.queryName,
+          queryName: fo.queryName!,
           filterOptions: fo.filterOptions,
           orderOptions: fo.orderOptions,
           pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
@@ -1805,24 +1835,27 @@ export namespace Finder {
   }
 
 
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined;
-  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
-    var fo2: FindOptions | null = fo && {
+  function typedResultsFindOptions(options: TypedResultsOptions<any>): FindOptions {
+    const { resultObject, ...fo } = options;
+    return {
       pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
+      ...(fo as FindOptions),
+      columnOptions: getAllColumns(resultObject),
       columnOptionsMode: "ReplaceAll",
     };
+  }
 
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined;
+  export function useTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO> | null, additionalDeps?: React.DependencyList, apiOptions?: APIHookOptions): ExtractTokensObject<RO>[] | null | undefined {
     return useAPI(async signal => {
-      if (!fo2)
+      if (!options)
         return null;
 
-      var rt = await getResultTable(fo2, signal);
+      var rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-      return rt.rows.map(row => toTypedRow(tokensObject, rt!.columns, row));
-    }, [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+      return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
+    }, [options && findOptionsPath(typedResultsFindOptions(options)), ...(additionalDeps || [])], apiOptions);
   }
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
@@ -1858,40 +1891,28 @@ export namespace Finder {
     }) as ExtractTokensObject<TO>;
   }
 
-  export async function getResultTableTyped<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
-    var fo2: FindOptions = {
-      pagination: { mode: "All" },
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResults<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<ExtractTokensObject<RO>[]> {
+    const rt = await getResultTable(typedResultsFindOptions(options), signal);
 
-    const rt = await getResultTable(fo2);
-
-    return rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row));
+    return rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row));
   }
 
-  export async function getResultTableTypedWithPagination<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
-    var fo2: FindOptions = {
-      ...fo,
-      columnOptions: getAllColumns(tokensObject),
-      columnOptionsMode: "ReplaceAll",
-    };
+  export async function getTypedResultsWithPagination<RO extends ResultObject>(options: TypedResultsOptions<RO>, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<RO>[] }> {
 
-    const rt = await getResultTable(fo2);
+    const rt = await getResultTable(typedResultsFindOptions(options));
 
     return ({
       totalElements: rt.totalElements,
-      rows: rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row))
+      rows: rt.rows.map(row => toTypedRow(options.resultObject, rt.columns, row))
     });
   }
 
-  export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {
+  export function getResultTable(fo: FindOptions, signal?: AbortSignal, defaultIncludeDefaultFilters: boolean = true): Promise<ResultTable> {
 
     fo = defaultNoColumnsAllRows(fo, undefined);
 
     return getQueryDescription(fo.queryName)
-      .then(qd => parseFindOptions(fo!, qd, false))
+      .then(qd => parseFindOptions(fo!, qd, defaultIncludeDefaultFilters))
       .then(fop => API.executeQuery(getQueryRequest(fop), signal));
   }
 
@@ -2039,10 +2060,10 @@ export namespace Finder {
         resultTables.push({ timeSerie: dt, rt: decompress(rt) });
 
         notifyOptions.text = JavascriptMessage.loading.niceToString() + `[${i + 1}/${dates.length}]`;
-        Notify.singleton?.notifyTimeout(notifyOptions);
+        Notify.getSingleton()?.notifyTimeout(notifyOptions);
       }
 
-      Notify.singleton?.remove(notifyOptions);
+      Notify.getSingleton()?.remove(notifyOptions);
 
       const index = request.columns.findIndex(a => a.token == timeSeries);
 
@@ -2175,7 +2196,7 @@ export namespace Finder {
       }
     }
 
-    export var encodeModel: { [typeName: string]: (model: any) => string } = {};
+    export const encodeModel: { [typeName: string]: (model: any) => string } = {};
 
     export function stringValue(value: any): string {
 
@@ -2266,17 +2287,21 @@ export namespace Finder {
               token: parts[0],
               operation: operation,
               value: ignoreValues ? null :
-                !isList(operation) ? unscapeTildes(parts[2]) :
-                  parts.slice(2).map(a => unscapeTildes(a)).notNull(),
+                isPair(operation) ? parts.slice(2).map(a => unscapeTildes(a) ?? null) :
+                  isList(operation) ? parts.slice(2).map(a => unscapeTildes(a)).notNull() :
+                    unscapeTildes(parts[2]),
               pinned: pinned,
             }) as FilterConditionOption
           } else {
+            const filters = toFilterList(gr.elements, identation + 1, ignoreValues || shouldIgnoreValues(pinned));
             return ({
               token: parts[0] == null || parts[0].length == 0 ? null : parts[0],
               groupOperation: FilterGroupOperation.assertDefined(parts[1]),
-              value: ignoreValues ? null : unscapeTildes(parts[2]),
+              value: ignoreValues ? null :
+                isGroupList({ filters }) ? parts.slice(2).map(a => unscapeTildes(a)).notNull() :
+                  unscapeTildes(parts[2]),
               pinned: pinned,
-              filters: toFilterList(gr.elements, identation + 1, ignoreValues || shouldIgnoreValues(pinned)),
+              filters,
             }) as FilterGroupOption;
           }
         });
@@ -2494,6 +2519,7 @@ export namespace Finder {
     label?: string;
     mandatory?: boolean;
     forceNullable?: boolean;
+    queryDescription: QueryDescription;
     filterOptions: FilterOptionParsed[];
     handleValueChange: (f: FilterOptionParsed, avoidSearch?: boolean) => void;
   }
@@ -2508,8 +2534,18 @@ export namespace Finder {
   export const filterValueFormatRules: FilterValueFormatter[] = FinderRules.initFilterValueFormatRules();
 
   export function renderFilterValue(f: FilterOptionParsed, ffc: FilterFormatterContext): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
-    var rule = filterValueFormatRules.filter(r => r.applicable(f, ffc)).last();
+    var rule = filterValueFormatRules.last(r => r.applicable(f, ffc));
     return rule.renderValue(f, ffc);
   }
 
+  export interface DomainRegistryEntry {
+    type: Type<any>;
+    getDomainField: (e: any) => any;
+  }
+
+  export const domainRegistry: Map<string, DomainRegistryEntry> = new Map<string, DomainRegistryEntry>();
+
+  export function registerDomainForTokens<T extends Entity, D extends Entity>(type: Type<T>, getDomainField: (a: T) => Lite<D>): void {
+    domainRegistry.set(type.typeName, { type, getDomainField });
+  }
 }

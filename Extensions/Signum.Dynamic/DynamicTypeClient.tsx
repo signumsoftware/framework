@@ -63,15 +63,16 @@ export namespace DynamicTypeClient {
       }
     ));
   
-    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
-    EvalClient.Options.getDynaicMigrationsStep = () =>
+    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicTypeEntity.findOptions()} />);
+    EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicMixinConnectionEntity.findOptions()} />);
+    EvalClient.Options.setDynaicMigrationsStep(() =>
       <>
         <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />
+        <SearchControl findOptions={DynamicSqlMigrationEntity.findOptions()} />
         <h3>{DynamicRenameEntity.nicePluralName()}</h3>
-        <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
-      </>;
+        <SearchControl findOptions={DynamicRenameEntity.findOptions()} />
+      </>
+    );
   
     EvalClient.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
       { token: t.append(p => p.typeName), type: "Text" },

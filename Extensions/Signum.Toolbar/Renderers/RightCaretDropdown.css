@@ -8,6 +8,20 @@
     grid-template-columns: repeat(3, 1fr);
 }
 
+/* Mobile (drop="down"): don't float. Neutralize Popper's inline position/inset/transform
+   so the menu flows inline right below the toggle, integrated in the sidebar and pushing
+   the content below it down instead of overlaying the window. */
+@media (max-width: 768px) {
+    .dropdown-menu.menu-right-of-caret.show {
+        position: static !important;
+        transform: none !important;
+        inset: auto !important;
+        min-width: 0;
+        max-width: none;
+        width: 100%;
+    }
+}
+
 .switcher-item {
     display: flex;
     flex-direction: column;

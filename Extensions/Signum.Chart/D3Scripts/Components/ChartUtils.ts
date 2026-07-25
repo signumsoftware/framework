@@ -77,7 +77,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
         .domain([d3.min(dates)!, d3.max(dates)!])
         .range([minRange, maxRange]);
 
-      const f = function (d: string | Date) { return scale(typeof d == "string" ?  new Date(d) : d); } as any as d3.ScaleContinuousNumeric<number, number>;
+      const f = function (d: string | Date) { return scale(typeof d == "string" ? new Date(d) : d); } as any as d3.ScaleContinuousNumeric<number, number>;
       f.ticks = scale.ticks as any;
       f.tickFormat = scale.tickFormat as any;
       return f;
@@ -86,7 +86,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
       var dates = values.map(d => DateTime.fromFormat(d as any as string, "HH:mm:ss.u").toJSDate());
 
       const scale = d3.scaleTime()
-        .domain([d3.min(dates)!,  d3.max(dates)!])
+        .domain([d3.min(dates)!, d3.max(dates)!])
         .range([minRange, maxRange]);
 
       const f = function (d: string | Date) { return scale(typeof d == "string" ? DateTime.fromFormat(d, "HH:mm:ss.u").toJSDate() : d); } as any as d3.ScaleContinuousNumeric<number, number>;
@@ -116,7 +116,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
   throw Error("Unexpected scale: " + scaleName);
 }
 
-export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColumn<any>) : "Middle" | "Before" | "After" {
+export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColumn<any>): "Middle" | "Before" | "After" {
 
   if (valueColumn.orderByIndex != null && (keyColumn.orderByIndex == null || valueColumn.orderByIndex < keyColumn.orderByIndex)) {
     if (valueColumn.orderByType == "Ascending")
@@ -124,7 +124,7 @@ export function insertPoint(keyColumn: ChartColumn<any>, valueColumn: ChartColum
     else
       return "After";
   } else {
-    return "Middle"; 
+    return "Middle";
   }
 }
 
@@ -145,7 +145,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
         case "MonthStart":
           return {
             normalized: qt.parent,
-            lastPart : qt,
+            lastPart: qt,
           };
       }
 
@@ -202,7 +202,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     return fullKey;
   }
 
-  const columnNomalized = normalizeToken(column.token!);  
+  const columnNomalized = normalizeToken(column.token!);
 
   const matchingFilters = column.token && (completeValues == "FromFilters" || completeValues == "Auto") ?
     (filterOptions.filter(f => !isFilterGroup(f)) as FilterConditionOptionParsed[])
@@ -275,7 +275,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       }).notNull()) ?? tryCeil(d3.max(values as string[]), unit)?.toISO();
 
 
-    if (min == undefined  || max == undefined)
+    if (min == undefined || max == undefined)
       return values;
 
     var isServerUtc = values.notNull().some(a => (a as string).endsWith("Z"));
@@ -300,8 +300,8 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 
   if (column.type == "Enum") {
 
-    const typeName = column.token!.type.name; 
-    
+    const typeName = column.token!.type.name;
+
     if (typeName == "boolean") {
       return complete(values, [false, true], column, insertPoint);
     }
@@ -333,7 +333,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
     const maxFilter = matchingFilters.firstOrNull(a => a.operation == "LessThan" || a.operation == "LessThanOrEqual");
     const max = maxFilter == null ? d3.max(values as number[]) :
       maxFilter.operation == "LessThan" ? maxFilter.value as number - step :
-        maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined; 
+        maxFilter.operation == "LessThanOrEqual" ? maxFilter.value : undefined;
 
     if (min == undefined || max == undefined)
       return values;
@@ -368,30 +368,30 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
 }
 
 function complete(values: unknown[], allValues: unknown[], column: ChartColumn<unknown>, insertPoint: "Middle" | "Before" | "After"): any[] {
-  
+
   if (insertPoint == "Middle") {
 
     const allValuesDic = allValues.toObject(column.getKey);
-    
+
     const oldValues = values.filter(a => !allValuesDic.hasOwnProperty(column.getKey(a)));
 
     return [...column.orderByType == "Descending" ? allValues.reverse() : allValues, ...oldValues];
   }
   else {
     const valuesDic = values.toObject(column.getKey);
-    
+
     const newValues = allValues.filter(a => !valuesDic.hasOwnProperty(column.getKey(a)));
 
     if (insertPoint == "Before")
       return [...newValues, ...values];
     else if (insertPoint == "After") //Descending
       return [...values, ...newValues];
-  } 
+  }
 
   throw new Error();
 }
 
-export function getStackOffset(curveName: string): ((series: d3.Series<any, any>, order: number[]) => void) | undefined {
+export function getStackOffset(curveName: string): ((series: d3.Series<any, any>[], order: Iterable<number>) => void) | undefined {
   switch (curveName) {
     case "zero": return d3.stackOffsetNone;
     case "expand": return d3.stackOffsetExpand;
@@ -404,7 +404,7 @@ export function getStackOffset(curveName: string): ((series: d3.Series<any, any>
 
 
 
-export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => number[]) | undefined {
+export function getStackOrder(schemeName: string): ((series: d3.Series<any, any>) => Iterable<number>) | undefined {
   switch (schemeName) {
     case "none": return d3.stackOrderNone;
     case "ascending": return d3.stackOrderAscending;

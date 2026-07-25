@@ -17,7 +17,7 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import { Operations } from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, toColumnOption } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
@@ -48,27 +48,33 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
   function setCurrentEntity(entity: Lite<Entity> | undefined) {
     setCurrentEntityInternal(entity);
     p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
+    p.searchControl.getCurrentEntity = () => entity;
+    p.searchControl.props.onPageTitleChanged?.();
+
+    if (entity != null && entity.model == null)
+      Navigator.API.fillLiteModels(entity).then(() => {
+        if (is(p.searchControl.getCurrentEntity?.(), entity))
+          p.searchControl.props.onPageTitleChanged?.();
+        forceUpdate();
+      });
   }
 
-  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, subTitle: string | undefined) {
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
 
     p.searchControl.getCurrentUserQuery = () => uq;
     setCurrentUserQueryInternal(uq);
 
-    p.searchControl.pageSubTitle = subTitle;
     p.searchControl.props.onPageTitleChanged?.();
-    if (uq != null && subTitle == null)
+    if (uq != null)
       UserQueryClient.API.translated(uq).then(model => {
         uq.model = model;
-        if (p.searchControl.getCurrentUserQuery?.() == uq) {
-          p.searchControl.pageSubTitle = model.displayName;
+        if (is(p.searchControl.getCurrentUserQuery?.(), uq))
           p.searchControl.props.onPageTitleChanged?.();
-        }
         forceUpdate();
       });
   }
-  
+
   React.useEffect(() => {
     const query = p.searchControl.props.tag == "SearchPage" ? QueryString.parse(location.search) : null;
 
@@ -78,11 +84,11 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
     const uq = query ? tryParseLite(query["userQuery"]) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
-      if (!is(p.searchControl.getCurrentUserQuery?.(), uq) || !p.searchControl.pageSubTitle)
-        setCurrentUserQuery(uq, undefined);
+      if (!is(p.searchControl.getCurrentUserQuery?.(), uq))
+        setCurrentUserQuery(uq);
     }
     else
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
 
     const entity = query ? tryParseLite(query["entity"]) : p.searchControl.props.extraOptions?.entity;
     p.searchControl.extraUrlParams.entity = entity && liteKey(entity);
@@ -129,7 +135,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.handleChangeFiltermode('Simple');
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
-        setCurrentUserQuery(undefined, undefined);
+        setCurrentUserQuery(undefined);
         setCurrentEntity(undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
@@ -146,7 +152,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
-          setCurrentUserQuery(uq, translated(userQuery, a => a.displayName));
+          setCurrentUserQuery(uq);
           //setCurrentEntity(undefined);
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -167,7 +173,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
     else {
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
       setCurrentEntity(undefined);
     }
   }
@@ -215,7 +221,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
       applyUserQueryToSearchControl(currentUserQuery!);
     else {
-      setCurrentUserQuery(undefined, undefined);
+      setCurrentUserQuery(undefined);
       setCurrentEntity(undefined);
     }
   }
@@ -236,9 +242,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
 
     var parser = new Finder.TokenCompleter(sc.props.queryDescription);
+    const columnOptions = fo.columnOptions?.notNull().map(toColumnOption) ?? [];
     [
-      ...fo.columnOptions?.map(a => a?.token) ?? [],
-      ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
+      ...columnOptions.map(a => a.token),
+      ...columnOptions.map(a => a.summaryToken),
       ...fo.orderOptions?.map(a => a?.token) ?? [],
     ].notNull().forEach(a => parser.request(a.toString()));
 
@@ -257,7 +264,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
-      columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
+      columns: columnOptions.map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString(), stoColumn) }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString(), stoSummary) }) : null,

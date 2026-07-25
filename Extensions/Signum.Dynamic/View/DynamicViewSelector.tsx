@@ -1,4 +1,4 @@
-import * as React from 'react'
+﻿import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { Entity, JavascriptMessage, is, SaveChangesMessage } from '@framework/Signum.Entities'
@@ -18,7 +18,7 @@ import { DynamicViewMessage, DynamicViewSelectorEntity } from '../Signum.Dynamic
 export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
-  const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
+  const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.getViewDispatcher().getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
   const exampleEntityRef = React.useRef<Entity | null>(null);
   const scriptChangedRef = React.useRef(false);
@@ -191,4 +191,5 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     </div>
   );
 }
+
 

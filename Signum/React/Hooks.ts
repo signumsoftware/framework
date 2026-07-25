@@ -86,10 +86,11 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(options?: { 
+export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
   initialTimeout?: number ,
-   resizeTimeout ? : number, 
-  autoResetOnHide?: boolean, 
+   resizeTimeout ? : number,
+  autoResetOnHide?: boolean,
+  avoidReset?: boolean,
   deps?: React.DependencyList
 }):
 
@@ -98,6 +99,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
   const initialTimeout = options?.initialTimeout  ?? 0;
   const resizeTimeout = options?.resizeTimeout  ?? 300;
   const autoResetOnHide = options?.autoResetOnHide  ?? false;
+  const avoidReset = options?.avoidReset  ?? false;
   const deps = options?.deps  ?? [];
 
   const [size, setSize] = React.useState<Size | undefined>();
@@ -112,8 +114,9 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(options?: {
 
   React.useEffect(()=> {
     if(size&& deps.length)
-    { 
-      setSize(undefined);
+    {
+      if (!avoidReset)
+        setSize(undefined);
       setTimeout(() => {
         setNewSize();
       }, resizeTimeout);
@@ -386,12 +389,14 @@ export const Breakpoints = {
 }
 
 export function getBreakpoint(): number {
-  var width = window.innerWidth;
-  if (width <= Breakpoints.sm) return 0;
-  if (width <= Breakpoints.md) return Breakpoints.sm;
-  if (width <= Breakpoints.lg) return Breakpoints.md;
-  if (width <= Breakpoints.xl) return Breakpoints.lg;
-  if (width <= Breakpoints.xxl) return Breakpoints.xl;
+  // Use matchMedia (CSS viewport, scrollbar-excluded) instead of window.innerWidth
+  // so JS breakpoints stay in sync with CSS @media rules and don't flip when a
+  // scrollbar appears/disappears as content width changes.
+  if (window.matchMedia(`(max-width: ${Breakpoints.sm}px)`).matches) return 0;
+  if (window.matchMedia(`(max-width: ${Breakpoints.md}px)`).matches) return Breakpoints.sm;
+  if (window.matchMedia(`(max-width: ${Breakpoints.lg}px)`).matches) return Breakpoints.md;
+  if (window.matchMedia(`(max-width: ${Breakpoints.xl}px)`).matches) return Breakpoints.lg;
+  if (window.matchMedia(`(max-width: ${Breakpoints.xxl}px)`).matches) return Breakpoints.xl;
   return Breakpoints.xxl;
 }
 

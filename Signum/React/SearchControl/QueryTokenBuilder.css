@@ -22,7 +22,7 @@
 
 
 .sf-query-token-part .rw-popup-container {
-    min-width: 400px;
+    min-width: fit-content;
 }
 
 .sf-query-token-plus {

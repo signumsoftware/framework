@@ -15,7 +15,9 @@ const ChatMarkdown = React.lazy(() => import("./Templates/ChatMarkdown"));
 
 export namespace ChatbotClient {
 
-  export let renderMarkdown = (markdown: string): React.JSX.Element => <ChatMarkdown content={markdown} />;
+  export const Options = {
+    renderMarkdown: (markdown: string): React.JSX.Element => <ChatMarkdown content={markdown} />
+  };
 
   export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(ChatSessionEntity, a => import('./Templates/ChatSession')));

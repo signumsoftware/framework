@@ -90,6 +90,7 @@ public static class AuthLogic
         {
             userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
             userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
+            userWithClaims.Claims["ExternalId"] = ((UserEntity)user).ExternalId;
         };
 
         CultureInfoLogic.AssertStarted(sb);
