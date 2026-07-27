@@ -53,6 +53,7 @@
     <Member Name="NothingToTranslate" Description="Nichts zu übersetzen" />
     <Member Name="NothingToTranslateIn0" Description="Nichts zu übersetzen in {0}" />
     <Member Name="OnlyNeutralCultures" Description="Nur neutrale Sprachen" />
+    <Member Name="OnlyRecommendedInstances" Description="Nur empfohlene Exemplare" />
     <Member Name="Plural" Description="Plural" />
     <Member Name="PluralDescription" Description="Beschreibung im Plural" />
     <Member Name="PressSearchForResults" Description="Drücken Sie Suchen für Ergebnisse..." />
