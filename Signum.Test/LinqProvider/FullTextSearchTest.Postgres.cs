@@ -12,7 +12,7 @@ public class FullTextSearchTest_Postgres
 
         WaitForFullTextIndex();
 
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
 
         if(!(Connector.Current is PostgreSqlConnector con))
             Assert.Skip("Skipping tests because not PostgreSqlConnector.");   

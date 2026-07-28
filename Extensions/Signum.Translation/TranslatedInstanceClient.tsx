@@ -84,7 +84,7 @@ export namespace TranslatedInstanceClient {
 
   
   export namespace API {
-  
+
     export function status(applyFilter?: boolean): Promise<TranslatedTypeSummary[]> {
       return ajaxGet({ url: "/api/translatedInstance?" + QueryString.stringify({ applyFilter }) });
     }

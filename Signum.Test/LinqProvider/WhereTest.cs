@@ -11,7 +11,7 @@ public class WhereTest
     public WhereTest()
     {
         MusicStarter.StartAndLoad();
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
     }
 
     [Fact]

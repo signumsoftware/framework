@@ -20,6 +20,13 @@ public static class ExcelExtensions
         return date.ToKind(kind);
     }
 
+    public static DateOnly FromExcelDateOnly(string date)
+    {
+        //A DateOnly is a pure calendar date and must NOT undergo any time-zone conversion,
+        //otherwise midnight gets shifted into the previous/next day (off-by-one).
+        return DateOnly.FromDateTime(DateTime.FromOADate(double.Parse(date, CultureInfo.InvariantCulture)));
+    }
+
     public static string ToExcelTime(TimeOnly timeOnly)
     {
         return timeOnly.ToTimeSpan().TotalDays.ToString(CultureInfo.InvariantCulture);
