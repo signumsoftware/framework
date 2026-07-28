@@ -29,7 +29,7 @@ export namespace WordClient {
   
     ChangeLogClient.registerChangeLogModule("Signum.Word", () => import("./Changelog"));
   
-    EvalClient.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
+    EvalClient.Options.checkEvalFindOptions.push(WordTemplateEntity.findOptions());
     register(QueryModel, {
       createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
       createFromEntities: (wt, lites) => {

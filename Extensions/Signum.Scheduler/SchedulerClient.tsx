@@ -36,10 +36,9 @@ export namespace SchedulerClient {
 
     Constructor.registerConstructor(ScheduleRuleWeekDaysEntity, async props => {
 
-      var holidayCalendar = (await Finder.fetchEntities({
-        queryName: HolidayCalendarEntity,
-        filterOptions: [{ token: HolidayCalendarEntity.token(a => a.entity.isDefault), value: true }]
-      })).firstOrNull();
+      var holidayCalendar = (await Finder.fetchEntities(HolidayCalendarEntity.fetchOptions(token => ({
+        filterOptions: [token(a => a.entity.isDefault).filter("EqualTo", true)]
+      })))).firstOrNull();
 
       return ScheduleRuleWeekDaysEntity.New({ calendar: holidayCalendar, ...props });
     })
@@ -63,10 +62,9 @@ export namespace SchedulerClient {
   
     var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
     es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
-      <SearchValueLine ctx={ctx} badgeColor="danger" isBadge="MoreThanZero" findOptions={{
-        queryName: SchedulerTaskExceptionLineEntity,
-        filterOptions: [{ token: SchedulerTaskExceptionLineEntity.token(e => e.schedulerTaskLog), value: ctx.value}],
-      }} />
+      <SearchValueLine ctx={ctx} badgeColor="danger" isBadge="MoreThanZero" findOptions={SchedulerTaskExceptionLineEntity.findOptions(token => ({
+        filterOptions: [token(e => e.schedulerTaskLog).filter("EqualTo", ctx.value)],
+      }))} />
     ]))
     Navigator.addSettings(es);
 

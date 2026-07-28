@@ -124,11 +124,10 @@ export default function ProcessPanelPage(): React.JSX.Element {
         </AccessibleTable>
         <br />
         <h2>{ProcessMessage.LatestProcesses.niceToString()}</h2>
-        <SearchControl findOptions={{
-          queryName: ProcessEntity,
-          orderOptions: [{ token: ProcessEntity.token(e => e.creationDate), orderType: "Descending" }],
+        <SearchControl findOptions={ProcessEntity.findOptions(token => ({
+          orderOptions: [token(e => e.creationDate).order("Descending")],
           pagination: { elementsPerPage: 10, mode: "Firsts" }
-        }}
+        }))}
           deps={[state?.executing.map(a => a.process.id!.toString()).join(",")]}
         />
       </div>

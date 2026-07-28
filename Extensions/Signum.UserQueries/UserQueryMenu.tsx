@@ -17,7 +17,7 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import { Operations } from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, toColumnOption } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
@@ -242,9 +242,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
 
     var parser = new Finder.TokenCompleter(sc.props.queryDescription);
+    const columnOptions = fo.columnOptions?.notNull().map(toColumnOption) ?? [];
     [
-      ...fo.columnOptions?.map(a => a?.token) ?? [],
-      ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
+      ...columnOptions.map(a => a.token),
+      ...columnOptions.map(a => a.summaryToken),
       ...fo.orderOptions?.map(a => a?.token) ?? [],
     ].notNull().forEach(a => parser.request(a.toString()));
 
@@ -263,7 +264,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       groupResults: fo.groupResults,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       includeDefaultFilters: fo.includeDefaultFilters,
-      columns: (fo.columnOptions ?? []).notNull().map(c => newMListElement(QueryColumnEmbedded.New({
+      columns: columnOptions.map(c => newMListElement(QueryColumnEmbedded.New({
         token: QueryTokenEmbedded.New({ tokenString: c.token.toString(), token: parser.get(c.token.toString(), stoColumn) }),
         displayName: typeof c.displayName == "function" ? c.displayName() : c.displayName,
         summaryToken: c.summaryToken ? QueryTokenEmbedded.New({ tokenString: c.summaryToken.toString(), token: parser.get(c.summaryToken.toString(), stoSummary) }) : null,

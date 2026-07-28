@@ -19,7 +19,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
         </span>
         } />
 
-      {!sc.value.isNew && <SearchValueLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, filterOptions: [{ token: EmailMessageEntity.token(a => a.entity.sentBy), value: sc.value }] }} />}
+      {!sc.value.isNew && <SearchValueLine ctx={sc} findOptions={EmailMessageEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.sentBy).filter("EqualTo", sc.value)] }))} />}
       <EntityDetail ctx={sc.subCtx(s => s.service)} />
     </div >
   );

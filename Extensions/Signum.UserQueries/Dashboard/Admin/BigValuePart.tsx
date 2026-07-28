@@ -18,14 +18,9 @@ export default function BigValuePart(p: { ctx: TypeContext<BigValuePartEntity> }
   return (
     <div >
       <EntityLine ctx={ctx.subCtx(p => p.userQuery)} mandatory={entityType ? "warning" : true} create={false}
-        findOptions={dashboardEntityType ? {
-          queryName: UserQueryEntity,
-          filterOptions: [{
-            token: UserQueryEntity.token(a => a.entity.entityType),
-            value: dashboardEntityType,
-            pinned: { active: "Checkbox_Checked" }
-          }]
-        } : undefined}
+        findOptions={dashboardEntityType ? UserQueryEntity.findOptions(token => ({
+          filterOptions: [token(a => a.entity.entityType).filter("EqualTo", dashboardEntityType, { pinned: { active: "Checkbox_Checked" } })]
+        })) : undefined}
         helpText={getEntityTypeHelpText(dashboardEntityType, ctx.value.userQuery?.entityType)}
         onChange={() => {
           ctx.value.valueToken = null;

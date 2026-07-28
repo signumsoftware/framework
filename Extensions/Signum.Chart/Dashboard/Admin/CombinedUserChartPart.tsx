@@ -7,8 +7,8 @@ import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 import { getEntityTypeHelpText } from '../../../Signum.Dashboard/Admin/EntityTypeRelatedHelpText';
 
-export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity> }): React.JSX.Element {
-  const ctx = p.ctx;
+export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUserChartPartEntity>, smallMode?: boolean }): React.JSX.Element {
+  const ctx = p.smallMode ? p.ctx.subCtx({ formGroupStyle: "Basic" }) : p.ctx;
   const dashboardEntityType = ctx.findParentCtx(DashboardEntity).value.entityType;
 
   return (
@@ -18,21 +18,12 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
           property: p => p.userChart,
           template: (ectx) =>
             <EntityLine ctx={ectx.subCtx(p => p.userChart)}
-              findOptions={{
-                queryName: UserChartEntity,
+              findOptions={UserChartEntity.findOptions(token => ({
                 filterOptions: [
-                  {
-                    token: UserChartEntity.token(a => a.entity.chartScript.key),
-                    operation: "IsIn",
-                    value: [D3ChartScript.Columns.key, D3ChartScript.Line.key]
-                  },
-                  ...(dashboardEntityType ? [{
-                    token: UserChartEntity.token(a => a.entity.entityType),
-                    value: dashboardEntityType,
-                    pinned: { active: "Checkbox_Checked" as const }
-                  }] : [])
+                  token(a => a.entity.chartScript.key).filter("IsIn", [D3ChartScript.Columns.key, D3ChartScript.Line.key]),
+                  ...(dashboardEntityType ? [token(a => a.entity.entityType).filter("EqualTo", dashboardEntityType, { pinned: { active: "Checkbox_Checked" as const } })] : [])
                 ]
-              }}
+              }))}
               helpText={getEntityTypeHelpText(dashboardEntityType, ectx.value.userChart?.entityType)}
             />,
           headerHtmlAttributes: { style: { width: "70%" } },
@@ -46,13 +37,13 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
       />
 
       <div className="row">
-        <div className="col-sm-6">
+        <div className={p.smallMode ? "col-12" : "col-sm-6"}>
           <CheckboxLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
           <CheckboxLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
         </div>
-        <div className="col-sm-6">
+        <div className={p.smallMode ? "col-12" : "col-sm-6"}>
             <AutoLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
         </div>
       </div>

@@ -9,6 +9,7 @@ import { isModifiableEntity } from '@framework/Signum.Entities';
 import { useController } from '@framework/Lines/LineBase';
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase';
 import { LinkButton } from '@framework/Basics/LinkButton';
+import { useSize } from '@framework/Hooks';
 
 
 export interface IGridEntity {
@@ -283,9 +284,10 @@ export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(pro
 }
 
 export interface EntityGridItemProps {
-  title?: React.ReactElement<any>;
-  children?: React.ReactNode;
+  title?: (smallMode: boolean) => React.ReactElement<any>;
+  children?: (smallMode: boolean) => React.ReactNode;
   customColor?: string;
+  sizeDeps?: React.DependencyList;
   onResizerDragStart?: (resizer: "left" | "right", e: React.DragEvent<any>) => void;
   onTitleDragStart?: (e: React.DragEvent<any>) => void;
   onTitleDragEnd?: (e: React.DragEvent<any>) => void;
@@ -296,8 +298,11 @@ export interface EntityGridItemProps {
 export function EntityGridItem(p: EntityGridItemProps): React.JSX.Element {
   var style = p.customColor == null ? "light" : "customColor";
 
+  const { size, setContainer } = useSize({ deps: p.sizeDeps, avoidReset: true });
+  const smallMode = size != null && size.width < 500;
+
   return (
-    <div className={classes("card", "shadow-sm")}>
+    <div className={classes("card", "shadow-sm")} ref={setContainer}>
       <div className={classes("card-header",
         style != "customColor" && ("bg-" + style)
       )} style={{ backgroundColor: p.customColor ?? undefined }}
@@ -310,10 +315,10 @@ export function EntityGridItem(p: EntityGridItemProps): React.JSX.Element {
             <FontAwesomeIcon aria-hidden={true} icon="xmark" />
           </LinkButton>
         }
-        {p.title}
+        {p.title?.(smallMode)}
       </div>
       <div className="card-body">
-        {p.children}
+        {p.children?.(smallMode)}
       </div>
       {p.onResizerDragStart &&
         <div className="sf-leftHandle" draggable={true}

@@ -90,20 +90,16 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                   {!ctx.value.isNew &&
                     <div>
                       <h3 className="mt-0 h5">{UserAssetMessage.UsedBy.niceToString()}</h3>
-                      <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarMenuEntity, filterOptions: [{ token: ToolbarMenuEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
-                      <SearchValueLine ctx={ctx4} findOptions={{ queryName: ToolbarEntity, filterOptions: [{ token: ToolbarEntity.token(a => a.entity.elements).any().append(a => a.content), value: ctx.value }] }} />
-                      <SearchValueLine ctx={ctx4} findOptions={{
-                        queryName: DashboardEntity,
+                      <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+                      <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+                      <SearchValueLine ctx={ctx4} findOptions={DashboardEntity.findOptions(token => ({
                         filterOptions: [
-                          {
-                            token: DashboardEntity.token(a => a.entity.parts).any(), groupOperation: "Or",
-                            filters: [
-                              { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(BigValuePartEntity).append(a => a.userQuery), value: ctx.value },
-                              { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(UserQueryPartEntity).append(a => a.userQuery), value: ctx.value },
-                            ]
-                          }
+                          token(a => a.entity.parts).any().filterGroup("Or", {}, t => [
+                              t(a => a.content).cast(BigValuePartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value),
+                              t(a => a.content).cast(UserQueryPartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value),
+                            ])
                         ]
-                      }} />
+                      }))} />
                     </div>
                   }
                 </div>
@@ -251,10 +247,9 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
     if (!ctx.value.isNew)
       fos.push({ token: UserQueryEntity.token(e => e.entity), operation: "DistinctTo", value: ctx.value });
 
-    const result = {
-      queryName: UserQueryEntity,
+    const result = UserQueryEntity.findOptions(token => ({
       filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
-    } as FindOptions;
+    })) as FindOptions;
 
     return result;
   }

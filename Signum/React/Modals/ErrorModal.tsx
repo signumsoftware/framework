@@ -203,11 +203,23 @@ ErrorModal.register = () => {
   };
 }
 
+function isOutdatedClientError(error: any): boolean {
+  const message = error?.message as string | undefined;
+
+  if (message == null)
+    return false;
+
+  // A new version has been deployed and the old hashed asset filenames no longer exist.
+  // Covers webpack's "Loading chunk ..." and Vite's "Failed to fetch dynamically imported module ..." / "error loading dynamically imported module ...".
+  return /^Loading chunk/i.test(message) ||
+    /(Failed to fetch|error loading) dynamically imported module/i.test(message);
+}
+
 ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): Promise<void> => {
   if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
-  if (new RegExp(/^Loading chunk?/i).test(error.message))
+  if (isOutdatedClientError(error))
     return MessageModal.show({
       title: ConnectionMessage.OutdatedClientApplication.niceToString(),
       message:

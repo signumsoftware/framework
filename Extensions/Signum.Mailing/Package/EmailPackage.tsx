@@ -13,15 +13,11 @@ export default function EmailPackage(p : { ctx: TypeContext<EmailPackageEntity> 
       <AutoLine ctx={e.subCtx(f => f.name)} readOnly={true} />
       <fieldset>
         <legend>{EmailMessageEntity.nicePluralName()}</legend>
-        <SearchControl findOptions={{
-          queryName: EmailMessageEntity,
+        <SearchControl findOptions={EmailMessageEntity.findOptions(token => ({
           filterOptions: [
-            {
-              token: EmailMessageEntity.token(e => e.entity).mixin(EmailMessagePackageMixin).append(e => e.package),
-              value: e.value
-            }
+            token(e => e.entity).mixin(EmailMessagePackageMixin).append(e => e.package).filter("EqualTo", e.value)
           ]
-        }} />
+        }))} />
       </fieldset>
     </div>
   );

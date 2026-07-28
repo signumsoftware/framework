@@ -33,15 +33,13 @@ export namespace DynamicViewClient {
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
     Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
   
-    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
-      queryName: DynamicViewEntity,
-      filterOptions: [{ token: DynamicViewEntity.token(a => a.entityType!.cleanName), value: type}]
-    }} />);
+    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={DynamicViewEntity.findOptions(token => ({
+      filterOptions: [token(a => a.entityType!.cleanName).filter("EqualTo", type)]
+    }))} />);
   
-    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
-      queryName: DynamicViewSelectorEntity,
-      filterOptions: [{ token: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName), value: type}]
-    }} />);
+    EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={DynamicViewSelectorEntity.findOptions(token => ({
+      filterOptions: [token(a => a.entityType!.cleanName).filter("EqualTo", type)]
+    }))} />);
   
     EvalClient.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [
       { token: t.append(p => p.entity.viewContent), type: "JSon" },

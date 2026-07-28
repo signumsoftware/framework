@@ -50,13 +50,12 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
   function renderCount(ctx: StyleContext, p: PredictorEntity, usage: PredictorColumnUsage) {
     return (
       <FormGroup ctx={ctx} label={PredictorColumnUsage.niceToString(usage) + " columns"}>
-        {inputId => p.state != "Trained" ? <FormControlReadonly id={inputId} ctx={ctx}>?</FormControlReadonly> : <SearchValue isBadge={true} isLink={true} findOptions={{
-          queryName: PredictorCodificationEntity,
+        {inputId => p.state != "Trained" ? <FormControlReadonly id={inputId} ctx={ctx}>?</FormControlReadonly> : <SearchValue isBadge={true} isLink={true} findOptions={PredictorCodificationEntity.findOptions(token => ({
           filterOptions: [
-            { token: PredictorCodificationEntity.token(e => e.predictor), value: p },
-            { token: PredictorCodificationEntity.token(e => e.usage), value: usage }
+            token(e => e.predictor).filter("EqualTo", p),
+            token(e => e.usage).filter("EqualTo", usage)
           ]
-        }} />}
+        }))} />}
       </FormGroup>
     );
   }

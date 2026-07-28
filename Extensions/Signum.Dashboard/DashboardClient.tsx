@@ -92,12 +92,11 @@ export namespace DashboardClient {
       if (tm == null)
         throw new Error("Call ToolbarClient before DasboardClient");
       tm.overrideView(rm => rm.insertAfterElement(SearchValueLine, scl => (scl.props.findOptions as FindOptions)?.queryName == ToolbarSwitcherEntity, scl => [
-        <SearchValueLine ctx={scl.props.ctx} findOptions={{
-          queryName: DashboardEntity,
+        <SearchValueLine ctx={scl.props.ctx} findOptions={DashboardEntity.findOptions(token => ({
           filterOptions: [
-            { token: DashboardEntity.token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu), value: rm.ctx.value },
+            token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu).filter("EqualTo", rm.ctx.value),
           ]
-        }} />
+        }))} />
       ]));
 
       registerRenderer(ToolbarMenuPartEntity, {

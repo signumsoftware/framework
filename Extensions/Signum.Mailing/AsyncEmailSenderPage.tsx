@@ -76,11 +76,10 @@ export default function AsyncEmailSenderPage(): React.JSX.Element {
       </div>
       <br />
       <h2>{EmailMessageEntity.niceName()}</h2>
-      <SearchControl findOptions={{
-        queryName: EmailMessageEntity,
-        orderOptions: [{ token: EmailMessageEntity.token(e => e.entity.creationDate), orderType: "Descending" }],
+      <SearchControl findOptions={EmailMessageEntity.findOptions(token => ({
+        orderOptions: [token(e => e.entity.creationDate).order("Descending")],
         pagination: { elementsPerPage: 10, mode: "Firsts" }
-      }} deps={[state.lastExecutionFinishedOn]}/>
+      }))} deps={[state.lastExecutionFinishedOn]}/>
     </div>
   );
 }

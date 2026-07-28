@@ -180,10 +180,9 @@ export namespace ChartClient {
     else
       fos.push({ token: UserQueryEntity.token(e => e.entityType?.entity?.cleanName), value: qd!.columns["Entity"].type.name });
   
-    const result = {
-      queryName: UserQueryEntity,
+    const result = UserQueryEntity.findOptions(token => ({
       filterOptions: fos.map(fo => { fo.frozen = true; return fo; }),
-    } as FindOptions;
+    })) as FindOptions;
   
     return result;
   }
