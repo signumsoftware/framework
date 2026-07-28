@@ -9,7 +9,7 @@ public class AllAnyContainsTest
     public AllAnyContainsTest()
     {
         MusicStarter.StartAndLoad();
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
     }
 
     [Fact]

@@ -14,7 +14,7 @@ public class FullTextSearchTest_SqlServer
 
         WaitForFullTextIndex();
 
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
 
         if(!(Connector.Current is SqlServerConnector con))
             throw SkipException.ForSkip("Skipping tests because not SQL Server.");

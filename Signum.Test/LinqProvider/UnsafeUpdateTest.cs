@@ -10,7 +10,7 @@ public class UpdateUpdateTest
     public UpdateUpdateTest()
     {
         MusicStarter.StartAndLoad();
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
         Schema.Current.EntityEvents<LabelEntity>().PreUnsafeUpdate += (update, query) => null;
         Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeUpdate += (update, query) => null;
         Schema.Current.EntityEvents<BandEntity>().PreUnsafeUpdate += (update, query) => null;

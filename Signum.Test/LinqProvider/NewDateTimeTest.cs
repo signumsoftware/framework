@@ -5,7 +5,7 @@ public class NewDateTimeTest
     public NewDateTimeTest()
     {
         MusicStarter.StartAndLoad();
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
     }
 
 
