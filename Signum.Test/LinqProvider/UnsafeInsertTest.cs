@@ -11,7 +11,7 @@ public class UpdateInsertTest
     {
         MusicStarter.StartAndLoad();
         Schema.Current.EntityEvents<AlbumEntity>().PreUnsafeInsert += (query, constructor, entityQuery) => constructor;
-        Connector.CurrentLogger = new DebugTextWriter();
+        Connector.CurrentLogger = SqlDumpTextWriter.Enabled ? new SqlDumpTextWriter() : new DebugTextWriter();
     }
 
     [Fact]
