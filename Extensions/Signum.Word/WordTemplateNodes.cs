@@ -415,7 +415,7 @@ public class TokenNode : BaseNode
                 obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
                 obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
                 obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
-                obj?.ToString();
+                TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
 
             if (text != null && text.Contains('\n'))
             {

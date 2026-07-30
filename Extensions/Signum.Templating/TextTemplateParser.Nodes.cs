@@ -123,7 +123,7 @@ public static partial class TextTemplateParser
             var text = obj is Enum ? ((Enum)obj).NiceToString() :
                    obj is TimeSpan ts ? ts.ToString((Format ?? ValueProvider.Format)?.Replace(":", @"\:"), p.Culture) :
                    obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
-                   obj?.ToString();
+                   TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
 
             p.StringBuilder.Append(p.IsHtml && !IsRaw && !(obj is HtmlString )? HttpUtility.HtmlEncode(text) : text);
         }
