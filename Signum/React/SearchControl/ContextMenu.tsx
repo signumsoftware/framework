@@ -8,7 +8,6 @@ import { useForceUpdate } from '../Hooks';
 export interface ContextMenuPosition {
   top: number;
   left: number;
-  maxTop?: number;
 }
 
 interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
@@ -43,7 +42,8 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
       let adjustedLeft = left;
 
       if (adjustedTop + menuHeight > viewportHeight) {
-        adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight -14);
+        // Flip up so the menu bottom stays inside the viewport, floored at the top edge.
+        adjustedTop = Math.max(14, viewportHeight - menuHeight - 14);
       }
 
       if (adjustedLeft + menuWidth > viewportWidth) {
@@ -52,7 +52,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
 
       setAdjustedPosition({ top: adjustedTop, left: adjustedLeft });
     }
-  }, [itemsCount, left, top, position.maxTop]);
+  }, [itemsCount, left, top]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -101,7 +101,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
   );
 };
 
-export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, container?: Element | null): ContextMenuPosition {
+export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>): ContextMenuPosition {
 
   const op = DomUtils.offsetParent(e.currentTarget);
 
@@ -110,7 +110,6 @@ export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, con
   var result = ({
     left: rec == null ? e.pageX : e.clientX - rec.left,
     top: rec == null ? e.pageY : e.clientY - rec.top,
-    maxTop: container?.getBoundingClientRect().top, //table's body top
   }) as ContextMenuPosition;
   return result;
 };
