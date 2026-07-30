@@ -24,7 +24,7 @@
     }
 
     .sf-html-editor .public-DraftEditor-content {
-        min-height: 140px;
+        min-height: var(--sf-html-editor-min-height, 140px);
         padding: 0 10px;
         outline: 0;
         /*background: var(--bs-body-bg);*/
