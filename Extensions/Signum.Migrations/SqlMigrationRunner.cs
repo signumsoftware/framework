@@ -44,7 +44,7 @@ public class SqlMigrationRunner
         SqlMigrations(autoRun: false);
     }
 
-    public static void SqlMigrations(bool autoRun)
+    public static void SqlMigrations(bool autoRun, bool force = false)
     {
         while (true)
         {
@@ -71,7 +71,7 @@ public class SqlMigrationRunner
             {
                 SetExecuted(list);
 
-                var outcome = Prompt(list, autoRun);
+                var outcome = Prompt(list, autoRun, force);
                 switch (outcome)
                 {
                     case PromptResult.Skip:
@@ -219,7 +219,7 @@ public class SqlMigrationRunner
     public const string DatabaseNameReplacement = "#DatabaseName#";
     public const string InitialMigrationComment = "Initial Migration";
 
-    private static PromptResult Prompt(List<MigrationInfo> migrations, bool autoRun)
+    private static PromptResult Prompt(List<MigrationInfo> migrations, bool autoRun, bool force)
     {
         Draw(migrations, null);
 
@@ -235,18 +235,25 @@ public class SqlMigrationRunner
 
         if (migrations.SkipWhile(a => a.IsExecuted).Any(a => a.IsExecuted))
         {
-            var str = "Possible merge conflict. There are old migrations in the folder that have not been executed!. You need to manually discard one migration branch.";
-            if (autoRun)
-                throw new InvalidOperationException(str);
+            if (force)
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Merge conflict found! Executing anyway because force = true");
+            }
+            else
+            {
+                var str = "Possible merge conflict. There are old migrations in the folder that have not been executed!. You need to manually discard one migration branch.";
+                if (autoRun)
+                    throw new InvalidOperationException(str);
+             
+                SafeConsole.WriteLineColor(ConsoleColor.Red, str);
+                Console.WriteLine();
+                Console.Write("Write '");
+                SafeConsole.WriteColor(ConsoleColor.White, "force");
+                Console.WriteLine("' to execute them anyway");
 
-            SafeConsole.WriteLineColor(ConsoleColor.Red, str);
-            Console.WriteLine();
-            Console.Write("Write '");
-            SafeConsole.WriteColor(ConsoleColor.White, "force");
-            Console.WriteLine("' to execute them anyway");
-
-            if (Console.ReadLine() != "force")
-                return PromptResult.Skip;
+                if (Console.ReadLine() != "force")
+                    return PromptResult.Skip;
+            }
         }
 
         if (migrations.All(a => a.IsExecuted))
