@@ -7,14 +7,17 @@ import { Lite, SearchMessage } from '@framework/Signum.Entities';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import * as AppContext from "@framework/AppContext"
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { useAPI } from '@framework/Hooks';
 import { ADGroupEntity } from './Signum.Authorization.AzureAD.ADGroup';
 import * as User from '../Signum.Authorization/Templates/User';
 import { UserEntity, UserLiteModel } from '../Signum.Authorization/Signum.Authorization';
 import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import { ResultRow } from '@framework/FindOptions';
-import { AzureADConfigurationEmbedded, AzureADQuery } from './Signum.Authorization.AzureAD';
+import { AzureADConfigurationEmbedded, AzureADMailboxStatus, AzureADQuery } from './Signum.Authorization.AzureAD';
 import { ActiveDirectoryMessage } from '../Signum.Authorization/Signum.Authorization.BaseAD';
 import { ActiveDirectoryClient } from '../Signum.Authorization/BaseAD/ActiveDirectoryClient';
+import { AzureADAuthenticator } from './AzureADAuthenticator';
+import { AuthClient } from '../Signum.Authorization/AuthClient';
 
 
 export namespace AzureADClient {
@@ -118,6 +121,38 @@ export namespace AzureADClient {
     });
   }
 
+  let mailboxStatusCache: { userKey: string | number | undefined, promise: Promise<AzureADMailboxStatus> } | undefined;
+
+  /** Server-side (Microsoft Graph) check of whether the current user can use the Outlook / Graph mailbox features.
+   *  Memoized per current user, so it auto-refreshes when the logged-in user changes. */
+  export function getCurrentUserMailboxStatus(): Promise<AzureADMailboxStatus> {
+    const userKey = AuthClient.currentUser()?.id;
+    if (mailboxStatusCache == null || mailboxStatusCache.userKey != userKey)
+      mailboxStatusCache = { userKey, promise: fetchCurrentUserMailboxStatus() };
+
+    return mailboxStatusCache.promise;
+  }
+
+  async function fetchCurrentUserMailboxStatus(): Promise<AzureADMailboxStatus> {
+    // Known client-side: a user without an ExternalId has no Active Directory account, so skip the server round-trip.
+    if (AuthClient.currentUser()?.externalId == null)
+      return "NoActiveDirectoryUser";
+
+    try {
+      const account = AzureADAuthenticator.getCurrentMsalAccount();
+      const accessToken = account ? await AzureADAuthenticator.getAccessToken() : null;
+      return await API.currentUserMailboxStatus(accessToken);
+    } catch (e) {
+      // Fail open: a token / network error must not block the feature (matches the previous behavior of not checking).
+      console.error("Could not determine the current user's mailbox status", e);
+      return "WithMailbox";
+    }
+  }
+
+  export function useCurrentUserMailboxStatus(): AzureADMailboxStatus | undefined {
+    return useAPI(() => getCurrentUserMailboxStatus(), [AuthClient.currentUser()?.id]);
+  }
+
   export function toExternalUser(row: ResultRow, scl: SearchControlLoaded): ActiveDirectoryClient.ExternalUser {
     const columns = scl.state.resultTable!.columns;
     return ({
@@ -138,6 +173,10 @@ export namespace AzureADClient {
     export const Options = { forceCacheInvalidationKey: undefined as string | undefined };
     export function cachedAzureUserPhotoUrl(size: number, oID: string): Promise<string | null> {
       return ajaxGet({ url: `/api/cachedAzureUserPhoto/${size}/${oID}` + (Options.forceCacheInvalidationKey ? ("?inv=" + Options.forceCacheInvalidationKey) : ""), cache: "default" });
+    }
+
+    export function currentUserMailboxStatus(accessToken: string | null): Promise<AzureADMailboxStatus> {
+      return ajaxPost({ url: `/api/auth/currentUserMailboxStatus` }, { accessToken });
     }
   }
 
