@@ -256,7 +256,8 @@ export type ChartParameter =
   "Zoom" |
   "Value" |
   "Percent" |
-  "Total";
+  "Total" |
+  "Legend";
 
 export const ChartParameterEmbedded: Type<ChartParameterEmbedded> = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
 export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
