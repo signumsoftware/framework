@@ -31,6 +31,12 @@ export interface AzureADConfigurationEmbedded extends BaseAD.BaseADConfiguration
   useDelegatedPermission: boolean;
 }
 
+export const AzureADMailboxStatus: EnumType<AzureADMailboxStatus> = new EnumType<AzureADMailboxStatus>("AzureADMailboxStatus");
+export type AzureADMailboxStatus =
+  "WithMailbox" |
+  "NoActiveDirectoryUser" |
+  "NoMailbox";
+
 export namespace AzureADQuery {
   export const ActiveDirectoryUsers: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryUsers");
   export const ActiveDirectoryGroups: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryGroups");

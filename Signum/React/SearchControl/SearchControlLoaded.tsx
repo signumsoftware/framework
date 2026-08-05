@@ -435,7 +435,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.setState({
       contextualMenu: {
-        position: getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
+        position: getMouseEventPosition(event),
         columnIndex,
         rowIndex,
         columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,

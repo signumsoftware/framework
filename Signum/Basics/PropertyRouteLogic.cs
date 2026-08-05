@@ -174,14 +174,17 @@ public static class PropertyRouteLogic
     {
         TypeEntity type = TypeLogic.TypeToEntity.GetOrThrow(route.RootType);
         string path = route.PropertyString();
-        return Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType.Is(type) && f.Path == path) ??
+
+        var prev = Schema.Current.CacheController<PropertyRouteEntity>()?.Enabled == true ? 
+            TryGetPropertyRouteEntity(type, path) :
+            Database.Query<PropertyRouteEntity>().SingleOrDefaultEx(f => f.RootType.Is(type) && f.Path == path);
+
+        //TODO: Consider using CacheLogic.IsDisabledInTransaction to make it faster (needs to be moved to framework)
+        return prev ??
              new PropertyRouteEntity
              {
                  RootType = type,
                  Path = path
              };
     }
-
-
-
 }
