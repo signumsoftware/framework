@@ -282,13 +282,31 @@ public class ImporterFromExcel
                         }
                         else
                         {
-                            var colIndex = pq.Columns.IndexOf(token);
-                            var cell = cells.TryGetC(colIndex);
-                            var strValue = cell == null ? null : document.GetCellValue(cell);
-                            object? value = ParseExcelValue(token, strValue, row, colIndex);
-                            var getSet = columnGetterSetter.GetOrThrow(token);
-                            value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
-                            return value;
+                            // A value or lite element. If a child column navigates into the lite element (e.g.
+                            // Element.UserName), the element token itself is not a query column, so resolve the
+                            // referenced entity by that property instead of reading the element column directly.
+                            var navColumn = node.Children.Select(a => a.Value!).SingleOrDefault(c => c is not CollectionElementToken && !c.Equals(token));
+                            if (navColumn != null)
+                            {
+                                if (previousValue != null)
+                                    return previousValue; //Merge: the element already matches by key; a lite reference has nothing else to update.
+
+                                var navIndex = pq.Columns.IndexOf(navColumn);
+                                var navCell = cells.TryGetC(navIndex);
+                                var navStr = navCell == null ? null : document.GetCellValue(navCell);
+                                var navValue = ParseExcelValue(navColumn, navStr, row, navIndex);
+                                return navValue == null ? null : FindLiteByColumn(cleanType, token, navColumn, navValue);
+                            }
+                            else
+                            {
+                                var colIndex = pq.Columns.IndexOf(token);
+                                var cell = cells.TryGetC(colIndex);
+                                var strValue = cell == null ? null : document.GetCellValue(cell);
+                                object? value = ParseExcelValue(token, strValue, row, colIndex);
+                                var getSet = columnGetterSetter.GetOrThrow(token);
+                                value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
+                                return value;
+                            }
                         }
                     }
 
@@ -316,6 +334,11 @@ public class ImporterFromExcel
                         var cleanType = token.Type.CleanType();
 
                         var elementColumns = node.Children.Where(a => a.Value is not CollectionElementToken).ToList();
+                        // A value/enum element (e.g. MList<LeadFederalAgency>), or a lite matched by the element
+                        // itself, has no child columns — the element token IS the data column. Include it so the
+                        // row isn't wrongly seen as an empty collection (which would drop every element).
+                        if (pq.Columns.Contains(node.Value!))
+                            elementColumns.Insert(0, node);
                         var rgRows = rg.ToList();
                         var filledRows = rgRows.Where(r => !IsCollectionRowEmpty(elementColumns, r)).ToList();
 
@@ -535,21 +558,41 @@ public class ImporterFromExcel
         }
         else
         {
-            var lastLocal = localExtraTokens.Last();
-            var pr = lastLocal.GetPropertyRoute()!;
-            var func = pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+            // The key navigates through a Lite, so read the lite locally and resolve the remaining columns from
+            // the database. When there are no local tokens the MList element itself is the lite (e.g. a
+            // MList<Lite<UserEntity>> matched by UserName), so the local getter is the element itself and the
+            // split point is the collection-element token.
+            Func<object, object> func;
+            Type type;
+            string keyPathAfterLite;
+            string splitDescription;
 
-            var type = pr.Type.CleanType();
+            if (localExtraTokens.Count == 0)
+            {
+                func = elem => elem;
+                type = elementToken.Type.CleanType();
+                keyPathAfterLite = keyToken.FullKey().After(elementToken.FullKey());
+                splitDescription = elementToken.FullKey();
+            }
+            else
+            {
+                var lastLocal = localExtraTokens.Last();
+                var pr = lastLocal.GetPropertyRoute()!;
+                func = pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+                type = pr.Type.CleanType();
+                keyPathAfterLite = keyToken.FullKey().After(lastLocal.FullKey());
+                splitDescription = pr.ToString()!;
+            }
 
             var qd = QueryLogic.Queries.QueryDescription(type);
             var entityToken = QueryUtils.Parse("Entity", qd, 0);
-            var columnToken = QueryUtils.Parse("Entity" + keyToken.FullKey().After(lastLocal.FullKey()), qd, 0);
+            var columnToken = QueryUtils.Parse("Entity" + keyPathAfterLite, qd, 0);
 
             return elem =>
             {
                 var lite = func(elem);
                 if (lite == null)
-                    throw new ApplicationException($"{pr} returned null");
+                    throw new ApplicationException($"{splitDescription} returned null");
 
                 var result =  InDBToken((Lite<Entity>)lite, entityToken, columnToken);
                 if (result == null)
@@ -578,6 +621,30 @@ public class ImporterFromExcel
         });
 
         return rt.Rows[0][0];
+    }
+
+    // Resolves a lite collection element (e.g. an item of MList<Lite<UserEntity>>) from a column that navigates
+    // into the lite (e.g. Element.UserName): finds the referenced entity whose navigated property equals the
+    // imported value and returns its lite. This is the reverse of the InDBToken lookup used to read the key.
+    static Lite<Entity> FindLiteByColumn(Type cleanType, QueryToken elementToken, QueryToken navColumn, object value)
+    {
+        var qd = QueryLogic.Queries.QueryDescription(cleanType);
+        var columnToken = QueryUtils.Parse("Entity" + navColumn.FullKey().After(elementToken.FullKey()), qd, 0);
+
+        var entities = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
+        {
+            QueryName = cleanType,
+            Filters = new List<Filter> { new FilterCondition(columnToken, FilterOperation.EqualTo, value) },
+            Orders = new List<Order>(),
+            Count = 2,
+        }).ToList();
+
+        if (entities.Count == 0)
+            throw new ApplicationException($"No {cleanType.NiceName()} found with {columnToken} = '{value}'");
+        if (entities.Count > 1)
+            throw new ApplicationException($"Multiple {cleanType.NiceName()} found with {columnToken} = '{value}'");
+
+        return entities[0].ToLite();
     }
 
     //A collection matchBy key parsed from Excel is the unwrapped primitive (e.g. int), while an in-memory element's
