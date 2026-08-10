@@ -29,6 +29,12 @@ public class PieChartScript : ChartScript
                 new ChartScriptParameter(ChartParameter.Value, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|OnLabel|OnArc") },
                 new ChartScriptParameter(ChartParameter.Percent, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|OnLabel|OnArc") },
                 new ChartScriptParameter(ChartParameter.Total, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
+            },
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Arrange)
+            {
+                // A side legend listing every section with its colour and value. Off by default so existing
+                // pie charts are unchanged; opt in per chart.
+                new ChartScriptParameter(ChartParameter.Legend, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Right") },
             }
         };
     }

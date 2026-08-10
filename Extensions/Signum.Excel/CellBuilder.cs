@@ -104,7 +104,7 @@ public class CellBuilder
             template == DefaultStyle.Decimal ? ExcelExtensions.ToExcelNumber(Convert.ToDecimal(value)) :
             template == DefaultStyle.Boolean ? ExcelExtensions.ToExcelNumber((bool)value ? 1 : 0) :
             forImport && template == DefaultStyle.Enum ? value.ToString()! :
-            template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
+            template == DefaultStyle.Enum && value is Enum enumValue ? enumValue.NiceToString() :
             forImport && value is Lite<Entity> lite ? lite.KeyLong() :
             value is string s ? s.Replace("\n", "\n").Replace("\n", "\n") :
             value.ToString()!;

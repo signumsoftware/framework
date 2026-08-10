@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Text.Json;
 using Signum.API.Json;
 using Signum.API.Filters;
 using Signum.API;
 using Signum.API.Controllers;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http;
 
 namespace Signum.Excel;
 
@@ -60,7 +62,7 @@ public class ExcelController : ControllerBase
     }
 
     [HttpPost("api/excel/import/{queryKey}"), ProfilerActionSplitter("queryKey")]
-    public IAsyncEnumerable<ImportResult> ImportFromExcel(string queryKey, [Required, FromBody] ImportFromExcelRequest request)
+    public async Task ImportFromExcel(string queryKey, [Required, FromBody] ImportFromExcelRequest request)
     {
         HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
 
@@ -70,7 +72,29 @@ public class ExcelController : ControllerBase
 
         Type mainType = TypeLogic.GetType(request.ImportModel.TypeName);
 
-        return ImporterFromExcel.ImportExcel(qr, request.ImportModel,  request.GetOperationSymbol(mainType));
+        // The client reads this response with jsonObjectStream, which parses ONE JSON object PER LINE, so the
+        // rows have to be written as NDJSON. Returning IAsyncEnumerable let MVC serialize them as a single
+        // JSON array with the global WriteIndented = true (SignumServer), which spreads every object over
+        // many lines: the client then parsed nothing, reported zero results, and a failed import looked
+        // exactly like a successful one — no errors listed, no rows marked. Same fix as ForeachNDJson in
+        // OperationController, which serializes its progress stream compactly for this very reason.
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            IncludeFields = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        };
+        options.Converters.AddRange(SignumServer.JsonSerializerOptions.Converters);
+
+        Response.ContentType = "application/x-ndjson";
+
+        await foreach (var result in ImporterFromExcel.ImportExcel(qr, request.ImportModel, request.GetOperationSymbol(mainType)))
+        {
+            var json = JsonSerializer.Serialize(result, options);
+
+            await Response.WriteAsync(json + "\n");
+            await Response.Body.FlushAsync();
+        }
     }
 }
 

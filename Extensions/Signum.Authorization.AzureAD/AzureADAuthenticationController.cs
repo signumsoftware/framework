@@ -22,6 +22,12 @@ public class AzureADAuthenticationController : ControllerBase
         return new LoginResponse { userEntity = user, token = token, authenticationType = "azureAD" };
     }
 
+    [HttpPost("api/auth/currentUserMailboxStatus")]
+    public Task<AzureADMailboxStatus> CurrentUserMailboxStatus([FromBody, Required] MailboxStatusRequest request, CancellationToken token)
+    {
+        return AzureADLogic.GetCurrentUserMailboxStatusAsync(request.AccessToken, token);
+    }
+
     public static TimeSpan PictureMaxAge = new TimeSpan(7, 0, 0);
 
     [HttpGet("api/cachedAzureUserPhoto/{size}/{oID}")]
@@ -61,5 +67,10 @@ public class AzureADAuthenticationController : ControllerBase
 public class LoginWithAzureADRequest
 {
     public string idToken;
-    public string accessToken; 
+    public string accessToken;
+}
+
+public class MailboxStatusRequest
+{
+    public string? AccessToken { get; set; }
 }

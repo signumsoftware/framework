@@ -268,7 +268,7 @@ function internalRadioGroup<V extends string | number | boolean | null>(c: EnumL
     <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
       {inputId => <>
         {getTimeMachineIcon({ ctx: p.ctx })}
-        <div style={getColumnStyle()}>
+        <div className={classes(c.mandatoryClass)} style={getColumnStyle()}>
           {optionItems.map((oi, i) =>
             <label key={i} htmlFor={baseId + "-" + i} {...c.props.valueHtmlAttributes} className={classes("sf-radio-element", c.getErrorClass())}>
               <input id={baseId + "-" + i} type="radio" value={oi.value} checked={p.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={p.ctx.readOnly} />

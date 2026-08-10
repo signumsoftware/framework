@@ -27,6 +27,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
   var pValue= parameters.Value;
   var pPercent = parameters.Percent;
   var pTotal = parameters.Total;
+  var pLegend = parameters.Legend; // undefined on charts saved before this parameter existed → treated as off
   var dataTotal = data.rows.sum(r => valueColumn.getValue(r));
 
   var size = d3.scaleLinear()
@@ -92,7 +93,8 @@ export default function renderPie({ data, width, height, parameters, loading, on
               </path>
               <SliceText value={pValue == 'OnArc' ? valueText : undefined} percent={pPercent == 'OnArc' ? percentText : undefined} slice={slice} innerRadius={rInner} outerRadius={outerRadious} color={textColor} />
               <g key={slice.index} className="color-legend">
-                {arcHeight > 20 && <TextValueRectangle className="color-legend sf-chart-strong sf-transition"
+                {/* The arc name/value labels are redundant once the side legend is shown, so drop them then. */}
+                {pLegend != "Right" && arcHeight > 20 && <TextValueRectangle className="color-legend sf-chart-strong sf-transition"
                   rectangleAtts={{ fill: "transparent" }}
                   rectMaxWidth={(width / 2) - Math.abs(Math.sin(m) * outerRadious * legendRadius)}
                   isRight={isRight}
@@ -121,6 +123,24 @@ export default function renderPie({ data, width, height, parameters, loading, on
           {numFormat.format(dataTotal)}
         </TextRectangle>}
       </g>
+      {pLegend == "Right" &&
+        <g className="pie-legend" transform={translate(8, 8)}>
+          {orderedPie.map((slice, i) => {
+            var active = detector?.(slice.data);
+            var swatch = keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data));
+            return (
+              <g key={slice.index} transform={translate(0, i * 20)}
+                cursor="pointer" opacity={active == false ? .5 : undefined}
+                onClick={e => onDrillDown(slice.data, e)}>
+                <rect width={12} height={12} y={2} rx={2} fill={swatch} />
+                <text x={18} y={12} className="sf-chart-strong"
+                  fontWeight={active == true ? "bold" : undefined}>
+                  {keyColumn.getValueNiceName(slice.data)}: {numFormat.format(valueColumn.getValue(slice.data))}
+                </text>
+              </g>
+            );
+          })}
+        </g>}
       <InitialMessage data={data} x={width / 2} y={height / 2} loading={loading} />
     </svg>
   );
