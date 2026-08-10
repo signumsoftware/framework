@@ -91,11 +91,21 @@ public static class WindowsADLogic
             return new PrincipalContext(ContextType.Domain, config.DomainName);
     }
 
+    static DirectoryEntry GetDirectoryEntry()
+    {
+        var config = ((WindowsADAuthorizer)AuthLogic.Authorizer!).GetConfig()!;
+
+        if (config.DirectoryRegistry_Username.HasText() && config.DirectoryRegistry_Password.HasText())
+            return new DirectoryEntry("LDAP://" + config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password);
+        else
+            return new DirectoryEntry("LDAP://" + config.DomainName);
+    }
+
     public static Task<List<ExternalUser>> SearchUser(string searchUserName, int limit)
     {
-        using (var pc = GetPrincipalContext())
+        using (var searchRoot = GetDirectoryEntry())
         {
-            using (var searcher = new DirectorySearcher())
+            using (var searcher = new DirectorySearcher(searchRoot))
             {
                 // Construct the LDAP OR filter
                 var filters = new List<string>();
@@ -281,9 +291,7 @@ public static class WindowsADLogic
 
     public static bool CheckUserActive(string username)
     {
-        var config = ((WindowsADAuthorizer)AuthLogic.Authorizer!).GetConfig();
-
-        using (var domainContext = new PrincipalContext(ContextType.Domain, config!.DomainName))
+        using (var domainContext = GetPrincipalContext())
         {
             using (var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, username))
             {
