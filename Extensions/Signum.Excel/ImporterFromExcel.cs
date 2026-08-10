@@ -135,14 +135,23 @@ public class ImporterFromExcel
                     {
                         if (rg.Key != null)
                         {
-
-                            entity = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
+                            //Two is enough to tell "none", "one" and "ambiguous" apart.
+                            var matches = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
                             {
                                 QueryName = request.QueryName,
                                 Filters = request.Filters.And(new FilterCondition(matchBy, FilterOperation.EqualTo, rg.Key)).ToList(),
                                 Orders = new List<Order>(),
-                                Count = null,
-                            }).SingleOrDefaultEx()!;
+                                Count = 2,
+                            }).ToList();
+
+                            //A match-by column with repeated values can not identify the row to update. Saying so
+                            //beats SingleOrDefaultEx's "Sequence contains more than one Entity", which names neither
+                            //the column nor the value and reads like an internal error.
+                            if (matches.Count > 1)
+                                throw new ApplicationException(ImportFromExcelMessage.MoreThanOne0FoundInThisQueryWith1EqualsTo2
+                                    .NiceToString(pq.MainType.NiceName(), matchBy, rg.Key));
+
+                            entity = matches.SingleOrDefaultEx()!;
                         }
                         else
                         {
@@ -434,7 +443,11 @@ public class ImporterFromExcel
                 tr.Commit();
         }
 
-        if (!model.Transactional)
+        //Transactional runs hold their rows back until the transaction has been committed or rolled back, and
+        //report them all here. The condition used to be inverted, so a transactional import reported nothing at
+        //all: the rows were collected into transactionalResults and then never yielded, leaving the caller with
+        //an empty result list whether it had succeeded or failed.
+        if (model.Transactional)
         {
             foreach (var res in transactionalResults)
             {
