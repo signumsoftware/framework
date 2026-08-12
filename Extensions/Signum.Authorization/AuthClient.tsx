@@ -178,7 +178,8 @@ export namespace AuthClient {
           setAuthToken(undefined, undefined);
           setCurrentUser(undefined);
           AppContext.resetUI();
-          AppContext.navigate("/auth/login");
+          if (AppContext._internalRouter) //during autoLogin the router does not exist yet, the caller falls back to the login form
+            AppContext.navigate("/auth/login");
         }
   
         throw e;
