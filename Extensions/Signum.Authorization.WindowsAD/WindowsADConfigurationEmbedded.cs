@@ -11,9 +11,6 @@ public class WindowsADConfigurationEmbedded : BaseADConfigurationEmbedded
     public bool LoginWithActiveDirectoryRegistry { get; set; }
 
     [StringLengthValidator(Max = 200)]
-    public string? SystemHouse { get; set; }
-
-    [StringLengthValidator(Max = 200)]
     public string? DomainName { get; set; }
 
     public string? DirectoryRegistry_Username { get; set; }

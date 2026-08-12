@@ -12,7 +12,6 @@ export const WindowsADConfigurationEmbedded: Type<WindowsADConfigurationEmbedded
 export interface WindowsADConfigurationEmbedded extends BaseAD.BaseADConfigurationEmbedded {
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
-  systemHouse: string | null;
   domainName: string | null;
   directoryRegistry_Username: string | null;
   directoryRegistry_Password: string | null;

@@ -12,7 +12,6 @@ export default function WindowsADConfiguration(p: { ctx: TypeContext<WindowsADCo
       <CheckboxLine ctx={ctx.subCtx(n => n.loginWithWindowsAuthenticator)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
       <CheckboxLine ctx={ctx.subCtx(n => n.loginWithActiveDirectoryRegistry)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
       <AutoLine ctx={ctx.subCtx(n => n.domainName)} />
-      <AutoLine ctx={ctx.subCtx(n => n.systemHouse)} />
       <AutoLine ctx={ctx.subCtx(ad => ad.directoryRegistry_Username)} helpText="Required for DirectoryServices if the IIS user is not in AD" />
       <AutoLine ctx={ctx.subCtx(ad => ad.directoryRegistry_Password)} />
 
