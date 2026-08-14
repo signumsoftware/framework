@@ -501,7 +501,12 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
   );
 }
 
-function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, hiddenGuids?: Set<string>): ToolbarResponse<any>[] {
+/**
+ * Drops the elements that should not be shown for `selectedEntity`: the ones in `hiddenGuids`
+ * (see `ToolbarClient.entityElementFilters`) and the ones querying a type the entity's domain
+ * does not allow, then cleans up the dividers/headers left dangling.
+ */
+export function simplifyForEntity(resp: ToolbarResponse<any>[], selectedEntity: Lite<Entity>, hiddenGuids?: Set<string>): ToolbarResponse<any>[] {
   var result = resp
     .map(tr => {
 
