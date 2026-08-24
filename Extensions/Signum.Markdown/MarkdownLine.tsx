@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ErrorBoundary } from '@framework/Components';
+import { classes } from '@framework/Globals';
 import Markdown, { Options } from 'react-markdown';
 import { TextAreaLine, TextAreaLineProps } from '@framework/Lines/TextAreaLine';
 import { FormGroup } from '@framework/Lines/FormGroup';
@@ -60,7 +61,7 @@ export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAt
   return (
     <ErrorBoundary>
       <FormGroup ctx={ctx} label={<>{markdownHelp}{label ?? ctx.niceName()}</>} labelIcon={isReadOnly ? undefined : toggle} helpTextOnTop={helpTextOnTopResolved}>
-        {inputId => preview ? <div className='form-control form-control-sm'><Markdown>{ctx.value}</Markdown></div> :
+        {inputId => preview ? <div id={inputId} className={classes(ctx.formControlClass, isReadOnly && "readonly")}><Markdown>{ctx.value}</Markdown></div> :
           <TextAreaLine
             ctx={ctx.subCtx({ formGroupStyle: 'None' })}
             readOnly={readOnly}
