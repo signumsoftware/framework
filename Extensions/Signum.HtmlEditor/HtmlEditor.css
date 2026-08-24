@@ -147,8 +147,24 @@
     list-style-type: none;
 }
 
+.sf-html-editor .text-bold {
+    font-weight: bold;
+}
+
+.sf-html-editor .text-italic {
+    font-style: italic;
+}
+
 .sf-html-editor .text-underline {
     text-decoration: underline;
+}
+
+.sf-html-editor .text-strikethrough {
+    text-decoration: line-through;
+}
+
+.sf-html-editor .text-underline-strikethrough {
+    text-decoration: underline line-through;
 }
 
 .sf-html-editor .text-code {
