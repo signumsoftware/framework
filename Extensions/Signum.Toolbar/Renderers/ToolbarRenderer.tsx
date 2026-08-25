@@ -631,7 +631,11 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
         {selectedOption &&
           <li>
             <ul>
-              {selectedOption.elements && <ToolbarMenuItems response={selectedOption} ctx={p.ctx} selectedEntity={p.selectedEntity} />}
+              {/* Keyed by the selected menu: without it React reuses the ToolbarMenuItemsEntityType instance
+                  across a menu switch, so its selEntityRef still holds the previous menu's entity while
+                  entityType is already the new menu's. The entity-element filter then runs for the wrong
+                  pair (a Measure lite handed to the Project filter). Remounting gives it fresh state. */}
+              {selectedOption.elements && <ToolbarMenuItems key={liteKeyOrQuery(selectedOption.content)} response={selectedOption} ctx={p.ctx} selectedEntity={p.selectedEntity} />}
             </ul>
           </li>
         }
