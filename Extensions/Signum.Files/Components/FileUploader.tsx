@@ -131,8 +131,20 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
 
 export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: number, fileType?: FileTypeSymbol, type: PseudoType, asyncOptions?: AsyncUploadOptions }): Promise<ModifiableEntity & IFile> {
   return new Promise((resolve, reject) => {
-    if (file.type && o.accept) {
-      if (!o.accept.split(',').some(accept => file.type.startsWith(accept.replace("*", "")))) {
+    if (o.accept) {
+      //Like the HTML input, accept allows mime types (image/*, application/pdf) and extensions (.xlsx).
+      const accepts = o.accept.split(',').map(a => a.trim().toLowerCase()).filter(a => a.length > 0);
+      const fileName = file.name.toLowerCase();
+      const fileType = file.type.toLowerCase();
+
+      //A browser that reports no mime type can only be validated by extension.
+      const canValidate = fileType != "" || accepts.some(a => a.startsWith("."));
+
+      const isValid = accepts.some(a => a.startsWith(".") ?
+        fileName.endsWith(a) :
+        fileType.startsWith(a.replace("*", "")));
+
+      if (canValidate && !isValid) {
         reject(new Error(FileMessage.TheFile0IsNotA1.niceToString(file.name, o.accept)));
         return;
       }

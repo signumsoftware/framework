@@ -2,7 +2,8 @@
     font-weight: bold;
     text-align: center;
     padding: 1em 0;
-    margin: .5em 0;
+    /*No bottom margin: the .form-group already separates from the next line, and it would push away the helpText*/
+    margin: .5em 0 0;
     color: var(--bs-body-color);
     border: 2px dashed var(--bs-border-color);
     border-radius: 7px;
