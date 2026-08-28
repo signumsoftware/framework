@@ -1,8 +1,13 @@
 import * as React from 'react';
+import { StyleContext } from '../Lines';
 import { classes } from '../Globals';
 
-export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7" | "lead";   
-export function Title(p: { children: React.ReactNode, type: HeaderType }): React.ReactElement {
+export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7" | "lead" | "label";
+export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: StyleContext }): React.ReactElement {
+
+  //For groups that behave like a single field (a checkbox list, a set of radios) instead of a section.
+  if (p.type == "label")
+    return <label className={p.ctx?.labelClass}>{p.children}</label>;
 
   var ElementType =
     p.type == "lead" ? "p" as const :
@@ -24,13 +29,15 @@ export function GroupHeader(p: {
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   fieldsetClassName?: string
   fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLFieldSetElement>
+  /** Only used by the "label" HeaderType, to get the labelClass of the form size. */
+  ctx?: StyleContext;
 }): React.ReactElement {
 
   if (p.avoidFieldSet) {
 
     return (
       <div className={p.className} {...p.htmlAttributes}>
-        {p.avoidFieldSet != true && <Title type={p.avoidFieldSet}>{p.label}{p.labelIcon} {p.buttons}</Title>}
+        {p.avoidFieldSet != true && <Title type={p.avoidFieldSet} ctx={p.ctx}>{p.label}{p.labelIcon} {p.buttons}</Title>}
         {p.children}
       </div>
     );

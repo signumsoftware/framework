@@ -126,10 +126,12 @@ public static class EmailModelLogic
 {
     class EmailModelInfo
     {
-        public object QueryName;
+        //Null for EmailModels over a ModelEntity (or any type without a registered query),
+        //the default EmailTemplate is then created with Query = null and renders only from the model.
+        public object? QueryName;
         public Func<EmailTemplateEntity>? DefaultTemplateConstructor;
 
-        public EmailModelInfo(object queryName)
+        public EmailModelInfo(object? queryName)
         {
             QueryName = queryName;
         }
@@ -226,10 +228,19 @@ public static class EmailModelLogic
 
     public static void RegisterEmailModel(Type model, Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
     {
-        registeredModels[model] = new EmailModelInfo(queryName ?? GetEntityType(model))
-        { 
+        registeredModels[model] = new EmailModelInfo(queryName ?? GetDefaultQueryName(model))
+        {
             DefaultTemplateConstructor = defaultTemplateConstructor,
         };
+    }
+
+    //Only EmailModel<T> where T has a registered query gets an implicit queryName.
+    //For an EmailModel over a ModelEntity there is nothing to query, so the template works only with the model.
+    static object? GetDefaultQueryName(Type model)
+    {
+        var entityType = GetEntityType(model);
+
+        return QueryLogic.Queries.QueryDefined(entityType) ? entityType : null;
     }
 
     public static Type GetEntityType(Type model)
@@ -348,10 +359,13 @@ public static class EmailModelLogic
             template.Name = emailModel.FullClassName;
 
         template.Model = emailModel;
-        template.Query = QueryLogic.GetQueryEntity(info.QueryName);
 
-        template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
-      
+        if (info.QueryName != null)
+        {
+            template.Query = QueryLogic.GetQueryEntity(info.QueryName);
+            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
+        }
+
         return template;
     }
 

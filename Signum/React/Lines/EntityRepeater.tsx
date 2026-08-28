@@ -20,6 +20,8 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   itemExtraButtons?: (er: EntityRepeaterController<V>, index: number) => React.ReactElement;
   elementHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>) => React.HTMLAttributes<any> | null | undefined;
+  /** Composes the element legend (remove/move/extra buttons and title). Default puts the buttons first. */
+  renderElementLegend?: (parts: { title: React.ReactElement | undefined, buttons: React.ReactElement }) => React.ReactNode;
   ref?: React.Ref<EntityRepeaterController<V>>
 }
 
@@ -79,6 +81,7 @@ export function EntityRepeater<V extends ModifiableEntity | Lite<Entity>>(props:
             move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
             drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
             itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
+            renderLegend={p.renderElementLegend}
             htmlAttributes={p.elementHtmlAttributes ? (() => p.elementHtmlAttributes!(mlec)) : undefined}
             getComponent={p.getComponent}
             getViewPromise={p.getViewPromise}
@@ -109,12 +112,33 @@ export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<En
   drag?: DragConfig;
   title?: React.ReactElement;
   itemExtraButtons?: () => React.ReactElement;
+  renderLegend?: (parts: { title: React.ReactElement | undefined, buttons: React.ReactElement }) => React.ReactNode;
   htmlAttributes?: () => React.HTMLAttributes<any> | null | undefined;
 }
 
-export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, htmlAttributes }: EntityRepeaterElementProps<V>): React.ReactElement {
+export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, renderLegend, htmlAttributes }: EntityRepeaterElementProps<V>): React.ReactElement {
 
   var attrs = htmlAttributes?.();
+
+  const buttons = <>
+    {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
+      onClick={onRemove}
+      title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+      {EntityBaseController.getTrashIcon()}
+    </LinkButton>}
+    &nbsp;
+    {move?.renderMoveUp()}
+    {move?.renderMoveDown()}
+    {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
+      draggable={true}
+      onDragStart={drag.onDragStart}
+      onDragEnd={drag.onDragEnd}
+      onKeyDown={drag.onKeyDown}
+      title={drag.title}>
+      {EntityBaseController.getMoveIcon()}
+    </LinkButton>}
+    {itemExtraButtons && itemExtraButtons()}
+  </>;
 
   return (
     <div
@@ -128,27 +152,12 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
         {...EntityBaseController.entityHtmlAttributes(ctx.value)}>
         {(onRemove || move || drag || itemExtraButtons || title) &&
           <legend>
-            <div className="d-flex">
-              {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
-                onClick={onRemove}
-                title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                {EntityBaseController.getTrashIcon()}
-              </LinkButton>}
-              &nbsp;
-              {move?.renderMoveUp()}
-              {move?.renderMoveDown()}
-              {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
-                draggable={true}
-                onDragStart={drag.onDragStart}
-                onDragEnd={drag.onDragEnd}
-                onKeyDown={drag.onKeyDown}
-                title={drag.title}>
-                {EntityBaseController.getMoveIcon()}
-              </LinkButton>}
-              {itemExtraButtons && itemExtraButtons()}
-              {title && '\xa0'}
-              {title}
-            </div>
+            {renderLegend ? renderLegend({ title, buttons }) :
+              <div className="d-flex">
+                {buttons}
+                {title && '\xa0'}
+                {title}
+              </div>}
           </legend>}
         <div className="sf-line-entity">
           <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
