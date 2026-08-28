@@ -333,6 +333,19 @@ export namespace DashboardClient {
         withPanel: opts?.withPanel ?? true,
       };
     }
+
+    /**
+     * Per-EntityType provider of the parts to leave out of an entity's dashboard. Returns the set of
+     * `PanelPartEmbedded.guid` strings to drop, or `null` to render the dashboard as designed.
+     * `DashboardView` closes the gaps the dropped parts leave behind.
+     */
+    export type HiddenPartsProvider = (dashboard: DashboardEntity, entity: Lite<Entity>) => Promise<Set<string> | null> | Set<string> | null;
+
+    export const hiddenPartsProviders: { [entityType: string]: HiddenPartsProvider } = {};
+
+    export function registerHiddenPartsProvider(entityType: string, provider: HiddenPartsProvider): void {
+      hiddenPartsProviders[entityType] = provider;
+    }
   }
 }
 

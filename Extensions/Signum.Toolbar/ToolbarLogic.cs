@@ -513,6 +513,16 @@ public static class ToolbarLogic
         return (ToolbarContentConfig<T>)ContentConfigDictionary.GetOrThrow(typeof(T));
     }
 
+    /// <summary>
+    /// The query behind a toolbar element's content, or null when the content is not query-backed
+    /// (a sub-menu, a permission, a dashboard). Meant for grouping elements that lead to the same place:
+    /// it runs no authorization check, so never use it to decide what the current user may open.
+    /// </summary>
+    public static QueryEntity? TryGetRelatedQuery(Lite<Entity> content)
+    {
+        return ContentConfigDictionary.TryGetC(content.EntityType)?.GetRelatedQuery(content);
+    }
+
     static Dictionary<Type, IToolbarContentConfig> ContentConfigDictionary = new Dictionary<Type, IToolbarContentConfig>();
 
 

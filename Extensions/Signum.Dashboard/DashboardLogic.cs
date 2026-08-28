@@ -163,6 +163,23 @@ public static class DashboardLogic
 
     public static Dictionary<string, Type> PartNames = new();
 
+    static Dictionary<Type, Func<IPartEntity, QueryEntity?>> PartRelatedQueries = new();
+
+    /// <summary>
+    /// Declares which query a kind of dashboard part shows, so that callers can group parts by what they display
+    /// without knowing every part type. Grouping only: it implies no authorization.
+    /// </summary>
+    public static void RegisterPartRelatedQuery<T>(Func<T, QueryEntity?> getRelatedQuery) where T : class, IPartEntity
+    {
+        PartRelatedQueries[typeof(T)] = p => getRelatedQuery((T)p);
+    }
+
+    /// <summary>The query a dashboard part shows, or null when it shows none or its kind declared none.</summary>
+    public static QueryEntity? TryGetRelatedQuery(IPartEntity part)
+    {
+        return PartRelatedQueries.TryGetC(part.GetType())?.Invoke(part);
+    }
+
     public static IPartEntity GetPart(IFromXmlContext ctx, IPartEntity old, XElement element)
     {
         Type type = PartNames.GetOrThrow(element.Name.ToString());

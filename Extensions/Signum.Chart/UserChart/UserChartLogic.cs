@@ -75,7 +75,8 @@ public static class UserChartLogic
                     var uc = UserCharts.Value.GetOrCreate(lite);
                     return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true);
                 },
-                GetRelatedQuery = lite => lite.RetrieveUserChart().Query,
+                // Straight from the cache: see the same note in UserQueryLogic.
+                GetRelatedQuery = lite => UserCharts.Value.GetOrCreate(lite).Query,
             }.Register();
 
             QueryLogic.Expressions.Register((UserChartEntity uc) => uc.InToolbar());
@@ -97,6 +98,9 @@ public static class UserChartLogic
             {
                 {"UserChartPart", typeof(UserChartPartEntity)},
             });
+
+            DashboardLogic.RegisterPartRelatedQuery((UserChartPartEntity p) => p.UserChart.Query);
+            // CombinedUserChartPart shows several charts at once, so no single query represents it.
 
             sb.Include<UserChartPartEntity>()
                 .WithCascadeDeleteBy(a => a.UserChart);
