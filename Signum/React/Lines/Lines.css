@@ -422,6 +422,10 @@ body.rtl .form-group.row>label {
     margin-bottom: 1rem;
 }
 
+.required-indicator {
+    color: rgb(var(--bs-danger-rgb));
+}
+
 .form-group .form-group {
     margin-bottom: 0px;
 }
