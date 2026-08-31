@@ -68,7 +68,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
   const label = <span><FontAwesomeIcon aria-hidden={true} icon={"file-excel"} />{p.searchControl.props.largeToolbarButtons == true ? <span className="d-none d-sm-inline">{" " + ExcelMessage.ExcelReport.niceToString()}</span> : undefined}</span>;
 
   if (p.plainExcel && !p.excelReport && !p.importFromExcel)
-    return <button className={"sf-query-button sf-search btn btn-tertiary"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
+    return <button className={"sf-query-button btn btn-tertiary"} title={ExcelMessage.ExcelReport.niceToString() } onClick={handlePlainExcel}>{label} </button>;
 
   return (
     <Dropdown show={isOpen} onToggle={handleSelectedToggle} title={ExcelMessage.ExcelReport.niceToString()}>
