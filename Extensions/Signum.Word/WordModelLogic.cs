@@ -126,14 +126,20 @@ public static class WordModelLogic
 {
     class WordModelInfo
     {
+        readonly Type wordModelType;
+        readonly object? explicitQueryName;
+
         //Null for WordModels over a ModelEntity (or any type without a registered query),
         //the default WordTemplate is then created with Query = null and renders only from the model.
-        public object? QueryName;
+        //Resolved lazily, so the WordModel can be registered before the query of the entity.
+        public object? QueryName => explicitQueryName ?? GetDefaultQueryName(wordModelType);
+
         public Func<WordTemplateEntity>? DefaultTemplateConstructor;
 
-        public WordModelInfo(object? queryName)
+        public WordModelInfo(Type wordModelType, object? queryName)
         {
-            QueryName = queryName;
+            this.wordModelType = wordModelType;
+            this.explicitQueryName = queryName;
         }
     }
 
@@ -213,10 +219,11 @@ public static class WordModelLogic
 
         template.Model = wordModel;
 
-        if (info.QueryName != null)
+        var queryName = info.QueryName;
+        if (queryName != null)
         {
-            template.Query = QueryLogic.GetQueryEntity(info.QueryName);
-            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
+            template.Query = QueryLogic.GetQueryEntity(queryName);
+            template.ParseData(QueryLogic.Queries.QueryDescription(queryName));
         }
 
         return template;
@@ -341,7 +348,7 @@ public static class WordModelLogic
 
     public static void RegisterWordModel(Type wordModelType, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
     {
-        registeredWordModels[wordModelType] = new WordModelInfo(queryName ?? GetDefaultQueryName(wordModelType))
+        registeredWordModels[wordModelType] = new WordModelInfo(wordModelType, queryName)
         {
             DefaultTemplateConstructor = defaultTemplateConstructor,
         };

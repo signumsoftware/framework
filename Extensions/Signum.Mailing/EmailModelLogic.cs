@@ -126,14 +126,20 @@ public static class EmailModelLogic
 {
     class EmailModelInfo
     {
+        readonly Type model;
+        readonly object? explicitQueryName;
+
         //Null for EmailModels over a ModelEntity (or any type without a registered query),
         //the default EmailTemplate is then created with Query = null and renders only from the model.
-        public object? QueryName;
+        //Resolved lazily, so the EmailModel can be registered before the query of the entity.
+        public object? QueryName => explicitQueryName ?? GetDefaultQueryName(model);
+
         public Func<EmailTemplateEntity>? DefaultTemplateConstructor;
 
-        public EmailModelInfo(object? queryName)
+        public EmailModelInfo(Type model, object? queryName)
         {
-            QueryName = queryName;
+            this.model = model;
+            this.explicitQueryName = queryName;
         }
     }
 
@@ -228,7 +234,7 @@ public static class EmailModelLogic
 
     public static void RegisterEmailModel(Type model, Func<EmailTemplateEntity>? defaultTemplateConstructor, object? queryName = null)
     {
-        registeredModels[model] = new EmailModelInfo(queryName ?? GetDefaultQueryName(model))
+        registeredModels[model] = new EmailModelInfo(model, queryName)
         {
             DefaultTemplateConstructor = defaultTemplateConstructor,
         };
@@ -360,10 +366,11 @@ public static class EmailModelLogic
 
         template.Model = emailModel;
 
-        if (info.QueryName != null)
+        var queryName = info.QueryName;
+        if (queryName != null)
         {
-            template.Query = QueryLogic.GetQueryEntity(info.QueryName);
-            template.ParseData(QueryLogic.Queries.QueryDescription(info.QueryName));
+            template.Query = QueryLogic.GetQueryEntity(queryName);
+            template.ParseData(QueryLogic.Queries.QueryDescription(queryName));
         }
 
         return template;
