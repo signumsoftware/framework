@@ -18,7 +18,7 @@ public class NumberLineProxy : BaseLineProxy
     public ILocator ReadonlyInputLocator => Element.Locator("input.numeric[readonly]");
     public ILocator ReadonlyDivLocator => Element.Locator("div.readonly.numeric");
     public ILocator AnyReadonlyLocator => ReadonlyInputLocator.Or(ReadonlyDivLocator);
-    public ILocator AnyInputLocator => ReadonlyInputLocator.Or(InputLocator);
+    public ILocator AnyInputLocator => AnyReadonlyLocator.Or(InputLocator);
 
     public override async Task<object?> GetValueUntypedAsync()
         => await GetValueAsync();
@@ -65,7 +65,7 @@ public class NumberLineProxy : BaseLineProxy
     }
 
     public async Task<IFormattable?> GetValueAsync()
-        => await ExtractValueAsync(InputLocator);
+        => await ExtractValueAsync(AnyInputLocator.First);
 
     public async Task<IFormattable?> GetValueReadonlyAsync()
         => await ExtractValueAsync(AnyReadonlyLocator.First);
