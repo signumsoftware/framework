@@ -240,7 +240,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
   addTab(tabsId: string, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
       e => e.type == Tabs && (e.props as any).id == tabsId,
-      e => [React.cloneElement(e, { children: [...React.Children.toArray((e.props as any).children), ...newTabs] } as any)])
+      // toArray over children and newTabs together: keying only the existing children (and
+      // spreading the new ones after) leaves the appended tabs keyless in the same array.
+      e => [React.cloneElement(e, { children: React.Children.toArray([(e.props as any).children, ...newTabs]) } as any)])
       .visit(this.result);
 
     return this;

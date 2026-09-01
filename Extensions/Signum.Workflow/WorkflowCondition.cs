@@ -4,15 +4,12 @@ using System.Xml.Linq;
 
 namespace Signum.Workflow;
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Shared, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class WorkflowConditionEntity : Entity, IUserAssetEntity
 {
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public TypeEntity MainEntityType { get; set; }
 
@@ -25,7 +22,7 @@ public class WorkflowConditionEntity : Entity, IUserAssetEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("WorkflowCondition",
-             new XAttribute("Guid", Guid),
+             new XAttribute("Guid", (Guid)Id),
              new XAttribute("Name", Name),
              new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",

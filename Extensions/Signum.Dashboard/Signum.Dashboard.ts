@@ -67,7 +67,6 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   cacheQueryConfiguration: CacheQueryConfigurationEmbedded | null;
   parts: Entities.MList<PanelPartEmbedded>;
   tokenEquivalencesGroups: Entities.MList<TokenEquivalenceGroupEntity>;
-  guid: string /*Guid*/;
   key: string | null;
   hideQuickLink: boolean;
   iconName: string | null;
@@ -177,7 +176,6 @@ export interface LinkElementEmbedded extends Entities.EmbeddedEntity {
 export const PanelPartEmbedded: Type<PanelPartEmbedded> = new Type<PanelPartEmbedded>("PanelPartEmbedded");
 export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   Type: "PanelPartEmbedded";
-  guid: string /*Guid*/;
   title: string | null;
   hideTitle: boolean;
   tooltip: string | null;

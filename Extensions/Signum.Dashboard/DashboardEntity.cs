@@ -7,7 +7,7 @@ using Signum.UserAssets.Queries;
 
 namespace Signum.Dashboard;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEntity
 {
     public DashboardEntity()
@@ -51,13 +51,11 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
 
     [BindParent]
     [NoRepeatValidator]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the part, written by PanelPartEmbedded.ToXml so it survives an export/import
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
     [Ignore, QueryableProperty, BindParent]
     public MList<TokenEquivalenceGroupEntity> TokenEquivalencesGroups { get; set; } = new MList<TokenEquivalenceGroupEntity>();
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [StringLengthValidator(Max = 200)]
     public string? Key { get; set; }
@@ -178,7 +176,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("Dashboard",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisplayName", DisplayName),
             EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
@@ -190,7 +188,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
             TitleColor == null ? null! : new XAttribute("TitleColor", TitleColor),
             CacheQueryConfiguration?.ToXml(ctx),
-            new XElement("Parts", Parts.Select(p => p.ToXml(ctx))),
+            new XElement("Parts", Parts.SelectWithRowId((p, rowId) => p.ToXml(ctx, rowId))),
             new XElement(nameof(TokenEquivalencesGroups), TokenEquivalencesGroups.Select(teg => teg.ToXml(ctx)))
         );
     }
@@ -209,7 +207,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         IconColor = element.Attribute("IconColor")?.Value;
         TitleColor = element.Attribute("TitleColor")?.Value; 
         CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
-        Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Parts.SynchronizeRowIds(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         TokenEquivalencesGroups.Synchronize(element.Element(nameof(TokenEquivalencesGroups))?.Elements().ToList() ?? new List<XElement>(), (teg, x) => teg.FromXml(x, ctx));
         ParseData(q => ctx.GetQueryDescription(q));
     }

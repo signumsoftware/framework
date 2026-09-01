@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getContrastingTextColorWCAG } from '@framework/Globals'
+import { MListElementBinding } from '@framework/Reflection'
 import { Entity, JavascriptMessage, getToString, liteKey, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { DashboardClient, PanelPartContentProps } from '../DashboardClient'
@@ -120,9 +121,9 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
             onFiltersChanged={forceUpdate} />)}
         {
           loadingHiddenParts ? JavascriptMessage.loading.niceToString() :
-            p.dashboard.combineSimilarRows ?
-              renderCombinedRows() :
-              renderBasic()
+          p.dashboard.combineSimilarRows ?
+            renderCombinedRows() :
+            renderBasic()
         }
       </div>
     </div>
@@ -310,7 +311,8 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const lite = p.entity ? toLite(p.entity) : undefined;
 
-  const partContentKey = p.ctx.value.guid;
+  //The MList row id identifies the part, the Tour targets it through the data-part-content attribute
+  const partContentKey = p.ctx.binding instanceof MListElementBinding ? p.ctx.binding.getMListElement()?.rowId : undefined;
 
   if (renderer.withPanel && !renderer.withPanel(content, lite)) {
     const tooltipHtml = translated(part, p => p.tooltip);

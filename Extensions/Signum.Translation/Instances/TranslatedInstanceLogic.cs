@@ -42,6 +42,7 @@ public static class TranslatedInstanceLogic
 
 
         PropertyRouteTranslationLogic.Start(sb);
+        TranslatedInstanceRowIds.Start(sb);
         sb.Include<TranslatedInstanceEntity>()
             //.WithDelete(TranslatedInstanceOperation.Delete)
             .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })

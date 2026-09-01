@@ -250,6 +250,66 @@ public class SaveTest
     }
 
     [Fact]
+    public void SaveMListWithNewRowId()
+    {
+        using (var tr = new Transaction())
+        {
+            var sample = Database.Query<AwardNominationEntity>().Select(a => new { a.Author, a.Award }).First();
+
+            var g0 = Guid.NewGuid();
+            var g1 = Guid.NewGuid();
+
+            var nomination = new AwardNominationEntity
+            {
+                Author = sample.Author,
+                Award = sample.Award,
+                Year = 2001,
+                Points = { new NominationPointEmbedded { Point = 10 }, new NominationPointEmbedded { Point = 20 } },
+            };
+
+            var points = (IMListPrivate<NominationPointEmbedded>)nomination.Points;
+            points.SetNewRowId(0, g0);
+            points.SetNewRowId(1, g1);
+
+            Assert.True(nomination.Points.IsNew); //A row id assigned by the caller does not make the row persisted
+
+            nomination.Save();
+
+            AssertSequenceEquals(
+                nomination.MListElements(a => a.Points).OrderBy(a => a.RowOrder).Select(mle => mle.RowId).ToList(),
+                new List<PrimaryKey> { g0, g1 });
+
+            Assert.False(nomination.Points.IsNew);
+
+            //Now a batch mixing an explicit row id with a database generated one
+            var g2 = Guid.NewGuid();
+
+            nomination.Points.Add(new NominationPointEmbedded { Point = 30 });
+            nomination.Points.Add(new NominationPointEmbedded { Point = 40 });
+            ((IMListPrivate<NominationPointEmbedded>)nomination.Points).SetNewRowId(2, g2);
+
+            nomination.Save();
+
+            var rowIds = nomination.MListElements(a => a.Points).OrderBy(a => a.RowOrder).Select(a => a.RowId).ToList();
+
+            Assert.Equal(4, rowIds.Count);
+            Assert.Equal((PrimaryKey)g0, rowIds[0]); //The rows that were already there keep their row id
+            Assert.Equal((PrimaryKey)g1, rowIds[1]);
+            Assert.Equal((PrimaryKey)g2, rowIds[2]);
+            Assert.DoesNotContain(rowIds[3], new[] { (PrimaryKey)g0, (PrimaryKey)g1, (PrimaryKey)g2 });
+
+            //Retrieving gives back the same row ids
+            var retrieved = nomination.ToLite().RetrieveAndRemember();
+
+            AssertSequenceEquals(
+                ((IMListPrivate<NominationPointEmbedded>)retrieved.Points).InnerList.Select(a => a.RowId!.Value).ToList(),
+                rowIds);
+
+            Assert.True(((IMListPrivate<NominationPointEmbedded>)retrieved.Points).InnerList.All(a => a.IsPersisted));
+        }
+    }
+
+    [Fact]
     public void SaveManyMList()
     {
         using (var tr = new Transaction())

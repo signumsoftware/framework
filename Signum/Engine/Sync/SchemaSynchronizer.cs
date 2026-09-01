@@ -12,6 +12,15 @@ public static class SchemaSynchronizer
 
     public static Action<Dictionary<string, DiffTable>>? SimplifyDiffTables;
 
+    /// <summary>
+    /// Called when the primary key of an MList table changes type, to update the places that store an MList row id
+    /// as a value instead of as a foreign key (typically <c>TranslatedInstance.RowId</c>, a string).
+    /// <para>Set by the module that owns those tables, since the synchronizer lives in Signum and can not reference
+    /// the extensions. The returned commands run after the new row ids are in place and before the renamed
+    /// <c>_old</c> column is dropped.</para>
+    /// </summary>
+    public static Func<TableMList, IColumn /*newPrimaryKey*/, DiffColumn /*oldPrimaryKey*/, SqlPreCommand?>? UpdateMListRowIdReferences;
+
     public static SqlPreCommand? SynchronizeTablesScript(Replacements replacements)
     {
         Schema s = Schema.Current;
@@ -119,7 +128,9 @@ public static class SchemaSynchronizer
             var diffPk = diff.Columns.Values.Where(a => a.PrimaryKey).Only();
             var pk = tab.PrimaryKey;
 
-            if (diffPk != null && diffPk.CompatibleTypes(pk))
+            //Same condition as incompatibleTypes above: CompatibleTypes always returns true in Postgres,
+            //so the Identity difference is what detects an int identity -> Guid primary key change there.
+            if (diffPk != null && (!diffPk.CompatibleTypes(pk) || diffPk.Identity != pk.Identity))
                 primaryKeyTypeChanged.Add(tab);
 
             diff.Columns = replacements.ApplyReplacementsToOld(diff.Columns, key);
@@ -340,6 +351,7 @@ public static class SchemaSynchronizer
             HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse = new HashSet<FieldEmbedded.EmbeddedHasValueColumn>();
 
             List<SqlPreCommand?> delayedHistoryColumns = new List<SqlPreCommand?>();
+            List<SqlPreCommand?> delayedUpdatesStealGuid = new List<SqlPreCommand?>(); //TEMPORARY Guid primary key migration, see PrimaryKeyUpdater
             List<SqlPreCommand?> delayedUpdatesHistory = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedUpdatesFks = new List<SqlPreCommand?>();
             List<SqlPreCommand?> delayedDrops = new List<SqlPreCommand?>();
@@ -424,6 +436,30 @@ public static class SchemaSynchronizer
 
                             removeOld: (cn, difCol) =>
                             {
+                                #region TEMPORARY Guid primary key migration, see PrimaryKeyUpdater
+                                var guidToSteal = primaryKeyTypeChanged.Contains(tab) ? pkUpdater.TryGetGuidColumnToSteal(tab, dif) : null;
+                                var isBeingStolen = guidToSteal != null && guidToSteal.Name == difCol.Name;
+
+                                pkUpdater.AssertGuidColumnNotSilentlyDropped(tab, difCol, replacements, isBeingStolen);
+
+                                //The new Guid primary key is filled from this column (delayedUpdatesStealGuid),
+                                //so the column can only be dropped after that update has run.
+                                if (isBeingStolen)
+                                {
+                                    var dropGuid = sqlBuilder.AlterTableDropColumn(tab, cn, withHistory);
+
+                                    delayedDrops.Add(SqlPreCommand.Combine(Spacing.Simple,
+                                        difCol.DefaultConstraint != null && difCol.DefaultConstraint.Name != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint!.Name) : null,
+                                        //Only split when there IS a history table: otherwise ForNormal and ForHistory both
+                                        //return the same command and the column would be dropped twice
+                                        withHistory ? SqlPreCommand_WithHistory.ForNormal(dropGuid) : dropGuid,
+                                        withHistory ? SqlPreCommand_WithHistory.ForHistory(dropGuid) : null
+                                    ));
+
+                                    return null;
+                                }
+                                #endregion
+
                                 var result = SqlPreCommand.Combine(Spacing.Simple,
                                         difCol.DefaultConstraint != null && difCol.DefaultConstraint.Name != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraint!.Name) : null,
                                     sqlBuilder.AlterTableDropColumn(tab, cn, withHistory));
@@ -444,12 +480,30 @@ public static class SchemaSynchronizer
                                 {
                                     if (difCol.PrimaryKey)
                                     {
-                                        if (disableSystemVersioning != null)
+                                        #region TEMPORARY Guid primary key migration, see PrimaryKeyUpdater
+                                        //Reuse the obsolete Guid column as the new primary key instead of letting NEWID() fill it.
+                                        var guidToSteal = primaryKeyTypeChanged.Contains(tab) ? pkUpdater.TryGetGuidColumnToSteal(tab, dif) : null;
+                                        if (guidToSteal != null)
+                                            delayedUpdatesStealGuid.Add(pkUpdater.StealGuidIntoPrimaryKey(tab, tabCol, guidToSteal, withHistory));
+                                        #endregion
+
+                                        //When the Guid is stolen the history table gets its ids from the same column, so UpdateHistoryTable is not needed
+                                        if (disableSystemVersioning != null && guidToSteal == null)
                                             delayedUpdatesHistory.Add(pkUpdater.UpdateHistoryTable(tab, dif.Name, tabCol, difCol));
 
                                         var updateIBA = tab is Table t ? pkUpdater.UpdateImplementedByAll(t, dif.Name, tabCol, difCol) : null;
                                         if (updateIBA != null)
                                             delayedUpdatesFks.Add(updateIBA);
+
+                                        if (tab is TableMList mlistTable)
+                                        {
+                                            //Row ids stored as a value instead of as a foreign key (TranslatedInstance.RowId)
+                                            if (UpdateMListRowIdReferences == null)
+                                                SafeConsole.WriteLineColor(ConsoleColor.Yellow,
+                                                    $"The primary key of {mlistTable.Name} changes type, but {nameof(UpdateMListRowIdReferences)} is not set: anything storing its row ids as a value (like TranslatedInstance.RowId) will be left dangling.");
+                                            else
+                                                delayedUpdatesFks.Add(UpdateMListRowIdReferences(mlistTable, tabCol, difCol));
+                                        }
                                     }
                                     else
                                     {
@@ -462,8 +516,8 @@ public static class SchemaSynchronizer
 
                                     delayedDrops.Add(SqlPreCommand.Combine(Spacing.Simple,
                                         difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab, difCol, false) : null,
-                                        SqlPreCommand_WithHistory.ForNormal(dropColumn),
-                                        SqlPreCommand_WithHistory.ForHistory(dropColumn)
+                                        withHistory ? SqlPreCommand_WithHistory.ForNormal(dropColumn) : dropColumn,
+                                        withHistory ? SqlPreCommand_WithHistory.ForHistory(dropColumn) : null
                                     ));
 
                                     var addColumn = tabCol.PrimaryKey ? 
@@ -753,6 +807,7 @@ public static class SchemaSynchronizer
                 historyFixes,
                 tables, historyTables, delayedHistoryColumns.Combine(Spacing.Double),
                 versioningTriggers,
+                delayedUpdatesStealGuid.Combine(Spacing.Double), //TEMPORARY Guid primary key migration, see PrimaryKeyUpdater
                 delayedUpdatesHistory.Combine(Spacing.Double),
                 delayedUpdatesFks.Combine(Spacing.Double),
                 delayedDrops.Combine(Spacing.Simple),

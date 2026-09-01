@@ -23,14 +23,14 @@ public static class UserAssetsExporter
         public Dictionary<Guid, XElement> elements = new();
         public Guid Include(IUserAssetEntity content)
         {
-            elements.GetOrCreate(content.Guid, () =>
+            elements.GetOrCreate((Guid)content.Id, () =>
             {
                 var element = content.ToXml(this);
                 ToXmlMixin(content, element, this);
                 return element;
             });
 
-            return content.Guid;
+            return (Guid)content.Id;
         }
 
         public Guid Include(Lite<IUserAssetEntity> content)
@@ -88,6 +88,32 @@ public static class UserAssetsImporter
     public static Polymorphic<Action<Entity>> SaveEntity = new();
     public static Func<XDocument, XDocument>? PreImport = null;
 
+    #region TEMPORARY legacy Lite format (added 2026-09)
+    // Before polymorphic Lites were consistently written as LiteKeys (cleanName;id;toString), some places wrote
+    // them as cleanName|guid (TourEntity.Trigger, CssStepEmbedded.ToolbarContent). Old exported .xml files still
+    // use that format, so it is translated here for every ParseLite.
+    //
+    // TO REMOVE once no application has .xml files in the old format.
+
+    /// <summary>
+    /// Translates the legacy <c>cleanName|guid</c> format into a LiteKey (<c>cleanName;guid</c>).
+    /// A LiteKey always contains a ';', and neither a clean name nor a Guid ever contains one, so a key already in
+    /// the new format is never touched even if its ToString happens to contain a '|'.
+    /// </summary>
+    public static string FixLegacyLiteKey(string liteKey)
+    {
+        if (liteKey.Contains(';') || !liteKey.Contains('|'))
+            return liteKey;
+
+        var id = liteKey.After('|');
+
+        if (!Guid.TryParse(id, out _))
+            return liteKey;
+
+        return liteKey.Before('|') + ";" + id;
+    }
+    #endregion
+
     class PreviewContext : IFromXmlContext
     {
         public Dictionary<Guid, IUserAssetEntity> entities = new();
@@ -139,7 +165,7 @@ public static class UserAssetsImporter
                 FromXmlMixin(entity, element, this);
 
                 var action = entity.IsNew ? EntityAction.New :
-                             customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
+                             customResolutionModel.ContainsKey(guid) ? EntityAction.Different :
                              GraphExplorer.FromRootVirtual((Entity)entity).Any(a => a.Modified != ModifiedState.Clean) ? EntityAction.Different :
                              EntityAction.Identical;
 
@@ -159,7 +185,7 @@ public static class UserAssetsImporter
                         To = kvp.Value,
                     }).ToMList(),
 
-                    CustomResolution = customResolutionModel.TryGetCN(entity.Guid),
+                    CustomResolution = customResolutionModel.TryGetCN(guid),
                 });
 
                 return entity;
@@ -193,7 +219,7 @@ public static class UserAssetsImporter
 
         public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
         {
-            var lite = Lite.Parse(liteKey);
+            var lite = Lite.Parse(FixLegacyLiteKey(liteKey));
 
             var newLite =
                 lite.EntityType == typeof(RoleEntity) && lite.ToString() is string str ? AuthLogic.TryGetRole(str) :
@@ -201,7 +227,7 @@ public static class UserAssetsImporter
 
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
             {
-                this.liteConflicts.GetOrCreate(userAsset.Guid)[(lite, route)] = newLite;
+                this.liteConflicts.GetOrCreate((Guid)userAsset.Id)[(lite, route)] = newLite;
                 return newLite;
             }
 
@@ -339,9 +365,9 @@ public static class UserAssetsImporter
 
         public Lite<Entity>? ParseLite(string liteKey, IUserAssetEntity userAsset, PropertyRoute route)
         {
-            var lite = Lite.Parse(liteKey);
+            var lite = Lite.Parse(FixLegacyLiteKey(liteKey));
 
-            if (this.liteConflicts.TryGetValue(userAsset.Guid, out var dic) && dic.TryGetValue((lite, route), out var alternative))
+            if (this.liteConflicts.TryGetValue((Guid)userAsset.Id, out var dic) && dic.TryGetValue((lite, route), out var alternative))
                 return alternative;
 
             return lite;
@@ -467,19 +493,24 @@ public static class UserAssetsImporter
         guid => RetrieveOrCreate<FakeEntity>(guid));
     static T RetrieveOrCreate<T>(Guid guid) where T : Entity, IUserAssetEntity, new()
     {
-        var result = Database.Query<T>().SingleOrDefaultEx(a => a.Guid == guid);
+        PrimaryKey id = guid;
+
+        var result = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
         if (result != null)
             return result;
 
-        return new T { Guid = guid };
+        //Still IsNew, so it will be inserted with this Guid as its primary key
+        return new T().SetId(id);
     }
 
     static readonly GenericInvoker<Func<Guid, Lite<Entity>>> giRetrieveUserAssetLite = new(
         guid => RetrieveUserAssetLite<FakeEntity>(guid));
     static Lite<Entity> RetrieveUserAssetLite<T>(Guid guid) where T : Entity, IUserAssetEntity
     {
-        return Database.Query<T>().Where(a => a.Guid == guid).Select(a => a.ToLite()).SingleEx();
+        PrimaryKey id = guid;
+
+        return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToLite()).SingleEx();
     }
 
     public static Lite<Entity> RetrieveUserAssetLite(Type type, Guid guid)
@@ -487,10 +518,9 @@ public static class UserAssetsImporter
         return giRetrieveUserAssetLite.GetInvoker(type)(guid);
     }
 
+    [PrimaryKey(typeof(Guid))]
     public class FakeEntity : Entity, IUserAssetEntity
     {
-        public Guid Guid { get; set; }
-
         public void FromXml(XElement element, IFromXmlContext ctx) => throw new NotImplementedException();
         public XElement ToXml(IToXmlContext ctx) => throw new NotImplementedException();
     }
@@ -501,9 +531,24 @@ public static class UserAssetsImporter
     public static void Register<T>(string userAssetName, Action<T> saveEntity) where T : Entity, IUserAssetEntity
     {
         TokenMigrationLogic.AssertStarted();
+        AssertGuidPrimaryKey(typeof(T));
 
         UserAssetNames.Add(userAssetName, typeof(T));
         UserAssetsImporter.SaveEntity.Register(saveEntity);
+    }
+
+    /// <summary>
+    /// The primary key of a user asset is the identifier used to match entities across databases in the XML
+    /// export/import, so it has to be a Guid.
+    /// </summary>
+    static void AssertGuidPrimaryKey(Type type)
+    {
+        var settings = Schema.Current.Settings;
+
+        var attr = settings.TypeAttribute<PrimaryKeyAttribute>(type) ?? settings.DefaultPrimaryKeyAttribute;
+
+        if (attr.Type != typeof(Guid))
+            throw new InvalidOperationException($"{type.Name} implements {nameof(IUserAssetEntity)}, so its primary key has to be a Guid but is a {attr.Type.TypeName()}. Add PrimaryKey(typeof(Guid)) to its {nameof(EntityKindAttribute)}.");
     }
 
     public static void SolveAllConflicts(UserAssetPreviewModel preview)

@@ -13,7 +13,6 @@ import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 export const HolidayCalendarEntity: Type<HolidayCalendarEntity> = new Type<HolidayCalendarEntity>("HolidayCalendar");
 export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "HolidayCalendar";
-  guid: string /*Guid*/;
   name: string;
   fromYear: number | null;
   toYear: number | null;
@@ -157,7 +156,6 @@ export interface SchedulerTaskExceptionLineEntity extends Entities.Entity {
 export const ScheduleRuleMinutelyEntity: Type<ScheduleRuleMinutelyEntity> = new Type<ScheduleRuleMinutelyEntity>("ScheduleRuleMinutely");
 export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleMinutely";
-  guid: string /*Guid*/;
   startingOn: string /*DateTime*/;
   eachMinutes: number;
   isAligned: boolean;
@@ -166,7 +164,6 @@ export interface ScheduleRuleMinutelyEntity extends Entities.Entity, IScheduleRu
 export const ScheduleRuleMonthsEntity: Type<ScheduleRuleMonthsEntity> = new Type<ScheduleRuleMonthsEntity>("ScheduleRuleMonths");
 export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleMonths";
-  guid: string /*Guid*/;
   startingOn: string /*DateTime*/;
   january: boolean;
   february: boolean;
@@ -185,7 +182,6 @@ export interface ScheduleRuleMonthsEntity extends Entities.Entity, IScheduleRule
 export const ScheduleRuleWeekDaysEntity: Type<ScheduleRuleWeekDaysEntity> = new Type<ScheduleRuleWeekDaysEntity>("ScheduleRuleWeekDays");
 export interface ScheduleRuleWeekDaysEntity extends Entities.Entity, IScheduleRuleEntity, UserAssets.IUserAssetEntity {
   Type: "ScheduleRuleWeekDays";
-  guid: string /*Guid*/;
   startingOn: string /*DateTime*/;
   monday: boolean;
   tuesday: boolean;

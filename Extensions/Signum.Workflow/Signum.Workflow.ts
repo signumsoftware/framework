@@ -343,7 +343,6 @@ export const WorkflowActionEntity: Type<WorkflowActionEntity> = new Type<Workflo
 export interface WorkflowActionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowAction";
   name: string;
-  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowActionEval;
 }
@@ -444,7 +443,6 @@ export const WorkflowConditionEntity: Type<WorkflowConditionEntity> = new Type<W
 export interface WorkflowConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowCondition";
   name: string;
-  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowConditionEval;
 }
@@ -510,7 +508,6 @@ export interface WorkflowEntity extends Entities.Entity, UserAssets.IUserAssetEn
   mainEntityType: Basics.TypeEntity;
   mainEntityStrategies: Entities.MList<WorkflowMainEntityStrategy>;
   expirationDate: string /*DateTime*/ | null;
-  guid: string /*Guid*/;
 }
 
 export const WorkflowEventEntity: Type<WorkflowEventEntity> = new Type<WorkflowEventEntity>("WorkflowEvent");
@@ -763,7 +760,6 @@ export interface WorkflowReplacementModel extends Entities.ModelEntity {
 export const WorkflowScriptEntity: Type<WorkflowScriptEntity> = new Type<WorkflowScriptEntity>("WorkflowScript");
 export interface WorkflowScriptEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScript";
-  guid: string /*Guid*/;
   name: string;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowScriptEval;
@@ -792,7 +788,6 @@ export const WorkflowScriptRetryStrategyEntity: Type<WorkflowScriptRetryStrategy
 export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowScriptRetryStrategy";
   rule: string;
-  guid: string /*Guid*/;
 }
 
 export namespace WorkflowScriptRetryStrategyOperation {
@@ -804,7 +799,6 @@ export const WorkflowTimerConditionEntity: Type<WorkflowTimerConditionEntity> = 
 export interface WorkflowTimerConditionEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "WorkflowTimerCondition";
   name: string;
-  guid: string /*Guid*/;
   mainEntityType: Basics.TypeEntity;
   eval: WorkflowTimerConditionEval;
 }

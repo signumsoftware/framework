@@ -12,7 +12,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
 {
     public bool IsNew
     {
-        get { return this.innerList.All(a => a.RowId == null); }
+        get { return this.innerList.All(a => !a.IsPersisted); }
     }
 
     public class RowIdElementComparer : IEqualityComparer<RowIdElement>
@@ -38,18 +38,40 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
         public readonly T Element;
         public readonly int? OldIndex;
 
+        /// <summary>
+        /// True when <see cref="RowId"/> was assigned by the caller (see <see cref="IMListPrivate.SetNewRowId"/>) instead
+        /// of coming from the database, so the row still has to be INSERTed using that row id.
+        /// </summary>
+        public readonly bool IsNewRowId;
+
+        /// <summary>
+        /// True when there is a row in the database for this element, so it has to be UPDATEd instead of INSERTed.
+        /// </summary>
+        public bool IsPersisted => this.RowId != null && !this.IsNewRowId;
+
         public RowIdElement(T value)
         {
             this.Element = value;
             this.RowId = null;
             this.OldIndex = null;
+            this.IsNewRowId = false;
         }
 
+        //Keep this exact signature: it is looked up by reflection in CachedTableMList, QueryBinder and Schema.Expressions
         public RowIdElement(T value, PrimaryKey rowId, int? oldIndex)
         {
             this.Element = value;
             this.RowId = rowId;
             this.OldIndex = oldIndex;
+            this.IsNewRowId = false;
+        }
+
+        public RowIdElement(T value, PrimaryKey rowId, int? oldIndex, bool isNewRowId)
+        {
+            this.Element = value;
+            this.RowId = rowId;
+            this.OldIndex = oldIndex;
+            this.IsNewRowId = isNewRowId;
         }
 
         public bool Equals(RowIdElement other)
@@ -89,7 +111,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
 
         public override string ToString()
         {
-            var pre = RowId == null ? "New" : RowId.Value.ToString();
+            var pre = RowId == null ? "New" : IsNewRowId ? "New " + RowId.Value.ToString() : RowId.Value.ToString();
 
             if(this.OldIndex != null)
                 pre += " Ix: " + this.OldIndex;
@@ -645,10 +667,26 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     {
         var prev = this.innerList[index];
 
-        if(prev.RowId.HasValue)
+        //A row id assigned by SetNewRowId is confirmed here once the row has actually been INSERTed
+        if (prev.IsNewRowId)
+        {
+            if (!prev.RowId!.Value.Equals(rowId))
+                throw new InvalidOperationException("Index {0} was inserted with RowId {1} but {2} was expected".FormatWith(index, rowId, prev.RowId));
+        }
+        else if (prev.RowId.HasValue)
             throw new InvalidOperationException("Index {0} already has RowId".FormatWith(index));
 
         this.innerList[index] = new RowIdElement(prev.Element, rowId, null);
+    }
+
+    void IMListPrivate.SetNewRowId(int index, PrimaryKey rowId)
+    {
+        var prev = this.innerList[index];
+
+        if (prev.IsPersisted)
+            throw new InvalidOperationException("Index {0} already has RowId {1} from the database, use ForceRowId to overwrite it".FormatWith(index, prev.RowId));
+
+        this.innerList[index] = new RowIdElement(prev.Element, rowId, null, isNewRowId: true);
     }
 
     PrimaryKey? IMListPrivate.GetRowId(int index)
@@ -669,7 +707,7 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     {
         var prev = this.innerList[index];
 
-        this.innerList[index] = new RowIdElement(prev.Element, prev.RowId!.Value, index);
+        this.innerList[index] = new RowIdElement(prev.Element, prev.RowId!.Value, index, prev.IsNewRowId);
     }
 
     void IMListPrivate.ExecutePostRetrieving(PostRetrievingContext ctx)
@@ -874,6 +912,12 @@ public interface IMListPrivate
     void SetOldIndex(int index);
     PrimaryKey? GetRowId(int index);
     void SetRowId(int index, PrimaryKey rowId);
+
+    /// <summary>
+    /// Assigns the row id that a not-yet-inserted row should get, instead of letting the database generate it.
+    /// Only supported for MList tables with a Guid primary key (PrimaryKey(typeof(Guid))), since they are not identity columns.
+    /// </summary>
+    void SetNewRowId(int index, PrimaryKey rowId);
     void ForceRowId(int index, PrimaryKey rowId);
 
     void InnerListModified(IList? newItems, IList? oldItems);

@@ -14,11 +14,9 @@ public interface IScheduleRuleEntity : IEntity, IUserAssetEntity
 }
 
 
-[EntityKind(EntityKind.Part, EntityData.Master)]
+[EntityKind(EntityKind.Part, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public DateTime Next(DateTime now)
@@ -55,7 +53,7 @@ public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ScheduleRuleMinutely",
-                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("Guid", (Guid)this.Id),
                        new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
                        new XAttribute("EachMinutes", this.EachMinutes));
     }
@@ -67,11 +65,9 @@ public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
     }
 }
 
-[EntityKind(EntityKind.Part, EntityData.Master)]
+[EntityKind(EntityKind.Part, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ScheduleRuleWeekDaysEntity : Entity, IScheduleRuleEntity
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool Monday { get; set; }
@@ -167,7 +163,7 @@ public class ScheduleRuleWeekDaysEntity : Entity, IScheduleRuleEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ScheduleRuleWeekDays",
-                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("Guid", (Guid)this.Id),
                        new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
                        new XAttribute("Monday", this.Monday),
                        new XAttribute("Tuesday", this.Monday),
@@ -196,11 +192,9 @@ public class ScheduleRuleWeekDaysEntity : Entity, IScheduleRuleEntity
 }
 
 
-[EntityKind(EntityKind.Part, EntityData.Master)]
+[EntityKind(EntityKind.Part, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     public DateTime StartingOn { get; set; } = Clock.Now.Date;
 
     public bool January { get; set; }
@@ -287,7 +281,7 @@ public class ScheduleRuleMonthsEntity : Entity, IScheduleRuleEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ScheduleRuleMonths",
-                       new XAttribute("Guid", this.Guid),
+                       new XAttribute("Guid", (Guid)this.Id),
                        new XAttribute("StartingOn", this.StartingOn.ToString("o", CultureInfo.InvariantCulture)),
                        new XAttribute("January", this.January),
                        new XAttribute("February", this.February),

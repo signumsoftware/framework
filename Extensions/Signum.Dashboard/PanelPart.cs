@@ -14,8 +14,6 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         BindParent();
     }
 
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     [StringLengthValidator(Min = 3, Max = 100), Translatable]
     public string? Title { get; set; }
 
@@ -93,7 +91,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             IconName = IconName,
             TitleColor = TitleColor,
             CustomColor = CustomColor,
-        }; // Guid is intentionally fresh — a clone is a new instance
+        }; // The row id is intentionally not carried over — a clone is a new row
     }
 
     internal void NotifyRowColumn()
@@ -102,10 +100,11 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         Notify(() => Columns);
     }
 
-    internal XElement ToXml(IToXmlContext ctx)
+    internal XElement ToXml(IToXmlContext ctx, PrimaryKey? rowId)
     {
         return new XElement("Part",
-            new XAttribute("Guid", Guid),
+            //The MList row id, so the identity of the part survives an export/import, see FromXmlExtensions.SynchronizeRowIds
+            rowId == null ? null! : new XAttribute("Guid", (Guid)rowId.Value),
             new XAttribute("Row", Row),
             new XAttribute("StartColumn", StartColumn),
             new XAttribute("Columns", Columns),
@@ -122,7 +121,6 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     internal void FromXml(XElement x, IFromXmlContext ctx)
     {
-        Guid = x.Attribute("Guid")?.Let(a => Guid.Parse(a.Value)) ?? Guid.NewGuid();
         Row = int.Parse(x.Attribute("Row")!.Value);
         StartColumn = int.Parse(x.Attribute("StartColumn")!.Value);
         Columns = int.Parse(x.Attribute("Columns")!.Value);

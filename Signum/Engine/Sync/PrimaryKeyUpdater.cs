@@ -1,6 +1,7 @@
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
+using NpgsqlTypes;
 using System.Data;
 
 namespace Signum.Engine.Sync;
@@ -49,16 +50,18 @@ internal class PrimaryKeyUpdater
         ObjectName sourceTable,
         Alias sourceAlias,
         string joinCondition,
-        string? otherJoins = null)
+        (string fromEntry, string condition)? extraTable = null)
     {
         if (isPostgres)
         {
             // PostgreSQL syntax: UPDATE target_alias SET ... FROM source_table source_alias WHERE ...
+            // The target table is NOT part of the FROM clause, so an extra table has to be another FROM entry and its
+            // condition has to go in the WHERE: a JOIN ... ON in the FROM clause can not reference the target alias.
             var sql = $"""
                     UPDATE {targetTable} {targetAlias} SET
                     {setClause.Indent(4)}
-                    FROM {sourceTable} {sourceAlias}{(otherJoins != null ? "\n" + otherJoins : "")}
-                    WHERE {joinCondition}
+                    FROM {sourceTable} {sourceAlias}{(extraTable != null ? ", " + extraTable.Value.fromEntry : "")}
+                    WHERE {joinCondition}{(extraTable != null ? "\n    AND " + extraTable.Value.condition : "")}
                     """;
 
             return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
@@ -66,11 +69,12 @@ internal class PrimaryKeyUpdater
         else
         {
             // SQL Server syntax: UPDATE t SET ... FROM target_table t JOIN source_table s ON ...
+            // Here the target table IS in the FROM clause, so an extra JOIN can reference the target alias.
             var sql = $"""
                     UPDATE {targetAlias} SET
                     {setClause.Indent(4)}
                     FROM {targetTable} {targetAlias}
-                    JOIN {sourceTable} {sourceAlias} ON {joinCondition}{(otherJoins != null ? "\n" + otherJoins : "")}
+                    JOIN {sourceTable} {sourceAlias} ON {joinCondition}{(extraTable != null ? $"\nJOIN {extraTable.Value.fromEntry} ON {extraTable.Value.condition}" : "")}
                     """;
 
             return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
@@ -282,7 +286,7 @@ internal class PrimaryKeyUpdater
             """,
                 sourceTable: table.Name, sourceAlias: tableAlias,
                 joinCondition: $"{tableAlias}.{Esc(oldId)} = {ibaAlias}.{Esc(ibaOldId)}",
-                otherJoins: $"JOIN {type_Table.Name} type ON type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'");
+                extraTable: ($"{type_Table.Name} type", $"type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'"));
         }
         else
         {
@@ -304,11 +308,104 @@ internal class PrimaryKeyUpdater
             """,
               sourceTable: ObjectName.Raw("pairs", isPostgres), sourceAlias: pairsAlias,
               joinCondition: $"{pairsAlias}.old_id = {ibaAlias}.{Esc(ibaOldId)}",
-              otherJoins: $"JOIN {type_Table.Name} type ON type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'");
+              extraTable: ($"{type_Table.Name} type", $"type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'"));
 
             update.AlterSql(cte + "\n" + update.Sql);
 
             return update;
         }
     }
+
+    #region TEMPORARY Guid primary key migration (added 2026-09)
+    // Until now, IUserAssetEntity entities (UserQuery, UserChart, Dashboard, Toolbar, EmailTemplate,
+    // WordTemplate, Workflow*, ...) had an int identity primary key PLUS a separate
+    // [UniqueIndex] Guid Guid column. That Guid, not the Id, was the stable identifier used to match
+    // entities across databases in the UserAssets XML export/import.
+    //
+    // Now the primary key IS the Guid and the Guid column is gone. A plain synchronization would add
+    // the new uniqueidentifier Id filled by NEWID() (the "Default NewID()" branch in
+    // SchemaSynchronizer) and then drop the Guid column, silently invalidating every previously
+    // exported .xml file and every cross-database reference. So instead, when the primary key type
+    // changes to uniqueidentifier and the old table still has a Guid column, we steal that value into
+    // the new primary key, keeping the identifiers stable.
+    //
+    // TO REMOVE once every application has run this migration: delete this whole region, its call
+    // sites in SchemaSynchronizer (search for StealGuid and AssertGuidColumn) and the
+    // primaryKeyTypeChanged set that feeds them.
+
+    public const string ObsoleteGuidColumnName = "Guid";
+
+    //Case insensitive: the column is "Guid" in SqlServer but the idiomatic "guid" in Postgres
+    static bool IsObsoleteGuidColumn(string columnName) => string.Equals(columnName, ObsoleteGuidColumnName, StringComparison.OrdinalIgnoreCase);
+
+    static readonly AbstractDbType GuidDbType = new AbstractDbType(SqlDbType.UniqueIdentifier, NpgsqlDbType.Uuid);
+
+    /// <summary>
+    /// Returns the obsolete <c>Guid</c> column of <paramref name="dif"/> whose value should be reused as the
+    /// new Guid primary key of <paramref name="tab"/>, or null when there is nothing to steal.
+    /// </summary>
+    public DiffColumn? TryGetGuidColumnToSteal(ITable tab, DiffTable dif)
+    {
+        if (!tab.PrimaryKey.DbType.Equals(GuidDbType))
+            return null; //the model does not ask for a Guid primary key
+
+        if (tab.Columns.Values.Any(c => IsObsoleteGuidColumn(c.Name)))
+            return null; //the model still declares a Guid column, so it is not being removed
+
+        return dif.Columns.Values.SingleOrDefaultEx(c => IsObsoleteGuidColumn(c.Name) && c.DbType.Equals(GuidDbType));
+    }
+
+    /// <summary>
+    /// <c>UPDATE tab SET Id = Guid</c>. Must run after the new primary key column has been added and before
+    /// the foreign keys pointing to it are updated by joining on the renamed Id_old column.
+    /// </summary>
+    public SqlPreCommand StealGuidIntoPrimaryKey(ITable tab, IColumn newPk, DiffColumn guidCol, bool withHistory)
+    {
+        SafeConsole.WriteLineColor(ConsoleColor.Cyan, $"Reusing the values in column '{guidCol.Name}' for '{newPk.Name}' (now of type {newPk.DbType.ToString(isPostgres).ToLowerInvariant()}) in {tab.Name}");
+
+        var update = new SqlPreCommandSimple($"""
+            --Reuse the value of the obsolete {tab.Name}.{guidCol.Name} column as the new primary key, so the ids stay stable across databases
+            UPDATE {tab.Name} SET
+                {Esc(newPk)} = {Esc(guidCol)}
+            """).Do(a => a.GoAfter = true);
+
+        if (!withHistory || tab.SystemVersioned == null)
+            return update;
+
+        //The history table mirrors the Guid column, so its rows carry the right value too, including rows
+        //whose entity no longer exists in the main table. This replaces UpdateHistoryTable for this table.
+        var updateHistory = new SqlPreCommandSimple($"""
+            UPDATE {tab.SystemVersioned.TableName} SET
+                {Esc(newPk)} = {Esc(guidCol)}
+            """).Do(a => a.GoAfter = true);
+
+        return SqlPreCommand.Combine(Spacing.Simple, update, updateHistory)!;
+    }
+
+    /// <summary>
+    /// Refuses to silently drop a <c>Guid</c> column when its value is not being stolen into a Guid primary key.
+    /// </summary>
+    public void AssertGuidColumnNotSilentlyDropped(ITable tab, DiffColumn difCol, Replacements rep, bool isBeingStolen)
+    {
+        if (isBeingStolen)
+            return; //the value survives as the new primary key, see StealGuidIntoPrimaryKey
+
+        if (!IsObsoleteGuidColumn(difCol.Name) || !difCol.DbType.Equals(GuidDbType))
+            return;
+
+        SafeConsole.WriteLineColor(ConsoleColor.Red, $"DANGER: {tab.Name}.{difCol.Name} is about to be DROPPED and all its values will be LOST!");
+        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, $"""
+            This uniqueidentifier column is typically the stable identifier used to match entities across
+            databases in the UserAssets XML export/import. Dropping it invalidates every exported .xml file.
+            To preserve the values instead, declare the primary key of {tab.Name} as [PrimaryKey(typeof(Guid))].
+            """);
+
+        if (!rep.Interactive)
+            throw new InvalidOperationException($"Synchronization aborted: dropping {tab.Name}.{difCol.Name} would lose all its values. Run the synchronization interactively to confirm, or declare a Guid primary key so the values are preserved.");
+
+        if (!SafeConsole.Ask($"Drop {tab.Name}.{difCol.Name} losing all its values?"))
+            throw new InvalidOperationException($"Synchronization aborted by the user: dropping {tab.Name}.{difCol.Name} would lose all its values.");
+    }
+
+    #endregion
 }

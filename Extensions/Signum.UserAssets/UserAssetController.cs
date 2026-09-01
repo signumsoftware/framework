@@ -247,7 +247,7 @@ public class UserAssetController : ControllerBase
     [HttpPost("api/userAssets/export")]
     public FileStreamResult Export([Required, FromBody]Lite<IUserAssetEntity>[] lites)
     {
-        var bytes = UserAssetsExporter.ToXml(lites.RetrieveList().ToArray().OrderBy(a => a.Guid).ToArray());
+        var bytes = UserAssetsExporter.ToXml(lites.RetrieveList().ToArray().OrderBy(a => a.Id).ToArray());
 
         string typeName = lites.Select(a => a.EntityType).Distinct().SingleEx().Name;
         var fileName = "{0}{1}.xml".FormatWith(typeName, lites.ToString(a => a.Id.ToString(), "_"));

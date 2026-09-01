@@ -62,7 +62,8 @@ public static class TourLogic
                 return;
 
             var dashboardLite = dashboard.ToLite();
-            var validGuids = dashboard.Parts.Select(p => p.Guid).ToHashSet();
+            //Read from the MList directly, since the row id is what identifies a part
+            var validGuids = ((IMListPrivate<PanelPartEmbedded>)dashboard.Parts).InnerList.Select(a => (Guid)a.RowId!.Value).ToHashSet();
 
             // Drop CssStep rows whose part-Guid no longer exists in the saved dashboard.
             Database.MListQuery((TourStepEntity ts) => ts.CssSteps)

@@ -56,10 +56,10 @@ export default function TourStep(p: {
     if (!p.dashboard)
       return [];
     return p.dashboard.parts
-      .map(pp => pp.element)
-      .map(pp => ({
-        key: pp.guid,
-        label: pp.title || getToString(pp.content),
+      .filter(mle => mle.rowId != null) //A part that has not been saved yet has no row id to reference
+      .map(mle => ({
+        key: mle.rowId!.toString(),
+        label: mle.element.title || getToString(mle.element.content),
       }));
   }, [p.dashboard]);
 

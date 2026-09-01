@@ -426,7 +426,8 @@ public class UserQueryDataTableProvider : IWordDataTableProvider
 {
     public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context, out Dictionary<string, string>? overridenColors)
     {
-        var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
+        PrimaryKey userQueryId = Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim());
+        var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Id == userQueryId);
 
         using (CurrentEntityConverter.SetCurrentEntity(context.GetEntity()))
         {
@@ -442,7 +443,8 @@ public class UserQueryDataTableProvider : IWordDataTableProvider
         if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
             return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
 
-        var uq = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+        PrimaryKey id = guid;
+        var uq = Database.Query<UserQueryEntity>().Where(a => a.Id == id).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
 
         if (uq == null)
             return "No UserQuery with GUID={0} found".FormatWith(guid);
@@ -474,7 +476,8 @@ public class UserChartDataTableProvider : IWordDataTableProvider
 
     public Data.DataTable GetDataTable(string suffix, Entity? entity, out Dictionary<string, string>? overridenColors)
     {
-        var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
+        PrimaryKey userChartId = Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim());
+        var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Id == userChartId);
 
         using (CurrentEntityConverter.SetCurrentEntity(entity))
         {
@@ -510,7 +513,8 @@ public class UserChartDataTableProvider : IWordDataTableProvider
         if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
             return "Impossible to convert '{0}' in a GUID for a UserChart".FormatWith(suffix);
 
-        var uc = Database.Query<UserChartEntity>().Where(a => a.Guid == guid).Select(a => new { UC = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+        PrimaryKey id = guid;
+        var uc = Database.Query<UserChartEntity>().Where(a => a.Id == id).Select(a => new { UC = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
 
         if (uc == null)
             return "No UserChart with GUID={0} found".FormatWith(guid);
