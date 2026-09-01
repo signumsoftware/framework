@@ -245,7 +245,7 @@
     <Member Name="FistResult" Description="Premier résultat" />
     <Member Name="SplitMessages" Description="Messages séparés" />
   </Type>
-  <Type Name="WhenManyRecipiensBehaviour" Description="Comportement en cas de nombreux destinataires">
+  <Type Name="WhenManyRecipientsBehaviour" Description="Comportement en cas de nombreux destinataires">
     <Member Name="KeepOneMessageWithManyRecipients" Description="Conservez un message avec plusieurs destinataires" />
     <Member Name="SplitMessages" Description="Messages séparés" />
   </Type>

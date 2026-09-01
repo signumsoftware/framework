@@ -161,8 +161,8 @@ export type WhenManyFromBehaviour =
   "SplitMessages" |
   "FistResult";
 
-export const WhenManyRecipiensBehaviour: EnumType<WhenManyRecipiensBehaviour> = new EnumType<WhenManyRecipiensBehaviour>("WhenManyRecipiensBehaviour");
-export type WhenManyRecipiensBehaviour =
+export const WhenManyRecipientsBehaviour: EnumType<WhenManyRecipientsBehaviour> = new EnumType<WhenManyRecipientsBehaviour>("WhenManyRecipientsBehaviour");
+export type WhenManyRecipientsBehaviour =
   "SplitMessages" |
   "KeepOneMessageWithManyRecipients";
 

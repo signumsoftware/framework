@@ -308,7 +308,7 @@
     <Member Name="FistResult" Description="Risultato del pugno" />
     <Member Name="SplitMessages" Description="Dividere i messaggi" />
   </Type>
-  <Type Name="WhenManyRecipiensBehaviour" Description="Quando molti recipiens comportamento">
+  <Type Name="WhenManyRecipientsBehaviour" Description="Comportamento con molti destinatari">
     <Member Name="KeepOneMessageWithManyRecipients" Description="Conserva un messaggio con molti destinatari" />
     <Member Name="SplitMessages" Description="Dividere i messaggi" />
   </Type>

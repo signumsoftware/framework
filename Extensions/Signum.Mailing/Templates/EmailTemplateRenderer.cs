@@ -317,7 +317,7 @@ class EmailMessageBuilder
             }
             else
             {
-                if (tr.WhenMany == WhenManyRecipiensBehaviour.SplitMessages)
+                if (tr.WhenMany == WhenManyRecipientsBehaviour.SplitMessages)
                 {
                     foreach (var gr in groupsWithEmail)
                     {
@@ -334,7 +334,7 @@ class EmailMessageBuilder
                         }
                     }
                 }
-                else if (tr.WhenMany == WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients)
+                else if (tr.WhenMany == WhenManyRecipientsBehaviour.KeepOneMessageWithManyRecipients)
                 {
                     var recipients = groupsWithEmail.Select(g => new EmailOwnerRecipientData(g.Key) { Kind = tr.Kind }).ToList();
 

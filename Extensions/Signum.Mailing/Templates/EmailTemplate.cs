@@ -204,7 +204,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             rep.Kind = xml.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>();
             rep.AddressSource = xml.Attribute("AddressSource")?.Value.ToEnum<EmailAddressSource>() ?? (rep.EmailAddress.HasText() ? EmailAddressSource.HardcodedAddress : EmailAddressSource.QueryToken);
             rep.Token = xml.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
-            rep.WhenMany = xml.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients;
+            rep.WhenMany = xml.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipientsBehaviour>() ?? WhenManyRecipientsBehaviour.KeepOneMessageWithManyRecipients;
             rep.WhenNone = xml.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException;
         });
 
@@ -266,7 +266,7 @@ public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     public EmailRecipientKind Kind { get; set; }
 
     public WhenNoneRecipientsBehaviour WhenNone { get; set; }
-    public WhenManyRecipiensBehaviour WhenMany { get; set; }
+    public WhenManyRecipientsBehaviour WhenMany { get; set; }
 
     public override string ToString()
     {
@@ -313,7 +313,7 @@ public enum WhenNoneRecipientsBehaviour
     NoRecipients
 }
 
-public enum WhenManyRecipiensBehaviour
+public enum WhenManyRecipientsBehaviour
 {
     SplitMessages,
     KeepOneMessageWithManyRecipients,
