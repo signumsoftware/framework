@@ -53,7 +53,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
         Location = element.Attribute("Location")?.Value.ToEnum<ToolbarLocation>() ?? ToolbarLocation.Side;
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tb => tb.Owner));
         Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
-        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x, i) => pp.FromXml(x, ctx));
     }
 
 
@@ -227,7 +227,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     {
         Name = element.Attribute("Name")!.Value;
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
-        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x, i) => pp.FromXml(x, ctx));
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tm =>tm.Owner));
     }
 

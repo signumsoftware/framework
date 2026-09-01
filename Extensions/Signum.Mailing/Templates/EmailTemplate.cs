@@ -179,7 +179,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         var valuePr = PropertyRoute.Construct((EmailTemplateEntity wt) => wt.Filters[0].ValueString);
-        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??

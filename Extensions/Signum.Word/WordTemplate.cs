@@ -112,7 +112,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         var valuePr = PropertyRoute.Construct((WordTemplateEntity wt) => wt.Filters[0].ValueString);
-        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });

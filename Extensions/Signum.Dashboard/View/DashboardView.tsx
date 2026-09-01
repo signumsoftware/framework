@@ -137,6 +137,16 @@ interface PartLayout {
 }
 
 /**
+ * The Guid row id of a part in DashboardEntity.parts, which is what identifies it (there is no property on the
+ * embedded entity). Undefined for a part that has not been saved yet, since the database assigns the row id.
+ */
+export function partRowId(ctx: TypeContext<PanelPartEmbedded>): string | undefined {
+  const rowId = ctx.binding instanceof MListElementBinding ? ctx.binding.getMListElement()?.rowId : undefined;
+
+  return rowId?.toString();
+}
+
+/**
  * Drops the parts a `hiddenPartsProvider` asked to leave out and closes the gaps they leave behind, so that
  * tailoring a panel away does not punch a hole in the grid. A row that filled its 12 columns keeps filling them,
  * its remaining panels growing in proportion; a row that did not simply closes up. The positions live here
@@ -155,15 +165,21 @@ function layoutParts(dashboard: DashboardEntity, hiddenGuids: Set<string> | unde
   if (!hiddenGuids?.size)
     return asDesigned;
 
-  const visible = all.filter(ctx => !hiddenGuids.has(ctx.value.guid));
+  const isHidden = (ctx: TypeContext<PanelPartEmbedded>) => {
+    const rowId = partRowId(ctx);
+    return rowId != null && hiddenGuids.has(rowId);
+  };
+
+  const visible = all.filter(ctx => !isHidden(ctx));
   if (visible.length == all.length)
     return asDesigned;
 
-  const repacked = new Map<string, { startColumn: number, columns: number }>();
+  //Keyed by the context, not by the row id, because a part that has not been saved yet has no row id
+  const repacked = new Map<TypeContext<PanelPartEmbedded>, { startColumn: number, columns: number }>();
 
   all.groupBy(ctx => ctx.value.row!.toString()).forEach(gr => {
     const row = gr.elements.orderBy(ctx => ctx.value.startColumn);
-    const kept = row.filter(ctx => !hiddenGuids.has(ctx.value.guid));
+    const kept = row.filter(ctx => !isHidden(ctx));
 
     if (kept.length == 0 || kept.length == row.length)
       return;
@@ -178,15 +194,15 @@ function layoutParts(dashboard: DashboardEntity, hiddenGuids: Set<string> | unde
 
     let next = start;
     kept.forEach((ctx, i) => {
-      repacked.set(ctx.value.guid, { startColumn: next, columns: widths[i] });
+      repacked.set(ctx, { startColumn: next, columns: widths[i] });
       next += widths[i];
     });
   });
 
   return {
     parts: visible,
-    startColumn: ctx => repacked.get(ctx.value.guid)?.startColumn ?? ctx.value.startColumn!,
-    columns: ctx => repacked.get(ctx.value.guid)?.columns ?? ctx.value.columns!,
+    startColumn: ctx => repacked.get(ctx)?.startColumn ?? ctx.value.startColumn!,
+    columns: ctx => repacked.get(ctx)?.columns ?? ctx.value.columns!,
   };
 }
 
@@ -312,7 +328,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const lite = p.entity ? toLite(p.entity) : undefined;
 
   //The MList row id identifies the part, the Tour targets it through the data-part-content attribute
-  const partContentKey = p.ctx.binding instanceof MListElementBinding ? p.ctx.binding.getMListElement()?.rowId : undefined;
+  const partContentKey = partRowId(p.ctx);
 
   if (renderer.withPanel && !renderer.withPanel(content, lite)) {
     const tooltipHtml = translated(part, p => p.tooltip);

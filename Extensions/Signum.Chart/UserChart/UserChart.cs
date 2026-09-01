@@ -148,8 +148,18 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
 
         var valuePr = PropertyRoute.Construct((UserChartEntity wt) => wt.Filters[0].ValueString);
-        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
-        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
+        //A column is matched by row id, so it can be a brand new instance: bind it to its chart script column by
+        //position here instead of relying on the one SynchronizeColumns pre-created when ChartScript was set
+        var chartScript = GetChartScript();
+        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x, i) =>
+        {
+            c.parentChart = this;
+            if (i < chartScript.Columns.Count)
+                c.ScriptColumn = chartScript.Columns[i];
+
+            c.FromXml(x, ctx);
+        });
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
         Parameters.ForEach(p =>

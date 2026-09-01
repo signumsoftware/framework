@@ -160,8 +160,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         ColumnsMode = element.Attribute("ColumnsMode")!.Value.Let(cm => cm == "Replace" ? "ReplaceAll" : cm).ToEnum<ColumnOptionsMode>();
 
         var valuePr = PropertyRoute.Construct((UserQueryEntity wt) => wt.Filters[0].ValueString);
-        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
-        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
+        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x, i) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         SystemTime = element.Element("SystemTime")?.Let(xml => (SystemTime ?? new SystemTimeEmbedded()).FromXml(xml));

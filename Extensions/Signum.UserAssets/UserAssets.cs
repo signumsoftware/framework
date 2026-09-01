@@ -155,6 +155,12 @@ public static class FromXmlExtensions
     public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
         where T : new()
     {
+        entities.Synchronize(xElements, (e, x, i) => syncAction(e, x));
+    }
+
+    public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement, int> syncAction)
+        where T : new()
+    {
         if (xElements == null)
             xElements = new List<XElement>();
 
@@ -169,7 +175,7 @@ public static class FromXmlExtensions
             else
                 entity = entities[i];
 
-            syncAction(entity, xElements[i]);
+            syncAction(entity, xElements[i], i);
         }
 
         if (entities.Count > xElements.Count)
@@ -227,10 +233,13 @@ public static class FromXmlExtensions
     /// keeping the row id from the XML, so the identity of each row survives an export/import even across databases.
     /// The MList has to be declared as <c>PrimaryKey(typeof(Guid))</c>, see <see cref="IMListPrivate.SetNewRowId"/>.
     /// <para>XML with no <c>Guid</c> at all (exported before the row ids were written) falls back to
-    /// <see cref="Synchronize{T}(MList{T}, List{XElement}?, Action{T, XElement})"/> by position, so importing an old file
-    /// is not reported as a change. A file where only some rows have it is an error.</para>
+    /// <see cref="Synchronize{T}(MList{T}, List{XElement}?, Action{T, XElement, int})"/> by position, so importing an old
+    /// file is not reported as a change. A file where only some rows have it is an error.</para>
+    /// <para>Since a row can be matched, created or reused, <paramref name="syncAction"/> also receives the index of the
+    /// element, for the state that depends on the position rather than on the XML (UserChartEntity binds the
+    /// ScriptColumn of each column that way).</para>
     /// </summary>
-    public static void SynchronizeRowIds<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
+    public static void SynchronizeRowIds<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement, int> syncAction)
         where T : class, new()
     {
         xElements ??= new List<XElement>();
@@ -254,19 +263,21 @@ public static class FromXmlExtensions
 
         var newList = new List<MList<T>.RowIdElement>();
 
-        foreach (var x in xElements)
+        for (int i = 0; i < xElements.Count; i++)
         {
+            var x = xElements[i];
+
             PrimaryKey rowId = Guid.Parse(x.Attribute("Guid")!.Value);
 
             if (byRowId.TryGetValue(rowId, out var existing))
             {
-                syncAction(existing.Element, x);
+                syncAction(existing.Element, x, i);
                 newList.Add(existing); //Keeps the RowId and the OldIndex, so an unchanged row is not updated
             }
             else
             {
                 var element = new T();
-                syncAction(element, x);
+                syncAction(element, x, i);
                 newList.Add(new MList<T>.RowIdElement(element, rowId, null, isNewRowId: true));
             }
         }

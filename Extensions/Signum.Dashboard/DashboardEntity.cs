@@ -207,7 +207,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         IconColor = element.Attribute("IconColor")?.Value;
         TitleColor = element.Attribute("TitleColor")?.Value; 
         CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
-        Parts.SynchronizeRowIds(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Parts.SynchronizeRowIds(element.Element("Parts")!.Elements().ToList(), (pp, x, i) => pp.FromXml(x, ctx));
         TokenEquivalencesGroups.Synchronize(element.Element(nameof(TokenEquivalencesGroups))?.Elements().ToList() ?? new List<XElement>(), (teg, x) => teg.FromXml(x, ctx));
         ParseData(q => ctx.GetQueryDescription(q));
     }

@@ -336,7 +336,8 @@ public static class UserAssetsImporter
 
                     FromXmlMixin(entity, element, this);
 
-                    SaveEntity.Invoke((Entity)entity);
+                    using (DisableIdentityIfExplicitId(entity))
+                        SaveEntity.Invoke((Entity)entity);
                 }
 
                 return entity;
@@ -500,8 +501,27 @@ public static class UserAssetsImporter
         if (result != null)
             return result;
 
-        //Still IsNew, so it will be inserted with this Guid as its primary key
+        //Still IsNew, so it will be inserted with this Guid as its primary key, see DisableIdentityIfExplicitId
         return new T().SetId(id);
+    }
+
+    /// <summary>
+    /// A user asset is identified by its Guid primary key, so <see cref="RetrieveOrCreate"/> gives a new one the Id that
+    /// comes from the XML. Tables with IdentityBehaviour let the database generate the Id and reject an entity that
+    /// already has one, so it has to be disabled for this insert.
+    /// <para>Only the table of this entity is affected, so the other entities in its graph (the parts of a dashboard,
+    /// for instance) keep getting database generated ids as usual.</para>
+    /// </summary>
+    static IDisposable? DisableIdentityIfExplicitId(IUserAssetEntity userAsset)
+    {
+        var entity = (Entity)userAsset;
+
+        if (!entity.IsNew || entity.IdOrNull == null)
+            return null;
+
+        var table = Schema.Current.Table(entity.GetType());
+
+        return table.IdentityBehaviour ? Administrator.DisableIdentity(table) : null;
     }
 
     static readonly GenericInvoker<Func<Guid, Lite<Entity>>> giRetrieveUserAssetLite = new(
