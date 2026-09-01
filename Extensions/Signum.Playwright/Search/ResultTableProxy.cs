@@ -102,22 +102,36 @@ public class ResultTableProxy
         return index;
     }
 
+    /// <summary>
+    /// Only the th that carry data-column-index, so the returned positions match the data-column-index
+    /// of the td in the body. The leading selection / entity th have no data-column-index, and no
+    /// indexed td either, so counting them shifted every index.
+    /// </summary>
     public async Task<string[]> GetColumnTokensAsync()
     {
-        return await Element.Locator("thead > tr > th")
+        return await Element.Locator("thead > tr > th[data-column-index]")
             .EvaluateAllAsync<string[]>("els => els.map(el => el.getAttribute('data-column-name') ?? '')");
     }
 
     public async Task<ILocator> CellElementAsync(int rowIndex, string token)
-    {
-        var col = await GetColumnIndexAsync(token);
-        return Row(rowIndex).CellElement(col);
-    }
+        => await CellElementAsync(Row(rowIndex), token);
 
     public async Task<ILocator> CellElementAsync(Lite<IEntity> lite, string token, int? subRowIndex = null)
+        => await CellElementAsync(Row(lite, subRowIndex), token);
+
+    async Task<ILocator> CellElementAsync(ResultRowProxy row, string token)
     {
-        var col = await GetColumnIndexAsync(token);
-        return Row(lite, subRowIndex).CellElement(col);
+        var tokens = await GetColumnTokensAsync();
+        var index = Array.IndexOf(tokens, token);
+
+        if (index != -1)
+            return row.CellElement(index);
+
+        //The entity column is rendered outside of the indexed columns, in the header and in the body
+        if (token == "Entity" && await HasColumnAsync("Entity"))
+            return row.EntityCellElement();
+
+        throw new InvalidOperationException($"Token {token} not found between {string.Join(", ", tokens)}");
     }
 
     // ---------------- HEADER ----------------
@@ -285,7 +299,9 @@ public class ResultRowProxy
 
     public ILocator SelectedCheckbox => Locator.Locator("input.sf-td-selection");
 
-    public ILocator CellElement(int columnIndex) => Locator.Locator($"td[data-column-index={columnIndex}]");
+    public ILocator CellElement(int columnIndex) => Locator.Locator($"td[data-column-index='{columnIndex}']");
+
+    public ILocator EntityCellElement() => Locator.Locator("td:not([data-column-index]):not(:has(input.sf-td-selection))");
 
     public ILocator EntityLink() => Locator.Locator($"td:nth-child(2):not([data-column-index])").Locator("a");
 

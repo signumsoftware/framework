@@ -47,6 +47,6 @@ public class EntityLineProxy : EntityBaseProxy
     => await AutoCompleteWaitChangesAsync(AutoCompleteElement, Element, beginning, resultContainsText);
 
     public override async Task<bool> IsReadonlyAsync()
-        => await Element.Locator(".form-control[readonly]").CountAsync() > 0
+        => await FormControlReadonlyLocator.CountAsync() > 0
            || await Element.IsDisabledAsync();
 }

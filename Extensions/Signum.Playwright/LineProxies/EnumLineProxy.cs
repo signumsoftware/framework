@@ -88,9 +88,5 @@ public class EnumLineProxy : BaseLineProxy
 
 
     public override async Task<bool> IsReadonlyAsync()
-    {
-        var readonlyInput = Element.Locator("input[readonly]");
-        var count = await readonlyInput.CountAsync();
-        return count > 0;
-    }
+        => await FormControlReadonlyLocator.CountAsync() > 0;
 }

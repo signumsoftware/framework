@@ -20,7 +20,7 @@ public class EntityComboProxy : EntityBaseProxy
         => await SetLiteValueAsync(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
 
     public override async Task<bool> IsReadonlyAsync()
-        => await this.Element.Locator("input[readonly]").CountAsync() > 0;
+        => await FormControlReadonlyLocator.CountAsync() > 0;
 
     public async Task<Lite<IEntity>?> GetLiteValueAsync()
     {

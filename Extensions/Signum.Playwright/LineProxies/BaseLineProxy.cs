@@ -18,6 +18,13 @@ public abstract class BaseLineProxy
     public abstract Task<object?> GetValueUntypedAsync();
     public abstract Task<bool> IsReadonlyAsync();
 
+    /// <summary>
+    /// FormControlReadonly.tsx renders an input[readonly] only when the content is a single plain
+    /// string, and a div.readonly otherwise (a rendered item, or no value at all). Lines that show
+    /// their value through FormControlReadonly have to look for both.
+    /// </summary>
+    public ILocator FormControlReadonlyLocator => Element.Locator("input[readonly]").Or(Element.Locator("div.readonly"));
+
     public static BaseLineProxy AutoLine(ILocator element, PropertyRoute route)
     {
         var type = route.Type.UnNullify();
