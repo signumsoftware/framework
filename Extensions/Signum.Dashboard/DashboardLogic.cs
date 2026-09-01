@@ -50,6 +50,7 @@ public static class DashboardLogic
         PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);
 
 
+
         UserAssetsImporter.Register<DashboardEntity>("Dashboard", DashboardOperation.Save);
 
         PartNames.AddRange(new Dictionary<string, Type>
@@ -650,7 +651,7 @@ public class CachedQueryDefinition
         QueryRequest = queryRequest;
         PinnedFiltersTokens = pinnedFiltersTokens;
         PanelPart = panelPart;
-        Guid = userAsset.Guid;
+        Guid = (Guid)userAsset.Id;
         UserAsset = userAsset.ToLite();
         IsQueryCached = isQueryCached;
         CanWriteFilters = canWriteFilters;

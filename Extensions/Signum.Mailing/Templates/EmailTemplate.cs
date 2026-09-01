@@ -6,16 +6,13 @@ using Signum.Templating;
 
 namespace Signum.Mailing.Templates;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 {
     public EmailTemplateEntity()
     {
         BindParent();
     }
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public EmailTemplateEntity(object queryName) : this()
     {
@@ -46,6 +43,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
     public bool GroupResults { get; set; }
 
     [PreserveOrder, Translatable(false)]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
@@ -128,14 +126,14 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
     {
         return new XElement("EmailTemplate",
             new XAttribute("Name", Name),
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisableAuthorization", DisableAuthorization),
             Query == null ? null : new XAttribute("Query", Query.Key),
             new XAttribute("EditableMessage", EditableMessage),
             Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.FullClassName),
             MasterTemplate == null ? null! : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
             new XAttribute("GroupResults", GroupResults),
-            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
             new XAttribute("MessageFormat", MessageFormat),
             From == null ? null! : new XElement("From",
@@ -170,7 +168,6 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        Guid = Guid.Parse(element.Attribute("Guid")!.Value);
         Name = element.Attribute("Name")!.Value;
         DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
@@ -182,7 +179,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         var valuePr = PropertyRoute.Construct((EmailTemplateEntity wt) => wt.Filters[0].ValueString);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         MessageFormat = element.Attribute("MessageFormat")?.Value.ToEnum<EmailMessageFormat>() ??

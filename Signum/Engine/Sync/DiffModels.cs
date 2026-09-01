@@ -508,14 +508,49 @@ public class DiffColumn
     internal bool CompatibleTypes(IColumn tabCol)
     {
         if (Schema.Current.Settings.IsPostgres)
-            return CompatibleTypes_Postgres(this.DbType.PostgreSql, tabCol.DbType.PostgreSql);
+            return CompatibleTypes_Postgres(this.DbType.PostgreSql, tabCol.DbType.PostgreSql, IsPrimaryKeyOrForeignKey(tabCol));
         else
             return CompatibleTypes_SqlServer(this.DbType.SqlServer, tabCol.DbType.SqlServer);
     }
 
-    private bool CompatibleTypes_Postgres(NpgsqlDbType fromType, NpgsqlDbType toType)
+    /// <summary>
+    /// The column identifies a row, or points to one, either in the database or in the model.
+    /// </summary>
+    bool IsPrimaryKeyOrForeignKey(IColumn tabCol) =>
+        this.PrimaryKey || tabCol.PrimaryKey ||
+        this.ForeignKey != null || tabCol.ReferenceTable != null;
+
+    private bool CompatibleTypes_Postgres(NpgsqlDbType fromType, NpgsqlDbType toType, bool isPrimaryKeyOrForeignKey)
     {
+        if (fromType == toType)
+            return true;
+
+        //AlterTableAlterColumn generates "ALTER COLUMN x TYPE y" without a USING clause, so only the conversions
+        //that Postgres applies automatically work in place, and there is no automatic cast to or from uuid.
+        if ((fromType == NpgsqlDbType.Uuid) != (toType == NpgsqlDbType.Uuid))
+            return false;
+
+        //A primary key or foreign key identifies a row, so it can only be altered in place when the conversion keeps
+        //the value (typically smallint -> integer -> bigint). Otherwise the id has to be re-generated and every
+        //foreign key pointing to it updated by joining through the renamed _old column, see PrimaryKeyUpdater.
+        if (isPrimaryKeyOrForeignKey)
+            return IsIntegerWidening(fromType, toType);
+
+        //Any other column can be converted in place, adding a conversion function to the script if necessary
         return true;
+    }
+
+    static bool IsIntegerWidening(NpgsqlDbType fromType, NpgsqlDbType toType)
+    {
+        static int Rank(NpgsqlDbType type) => type switch
+        {
+            NpgsqlDbType.Smallint => 1,
+            NpgsqlDbType.Integer => 2,
+            NpgsqlDbType.Bigint => 3,
+            _ => 0,
+        };
+
+        return Rank(fromType) != 0 && Rank(toType) != 0 && Rank(fromType) <= Rank(toType);
     }
 
     private bool CompatibleTypes_SqlServer(SqlDbType fromType, SqlDbType toType)

@@ -11,7 +11,7 @@ public interface IToolbarEntity: IEntity
     IEnumerable<Lite<IToolbarEntity>> GetSubToolbars();
 }
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     public ToolbarEntity()
@@ -31,22 +31,20 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
 
     [PreserveOrder]
     [NoRepeatValidator, BindParent]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element, written by ToolbarElementEmbedded.ToXml so it survives an export/import
     public MList<ToolbarElementEmbedded> Elements { get; set; } = new MList<ToolbarElementEmbedded>();
 
     public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Elements.Select(a => a.Content).OfType<Lite<IToolbarEntity>>();
 
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("Toolbar",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("Name", Name),
             new XAttribute("Location", Location),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             Priority == null ? null! : new XAttribute("Priority", Priority.Value.ToString()),
-            new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
+            new XElement("Elements", Elements.SelectWithRowId((p, rowId) => p.ToXml(ctx, rowId))));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -55,7 +53,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
         Location = element.Attribute("Location")?.Value.ToEnum<ToolbarLocation>() ?? ToolbarLocation.Side;
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tb => tb.Owner));
         Priority = element.Attribute("Priority")?.Let(a => int.Parse(a.Value));
-        Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
     }
 
 
@@ -81,8 +79,6 @@ public static class ToolbarOperation
 
 public class ToolbarElementEmbedded : EmbeddedEntity
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     public ToolbarElementType Type { get; set; }
 
     [StringLengthValidator(Min = 1, Max = 100), Translatable]
@@ -109,10 +105,11 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
 
-    public virtual XElement ToXml(IToXmlContext ctx)
+    public virtual XElement ToXml(IToXmlContext ctx, PrimaryKey? rowId)
     {
         return new XElement("ToolbarElement",
-            new XAttribute("Guid", Guid),
+            //The MList row id, so the identity of the element survives an export/import, see FromXmlExtensions.SynchronizeRowIds
+            rowId == null ? null! : new XAttribute("Guid", (Guid)rowId.Value),
             new XAttribute("Type", Type),
             string.IsNullOrEmpty(Label) ? null! : new XAttribute("Label", Label),
             string.IsNullOrEmpty(IconName) ? null! : new XAttribute("IconName", IconName),
@@ -130,7 +127,6 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
     public virtual void FromXml(XElement x, IFromXmlContext ctx)
     {
-        Guid = x.Attribute("Guid")?.Value is { } g ? Guid.Parse(g) : Guid.NewGuid();
         Type = x.Attribute("Type")!.Value.ToEnum<ToolbarElementType>();
         Label = x.Attribute("Label")?.Value;
         ShowCount = x.Attribute("ShowCount")?.Value.ToEnum<ShowCount>();
@@ -199,20 +195,18 @@ public enum ToolbarElementType
     ExtraIcon
 }
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Shared, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
 {
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [StringLengthValidator(Max = 100), Translatable]
     public string Name { get; set; }
 
     [PreserveOrder]
     [NoRepeatValidator]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element, written by ToolbarElementEmbedded.ToXml so it survives an export/import
     public MList<ToolbarMenuElementEmbedded> Elements { get; set; } = new MList<ToolbarMenuElementEmbedded>();
 
     public Lite<TypeEntity>? EntityType { get; set; }
@@ -220,11 +214,11 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ToolbarMenu",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("Name", Name),
             EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
-            new XElement("Elements", Elements.Select(p => p.ToXml(ctx))));
+            new XElement("Elements", Elements.SelectWithRowId((p, rowId) => p.ToXml(ctx, rowId))));
     }
 
     public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Elements.Select(a => a.Content).OfType<Lite<IToolbarEntity>>();
@@ -233,7 +227,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     {
         Name = element.Attribute("Name")!.Value;
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
-        Elements.Synchronize(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+        Elements.SynchronizeRowIds(element.Element("Elements")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, tm =>tm.Owner));
     }
 
@@ -252,9 +246,9 @@ public class ToolbarMenuElementEmbedded: ToolbarElementEmbedded
 
     public bool AutoSelect { get; set; }
 
-    public override XElement ToXml(IToXmlContext ctx)
+    public override XElement ToXml(IToXmlContext ctx, PrimaryKey? rowId)
     {
-        var e = base.ToXml(ctx);
+        var e = base.ToXml(ctx, rowId);
         e.Add(WithEntity ? new XAttribute("WithEntity", WithEntity) : null!);
         e.Add(AutoSelect ? new XAttribute("AutoSelect", AutoSelect) : null!);
         return e;

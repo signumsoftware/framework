@@ -4,15 +4,12 @@ using System.Xml.Linq;
 
 namespace Signum.Workflow;
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Shared, EntityData.Master), PrimaryKey(typeof(Guid))]
     public class WorkflowScriptRetryStrategyEntity : Entity, IUserAssetEntity
     {
         [UniqueIndex]
         [StringLengthValidator(Min = 3, Max = 100)]
         public string Rule { get; set; }
-
-        [UniqueIndex]
-        public Guid Guid { get; set; } = Guid.NewGuid();
 
         [AutoExpressionField]
         public override string ToString() => As.Expression(() => Rule);
@@ -52,7 +49,7 @@ namespace Signum.Workflow;
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("WorkflowScriptRetryStrategy",
-                  new XAttribute("Guid", Guid),
+                  new XAttribute("Guid", (Guid)Id),
                   new XAttribute("Rule", Rule)
                 );
         }

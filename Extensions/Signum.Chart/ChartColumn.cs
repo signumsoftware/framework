@@ -89,9 +89,10 @@ public class ChartColumnEmbedded : EmbeddedEntity
         return new Column(Token!.Token, DisplayName);
     }
 
-    internal XElement ToXml(IToXmlContext ctx)
+    internal XElement ToXml(IToXmlContext ctx, PrimaryKey? rowId)
     {
         return new XElement("Column",
+          rowId == null ? null! : new XAttribute("Guid", (Guid)rowId.Value),
           Token == null ? null! : new XAttribute("Token", this.Token.Token.FullKey()),
           !DisplayName.HasText() ? null! : new XAttribute("DisplayName", this.DisplayName),
           !Format.HasText() ? null! : new XAttribute("Format", this.Format),

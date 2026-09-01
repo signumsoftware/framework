@@ -50,7 +50,6 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<Chart.ChartColumnEmbedded>;
   filters: Entities.MList<Queries.QueryFilterEmbedded>;
   customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
-  guid: string /*Guid*/;
 }
 
 export const UserChartLiteModel: Type<UserChartLiteModel> = new Type<UserChartLiteModel>("UserChartLiteModel");

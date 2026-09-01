@@ -30,7 +30,6 @@ export namespace SubPageMessage {
 export const ToolbarElementEmbedded: Type<ToolbarElementEmbedded> = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
 export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolbarElementEmbedded";
-  guid: string /*Guid*/;
   type: ToolbarElementType;
   label: string | null;
   iconName: string | null;
@@ -57,7 +56,6 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
   location: ToolbarLocation;
   priority: number | null;
   elements: Entities.MList<ToolbarElementEmbedded>;
-  guid: string /*Guid*/;
 }
 
 export const ToolbarLocation: EnumType<ToolbarLocation> = new EnumType<ToolbarLocation>("ToolbarLocation");
@@ -76,7 +74,6 @@ export const ToolbarMenuEntity: Type<ToolbarMenuEntity> = new Type<ToolbarMenuEn
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
-  guid: string /*Guid*/;
   name: string;
   elements: Entities.MList<ToolbarMenuElementEmbedded>;
   entityType: Entities.Lite<Basics.TypeEntity> | null;
@@ -108,7 +105,6 @@ export interface ToolbarSwitcherEntity extends Entities.Entity, IToolbarEntity, 
   name: string;
   owner: Entities.Lite<Entities.Entity> | null;
   options: Entities.MList<ToolbarSwitcherOptionEmbedded>;
-  guid: string /*Guid*/;
 }
 
 export namespace ToolbarSwitcherOperation {

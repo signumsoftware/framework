@@ -8,12 +8,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Word;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 {
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 200)]
     public string Name { get; set; }
@@ -27,6 +24,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
     public bool GroupResults { get; set; }
 
     [PreserveOrder, Translatable(false)]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
@@ -82,7 +80,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
     {
         return new XElement("WordTemplate",
             new XAttribute("Name", Name),
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisableAuthorization", DisableAuthorization),
             Query == null ? null : new XAttribute("Query", Query.Key),
             Model?.Let(m => new XAttribute("Model", m.FullClassName)),
@@ -91,7 +89,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             WordTransformer?.Let(wt => new XAttribute("WordTransformer", wt.Key)),
             WordConverter?.Let(wc => new XAttribute("WordConverter", wc.Key)),
             new XAttribute("GroupResults", GroupResults),
-            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
             Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script))),
             ctx.RetrieveLite(Template).Let(t => t.ToXML("Template"))
@@ -100,7 +98,6 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public void FromXml(XElement element, IFromXmlContext ctx)
     {
-        Guid = Guid.Parse(element.Attribute("Guid")!.Value);
         Name = element.Attribute("Name")!.Value;
         DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
@@ -115,7 +112,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
         var valuePr = PropertyRoute.Construct((WordTemplateEntity wt) => wt.Filters[0].ValueString);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });

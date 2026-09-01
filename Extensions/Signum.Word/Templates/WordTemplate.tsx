@@ -114,7 +114,7 @@ export function UserChartTemplateButton(p: { qd: QueryDescription }): React.JSX.
       ])
     ]
   }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
-    var text = "UserChart:" + uce.guid;
+    var text = "UserChart:" + uce.id;
 
     if ((uce.chartScript.key.contains("Multi") || uce.chartScript.key.contains("Stacked")) && uce.columns[1].element.token != null /*Split*/)
       text += "\nPivot(0, 1, 2)";
@@ -126,7 +126,7 @@ export function UserChartTemplateButton(p: { qd: QueryDescription }): React.JSX.
 export function UserQueryTemplateButton(p: { qd: QueryDescription }): React.JSX.Element {
   return renderWidgetButton(<><FontAwesomeIcon aria-hidden={true} icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find(UserQueryEntity.findOptions(token => ({
     filterOptions: [token(a => a.entity!.entityType!.entity!.cleanName).filter("IsIn", [null, ...getTypeInfos(p.qd.columns["Entity"].type!).map(a => a.name)])]
-  }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.guid)))
+  }))).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.id)))
 }
 
 function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {

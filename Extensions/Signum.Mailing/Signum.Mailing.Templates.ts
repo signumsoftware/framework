@@ -25,7 +25,6 @@ export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.I
   name: string;
   isDefault: boolean;
   messages: Entities.MList<EmailMasterTemplateMessageEmbedded>;
-  guid: string /*Guid*/;
   attachments: Entities.MList<IAttachmentGeneratorEntity>;
 }
 
@@ -59,7 +58,6 @@ export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
 export const EmailTemplateEntity: Type<EmailTemplateEntity> = new Type<EmailTemplateEntity>("EmailTemplate");
 export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Templating.IContainsQuery {
   Type: "EmailTemplate";
-  guid: string /*Guid*/;
   name: string;
   editableMessage: boolean;
   disableAuthorization: boolean;
@@ -120,7 +118,7 @@ export interface EmailTemplateRecipientEmbedded extends EmailTemplateAddressEmbe
   Type: "EmailTemplateRecipientEmbedded";
   kind: Mailing.EmailRecipientKind;
   whenNone: WhenNoneRecipientsBehaviour;
-  whenMany: WhenManyRecipiensBehaviour;
+  whenMany: WhenManyRecipientsBehaviour;
 }
 
 export namespace EmailTemplateViewMessage {

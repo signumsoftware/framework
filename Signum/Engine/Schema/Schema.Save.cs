@@ -1090,10 +1090,36 @@ public partial class TableMList
         }
 
         internal Func<string[], bool, string> sqlInsert = null!;
+        internal Func<string[], string> sqlInsertDisableIdentity = null!;
         public Action<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
         public Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>> InsertParametersDisableIdentity = null!;
         public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
             new ConcurrentDictionary<int, Action<List<MListInsert>>>();
+        public ConcurrentDictionary<int, Action<List<MListInsert>>> insertDisableIdentityCache =
+            new ConcurrentDictionary<int, Action<List<MListInsert>>>();
+
+        /// <summary>
+        /// Rows whose row id was assigned with <see cref="IMListPrivate.SetNewRowId"/> need a different INSERT (the primary
+        /// key is written explicitly and nothing is returned), so each batch is split in two.
+        /// </summary>
+        void ExecuteInsert(List<MListInsert> list)
+        {
+            var withNewRowId = list.Where(a => a.MList.InnerList[a.Index].IsNewRowId).ToList();
+
+            if (withNewRowId.Count == 0)
+            {
+                GetInsert(list.Count)(list);
+            }
+            else
+            {
+                var generated = list.Where(a => !a.MList.InnerList[a.Index].IsNewRowId).ToList();
+
+                if (generated.Count > 0)
+                    GetInsert(generated.Count)(generated);
+
+                GetInsertDisableIdentity(withNewRowId.Count)(withNewRowId);
+            }
+        }
 
         Action<List<MListInsert>> GetInsert(int numElements)
         {
@@ -1119,6 +1145,42 @@ public partial class TableMList
                         var pair = list[i];
 
                         pair.MList.SetRowId(pair.Index, new PrimaryKey((IComparable)dt.Rows[i][0]));
+
+                        if (this.hasOrder)
+                            pair.MList.SetOldIndex(pair.Index);
+                    }
+                };
+            });
+        }
+
+        Action<List<MListInsert>> GetInsertDisableIdentity(int numElements)
+        {
+            return insertDisableIdentityCache.GetOrAdd(numElements, num =>
+            {
+                if (this.table.PrimaryKey.Identity)
+                    throw new InvalidOperationException($"{nameof(IMListPrivate.SetNewRowId)} is not supported in {this.table.Name} because {this.table.PrimaryKey.Name} is an identity column. Declare the MList as PrimaryKey(typeof(Guid)).");
+
+                string sqlMulti = sqlInsertDisableIdentity(Enumerable.Range(0, num).Select(i => i.ToString()).ToArray());
+
+                return (List<MListInsert> list) =>
+                {
+                    List<DbParameter> result = new List<DbParameter>();
+                    for (int i = 0; i < num; i++)
+                    {
+                        var pair = list[i];
+                        var row = pair.MList.InnerList[pair.Index];
+
+                        InsertParametersDisableIdentity.Value(pair.Entity, row.Element, pair.Index, pair.Forbidden, i.ToString(), row.RowId!.Value, result);
+                    }
+
+                    new SqlPreCommandSimple(sqlMulti, result).ExecuteNonQuery();
+
+                    for (int i = 0; i < num; i++)
+                    {
+                        var pair = list[i];
+
+                        //Confirms the row id assigned by SetNewRowId, so the row counts as persisted from now on
+                        pair.MList.SetRowId(pair.Index, pair.MList.InnerList[pair.Index].RowId!.Value);
 
                         if (this.hasOrder)
                             pair.MList.SetOldIndex(pair.Index);
@@ -1179,7 +1241,7 @@ public partial class TableMList
                 }
             }
 
-            toInsert.SplitStatements(this.table.Columns.Count, list => GetInsert(list.Count)(list));
+            toInsert.SplitStatements(this.table.Columns.Count, list => ExecuteInsert(list));
         }
 
         public void RelationalUpdates(List<EntityForbidden> idents)
@@ -1205,7 +1267,8 @@ public partial class TableMList
 
                     var innerList = ((IMListPrivate<T>)collection).InnerList;
 
-                    var exceptions = innerList.Select(a => a.RowId).NotNull().ToArray();
+                    //Rows with a row id assigned by SetNewRowId are not in the database yet, so they are INSERTed, not UPDATEd
+                    var exceptions = innerList.Where(a => a.IsPersisted).Select(a => a.RowId!.Value).ToArray();
 
                     if (exceptions.IsEmpty())
                         toDelete.Add(ef.Entity);
@@ -1218,7 +1281,7 @@ public partial class TableMList
                         {
                             var row = innerList[i];
 
-                            if (row.RowId.HasValue)
+                            if (row.IsPersisted)
                             {
                                 if (hasOrder && row.OldIndex != i ||
                                    isEmbeddedEntity && ((ModifiableEntity)(object)row.Element!).IsGraphModified)
@@ -1231,7 +1294,7 @@ public partial class TableMList
 
                     for (int i = 0; i < innerList.Count; i++)
                     {
-                        if (innerList[i].RowId == null)
+                        if (!innerList[i].IsPersisted)
                             toInsert.Add(new MListInsert(ef, collection, i));
                     }
                 }
@@ -1241,7 +1304,7 @@ public partial class TableMList
 
             toDeleteExcept.ForEach(e => GetDeleteExcept(e.ExceptRowIds.Length)(e));
             toUpdate.SplitStatements(this.table.Columns.Count + 2, listPairs => GetUpdate(listPairs.Count)(listPairs));
-            toInsert.SplitStatements(this.table.Columns.Count, listPairs => GetInsert(listPairs.Count)(listPairs));
+            toInsert.SplitStatements(this.table.Columns.Count, listPairs => ExecuteInsert(listPairs));
         }
 
         public SqlPreCommand? RelationalUpdateSync(Entity parent, string suffix, bool replaceParameter)
@@ -1387,16 +1450,21 @@ public partial class TableMList
 
             result.InsertParameters = expr.Compile();
 
+            var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
+
+            var trioIdent = new List<Table.Trio>
+            {
+                new Table.Trio(this.PrimaryKey, Expression.Field(paramRowId, nameof(Signum.Entities.PrimaryKey.Object)), paramSuffix)
+            };
+            trioIdent.AddRange(trios);
+
+            //Same as sqlInsert but writing the primary key explicitly, so no OUTPUT/RETURNING is needed
+            result.sqlInsertDisableIdentity = suffixes => "INSERT INTO {0} ({1})\nVALUES\n{2};".FormatWith(Name,
+                trioIdent.ToString(p => p.SourceColumn.SqlEscape(isPostgres), ", "),
+                suffixes.ToString(s => "  (" + trioIdent.ToString(p => p.ParameterName + s, ", ") + ")", ",\n"));
+
             result.InsertParametersDisableIdentity = new Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(() =>
             {
-                var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
-
-                var trioIdent = new List<Table.Trio>
-                {
-                    new Table.Trio(this.PrimaryKey, Expression.Field(paramRowId, nameof(Signum.Entities.PrimaryKey.Object)), paramSuffix)
-                };
-                trioIdent.AddRange(trios);
-
                 var exprDI = Expression.Lambda<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(
                     Table.CreateBlock(trioIdent.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramRowId, paramList);
 

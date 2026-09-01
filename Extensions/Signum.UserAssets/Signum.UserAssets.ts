@@ -14,7 +14,6 @@ export type EntityAction =
   "New";
 
 export interface IUserAssetEntity extends Entities.Entity {
-  guid: string /*Guid*/;
 }
 
 export const LiteConflictEmbedded: Type<LiteConflictEmbedded> = new Type<LiteConflictEmbedded>("LiteConflictEmbedded");

@@ -4,7 +4,7 @@ using Signum.UserAssets;
 
 namespace Signum.Mailing.Templates;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class EmailMasterTemplateEntity : Entity, IUserAssetEntity
 {
     [UniqueIndex]
@@ -15,9 +15,6 @@ public class EmailMasterTemplateEntity : Entity, IUserAssetEntity
 
     [BindParent, PreserveOrder]
     public MList<EmailMasterTemplateMessageEmbedded> Messages { get; set; } = new MList<EmailMasterTemplateMessageEmbedded>();
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
 
@@ -46,7 +43,7 @@ public class EmailMasterTemplateEntity : Entity, IUserAssetEntity
     {
         return new XElement("EmailMasterTemplate",
             new XAttribute("Name", Name ?? ""),
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
 
             new XElement("Messages", Messages.Select(x =>
                 new XElement("Message",
