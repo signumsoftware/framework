@@ -226,11 +226,27 @@ public static class FromXmlExtensions
     /// Rows are matched by that row id instead of by position, and rows that are not in the database yet are inserted
     /// keeping the row id from the XML, so the identity of each row survives an export/import even across databases.
     /// The MList has to be declared as <c>PrimaryKey(typeof(Guid))</c>, see <see cref="IMListPrivate.SetNewRowId"/>.
+    /// <para>XML with no <c>Guid</c> at all (exported before the row ids were written) falls back to
+    /// <see cref="Synchronize{T}(MList{T}, List{XElement}?, Action{T, XElement})"/> by position, so importing an old file
+    /// is not reported as a change. A file where only some rows have it is an error.</para>
     /// </summary>
     public static void SynchronizeRowIds<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
         where T : class, new()
     {
         xElements ??= new List<XElement>();
+
+        var withoutGuid = xElements.Where(x => x.Attribute("Guid") == null).ToList();
+
+        if (withoutGuid.Count == xElements.Count)
+        {
+            //XML exported before the row ids were written has no Guid at all: synchronize by position, as before,
+            //so importing an old file does not look like a change
+            entities.Synchronize(xElements, syncAction);
+            return;
+        }
+
+        if (withoutGuid.Count > 0)
+            throw new InvalidOperationException($"{withoutGuid.Count} of the {xElements.Count} '{xElements.First().Name}' elements have no Guid attribute. Either all of them have it (the row id) or none of them (old XML, synchronized by position).");
 
         var mlist = (IMListPrivate<T>)entities;
 
@@ -240,10 +256,7 @@ public static class FromXmlExtensions
 
         foreach (var x in xElements)
         {
-            //XML exported before the row ids were preserved has no Guid, the row is just re-created
-            var guid = x.Attribute("Guid")?.Value.Let(Guid.Parse) ?? Guid.NewGuid();
-
-            PrimaryKey rowId = guid;
+            PrimaryKey rowId = Guid.Parse(x.Attribute("Guid")!.Value);
 
             if (byRowId.TryGetValue(rowId, out var existing))
             {
