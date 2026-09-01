@@ -138,44 +138,43 @@ export async function onImportFromExcel(sc: SearchControlLoaded): Promise<void> 
 
     } else {
 
-      if (model.transactional) {
+      // One row failing never stops the others (each row is caught server-side), so the run always ends with a
+      // mix to report: what was written, and what could not be. Show both in one summary instead of only
+      // surfacing the failures — a run where half the rows worked used to look like a pure error.
+      const errors = r.results.filter(a => a.error != null);
+      const ok = r.results.filter(a => a.error == null);
+      const inserted = ok.filter(a => a.action == "Inserted").length;
+      const updated = ok.filter(a => a.action == "Updated").length;
+      const unchanged = ok.filter(a => a.action == "NoChanges").length;
 
-        var errors = r.results.filter(a => a.error != null);
+      // A transactional run rolls everything back as soon as one row fails, so nothing was actually written
+      // and the per-row outcomes above describe what *would* have happened.
+      const rolledBack = model.transactional && errors.length > 0;
 
-        if (errors.length) {
-          await MessageModal.showError(
+      await MessageModal.show({
+        buttons: "ok",
+        icon: errors.length == 0 ? "success" : rolledBack || inserted + updated == 0 ? "error" : "warning",
+        style: errors.length == 0 ? "success" : rolledBack || inserted + updated == 0 ? "error" : "warning",
+        size: "xl",
+        title: ImportFromExcelMessage.ImportSummary.niceToString(),
+        message: <div>
+          {rolledBack
+            ? <p className="text-danger fw-bold">{ImportFromExcelMessage.NothingWasSavedTheWholeImportRunsInOneTransaction.niceToString()}</p>
+            : <p>{ImportFromExcelMessage._0Inserted1Updated2Unchanged.niceToString(inserted, updated, unchanged)}</p>}
+          {errors.length > 0 && <>
+            <strong>{ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length)}</strong>
             <ul>
-              {errors.map((e, i) => <li key={i}><strong>{e.rowIndex}</strong> {e.error}</li>)}
-            </ul>,
-            ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length));
-
-          await onImportFromExcelRetry();
-
-          return;
-        }
-
-      } else {
-
-        var errors = r.results.filter(a => a.error != null && a.entity == null);
-
-        if (errors.length) {
-          await MessageModal.show({
-            buttons: "ok",
-            icon: "error",
-            style: "error",
-            size: "xl",
-            title: ImportFromExcelMessage.ErrorsIn0Rows_N.niceToString().forGenderAndNumber(errors.length).formatWith(errors.length),
-            message: <ul>
               {errors.map((e, i) => <li key={i}><strong>Row {e.rowIndex}:</strong> {e.error}</li>)}
             </ul>
-          });
+          </>}
+        </div>
+      });
 
-          if (errors.length == r.results.length) {
-            await onImportFromExcelRetry();
+      // Nothing landed, so let them correct the file or the settings without reopening the menu by hand.
+      if (r.results.length > 0 && (rolledBack || errors.length == r.results.length)) {
+        await onImportFromExcelRetry();
 
-            return;
-          }
-        }
+        return;
       }
 
       var state = r.results.filter(a => a.entity != null).toObject(a => liteKey(a.entity!), a => {

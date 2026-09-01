@@ -374,7 +374,7 @@ public static class AlertLogic
                 TextArguments = textArguments?.ToString("\n###\n"),
                 TextField = text,
                 Target = (Lite<Entity>)entity,
-                TargetToString = entity.ToString()?.Truncate(200),
+                TargetToString = entity.ToString()?.Truncate(200).Trim(), //Trim after Truncate: TargetToString rejects leading/trailing spaces, and cutting at 200 can land on one
                 LinkTarget = linkTarget,
                 GroupTarget = groupTarget,
                 AlertType = alertType,

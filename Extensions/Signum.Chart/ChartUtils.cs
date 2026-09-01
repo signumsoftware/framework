@@ -338,7 +338,8 @@ public enum ChartParameter
     Zoom,
     Value,
     Percent,
-    Total
+    Total,
+    Legend
 }
 
 public enum ChartParameterGroupMessage

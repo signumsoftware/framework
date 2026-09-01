@@ -1,6 +1,10 @@
 export default {
   text: {
+    bold: "text-bold",
+    italic: "text-italic",
     underline: "text-underline",
+    strikethrough: "text-strikethrough",
+    underlineStrikethrough: "text-underline-strikethrough",
     code: "text-code",
   },
   code: "code-block",

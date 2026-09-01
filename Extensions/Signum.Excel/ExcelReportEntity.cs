@@ -99,8 +99,20 @@ public enum ImportFromExcelMessage
     [Description("Errors in {0} row[s]")]
     ErrorsIn0Rows_N,
 
+    [Description("Import summary")]
+    ImportSummary,
+
+    [Description("{0} inserted, {1} updated, {2} unchanged")]
+    _0Inserted1Updated2Unchanged,
+
+    [Description("Nothing was saved: the whole import runs in one transaction and some rows failed. Fix the rows below and import again, or clear 'Transactional' to keep the rows that work.")]
+    NothingWasSavedTheWholeImportRunsInOneTransaction,
+
     [Description("No {0} found in this query with {1} equals to {2}")]
     No0FoundInThisQueryWith1EqualsTo2,
+
+    [Description("More than one {0} found in this query with {1} equals to {2}. The match-by column has to identify one row; choose a column with unique values, like Id")]
+    MoreThanOne0FoundInThisQueryWith1EqualsTo2,
 
     [Description("Unable to assign more than one unrelated collection: {0}")]
     UnableToAssignMoreThanOneUnrelatedCollections0,

@@ -128,6 +128,7 @@
     <Member Name="Content" Description="Inhalt" />
     <Member Name="CustomColor" Description="Benutzerdefinierte Farbe" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideTitle" Description="Titel ausblenden" />
     <Member Name="IconColor" Description="Symbolfarbe" />
     <Member Name="IconName" Description="Symbolname" />
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />

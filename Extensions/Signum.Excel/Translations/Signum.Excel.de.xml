@@ -64,11 +64,15 @@
     <Member Name="ColumnsDoNotMatchExcelColumns0QueryColumns1" Description="Die Spalten stimmen nicht überein. Excel-Spalten: {0} Abfragespalten: {1}" />
     <Member Name="DownloadTemplate" Description="Excel-Vorlage für diese Abfrage herunterladen" />
     <Member Name="DuplicatedNonConsecutive0Found1" Description="Duplikate nicht aufeinanderfolgender {0} gefunden: {1}" />
+    <Member Name="_0Inserted1Updated2Unchanged" Description="{0} eingefügt, {1} aktualisiert, {2} unverändert" />
     <Member Name="ErrorsIn0Rows_N" Description="Fehler in {0} Zeile(n)" />
+    <Member Name="ImportSummary" Description="Import-Zusammenfassung" />
+    <Member Name="NothingWasSavedTheWholeImportRunsInOneTransaction" Description="Es wurde nichts gespeichert: Der gesamte Import läuft in einer Transaktion und einige Zeilen sind fehlgeschlagen. Korrigieren Sie die unten aufgeführten Zeilen und importieren Sie erneut, oder deaktivieren Sie 'Transaktionale', um die funktionierenden Zeilen zu behalten." />
     <Member Name="Import0FromExcel" Description="{0} aus Excel Importieren" />
     <Member Name="ImportFromExcel" Description="Aus Excel importieren" />
     <Member Name="Importing0" Description="Importieren {0}" />
     <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Viele Filter versuchen, die gleiche Eigenschaft {0} mit unterschiedlichen Werten {1} zuzuweisen" />
+    <Member Name="MoreThanOne0FoundInThisQueryWith1EqualsTo2" Description="Mehr als eine {0} gefunden in dieser Abfrage mit {1} gleich {2}. Die Abgleichsspalte muss eine Zeile eindeutig bestimmen; wählen Sie eine Spalte mit eindeutigen Werten, z. B. Id" />
     <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="Keine {0} gefunden in dieser Abfrage mit {1} gleich {2}" />
     <Member Name="Operation0IsNotSupported" Description="Operation {0} wird nicht unterstützt" />
     <Member Name="SomeColumnsAreIncompatibleWithImportingFromExcel" Description="Einige Spalten sind für den Import aus Excel nicht kompatibel:" />

@@ -88,7 +88,10 @@ public static class UserQueryLogic
                     var uq = UserQueries.Value.GetOrCreate(lite); 
                     return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true);
                 },
-                GetRelatedQuery = lite => lite.RetrieveUserQuery().Query,
+                // Straight from the cache: RetrieveUserQuery logs a view and throws when not allowed, and
+                // neither belongs here. Callers ask for the related query to group or authorize elements,
+                // not to open the user query, and IsAuthorized above already covers the access check.
+                GetRelatedQuery = lite => UserQueries.Value.GetOrCreate(lite).Query,
             }.Register();
 
             QueryLogic.Expressions.Register((UserQueryEntity uq) => uq.InToolbar());
@@ -112,6 +115,10 @@ public static class UserQueryLogic
                 {"UserQueryPart", typeof(UserQueryPartEntity)},
                 {"BigValuePart", typeof(BigValuePartEntity)},
             });
+
+            DashboardLogic.RegisterPartRelatedQuery((UserQueryPartEntity p) => p.UserQuery.Query);
+            DashboardLogic.RegisterPartRelatedQuery((BigValuePartEntity p) => p.UserQuery?.Query);
+            // ValueUserQueryListPart shows several queries at once, so no single one represents it.
 
             DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
             DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });

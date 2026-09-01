@@ -28,6 +28,8 @@ export interface EntityAccordionProps<V extends ModifiableEntity> extends Entity
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
+  /** Composes the element header (remove/move/extra buttons and title). Default puts the buttons first. */
+  renderElementHeader?: (parts: { title: React.ReactNode, buttons: React.ReactElement }) => React.ReactNode;
   ref?: React.Ref<EntityAccordionController<V>>
 }
 
@@ -142,6 +144,7 @@ export function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordi
               getTitle={p.getTitle}
               htmlAttributes={p.itemHtmlAttributes?.(mlec, c) }
               headerHtmlAttributes={p.headerHtmlAttributes?.(mlec, c)}
+              renderHeader={p.renderElementHeader}
               title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
         {
@@ -171,9 +174,10 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   itemExtraButtons?: () => React.ReactElement;
   htmlAttributes?: React.HTMLAttributes<any>;
   headerHtmlAttributes?: React.HTMLAttributes<any>;
+  renderHeader?: (parts: { title: React.ReactNode, buttons: React.ReactElement }) => React.ReactNode;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>): React.ReactElement
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, renderHeader, onSelectTab }: EntityAccordionElementProps<V>): React.ReactElement
 {
 
   const forceUpdate = useForceUpdate();
@@ -210,6 +214,28 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
     );
   }
 
+  const headerTitle = getTitle ? getTitle(ctx) : getToString(ctx.value);
+
+  const headerButtons = <>
+    {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
+      onClick={onRemove}
+      title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+      {EntityBaseController.getTrashIcon()}
+    </LinkButton>}
+    &nbsp;
+    {move?.renderMoveUp()}
+    {move?.renderMoveDown()}
+    {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); }}
+      draggable={true}
+      onDragStart={drag.onDragStart}
+      onDragEnd={drag.onDragEnd}
+      onKeyDown={drag.onKeyDown}
+      title={drag.title}>
+      {EntityBaseController.getMoveIcon()}
+    </LinkButton>}
+    {itemExtraButtons && itemExtraButtons()}
+  </>;
+
   return (
     <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
       ref={refHtml}
@@ -222,25 +248,12 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)} {...headerHtmlAttributes}>
         <div className="d-flex align-items-center flex-grow-1">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
-          {onRemove && <LinkButton className={classes("sf-line-button", "sf-remove")}
-            onClick={onRemove}
-            title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-            {EntityBaseController.getRemoveIcon()}
-          </LinkButton>}
-          &nbsp;
-          {move?.renderMoveUp()}
-          {move?.renderMoveDown()}
-          {drag && <LinkButton className={classes("sf-line-button", "sf-move")} onClick={e => { e.stopPropagation(); } }
-            draggable={true}
-            onDragStart={drag.onDragStart}
-            onDragEnd={drag.onDragEnd}
-            onKeyDown={drag.onKeyDown}
-            title={drag.title}>
-            {EntityBaseController.getMoveIcon()}
-          </LinkButton>}
-          {itemExtraButtons && itemExtraButtons()}
-          {'\xa0'}
-          {getTitle ? getTitle(ctx) : getToString(ctx.value)}
+          {renderHeader ? renderHeader({ title: headerTitle, buttons: headerButtons }) :
+            <>
+              {headerButtons}
+              {'\xa0'}
+              {headerTitle}
+            </>}
         </div>
       </Accordion.Header>
       <Accordion.Body>

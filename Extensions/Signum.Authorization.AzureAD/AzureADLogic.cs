@@ -442,6 +442,55 @@ public static class AzureADLogic
     }
 
 
+    public static TimeSpan CacheMailboxStatusFor = new TimeSpan(6, 0, 0);
+
+    static readonly ConcurrentDictionary<Guid, (DateTime date, AzureADMailboxStatus status)> MailboxStatusCache = new ConcurrentDictionary<Guid, (DateTime date, AzureADMailboxStatus status)>();
+
+    // Determines, server-side, whether the current user can use the Microsoft Graph mailbox features (calendar, mail...).
+    public static async Task<AzureADMailboxStatus> GetCurrentUserMailboxStatusAsync(string? accessToken, CancellationToken token)
+    {
+        var externalId = UserEntity.CurrentExternalId;
+        if (externalId == null)
+            return AzureADMailboxStatus.NoActiveDirectoryUser;
+
+        var oid = Guid.Parse(externalId);
+
+        if (MailboxStatusCache.TryGetValue(oid, out var cached) && cached.date.Add(CacheMailboxStatusFor) > Clock.Now)
+            return cached.status;
+
+        // Without a delegated access token we cannot verify the mailbox; assume it is available so we don't hide the feature wrongly.
+        if (accessToken == null)
+            return AzureADMailboxStatus.WithMailbox;
+
+        var status = await ProbeMailboxAsync(accessToken, token);
+        MailboxStatusCache[oid] = (Clock.Now, status);
+        return status;
+    }
+
+    static async Task<AzureADMailboxStatus> ProbeMailboxAsync(string accessToken, CancellationToken token)
+    {
+        using (HeavyProfiler.Log("Microsoft Graph", () => "GetCurrentUserMailboxStatus"))
+        {
+            try
+            {
+                var graphClient = new GraphServiceClient(new AccessTokenCredential(accessToken));
+
+                // Touches the mailbox with the same delegated Calendars.Read scope the calendar features use.
+                await graphClient.Me.Calendar.GetAsync(req => req.QueryParameters.Select = new[] { "id" }, token);
+
+                return AzureADMailboxStatus.WithMailbox;
+            }
+            catch (ODataError e) when (IsMailboxUnavailable(e))
+            {
+                return AzureADMailboxStatus.NoMailbox;
+            }
+        }
+    }
+
+    static bool IsMailboxUnavailable(ODataError e) =>
+        e.Error?.Code == "MailboxNotEnabledForRESTAPI" ||
+        (e.Error?.Message?.Contains("mailbox is either inactive", StringComparison.OrdinalIgnoreCase) ?? false);
+
     public static Task<MemoryStream> GetUserPhoto(Guid oid, int size)
     {
         var tokenCredential = GetTokenCredential();
@@ -466,6 +515,14 @@ public static class AzureADLogic
         size <= 360 ? 360 :
         size <= 432 ? 432 :
         size <= 504 ? 504 : 648;
+}
+
+[InTypeScript(true)]
+public enum AzureADMailboxStatus
+{
+    WithMailbox,
+    NoActiveDirectoryUser,
+    NoMailbox,
 }
 
 public record SimpleGroup(Guid Id, string? DisplayName);

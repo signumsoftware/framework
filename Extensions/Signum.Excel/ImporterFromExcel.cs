@@ -46,7 +46,8 @@ public class ImporterFromExcel
             return ParseExcelValue(matchBy!, valueStr, row, matchByIndex.Value);
         }).ToList();
 
-        var duplicateKeys = rowGroups.GroupBy(r => r.Key).Where(a => a.Count() > 1).ToList();
+        //Null keys are new rows (no match value / empty Id); they have no identity, so they can never be "duplicated non-consecutive".
+        var duplicateKeys = rowGroups.Where(r => r.Key != null).GroupBy(r => r.Key).Where(a => a.Count() > 1).ToList();
 
         if (duplicateKeys.Any())
             throw new ApplicationException(ImportFromExcelMessage.DuplicatedNonConsecutive0Found1.NiceToString(matchBy,
@@ -65,7 +66,7 @@ public class ImporterFromExcel
 
         var elementTokens = (pq.ElementTopToken?.Follow(a => a.Parent)).EmptyIfNull().OfType<CollectionElementToken>().ToList();
 
-        var mlistGetters = elementTokens.ToDictionary(a => a, a => GetMListGetter(a));
+        var mlistGetters = elementTokens.ToDictionary(a => a, a => GetMListGetter(a, pq.MainType));
 
         var columnGetterSetter = GetColumnGettersAndSetters(pq.Columns/*.Where(a => !a.HasElement()).ToList()*/, pq.MainType);
         var filtersGetterSetter = GetColumnGettersAndSetters(pq.SimpleFilters.Keys.ToList(), pq.MainType);
@@ -134,14 +135,23 @@ public class ImporterFromExcel
                     {
                         if (rg.Key != null)
                         {
-
-                            entity = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
+                            //Two is enough to tell "none", "one" and "ambiguous" apart.
+                            var matches = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
                             {
                                 QueryName = request.QueryName,
                                 Filters = request.Filters.And(new FilterCondition(matchBy, FilterOperation.EqualTo, rg.Key)).ToList(),
                                 Orders = new List<Order>(),
-                                Count = null,
-                            }).SingleOrDefaultEx()!;
+                                Count = 2,
+                            }).ToList();
+
+                            //A match-by column with repeated values can not identify the row to update. Saying so
+                            //beats SingleOrDefaultEx's "Sequence contains more than one Entity", which names neither
+                            //the column nor the value and reads like an internal error.
+                            if (matches.Count > 1)
+                                throw new ApplicationException(ImportFromExcelMessage.MoreThanOne0FoundInThisQueryWith1EqualsTo2
+                                    .NiceToString(pq.MainType.NiceName(), matchBy, rg.Key));
+
+                            entity = matches.SingleOrDefaultEx()!;
                         }
                         else
                         {
@@ -262,13 +272,16 @@ public class ImporterFromExcel
                             var me = (ModifiableEntity)(previousValue ?? Activator.CreateInstance(cleanType))!;
                             foreach (var c in node.Children.Where(a => a.Value is not CollectionElementToken))
                             {
+                                var getSet = columnGetterSetter.GetOrThrow(c.Value);
+
+                                if (getSet.IsId)
+                                    continue; //The Id column is only used to match existing rows; new elements get a server-generated Id.
+
                                 var colIndex = pq.Columns.IndexOf(c.Value);
                                 var cell = cells.TryGetC(colIndex);
                                 var strValue = cell == null ? null : document.GetCellValue(cell);
 
                                 object? value = ParseExcelValue(c.Value, strValue, row, colIndex);
-
-                                var getSet = columnGetterSetter.GetOrThrow(c.Value);
 
                                 value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
                                 var parent = getSet.ParentGetter != null ? getSet.ParentGetter(me) : me;
@@ -278,14 +291,48 @@ public class ImporterFromExcel
                         }
                         else
                         {
-                            var colIndex = pq.Columns.IndexOf(token);
+                            // A value or lite element. If a child column navigates into the lite element (e.g.
+                            // Element.UserName), the element token itself is not a query column, so resolve the
+                            // referenced entity by that property instead of reading the element column directly.
+                            var navColumn = node.Children.Select(a => a.Value!).SingleOrDefault(c => c is not CollectionElementToken && !c.Equals(token));
+                            if (navColumn != null)
+                            {
+                                if (previousValue != null)
+                                    return previousValue; //Merge: the element already matches by key; a lite reference has nothing else to update.
+
+                                var navIndex = pq.Columns.IndexOf(navColumn);
+                                var navCell = cells.TryGetC(navIndex);
+                                var navStr = navCell == null ? null : document.GetCellValue(navCell);
+                                var navValue = ParseExcelValue(navColumn, navStr, row, navIndex);
+                                return navValue == null ? null : FindLiteByColumn(cleanType, token, navColumn, navValue);
+                            }
+                            else
+                            {
+                                var colIndex = pq.Columns.IndexOf(token);
+                                var cell = cells.TryGetC(colIndex);
+                                var strValue = cell == null ? null : document.GetCellValue(cell);
+                                object? value = ParseExcelValue(token, strValue, row, colIndex);
+                                var getSet = columnGetterSetter.GetOrThrow(token);
+                                value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
+                                return value;
+                            }
+                        }
+                    }
+
+                    //A row whose collection columns are ALL empty represents an empty collection (an outer-apply artifact),
+                    //not a new element. This is different from a new element, which has at least one non-empty column.
+                    bool IsCollectionRowEmpty(List<Node<QueryToken>> elementColumns, Row row)
+                    {
+                        var cells = row.Descendants<Cell>().ToDictionary(a => a.GetExcelColumnIndex()!.Value - 1);
+                        foreach (var c in elementColumns)
+                        {
+                            var colIndex = pq.Columns.IndexOf(c.Value);
                             var cell = cells.TryGetC(colIndex);
                             var strValue = cell == null ? null : document.GetCellValue(cell);
-                            object? value = ParseExcelValue(token, strValue, row, colIndex);
-                            var getSet = columnGetterSetter.GetOrThrow(token);
-                            value = getSet.EntityFinder != null ? getSet.EntityFinder(value) : value;
-                            return value;
+                            if (strValue.HasText())
+                                return false;
                         }
+                        return true;
                     }
 
                     foreach (var node in columnTree.Where(a => a.Value is CollectionElementToken))
@@ -294,12 +341,26 @@ public class ImporterFromExcel
                         var mlist = (IList)mlistGetters.GetOrThrow(token)(entity);
                         var key = keyByElementToken.GetOrThrow(token);
                         var cleanType = token.Type.CleanType();
+
+                        var elementColumns = node.Children.Where(a => a.Value is not CollectionElementToken).ToList();
+                        // A value/enum element (e.g. MList<LeadFederalAgency>), or a lite matched by the element
+                        // itself, has no child columns — the element token IS the data column. Include it so the
+                        // row isn't wrongly seen as an empty collection (which would drop every element).
+                        if (pq.Columns.Contains(node.Value!))
+                            elementColumns.Insert(0, node);
+                        var rgRows = rg.ToList();
+                        var filledRows = rgRows.Where(r => !IsCollectionRowEmpty(elementColumns, r)).ToList();
+
+                        //An empty collection row (all element columns blank) means "no elements"; it cannot be combined with real element rows.
+                        if (filledRows.Count != rgRows.Count && filledRows.Any())
+                            throw new InvalidOperationException($"The collection '{token.Parent}' mixes an empty row (empty collection) with element rows for the same {pq.MainType.NiceName()}. Each element column must be either all blank (no elements) or filled (one row per element).");
+
                         if (key == null) //Last MList in an Insert Mode
                         {
                             if (mlist.Count != 0)
                                 throw new InvalidOperationException("MList should be empty");
 
-                            foreach (var row in rg)
+                            foreach (var row in filledRows)
                             {
                                 var elem = ApplyChanges(null, node, token, cleanType, row);
                                 mlist.Add(elem);
@@ -307,9 +368,13 @@ public class ImporterFromExcel
                         }
                         else
                         {
-                            var shouldGroups = GroupByConsecutive(rg, key.MatchBy, key.MatchByIndex, document);
-                            var should = shouldGroups.Count == 1 && shouldGroups.SingleEx().Key == null ? new() : shouldGroups.ToDictionary(a => a.Key!);
-                            var current = mlist.Cast<object>().ToDictionary(key.Getter);
+                            var shouldGroups = GroupByConsecutive(filledRows, key.MatchBy, key.MatchByIndex, document);
+
+                            //Rows without a match key (empty Id) are always inserted as new elements; they don't participate in key matching.
+                            var newRows = shouldGroups.Where(g => g.Key == null).SelectMany(g => g).ToList();
+                            //NormalizeKey unwraps PrimaryKey so an Excel-parsed Id (int/long) matches an in-memory element's Id (PrimaryKey).
+                            var should = shouldGroups.Where(g => g.Key != null).ToDictionary(a => NormalizeKey(a.Key)!);
+                            var current = mlist.Cast<object>().ToDictionary(o => NormalizeKey(key.Getter(o))!);
 
                             Synchronizer.Synchronize(
                                   newDictionary: should,
@@ -327,6 +392,12 @@ public class ImporterFromExcel
                                   {
                                       ApplyChanges(o, node, token, cleanType, n.FirstEx());
                                   });
+
+                            foreach (var row in newRows)
+                            {
+                                var elem = ApplyChanges(null, node, token, cleanType, row);
+                                mlist.Add(elem);
+                            }
                         }
                     }
                     
@@ -372,7 +443,11 @@ public class ImporterFromExcel
                 tr.Commit();
         }
 
-        if (!model.Transactional)
+        //Transactional runs hold their rows back until the transaction has been committed or rolled back, and
+        //report them all here. The condition used to be inverted, so a transactional import reported nothing at
+        //all: the rows were collected into transactionalResults and then never yielded, leaving the caller with
+        //an empty result list whether it had succeeded or failed.
+        if (model.Transactional)
         {
             foreach (var res in transactionalResults)
             {
@@ -397,6 +472,7 @@ public class ImporterFromExcel
                     var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
                     var t when t == typeof(decimal) => RoundToValidator(ExcelExtensions.FromExcelNumber(strValue), token),
                     var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
+                    var t when t == typeof(DateOnly) => ExcelExtensions.FromExcelDateOnly(strValue),
                     var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                     var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
                     var t when t == typeof(bool) => strValue == "TRUE" ? true : strValue == "FALSE" ? false : ExcelExtensions.FromExcelNumber(strValue) == 1,
@@ -441,11 +517,34 @@ public class ImporterFromExcel
         return ExcelExtensions.GetExcelColumnName((uint)colIndex + 1) + row.RowIndex;
     }
 
-    static Func<ModifiableEntity, IMListPrivate> GetMListGetter(CollectionElementToken token)
+    static Func<ModifiableEntity, IMListPrivate> GetMListGetter(CollectionElementToken token, Type mainType)
     {
         var pr = token.Parent!.GetPropertyRoute()!; //No other case since MList can not neast without going through Root entities
 
-        return pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile();
+        var mlistGetter = pr.GetLambdaExpression<ModifiableEntity, IMListPrivate>(false).Compile();
+
+        if (pr.RootType != mainType && !token.Parent!.HasElement())
+        {
+            //The MList lives inside a singly-referenced Part entity, e.g. Entity.Extension.(BundMeasureExtension).Milestones.Element.
+            //The compiled getter above is rooted at the Part, so it must be fed the Part instance, not the main entity.
+            var info = GetPartReferenceInfo(token.Parent!, mainType)!.Value;
+            var refGetter = info.RefRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, info.RefRoute.GetMListItemsRoute()).Compile();
+            var concrete = info.ConcreteType;
+            var refName = info.RefRoute.PropertyInfo!.Name;
+
+            return entity =>
+            {
+                var part = refGetter(entity);
+                if (part == null)
+                    throw new InvalidOperationException($"Unable to read the collection '{token}' because '{refName}' is null. Add the '{refName}' [HasValue] column so the Part entity is instantiated first.");
+                if (part.GetType() != concrete)
+                    throw new InvalidOperationException($"Unable to read the collection '{token}' because '{refName}' is a {part.GetType().Name}, but the column targets {concrete.Name}.");
+
+                return mlistGetter(part);
+            };
+        }
+
+        return mlistGetter;
     }
 
     static bool IsNavigatingLite(QueryToken t)
@@ -472,21 +571,41 @@ public class ImporterFromExcel
         }
         else
         {
-            var lastLocal = localExtraTokens.Last();
-            var pr = lastLocal.GetPropertyRoute()!;
-            var func = pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+            // The key navigates through a Lite, so read the lite locally and resolve the remaining columns from
+            // the database. When there are no local tokens the MList element itself is the lite (e.g. a
+            // MList<Lite<UserEntity>> matched by UserName), so the local getter is the element itself and the
+            // split point is the collection-element token.
+            Func<object, object> func;
+            Type type;
+            string keyPathAfterLite;
+            string splitDescription;
 
-            var type = pr.Type.CleanType();
+            if (localExtraTokens.Count == 0)
+            {
+                func = elem => elem;
+                type = elementToken.Type.CleanType();
+                keyPathAfterLite = keyToken.FullKey().After(elementToken.FullKey());
+                splitDescription = elementToken.FullKey();
+            }
+            else
+            {
+                var lastLocal = localExtraTokens.Last();
+                var pr = lastLocal.GetPropertyRoute()!;
+                func = pr.GetLambdaExpression<object, object>(false, pr.GetMListItemsRoute()).Compile();
+                type = pr.Type.CleanType();
+                keyPathAfterLite = keyToken.FullKey().After(lastLocal.FullKey());
+                splitDescription = pr.ToString()!;
+            }
 
             var qd = QueryLogic.Queries.QueryDescription(type);
             var entityToken = QueryUtils.Parse("Entity", qd, 0);
-            var columnToken = QueryUtils.Parse("Entity" + keyToken.FullKey().After(lastLocal.FullKey()), qd, 0);
+            var columnToken = QueryUtils.Parse("Entity" + keyPathAfterLite, qd, 0);
 
             return elem =>
             {
                 var lite = func(elem);
                 if (lite == null)
-                    throw new ApplicationException($"{pr} returned null");
+                    throw new ApplicationException($"{splitDescription} returned null");
 
                 var result =  InDBToken((Lite<Entity>)lite, entityToken, columnToken);
                 if (result == null)
@@ -517,6 +636,63 @@ public class ImporterFromExcel
         return rt.Rows[0][0];
     }
 
+    // Resolves a lite collection element (e.g. an item of MList<Lite<UserEntity>>) from a column that navigates
+    // into the lite (e.g. Element.UserName): finds the referenced entity whose navigated property equals the
+    // imported value and returns its lite. This is the reverse of the InDBToken lookup used to read the key.
+    static Lite<Entity> FindLiteByColumn(Type cleanType, QueryToken elementToken, QueryToken navColumn, object value)
+    {
+        var qd = QueryLogic.Queries.QueryDescription(cleanType);
+        var columnToken = QueryUtils.Parse("Entity" + navColumn.FullKey().After(elementToken.FullKey()), qd, 0);
+
+        var entities = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
+        {
+            QueryName = cleanType,
+            Filters = new List<Filter> { new FilterCondition(columnToken, FilterOperation.EqualTo, value) },
+            Orders = new List<Order>(),
+            Count = 2,
+        }).ToList();
+
+        if (entities.Count == 0)
+            throw new ApplicationException($"No {cleanType.NiceName()} found with {columnToken} = '{value}'");
+        if (entities.Count > 1)
+            throw new ApplicationException($"Multiple {cleanType.NiceName()} found with {columnToken} = '{value}'");
+
+        return entities[0].ToLite();
+    }
+
+    //A collection matchBy key parsed from Excel is the unwrapped primitive (e.g. int), while an in-memory element's
+    //Id is a PrimaryKey. PrimaryKey.Equals(non-PrimaryKey) is always false, so unwrap it for dictionary matching.
+    static object? NormalizeKey(object? key) => key is PrimaryKey pk ? pk.Object : key;
+
+    static bool IsPartReferenceToken(QueryToken token)
+    {
+        var type = token.Type.CleanType();
+        return type.IsEntity() && EntityKindCache.GetEntityKind(type) is EntityKind.Part or EntityKind.SharedPart;
+    }
+
+    //For a column rooted at a singly-referenced Part entity (e.g. Entity.Extension.(BundMeasureExtension).SomeField),
+    //returns the route of the reference property (rooted at the main entity / a container) and the concrete Part type to expect.
+    static (PropertyRoute RefRoute, Type ConcreteType)? GetPartReferenceInfo(QueryToken c, Type mainType)
+    {
+        var pr = c.GetPropertyRoute();
+        if (pr == null || pr.RootType == mainType)
+            return null;
+
+        var chain = c.Follow(a => a.Parent).ToList(); //child-first
+        for (int i = 0; i < chain.Count; i++)
+        {
+            if (chain[i] is EntityPropertyToken ep &&
+                ep.PropertyInfo.PropertyType.IsEntity() &&
+                ep.GetPropertyRoute() is { } epr && epr.RootType != pr.RootType)
+            {
+                var concrete = i > 0 && chain[i - 1] is AsTypeToken ast ? ast.Type.CleanType() : ep.PropertyInfo.PropertyType;
+                return (epr, concrete);
+            }
+        }
+
+        return null;
+    }
+
     static bool IsMainTypeOrPart(QueryToken token, Type mainType)
     {
         var pr = token.GetPropertyRoute();
@@ -539,35 +715,71 @@ public class ImporterFromExcel
         {
             if (c is HasValueToken)
             {
-                var pr = c.Parent!.GetPropertyRoute()!;
-
-                if (!IsMainTypeOrPart(c.Parent, mainType))
+                if (!IsMainTypeOrPart(c.Parent!, mainType))
                     throw new InvalidOperationException("Invalid token " + c);
+
+                //For an embedded property the parent token is the EntityPropertyToken itself.
+                //For a Part entity reference the parent token is an AsTypeToken (the concrete type cast),
+                //so the property route of the reference lives one level up.
+                var pr = c.Parent is AsTypeToken ast ? ast.Parent!.GetPropertyRoute()! : c.Parent!.GetPropertyRoute()!;
 
                 var parentGetter = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
                     pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()) : null;
 
                 var pi = pr.PropertyInfo!;
 
-                if (!pi.PropertyType.IsEmbeddedEntity())
-                    throw new InvalidOperationException("HasValue only supported for embedded entities");
+                if (pi.PropertyType.IsEmbeddedEntity())
+                {
+                    var p = Expression.Parameter(typeof(ModifiableEntity));
+                    var obj = Expression.Parameter(typeof(object));
 
-                var p = Expression.Parameter(typeof(ModifiableEntity));
-                var obj = Expression.Parameter(typeof(object));
+                    var prop = Expression.Property(Expression.Convert(p, pi.DeclaringType!), pi);
 
-                var prop = Expression.Property(Expression.Convert(p, pi.DeclaringType!), pi);
-
-                var value = Expression.Condition(Expression.Convert(obj, typeof(bool)),
-                     Expression.Coalesce(prop, Expression.New(pi.PropertyType!)), //Prevent unnecessary new 
-                     Expression.Constant(null, pi.PropertyType));
+                    var value = Expression.Condition(Expression.Convert(obj, typeof(bool)),
+                         Expression.Coalesce(prop, Expression.New(pi.PropertyType!)), //Prevent unnecessary new
+                         Expression.Constant(null, pi.PropertyType));
 
 
-                var lambda = Expression.Lambda<Action<ModifiableEntity, object?>>(Expression.Assign(prop, value), p, obj);
+                    var lambda = Expression.Lambda<Action<ModifiableEntity, object?>>(Expression.Assign(prop, value), p, obj);
+
+                    return new TokenGettersAndSetters
+                    {
+                        ParentGetter = parentGetter?.Compile(),
+                        Setter = lambda.Compile()
+                    };
+                }
+
+                //Part entity reference, e.g. Entity.Extension.(BundMeasureExtension).HasValue
+                var concreteType = c.Parent is AsTypeToken at ? at.Type.CleanType() : pi.PropertyType;
+
+                if (!(pi.PropertyType.IsEntity() && EntityKindCache.GetEntityKind(concreteType) is EntityKind.Part or EntityKind.SharedPart))
+                    throw new InvalidOperationException("HasValue only supported for embedded entities and Part entity references");
+
+                var refPi = pi;
+                var refName = pi.Name;
+                Action<ModifiableEntity, object?> setter = (parent, obj) =>
+                {
+                    if (obj == null)
+                        return; //Blank cell: leave the reference unchanged (avoids accidental data loss on update)
+
+                    if ((bool)obj)
+                    {
+                        var current = refPi.GetValue(parent);
+                        if (current == null)
+                            refPi.SetValue(parent, Activator.CreateInstance(concreteType));
+                        else if (current.GetType() != concreteType)
+                            throw new InvalidOperationException($"'{refName}' already contains a {current.GetType().Name}, but the column targets {concreteType.Name}. Changing the type of an existing Part entity is not supported by the importer.");
+                    }
+                    else
+                    {
+                        refPi.SetValue(parent, null);
+                    }
+                };
 
                 return new TokenGettersAndSetters
                 {
                     ParentGetter = parentGetter?.Compile(),
-                    Setter = lambda.Compile()
+                    Setter = setter
                 };
             }
             else
@@ -637,8 +849,33 @@ public class ImporterFromExcel
                         EntityFinder = entityFinder,
                     };
 
-                var parentGetter = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
-                    pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()) : null;
+                Func<ModifiableEntity, ModifiableEntity>? parentGetter;
+                if (IsMainTypeOrPart(c, mainType) && pr.RootType != mainType && !c.HasElement())
+                {
+                    //Single (non-collection) reference to a Part entity, e.g. Entity.Extension.(BundMeasureExtension).SomeField.
+                    //The property route is rooted at the Part, so we navigate MainEntity -> reference property -> (nested embedded) manually.
+                    var info = GetPartReferenceInfo(c, mainType)!.Value;
+                    var refGetter = info.RefRoute.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, info.RefRoute.GetMListItemsRoute()).Compile();
+                    var innerGetter = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
+                        pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()).Compile() : null;
+                    var concrete = info.ConcreteType;
+                    var refName = info.RefRoute.PropertyInfo!.Name;
+                    parentGetter = me =>
+                    {
+                        var part = refGetter(me);
+                        if (part == null)
+                            throw new InvalidOperationException($"Unable to assign '{c}' because '{refName}' is null. Add the '{refName}' [HasValue] column (to the left of this one) to instantiate the Part entity first.");
+                        if (part.GetType() != concrete)
+                            throw new InvalidOperationException($"Unable to assign '{c}' because '{refName}' is a {part.GetType().Name}, but the column targets {concrete.Name}.");
+                        return innerGetter != null ? innerGetter(part) : part;
+                    };
+                }
+                else
+                {
+                    var pge = pr.Parent!.PropertyRouteType != PropertyRouteType.Root ?
+                        pr.Parent!.GetLambdaExpression<ModifiableEntity, ModifiableEntity>(false, pr.Parent.GetMListItemsRoute()) : null;
+                    parentGetter = pge?.Compile();
+                }
 
                 var prop = pr.PropertyInfo!;
 
@@ -646,7 +883,7 @@ public class ImporterFromExcel
                     return new TokenGettersAndSetters
                     {
                         IsId = true,
-                        ParentGetter = parentGetter?.Compile(),
+                        ParentGetter = parentGetter,
                         Setter = null
                     };
 
@@ -659,9 +896,9 @@ public class ImporterFromExcel
 
                 var lambda = Expression.Lambda<Action<ModifiableEntity, object?>>(body, p, obj);
 
-                return new TokenGettersAndSetters 
+                return new TokenGettersAndSetters
                 {
-                    ParentGetter = parentGetter?.Compile(),
+                    ParentGetter = parentGetter,
                     Setter = lambda.Compile(),
                     EntityFinder = entityFinder,
                     Required = prop.PropertyType.IsValueType && !prop.PropertyType.IsNullable(),
@@ -705,7 +942,9 @@ public class ImporterFromExcel
 
         var authErrors = simpleFilters.Keys.Concat(columns).Distinct().Select(a =>
         {
-            var pr = a is HasValueToken ? a.Parent!.GetPropertyRoute() : a.GetPropertyRoute();
+            var pr = a is HasValueToken hv
+                ? (hv.Parent is AsTypeToken ast ? ast.Parent!.GetPropertyRoute() : hv.Parent!.GetPropertyRoute())
+                : a.GetPropertyRoute();
 
             return PropertyAuthLogic.CanBeAllowedFor(pr!, PropertyAllowed.Write);
         }).NotNull().ToList();
@@ -809,7 +1048,7 @@ public class ImporterFromExcel
             t is EntityPropertyToken ep ? null :
             t is CollectionElementToken ce ? null : 
             t is AsTypeToken at ? null :
-            t is HasValueToken hv && hv.Parent!.Type.IsEmbeddedEntity() ? null :
+            t is HasValueToken hv && (hv.Parent!.Type.IsEmbeddedEntity() || IsPartReferenceToken(hv.Parent!)) ? null :
             ImportFromExcelMessage._01IsIncompatible.NiceToString(t, t.GetType().Name)
         ).NotNull().FirstOrDefault();
 

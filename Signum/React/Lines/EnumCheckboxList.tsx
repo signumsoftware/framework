@@ -52,9 +52,16 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
     if (c.isHidden)
       return null;
 
+    //The list as a whole can be required, not each one of the options.
+    var groupAriaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
+    const isRequired = p.ctx.propertyRoute?.member?.required && !groupAriaAtts['aria-readonly'];
+    const label = p.label == null ? p.label :
+      <>{p.label}{isRequired && <span aria-hidden="true" className="required-indicator">*</span>}</>;
+
     return (
       <GroupHeader className={classes("sf-checkbox-list", c.getErrorClass("border"))}
-        label={p.label}
+        ctx={p.ctx}
+        label={label}
         labelIcon={p.labelIcon}
         avoidFieldSet={p.avoidFieldSet}
         buttons={undefined}
@@ -73,9 +80,6 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
         if (!data.some(d => d == mle.element))
           data.insertAt(0, mle.element)
       });
-
-      var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
-      const requiredIndicator = p.ctx.propertyRoute?.member?.required && !ariaAtts['aria-readonly'];
 
       const ti = getTypeInfo(p.type!.name);
 
@@ -100,7 +104,7 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
                   name={val}
                   onChange={e => c.handleOnChange(e, val)} />
                 &nbsp;
-                <span>{ti.members[val].niceName}{requiredIndicator && <span aria-hidden="true" className="required-indicator">*</span>}</span>
+                <span>{ti.members[val].niceName}</span>
             </label>);
           })}
         </div>

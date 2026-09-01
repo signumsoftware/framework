@@ -97,7 +97,11 @@ export namespace ImportFromExcelMessage {
   export const _0IsReadOnly: MessageKey = new MessageKey("ImportFromExcelMessage", "_0IsReadOnly");
   export const _01IsIncompatible: MessageKey = new MessageKey("ImportFromExcelMessage", "_01IsIncompatible");
   export const ErrorsIn0Rows_N: MessageKey = new MessageKey("ImportFromExcelMessage", "ErrorsIn0Rows_N");
+  export const ImportSummary: MessageKey = new MessageKey("ImportFromExcelMessage", "ImportSummary");
+  export const _0Inserted1Updated2Unchanged: MessageKey = new MessageKey("ImportFromExcelMessage", "_0Inserted1Updated2Unchanged");
+  export const NothingWasSavedTheWholeImportRunsInOneTransaction: MessageKey = new MessageKey("ImportFromExcelMessage", "NothingWasSavedTheWholeImportRunsInOneTransaction");
   export const No0FoundInThisQueryWith1EqualsTo2: MessageKey = new MessageKey("ImportFromExcelMessage", "No0FoundInThisQueryWith1EqualsTo2");
+  export const MoreThanOne0FoundInThisQueryWith1EqualsTo2: MessageKey = new MessageKey("ImportFromExcelMessage", "MoreThanOne0FoundInThisQueryWith1EqualsTo2");
   export const UnableToAssignMoreThanOneUnrelatedCollections0: MessageKey = new MessageKey("ImportFromExcelMessage", "UnableToAssignMoreThanOneUnrelatedCollections0");
   export const DuplicatedNonConsecutive0Found1: MessageKey = new MessageKey("ImportFromExcelMessage", "DuplicatedNonConsecutive0Found1");
   export const ColumnsDoNotMatchExcelColumns0QueryColumns1: MessageKey = new MessageKey("ImportFromExcelMessage", "ColumnsDoNotMatchExcelColumns0QueryColumns1");

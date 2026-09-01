@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getContrastingTextColorWCAG } from '@framework/Globals'
 import { MListElementBinding } from '@framework/Reflection'
-import { Entity, getToString, toLite, translated } from '@framework/Signum.Entities'
+import { Entity, JavascriptMessage, getToString, liteKey, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { DashboardClient, PanelPartContentProps } from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Dashboard'
@@ -22,29 +22,40 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
+
+  const entityLite = p.entity ? toLite(p.entity) : undefined;
+  const hiddenPartsProvider = entityLite && DashboardClient.Options.hiddenPartsProviders[entityLite.EntityType];
+  const hiddenParts = useAPI(() => entityLite && hiddenPartsProvider ? hiddenPartsProvider(p.dashboard, entityLite) : null,
+    [p.dashboard, entityLite && liteKey(entityLite)]);
+
+  // Tell the controller what is not being rendered before it decides whether the dashboard is still loading.
+  dashboardController.hiddenParts = hiddenParts ?? new Set<string>();
   dashboardController.setIsLoading();
 
-  function renderBasic() {
-    const db = p.dashboard;
-    const ctx = TypeContext.root(db);
+  // Wait for the provider rather than laying out parts it is about to remove: a panel that appears and then
+  // vanishes, taking the row's proportions with it, is exactly what the provider is there to prevent.
+  const loadingHiddenParts = hiddenPartsProvider != null && hiddenParts === undefined;
 
+  const layout = React.useMemo(() => layoutParts(p.dashboard, hiddenParts ?? undefined), [p.dashboard, hiddenParts]);
+
+  function renderBasic() {
     return (
       <div>
         <div className="sf-dashboard-view">
           {
-            mlistItemContext(ctx.subCtx(a => a.parts))
+            layout.parts
               .groupBy(c => c.value.row!.toString())
               .orderBy(gr => Number(gr.key))
               .map(gr =>
                 <div className="row row-control-panel" key={"row" + gr.key}>
-                  {gr.elements.orderBy(ctx => ctx.value.startColumn).map((c, j, list) => {
+                  {gr.elements.orderBy(ctx => layout.startColumn(ctx)).map((c, j, list) => {
 
-                    const prev = j == 0 ? undefined : list[j - 1].value;
+                    const prev = j == 0 ? undefined : list[j - 1];
 
-                    const offset = c.value.startColumn! - (prev ? (prev.startColumn! + prev.columns!) : 0);
+                    const offset = layout.startColumn(c) - (prev ? (layout.startColumn(prev) + layout.columns(prev)) : 0);
 
                     return (
-                      <div key={j} className={`col-sm-${c.value.columns} offset-sm-${offset}`}>
+                      <div key={j} className={`col-sm-${layout.columns(c)} offset-sm-${offset}`}>
                         <PanelPart ctx={c} entity={p.entity}
                           dashboardController={dashboardController} reload={p.reload} cachedQueries={p.cachedQueries} deps={p.deps} />
                       </div>
@@ -58,16 +69,13 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   }
 
   function renderCombinedRows() {
-    const db = p.dashboard;
-    const ctx = TypeContext.root(db);
-
-    var rows = mlistItemContext(ctx.subCtx(a => a.parts))
+    var rows = layout.parts
       .groupBy(c => c.value.row!.toString())
       .orderBy(g => Number(g.key))
       .map(g => ({
-        columns: g.elements.orderBy(a => a.value.startColumn).map(p => ({
-          startColumn: p.value.startColumn,
-          columnWidth: p.value.columns,
+        columns: g.elements.orderBy(a => layout.startColumn(a)).map(p => ({
+          startColumn: layout.startColumn(p),
+          columnWidth: layout.columns(p),
           parts: [p],
         }) as CombinedColumn)
       }) as CombinedRow);
@@ -112,6 +120,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
             filterOptions={pf.pinnedFilters}
             onFiltersChanged={forceUpdate} />)}
         {
+          loadingHiddenParts ? JavascriptMessage.loading.niceToString() :
           p.dashboard.combineSimilarRows ?
             renderCombinedRows() :
             renderBasic()
@@ -119,6 +128,87 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
       </div>
     </div>
   );
+}
+
+interface PartLayout {
+  parts: TypeContext<PanelPartEmbedded>[];
+  startColumn: (ctx: TypeContext<PanelPartEmbedded>) => number;
+  columns: (ctx: TypeContext<PanelPartEmbedded>) => number;
+}
+
+/**
+ * Drops the parts a `hiddenPartsProvider` asked to leave out and closes the gaps they leave behind, so that
+ * tailoring a panel away does not punch a hole in the grid. A row that filled its 12 columns keeps filling them,
+ * its remaining panels growing in proportion; a row that did not simply closes up. The positions live here
+ * instead of on the entity - writing them back would mark the dashboard as modified.
+ */
+function layoutParts(dashboard: DashboardEntity, hiddenGuids: Set<string> | undefined): PartLayout {
+
+  const all = mlistItemContext(TypeContext.root(dashboard).subCtx(a => a.parts));
+
+  const asDesigned: PartLayout = {
+    parts: all,
+    startColumn: ctx => ctx.value.startColumn!,
+    columns: ctx => ctx.value.columns!,
+  };
+
+  if (!hiddenGuids?.size)
+    return asDesigned;
+
+  const visible = all.filter(ctx => !hiddenGuids.has(ctx.value.guid));
+  if (visible.length == all.length)
+    return asDesigned;
+
+  const repacked = new Map<string, { startColumn: number, columns: number }>();
+
+  all.groupBy(ctx => ctx.value.row!.toString()).forEach(gr => {
+    const row = gr.elements.orderBy(ctx => ctx.value.startColumn);
+    const kept = row.filter(ctx => !hiddenGuids.has(ctx.value.guid));
+
+    if (kept.length == 0 || kept.length == row.length)
+      return;
+
+    const start = row[0].value.startColumn!;
+    const available = 12 - start;
+    const wasFull = row.sum(ctx => ctx.value.columns!) == available;
+
+    const widths = wasFull
+      ? growToFill(kept.map(ctx => ctx.value.columns!), available)
+      : kept.map(ctx => ctx.value.columns!);
+
+    let next = start;
+    kept.forEach((ctx, i) => {
+      repacked.set(ctx.value.guid, { startColumn: next, columns: widths[i] });
+      next += widths[i];
+    });
+  });
+
+  return {
+    parts: visible,
+    startColumn: ctx => repacked.get(ctx.value.guid)?.startColumn ?? ctx.value.startColumn!,
+    columns: ctx => repacked.get(ctx.value.guid)?.columns ?? ctx.value.columns!,
+  };
+}
+
+/** Grows `widths` proportionally until they add up to `target`, handing the leftover columns to the widest gaps. */
+function growToFill(widths: number[], target: number): number[] {
+  const total = widths.sum();
+
+  if (total >= target || total == 0)
+    return widths;
+
+  const exact = widths.map(w => w * target / total);
+  const result = exact.map(e => Math.max(1, Math.floor(e)));
+
+  let rest = target - result.sum();
+  if (rest <= 0)
+    return result;
+
+  const byFraction = exact.map((e, i) => ({ i, fraction: e - Math.floor(e) })).orderByDescending(a => a.fraction);
+  for (let k = 0; rest > 0; k = (k + 1) % byFraction.length, rest--)
+    result[byFraction[k].i]++;
+
+  return result;
 }
 
 function combineRows(rows: CombinedRow[]): CombinedRow[] {

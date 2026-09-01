@@ -284,7 +284,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({
       selectedNode: n,
       contextualMenu: {
-        position: getMouseEventPosition(e, document.querySelector('.tree-container tbody')),
+        position: getMouseEventPosition(e),
       }
     }, () => this.loadMenuItems());
   }

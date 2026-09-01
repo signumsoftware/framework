@@ -57,7 +57,10 @@ export namespace UserQueryClient {
           <span className="sf-breadcrumb-title d-inline-flex align-items-center">
             <EntityLink lite={entity} inPlaceNavigation />
             <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
-            {defaultTitle}
+            {/* The user query's own name, not the query nice name: a breadcrumb query is a named view of the
+                entity ("Teilprojekte"), which the plain type name ("Projekte") does not convey. Same as
+                DashboardPage, which shows the dashboard's title after the chevron. */}
+            {getToString(uq)}
           </span>
         );
 
