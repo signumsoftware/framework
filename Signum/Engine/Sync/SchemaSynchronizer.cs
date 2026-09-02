@@ -142,6 +142,22 @@ public static class SchemaSynchronizer
                 var diffTemp = databaseTablesHistory.GetOrThrow(replacements.Apply(Replacements.KeyTables, temporalTableName.ToString()));
                 diffTemp.Columns = replacements.ApplyReplacementsToOld(diffTemp.Columns, key);
                 diffTemp.Indices = ApplyIndexAutoReplacements(diffTemp, tab, modelIndices[tab]);
+
+                //preRenameColumns (A -> A_old) runs before any SET SYSTEM_VERSIONING = OFF, so SQL Server propagates the
+                //SP_RENAME to the history table of a connected system-versioned table. Mirror it in diffTemp, otherwise
+                //historyFixes sees A_old vs A and renames the history column a second time, which fails.
+                //Disconnected history tables (InferredTemporalTableName) and Postgres (trigger-based versioning) do not
+                //propagate, and there historyFixes is what renames the history column.
+                var propagatesRenameToHistory = !isPostgres && diff.TemporalTableName != null && diff.InferredTemporalTableName == null;
+                if (propagatesRenameToHistory && preRenameColumnsList.TryGetC(diff.Name) is { } preRenames)
+                {
+                    foreach (var tempCol in diffTemp.Columns.Values)
+                    {
+                        var newName = preRenames.TryGetC(tempCol.Name);
+                        if (newName != null)
+                            tempCol.Name = newName;
+                    }
+                }
             }
         });
 
