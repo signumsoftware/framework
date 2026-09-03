@@ -106,6 +106,8 @@ export interface SearchControlLoadedProps {
   allowChangeOrder: boolean;
   create: boolean | ((fo: FindOptionsParsed) => boolean);
   createButtonClass?: string;
+  //Overrides the default "Create new [TypeName]" caption/title of the create button
+  createTitle?: string | ((sc: SearchControlLoaded) => string);
   view: boolean | "InPlace";
   largeToolbarButtons: boolean;
   defaultRefreshMode?: RefreshMode;
@@ -182,6 +184,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   static maxToArrayElements = 100;
   static mobileOptions: ((fop: FindOptionsParsed) => SearchControlMobileOptions) | null = null;
   static onDrilldown: ((scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>) | null = null;
+  //Allows extensions (i.e. UserQueries) to override the caption of the create button
+  static getCreateTitle: ((scl: SearchControlLoaded) => string | undefined) | null = null;
 
   extraUrlParams: { [key: string]: string | undefined } = {};
 
@@ -837,6 +841,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   createTitle(): string {
+
+    const custom = this.props.createTitle ?? this.props.querySettings?.createTitle;
+    const customTitle = custom == null ? SearchControlLoaded.getCreateTitle?.(this) :
+      typeof custom == "function" ? custom(this) : custom;
+
+    if (customTitle != null)
+      return customTitle;
 
     const tis = this.entityColumnTypeInfos();
 

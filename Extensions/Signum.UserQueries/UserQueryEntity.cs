@@ -49,6 +49,12 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     [StringLengthValidator(Min = 1, Max = 200), Translatable]
     public string DisplayName { get; set; }
 
+    /// <summary>
+    /// Overrides the default "Create new [TypeName]" caption of the create button in the SearchControl
+    /// </summary>
+    [StringLengthValidator(Min = 1, Max = 200), Translatable]
+    public string? CreateTitle { get; set; }
+
     public bool AppendFilters { get; set; }
 
     public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
@@ -125,6 +131,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         return new XElement("UserQuery",
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
+            CreateTitle == null ? null : new XAttribute("CreateTitle", CreateTitle),
             new XAttribute("Query", Query.Key),
             EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             Owner == null ? null : new XAttribute("Owner", Owner.KeyLong()),
@@ -148,6 +155,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     {
         Query = ctx.GetQuery(element.Attribute("Query")!.Value);
         DisplayName = element.Attribute("DisplayName")!.Value;
+        CreateTitle = element.Attribute("CreateTitle")?.Value;
         EntityType = element.Attribute("EntityType")?.Let(a => ctx.GetType(a.Value).ToLite());
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, uq => uq.Owner))!;
         HideQuickLink = element.Attribute("HideQuickLink")?.Let(a => bool.Parse(a.Value)) ?? false;
@@ -274,6 +282,7 @@ public class UserQueryLiteModel : ModelEntity
     public QueryEntity Query { get; set; }
     public bool HideQuickLink { get; set; }
     public bool ShowTitleAsBreadcrumb { get; set; }
+    public string? CreateTitle { get; set; }
 
     internal static UserQueryLiteModel Translated(UserQueryEntity uq) => new UserQueryLiteModel
     {
@@ -281,6 +290,7 @@ public class UserQueryLiteModel : ModelEntity
         Query = uq.Query,
         HideQuickLink = uq.HideQuickLink,
         ShowTitleAsBreadcrumb = uq.ShowTitleAsBreadcrumb,
+        CreateTitle = uq.TranslatedFieldNullable(a => a.CreateTitle),
     };
 
     [AutoExpressionField]
@@ -567,6 +577,8 @@ public enum UserQueryMessage
     Pagination,
     [Description("{0} count of {1} is {2} than {3}")]
     _0CountOf1Is2Than3,
+    [Description("Overrides the default \"{0}\" caption of the create button")]
+    OverridesTheDefault0CaptionOfTheCreateButton,
 }
 
 public class HealthCheckEmbedded : EmbeddedEntity

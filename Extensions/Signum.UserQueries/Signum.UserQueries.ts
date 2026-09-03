@@ -68,6 +68,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   includeDefaultFilters: boolean | null;
   owner: Entities.Lite<Entities.Entity> | null;
   displayName: string;
+  createTitle: string | null;
   appendFilters: boolean;
   refreshMode: DynamicQuery.RefreshMode;
   filters: Entities.MList<Queries.QueryFilterEmbedded>;
@@ -89,6 +90,7 @@ export interface UserQueryLiteModel extends Entities.ModelEntity {
   query: Basics.QueryEntity;
   hideQuickLink: boolean;
   showTitleAsBreadcrumb: boolean;
+  createTitle: string | null;
 }
 
 export namespace UserQueryMessage {
@@ -104,6 +106,7 @@ export namespace UserQueryMessage {
   export const Date: MessageKey = new MessageKey("UserQueryMessage", "Date");
   export const Pagination: MessageKey = new MessageKey("UserQueryMessage", "Pagination");
   export const _0CountOf1Is2Than3: MessageKey = new MessageKey("UserQueryMessage", "_0CountOf1Is2Than3");
+  export const OverridesTheDefault0CaptionOfTheCreateButton: MessageKey = new MessageKey("UserQueryMessage", "OverridesTheDefault0CaptionOfTheCreateButton");
 }
 
 export namespace UserQueryOperation {

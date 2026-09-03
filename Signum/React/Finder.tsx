@@ -2393,6 +2393,8 @@ export namespace Finder {
     modalSize?: BsSize;
     showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
     allowCreate?: boolean;
+    //Overrides the default "Create new [TypeName]" caption/title of the create button
+    createTitle?: string | ((sc: SearchControlLoaded) => string);
     allowSelection?: boolean;
     getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
     onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
