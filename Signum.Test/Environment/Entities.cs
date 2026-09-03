@@ -342,6 +342,7 @@ public class AwardNominationEntity : Entity, ICanBeOrdered
 
     [PreserveOrder]
     [NoRepeatValidator]
+    [PrimaryKey(typeof(Guid))] //Guid row ids, so IMListPrivate.SetNewRowId can be tested
     public MList<NominationPointEmbedded> Points { get; set; } = new MList<NominationPointEmbedded>();
 }
 

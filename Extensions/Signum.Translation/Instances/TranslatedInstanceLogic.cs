@@ -42,6 +42,7 @@ public static class TranslatedInstanceLogic
 
 
         PropertyRouteTranslationLogic.Start(sb);
+        TranslatedInstanceRowIds.Start(sb);
         sb.Include<TranslatedInstanceEntity>()
             //.WithDelete(TranslatedInstanceOperation.Delete)
             .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
@@ -483,24 +484,54 @@ public static class TranslatedInstanceLogic
         Type type = TypeLogic.GetType(fileName.Before('.'));
         CultureInfo culture = CultureInfo.GetCultureInfo(fileName.After('.').Before('.'));
 
-        var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecord
-        {
-            Culture = culture,
-            Key = new LocalizedInstanceKey(
-                route: PropertyRoute.Parse(type, cellValues[1]!),
-                instance: Lite.Parse<Entity>(cellValues[0]!)!,
-                rowId: cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, type))),
-            OriginalText = cellValues[3]!,
-            TranslatedText = cellValues[4]!
-        });
-
         if (mode == MatchTranslatedInstances.ByInstanceID)
+        {
+            var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues =>
+            {
+                var route = PropertyRoute.Parse(type, cellValues[1]!);
+
+                return new TranslationRecord
+                {
+                    Culture = culture,
+                    Key = new LocalizedInstanceKey(
+                        route: route,
+                        instance: Lite.Parse<Entity>(cellValues[0]!)!,
+                        //The row id belongs to the MList table, whose primary key can be of a different type than the entity's
+                        rowId: cellValues[2].DefaultToNull()?.Let(s => PrimaryKey.Parse(s, MListRouteOf(route, cellValues[1]!)))),
+                    OriginalText = cellValues[3]!,
+                    TranslatedText = cellValues[4]!
+                };
+            });
+
             SaveRecordsByInstance(records, type, isSync: false, culture);
+        }
         else
+        {
+            //Matching by OriginalText finds the instances and their row ids with a query (see FromEntities in
+            //SaveRecordsByOriginalText), so the Id and RowId columns of the excel are not used at all. They are not even
+            //parsed: a file exported when the primary keys were ints has ids that no longer parse as a Guid, and that is
+            //precisely a reason to import by text.
+            var records = PlainExcelGenerator.ReadPlainExcel(stream, cellValues => new TranslationRecordByText
+            {
+                Culture = culture,
+                Route = PropertyRoute.Parse(type, cellValues[1]!),
+                OriginalText = cellValues[3]!,
+                TranslatedText = cellValues[4]!
+            });
+
             SaveRecordsByOriginalText(records, type, isSync: false, culture);
+        }
 
         return new TypeCulturePair(type, culture);
     }
+
+    /// <summary>
+    /// The MList property route that owns the row ids of <paramref name="route"/>, which is what determines their type
+    /// (an entity with a Guid primary key can have MLists with int row ids, and the other way around).
+    /// </summary>
+    static PropertyRoute MListRouteOf(PropertyRoute route, string path) =>
+        route.GetMListItemsRoute()?.Parent ??
+        throw new InvalidOperationException($"'{path}' has a RowId, but it is not inside an MList");
 
     public static List<InstanceChanges> GetInstanceChanges(Type type, CultureInfo targetCulture, List<CultureInfo> cultures, bool applyFilter = true)
     {
@@ -603,13 +634,13 @@ public static class TranslatedInstanceLogic
         }
     }
 
-    public static void SaveRecordsByOriginalText(List<TranslationRecord> records, Type type, bool isSync, CultureInfo? c)
+    public static void SaveRecordsByOriginalText(List<TranslationRecordByText> records, Type type, bool isSync, CultureInfo? c)
     {
         Dictionary<string, List<string>> errors = new Dictionary<string, List<string>>();
 
         Dictionary<(PropertyRoute route, string originalText), Dictionary<CultureInfo, string>> excelTranslations = records
             .Where(a => !isSync || a.TranslatedText.HasText())
-            .GroupBy(a => (a.Key.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
+            .GroupBy(a => (a.Route, a.OriginalText), a => (a.Culture, a.TranslatedText))
             .Select(gr => KeyValuePair.Create((gr.Key.Route, gr.Key.OriginalText), 
                 gr.GroupAggregateToDictionary(a => a.Culture, a =>
                 {
@@ -730,6 +761,23 @@ public class TranslationRecord
     public override string ToString()
     {
         return "{0} {1} {2} -> {3}".FormatWith(Culture, Key.Instance, Key.Route, TranslatedText);
+    }
+}
+
+/// <summary>
+/// A translation that is not tied to one instance: the entities (and the row ids of their MList elements) that have this
+/// OriginalText are found with a query. See <see cref="MatchTranslatedInstances.ByOriginalText"/>.
+/// </summary>
+public class TranslationRecordByText
+{
+    public required CultureInfo Culture;
+    public required PropertyRoute Route;
+    public required string TranslatedText;
+    public required string OriginalText;
+
+    public override string ToString()
+    {
+        return "{0} {1} {2} -> {3}".FormatWith(Culture, Route, OriginalText, TranslatedText);
     }
 }
 

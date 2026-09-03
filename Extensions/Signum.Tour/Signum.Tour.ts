@@ -54,7 +54,6 @@ export interface TourEntity extends Entities.Entity, UserAssets.IUserAssetEntity
   showProgress: boolean;
   animate: boolean;
   showCloseButton: boolean;
-  guid: string /*Guid*/;
 }
 
 export namespace TourMessage {

@@ -29,7 +29,7 @@ export class DashboardController {
   isLoading: boolean;
 
   /**
-   * Guids of the parts left out of the render (see `DashboardClient.Options.hiddenPartsProviders`). They never
+   * Guid row ids of the parts left out of the render (see `DashboardClient.Options.hiddenPartsProviders`). They never
    * mount, so they never register an invalidation, and waiting for them would keep every part that waits for
    * invalidation loading forever.
    */
@@ -46,7 +46,7 @@ export class DashboardController {
 
   setIsLoading(): void {
     this.isLoading = !this.dashboard.parts
-      .filter(p => !this.hiddenParts.has(p.element.guid))
+      .filter(p => p.rowId == null || !this.hiddenParts.has(p.rowId.toString())) //A part that is not saved yet has no row id, so it can not be hidden
       .filter(p => p.element.content.Type && DashboardClient.hasWaitForInvalidation(p.element.content.Type))
       .every(p => this.invalidationMap.has(p.element));
   }

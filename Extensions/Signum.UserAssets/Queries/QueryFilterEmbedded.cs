@@ -97,11 +97,12 @@ public class QueryFilterEmbedded : EmbeddedEntity
         return null;
     }
 
-    public XElement ToXml(IToXmlContext ctx)
+    public XElement ToXml(IToXmlContext ctx, PrimaryKey? rowId)
     {
         if (GroupOperation.HasValue)
         {
             return new XElement("Filter",
+               rowId == null ? null! : new XAttribute("Guid", (Guid)rowId.Value),
                new XAttribute("Indentation", Indentation),
                new XAttribute("GroupOperation", GroupOperation),
                Token == null ? null! : new XAttribute("Token", Token.Token.FullKey()),
@@ -112,6 +113,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
         else
         {
             return new XElement("Filter",
+                rowId == null ? null! : new XAttribute("Guid", (Guid)rowId.Value),
                 new XAttribute("Indentation", Indentation),
                 new XAttribute("Token", Token!.Token.FullKey()),
                 new XAttribute("Operation", Operation!),

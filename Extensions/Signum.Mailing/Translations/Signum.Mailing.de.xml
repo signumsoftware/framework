@@ -306,7 +306,7 @@
     <Member Name="FistResult" Description="Erstes Ergebnis" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
   </Type>
-  <Type Name="WhenManyRecipiensBehaviour" Description="Verhalten Wenn viele Empfänger">
+  <Type Name="WhenManyRecipientsBehaviour" Description="Verhalten Wenn viele Empfänger">
     <Member Name="KeepOneMessageWithManyRecipients" Description="Eine Nachricht mit vielen Empfängern" />
     <Member Name="SplitMessages" Description="Geteilte Nachrichten" />
   </Type>

@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Signum.UserQueries;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
 {
     public UserQueryEntity()
@@ -60,6 +60,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     public RefreshMode RefreshMode { get; set; } = RefreshMode.Auto;
 
     [PreserveOrder, BindParent]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
@@ -68,6 +69,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     public ColumnOptionsMode ColumnsMode { get; set; }
 
     [PreserveOrder]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<QueryColumnEmbedded> Columns { get; set; } = new MList<QueryColumnEmbedded>();
 
     public PaginationMode? PaginationMode { get; set; }
@@ -82,9 +84,6 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     [PreserveOrder, NoRepeatValidator]
     [ImplementedBy(typeof(UserQueryEntity))]
     public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => DisplayName);
@@ -129,7 +128,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("UserQuery",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisplayName", DisplayName),
             CreateTitle == null ? null : new XAttribute("CreateTitle", CreateTitle),
             new XAttribute("Query", Query.Key),
@@ -144,8 +143,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
             PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
             new XAttribute("ColumnsMode", ColumnsMode),
-            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
-            Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
+            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
+            Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.SelectWithRowId((c, rowId) => c.ToXml(ctx, rowId)).ToList()),
             Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
             SystemTime?.ToXml(),
             CustomDrilldowns.IsNullOrEmpty() ? null : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
@@ -169,8 +168,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         ColumnsMode = element.Attribute("ColumnsMode")!.Value.Let(cm => cm == "Replace" ? "ReplaceAll" : cm).ToEnum<ColumnOptionsMode>();
 
         var valuePr = PropertyRoute.Construct((UserQueryEntity wt) => wt.Filters[0].ValueString);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
-        Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
+        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x, i) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         SystemTime = element.Element("SystemTime")?.Let(xml => (SystemTime ?? new SystemTimeEmbedded()).FromXml(xml));

@@ -80,7 +80,6 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   systemTime: SystemTimeEmbedded | null;
   healthCheck: HealthCheckEmbedded | null;
   customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
-  guid: string /*Guid*/;
 }
 
 export const UserQueryLiteModel: Type<UserQueryLiteModel> = new Type<UserQueryLiteModel>("UserQueryLiteModel");

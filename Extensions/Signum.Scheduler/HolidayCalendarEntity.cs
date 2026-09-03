@@ -6,11 +6,9 @@ using System.ComponentModel;
 namespace Signum.Scheduler;
 
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Shared, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class HolidayCalendarEntity : Entity, IUserAssetEntity
 {
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
     [UniqueIndex]
     [StringLengthValidator(Min = 3, Max = 100)]
     public string Name { get; set; }
@@ -57,7 +55,7 @@ public class HolidayCalendarEntity : Entity, IUserAssetEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("HolidayCalendar",
-            new XAttribute("Guid", this.Guid),
+            new XAttribute("Guid", (Guid)this.Id),
             new XAttribute("Name", this.Name),
             this.FromYear == null ? null : new XAttribute("FromYear", this.FromYear),
             this.ToYear == null ? null : new XAttribute("ToYear", this.ToYear),

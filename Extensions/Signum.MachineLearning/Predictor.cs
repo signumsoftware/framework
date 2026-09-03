@@ -73,7 +73,7 @@ public class PredictorMainQueryEmbedded : EmbeddedEntity
 
     public bool GroupResults { get; set; }
 
-    [PreserveOrder]
+    [PreserveOrder, Translatable(false)] //Pinned is ignored in this route (PredictorLogic.IgnorePinned), so it has no column to translate
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]
@@ -308,7 +308,7 @@ public class PredictorSubQueryEntity : Entity, ICanBeOrdered
 
     public QueryEntity Query { get; set; }
 
-    [PreserveOrder]
+    [PreserveOrder, Translatable(false)] //Pinned is ignored in this route (PredictorLogic.IgnorePinned), so it has no column to translate
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [PreserveOrder]

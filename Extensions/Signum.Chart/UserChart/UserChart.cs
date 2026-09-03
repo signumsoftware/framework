@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Signum.Chart.UserChart;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEntity
 {
     public UserChartEntity()
@@ -69,17 +69,16 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     public MList<ChartParameterEmbedded> Parameters { get; set; } = new MList<ChartParameterEmbedded>();
 
     [BindParent, PreserveOrder]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<ChartColumnEmbedded> Columns { get; set; } = new MList<ChartColumnEmbedded>();
 
     [BindParent, PreserveOrder]
+    [PrimaryKey(typeof(Guid))] //The row id identifies the element in the XML and in TranslatedInstance.RowId
     public MList<QueryFilterEmbedded> Filters { get; set; } = new MList<QueryFilterEmbedded>();
 
     [NoRepeatValidator, PreserveOrder]
     [ImplementedBy(typeof(UserQueryEntity))]
     public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => DisplayName);
@@ -122,7 +121,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("UserChart",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
             EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
@@ -131,8 +130,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             new XAttribute("ChartScript", ChartScript.Key),
             MaxRows == null ? null : new XAttribute("MaxRows", MaxRows.Value),
-            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
-            new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
+            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
+            new XElement("Columns", Columns.SelectWithRowId((c, rowId) => c.ToXml(ctx, rowId)).ToList()),
             Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
             CustomDrilldowns.IsNullOrEmpty() ? null : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
     }
@@ -149,8 +148,18 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
 
         var valuePr = PropertyRoute.Construct((UserChartEntity wt) => wt.Filters[0].ValueString);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
-        Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
+        Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
+        //A column is matched by row id, so it can be a brand new instance: bind it to its chart script column by
+        //position here instead of relying on the one SynchronizeColumns pre-created when ChartScript was set
+        var chartScript = GetChartScript();
+        Columns.SynchronizeRowIds(element.Element("Columns")?.Elements().ToList(), (c, x, i) =>
+        {
+            c.parentChart = this;
+            if (i < chartScript.Columns.Count)
+                c.ScriptColumn = chartScript.Columns[i];
+
+            c.FromXml(x, ctx);
+        });
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
         var paramsXml = (element.Element("Parameters")?.Elements()).EmptyIfNull().ToDictionary(a => a.Attribute("Name")!.Value);
         Parameters.ForEach(p =>

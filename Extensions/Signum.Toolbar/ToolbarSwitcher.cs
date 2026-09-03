@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace  Signum.Toolbar;
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Shared, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
 {
     [UniqueIndex]
@@ -17,9 +17,6 @@ public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
     [PreserveOrder, NoRepeatValidator]
     public MList<ToolbarSwitcherOptionEmbedded> Options { get; set; } = new MList<ToolbarSwitcherOptionEmbedded>();
 
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
-
 
     public IEnumerable<Lite<IToolbarEntity>> GetSubToolbars() => Options.Select(a => a.ToolbarMenu).OfType<Lite<IToolbarEntity>>();
 
@@ -27,7 +24,7 @@ public class ToolbarSwitcherEntity : Entity, IToolbarEntity, IUserAssetEntity
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ToolbarSwitcher",
-            new XAttribute("Guid", Guid),
+            new XAttribute("Guid", (Guid)Id),
             new XAttribute("Name", Name),
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             new XElement("Options", Options.Select(p => p.ToXml(ctx))));

@@ -67,7 +67,7 @@ public class TokenSyncContext
         var typeName = entity.GetType().Name;
         foreach (var file in History)
         {
-            var match = file.UserAssetActions?.FirstOrDefault(a => a.EntityType == typeName && a.Guid == entity.Guid);
+            var match = file.UserAssetActions?.FirstOrDefault(a => a.EntityType == typeName && a.Guid == (Guid)entity.Id);
             if (match != null)
             {
                 action = match.Action;
@@ -90,7 +90,7 @@ public class TokenSyncContext
         (Recording.UserAssetActions ??= new()).Add(new UserAssetEntityAction
         {
             EntityType = entity.GetType().Name,
-            Guid = entity.Guid,
+            Guid = (Guid)entity.Id,
             Action = action,
         });
     }

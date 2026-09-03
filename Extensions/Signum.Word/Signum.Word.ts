@@ -36,7 +36,6 @@ export interface WordModelEntity extends Entities.Entity {
 export const WordTemplateEntity: Type<WordTemplateEntity> = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Templating.IContainsQuery {
   Type: "WordTemplate";
-  guid: string /*Guid*/;
   name: string;
   query: Basics.QueryEntity | null;
   model: WordModelEntity | null;

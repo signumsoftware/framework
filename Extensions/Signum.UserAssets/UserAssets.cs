@@ -133,8 +133,6 @@ public interface IFromXmlContext
 
 public interface IUserAssetEntity : IEntity
 {
-    Guid Guid { get; set; }
-
     XElement ToXml(IToXmlContext ctx);
 
     void FromXml(XElement element, IFromXmlContext ctx);
@@ -157,6 +155,12 @@ public static class FromXmlExtensions
     public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement> syncAction)
         where T : new()
     {
+        entities.Synchronize(xElements, (e, x, i) => syncAction(e, x));
+    }
+
+    public static void Synchronize<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement, int> syncAction)
+        where T : new()
+    {
         if (xElements == null)
             xElements = new List<XElement>();
 
@@ -171,7 +175,7 @@ public static class FromXmlExtensions
             else
                 entity = entities[i];
 
-            syncAction(entity, xElements[i]);
+            syncAction(entity, xElements[i], i);
         }
 
         if (entities.Count > xElements.Count)
@@ -213,6 +217,73 @@ public static class FromXmlExtensions
         }
     }
 
+
+    /// <summary>
+    /// Projects each element of an MList together with its row id, so ToXml can write it and the identity of the row
+    /// survives an export/import. See <see cref="SynchronizeRowIds"/> for the other half.
+    /// </summary>
+    public static IEnumerable<R> SelectWithRowId<T, R>(this MList<T> mlist, Func<T, PrimaryKey?, R> selector)
+    {
+        return ((IMListPrivate<T>)mlist).InnerList.Select(a => selector(a.Element, a.RowId));
+    }
+
+    /// <summary>
+    /// Synchronizes an MList whose rows are identified by their Guid row id, written by ToXml in the <c>Guid</c> attribute.
+    /// Rows are matched by that row id instead of by position, and rows that are not in the database yet are inserted
+    /// keeping the row id from the XML, so the identity of each row survives an export/import even across databases.
+    /// The MList has to be declared as <c>PrimaryKey(typeof(Guid))</c>, see <see cref="IMListPrivate.SetNewRowId"/>.
+    /// <para>XML with no <c>Guid</c> at all (exported before the row ids were written) falls back to
+    /// <see cref="Synchronize{T}(MList{T}, List{XElement}?, Action{T, XElement, int})"/> by position, so importing an old
+    /// file is not reported as a change. A file where only some rows have it is an error.</para>
+    /// <para>Since a row can be matched, created or reused, <paramref name="syncAction"/> also receives the index of the
+    /// element, for the state that depends on the position rather than on the XML (UserChartEntity binds the
+    /// ScriptColumn of each column that way).</para>
+    /// </summary>
+    public static void SynchronizeRowIds<T>(this MList<T> entities, List<XElement>? xElements, Action<T, XElement, int> syncAction)
+        where T : class, new()
+    {
+        xElements ??= new List<XElement>();
+
+        var withoutGuid = xElements.Where(x => x.Attribute("Guid") == null).ToList();
+
+        if (withoutGuid.Count == xElements.Count)
+        {
+            //XML exported before the row ids were written has no Guid at all: synchronize by position, as before,
+            //so importing an old file does not look like a change
+            entities.Synchronize(xElements, syncAction);
+            return;
+        }
+
+        if (withoutGuid.Count > 0)
+            throw new InvalidOperationException($"{withoutGuid.Count} of the {xElements.Count} '{xElements.First().Name}' elements have no Guid attribute. Either all of them have it (the row id) or none of them (old XML, synchronized by position).");
+
+        var mlist = (IMListPrivate<T>)entities;
+
+        var byRowId = mlist.InnerList.Where(a => a.RowId != null).ToDictionary(a => a.RowId!.Value);
+
+        var newList = new List<MList<T>.RowIdElement>();
+
+        for (int i = 0; i < xElements.Count; i++)
+        {
+            var x = xElements[i];
+
+            PrimaryKey rowId = Guid.Parse(x.Attribute("Guid")!.Value);
+
+            if (byRowId.TryGetValue(rowId, out var existing))
+            {
+                syncAction(existing.Element, x, i);
+                newList.Add(existing); //Keeps the RowId and the OldIndex, so an unchanged row is not updated
+            }
+            else
+            {
+                var element = new T();
+                syncAction(element, x, i);
+                newList.Add(new MList<T>.RowIdElement(element, rowId, null, isNewRowId: true));
+            }
+        }
+
+        mlist.AssignMList(newList);
+    }
 
     public static T? CreateOrAssignEmbedded<T>(this T? embedded, XElement? element, Action<T, XElement> syncAction)
       where T : EmbeddedEntity, new()

@@ -4,7 +4,7 @@ using System.Xml.Linq;
 
 namespace Signum.Workflow;
 
-[EntityKind(EntityKind.Main, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master), PrimaryKey(typeof(Guid))]
 public class WorkflowEntity : Entity, IUserAssetEntity
 {
     [UniqueIndex]
@@ -22,9 +22,6 @@ public class WorkflowEntity : Entity, IUserAssetEntity
     /// </summary>
     [InTypeScript(false), AvoidDump]
     public WorkflowXmlEmbedded? FullDiagramXml { get; set; }
-
-    [UniqueIndex]
-    public Guid Guid { get; set; } = Guid.NewGuid();
 
     public XElement ToXml(IToXmlContext ctx)
     {
