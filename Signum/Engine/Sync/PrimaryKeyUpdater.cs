@@ -278,7 +278,7 @@ internal class PrimaryKeyUpdater
 
         if (table.SystemVersioned == null)
         {
-            return UpdateJoin(
+            var simple = UpdateJoin(
                 targetTable: ibaTable, targetAlias: ibaAlias,
                 setClause: $"""
             {Esc(ibaNewId)} = {tableAlias}.{Esc(newId)},
@@ -287,6 +287,8 @@ internal class PrimaryKeyUpdater
                 sourceTable: table.Name, sourceAlias: tableAlias,
                 joinCondition: $"{tableAlias}.{Esc(oldId)} = {ibaAlias}.{Esc(ibaOldId)}",
                 extraTable: ($"{type_Table.Name} type", $"type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'"));
+
+            return SqlPreCommand.Combine(Spacing.Double, simple, NullOutUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId))!;
         }
         else
         {
@@ -312,8 +314,36 @@ internal class PrimaryKeyUpdater
 
             update.AlterSql(cte + "\n" + update.Sql);
 
-            return update;
+            return SqlPreCommand.Combine(Spacing.Double, update, NullOutUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId))!;
         }
+    }
+
+    /// <summary>
+    /// Clears the old-typed id column of the rows the remap above could not reach: a row whose target entity had
+    /// already been deleted matches no <c>_old</c> value, so it would keep an id of the previous type for a type
+    /// that is now keyed differently. Reading such a row throws (e.g. "XEntity requires ids of type Guid, not int"),
+    /// and because these references are usually loaded through a cached table or a GlobalLazy, one stale row can
+    /// break every request rather than only the record that holds it.
+    /// <para>Only the id is cleared, not the row: the reference becomes empty instead of invalid. A table that can
+    /// not represent an empty reference has to clean up after itself, the way TranslatedInstanceRowIds does.</para>
+    /// </summary>
+    private SqlPreCommand NullOutUnmatched(AliasGenerator ag, ObjectName oldTableName, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId)
+    {
+        var ibaAlias = ag.NextTableAlias(ibaTable.Name);
+        var typeAlias = ag.NextTableAlias(type_Table.Name.Name);
+
+        return UpdateJoin(
+            targetTable: ibaTable, targetAlias: ibaAlias,
+            setClause: $"""
+            --The target no longer exists, so the remap above could not reach this row and the stale id is cleared
+            {Esc(ibaOldId)} = null
+            """,
+            sourceTable: type_Table.Name, sourceAlias: typeAlias,
+            joinCondition: $"""
+            {typeAlias}.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)}
+                AND {typeAlias}.{Esc(type_TableName)} = '{oldTableName}'
+                AND {ibaAlias}.{Esc(ibaOldId)} IS NOT NULL
+            """);
     }
 
     #region TEMPORARY Guid primary key migration (added 2026-09)
