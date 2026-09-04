@@ -52,6 +52,8 @@ export interface SearchControlProps {
   allowChangeOrder?: boolean;
   create?: boolean;
   createButtonClass?: string;
+  //Overrides the default "Create new [TypeName]" caption/title of the create button
+  createTitle?: string | ((sc: SearchControlLoaded) => string);
   view?: boolean | "InPlace";
   largeToolbarButtons?: boolean;
   defaultRefreshMode?: RefreshMode;
@@ -227,6 +229,7 @@ function SearchControl(p: SearchControlProps): React.JSX.Element | null {
         allowChangeOrder={SearchControlOptions.allowOrderColumns(handler, p)}
         create={p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.notNull().some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
         createButtonClass={p.createButtonClass}
+        createTitle={p.createTitle}
 
         view={p.view != null ? p.view : tis.notNull().some(ti => Navigator.isViewable(ti, { isSearch: "main" }))}
 

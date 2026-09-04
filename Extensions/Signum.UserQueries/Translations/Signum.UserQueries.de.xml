@@ -36,6 +36,7 @@
     <Member Name="AppendFilters" Description="Filters anfügen" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="ColumnsMode" Description="Spalten-Modus" />
+    <Member Name="CreateTitle" Description="Titel der Neu-Schaltfläche" />
     <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
@@ -69,6 +70,7 @@
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
     <Member Name="MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0" Description="Macht die {0} für benutzerdefinierte Drilldowns und im Kontextmenü beim Gruppieren verfügbar {1}" />
+    <Member Name="OverridesTheDefault0CaptionOfTheCreateButton" Description="Überschreibt die Standardbeschriftung &quot;{0}&quot; der Neu-Schaltfläche" />
     <Member Name="Pagination" Description="Paginierung" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />

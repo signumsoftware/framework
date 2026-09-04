@@ -41,6 +41,10 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
   var qs = Finder.querySettings[query.key];
 
   var hasSystemTime = qs?.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
+
+  const entityTis = qd.columns["Entity"] ? getTypeInfos(qd.columns["Entity"].type) : [];
+  const defaultCreateTitle = entityTis.length == 0 ? undefined :
+    SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(entityTis.first().gender).formatWith(entityTis.map(ti => ti.niceName).join(", "));
   const url = window.location;
 
   return (
@@ -79,6 +83,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                   <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null || undefined} onChange={() => forceUpdate()}
                     helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
                   <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+                  <AutoLine ctx={ctx4.subCtx(e => e.createTitle)}
+                    helpText={defaultCreateTitle && UserQueryMessage.OverridesTheDefault0CaptionOfTheCreateButton.niceToString(defaultCreateTitle)} />
                   <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
                     findOptions={getCustomDrilldownsFindOptions()}
                     avoidDuplicates={true}

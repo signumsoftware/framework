@@ -105,6 +105,7 @@ function SearchContolInPart({ findOptions, part, deps, cachedQuery, onDataChange
           pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
           showFooter={part.showFooter}
           allowSelection={part.allowSelection}
+          createTitle={translated(part.userQuery, a => a.createTitle) ?? undefined}
           defaultRefreshMode={part.userQuery.refreshMode}
           searchOnLoad={part.userQuery.refreshMode == "Auto"}
           customRequest={cachedQuery && ((req, fop) => cachedQuery!.then(cq => executeQueryCached(req, fop, cq)))}

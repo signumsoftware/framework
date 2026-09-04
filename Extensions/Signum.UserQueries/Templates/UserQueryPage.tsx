@@ -91,6 +91,7 @@ export default function UserQueryPage(): React.JSX.Element | null {
           userQuery: newLite(UserQueryEntity, userQueryId),
           entity: currentEntity ?? undefined,
         }}
+        createTitle={translated(currentUserQuery, a => a.createTitle) ?? undefined}
         defaultRefreshMode={currentUserQuery.refreshMode}
         searchOnLoad={currentUserQuery.refreshMode == "Auto"}
         onHeighChanged={onResize}
