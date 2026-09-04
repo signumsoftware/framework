@@ -96,14 +96,14 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                   {!ctx.value.isNew &&
                     <div>
                       <h3 className="mt-0 h5">{UserAssetMessage.UsedBy.niceToString()}</h3>
-                      <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
-                      <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+                      {ToolbarMenuEntity.memberImplements(a => a.elements[0].element.content, UserQueryEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
+                      {ToolbarEntity.memberImplements(a => a.elements[0].element.content, UserQueryEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
                       <SearchValueLine ctx={ctx4} findOptions={DashboardEntity.findOptions(token => ({
                         filterOptions: [
                           token(a => a.entity.parts).any().filterGroup("Or", {}, t => [
-                              t(a => a.content).cast(BigValuePartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value),
-                              t(a => a.content).cast(UserQueryPartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value),
-                            ])
+                            DashboardEntity.memberImplements(a => a.parts[0].element.content, BigValuePartEntity) ? t(a => a.content).cast(BigValuePartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value) : null,
+                            DashboardEntity.memberImplements(a => a.parts[0].element.content, UserQueryPartEntity) ? t(a => a.content).cast(UserQueryPartEntity).append(a => a.userQuery).filter("EqualTo", ctx.value) : null,
+                          ])
                         ]
                       }))} />
                     </div>

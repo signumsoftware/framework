@@ -91,13 +91,14 @@ export namespace DashboardClient {
       var tm = Navigator.getSettings(ToolbarMenuEntity);
       if (tm == null)
         throw new Error("Call ToolbarClient before DasboardClient");
-      tm.overrideView(rm => rm.insertAfterElement(SearchValueLine, scl => (scl.props.findOptions as FindOptions)?.queryName == ToolbarSwitcherEntity, scl => [
-        <SearchValueLine ctx={scl.props.ctx} findOptions={DashboardEntity.findOptions(token => ({
-          filterOptions: [
-            token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu).filter("EqualTo", rm.ctx.value),
-          ]
-        }))} />
-      ]));
+      if (DashboardEntity.memberImplements(a => a.parts[0].element.content, ToolbarMenuPartEntity))
+        tm.overrideView(rm => rm.insertAfterElement(SearchValueLine, scl => (scl.props.findOptions as FindOptions)?.queryName == ToolbarSwitcherEntity, scl => [
+          <SearchValueLine ctx={scl.props.ctx} findOptions={DashboardEntity.findOptions(token => ({
+            filterOptions: [
+              token(a => a.entity.parts).any().append(a => a.content).cast(ToolbarMenuPartEntity).append(a => a.toolbarMenu).filter("EqualTo", rm.ctx.value),
+            ]
+          }))} />
+        ]));
 
       registerRenderer(ToolbarMenuPartEntity, {
         component: () => import('./View/ToolbarMenuPart').then(a => a.default),
