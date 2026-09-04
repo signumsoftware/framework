@@ -81,7 +81,7 @@ public class Schema : IImplementationsFinder
     public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
         { "plpgsql", s => true }, // Always include in the list (pre-installed in Azure PostgreSQL)
-        { "uuid-ossp", s => true },
+        { "uuid-ossp", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Default?.StartsWith("uuid_generate_") == true))}, //Only needed for uuid_generate_vX(), not for the built-in uuidv7() of PostgreSQL 18
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
         { "vector", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.DbType.IsVector()))},
     };
@@ -684,11 +684,12 @@ public class Schema : IImplementationsFinder
         Generating += Assets.Schema_Generating;
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-        Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+        Synchronizing += SchemaSynchronizer.SyncPostgresExtensionsCreate;
         Synchronizing += SchemaSynchronizer.SyncPostgresDefaultTextLanguage;
 
         Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
+        Synchronizing += SchemaSynchronizer.SyncPostgresExtensionsDrop;
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;
 

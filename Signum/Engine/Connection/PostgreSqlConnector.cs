@@ -131,6 +131,9 @@ public class PostgreSqlConnector : Connector
 
     public override bool SupportsPartitioning => false; //for now
 
+    //uuidv7() is built-in since PostgreSQL 18. On older servers we fall back to uuid_generate_v1() (uuid-ossp extension)
+    public override bool SupportsUuidV7 => PostgresVersion != null && PostgresVersion.Major >= 18;
+
     public override bool AllowsIndexWithWhere(string where) => true;
 
     public override Connector ForDatabase(Maps.DatabaseName? database)

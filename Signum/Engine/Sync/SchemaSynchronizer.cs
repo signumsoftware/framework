@@ -1082,7 +1082,9 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
-            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID()") :
+            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ?
+                (Connector.Current.SupportsUuidV7 ? DbTypeAttribute.Postgres_UuidV7 : DbTypeAttribute.Postgres_UuidGenerateV1) :
+                DbTypeAttribute.SqlServer_NewId) :
             column.DbType.IsTime() ? "'00:00'" :
             column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
@@ -1344,7 +1346,13 @@ SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..S
 EXEC(@{1})".FormatWith(databaseName.Name, variableName));
     }
 
-    public static SqlPreCommand? SyncPostgresExtensions(Replacements replacements)
+    //Runs before the tables, so the extensions are available for the columns/types that need them
+    public static SqlPreCommand? SyncPostgresExtensionsCreate(Replacements replacements) => SyncPostgresExtensions(create: true);
+
+    //Runs after the tables, so a no-longer-needed extension is dropped once the columns depending on it are gone
+    public static SqlPreCommand? SyncPostgresExtensionsDrop(Replacements replacements) => SyncPostgresExtensions(create: false);
+
+    static SqlPreCommand? SyncPostgresExtensions(bool create)
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
@@ -1360,8 +1368,8 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
         var result = Synchronizer.SynchronizeScript(Spacing.Simple,
               newDictionary: should,
               oldDictionary: current,
-              createNew: (key, n) => isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
-              removeOld: (key, o) => isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
+              createNew: (key, n) => !create || isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
+              removeOld: (key, o) => create || isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
               mergeBoth: (k, n, o) => null);
 
         return result;

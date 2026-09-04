@@ -161,6 +161,8 @@ public abstract class Connector
 
     public abstract bool SupportsVectors { get; }
 
+    public abstract bool SupportsUuidV7 { get; }
+
     public abstract string LocalTimeZone { get; }
 }
 
