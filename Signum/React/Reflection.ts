@@ -1453,6 +1453,12 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
     return pr?.member;
   }
 
+  memberImplements(lambdaToProperty: (v: T) => any, type: PseudoType) : boolean {
+    var mi = this.tryMemberInfo(lambdaToProperty);
+
+    return mi != null && tryGetTypeInfos(mi.type).contains(getTypeInfo(type));
+  }
+
   hasMixin(mixinType: Type<MixinEntity>): boolean {
     return Dic.getKeys(this.typeInfo().members).some(k => k.startsWith("[" + mixinType.typeName + "]"));
   }
