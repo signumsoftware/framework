@@ -334,7 +334,12 @@ public class DbTypeAttribute : Attribute
 
     public string? GetDefault(bool isPostgres)
     {
-        return (isPostgres ? DefaultPostgres : DefaultSqlServer) ?? Default;
+        var result = (isPostgres ? DefaultPostgres : DefaultSqlServer) ?? Default;
+
+        if (isPostgres && result == Postgres_UuidV7 && Connector.Current?.SupportsUuidV7 == false)
+            return Postgres_UuidGenerateV1; //PostgreSQL < 18 has no uuidv7()
+
+        return result;
     }
 
     public string? Check { get; set; }
@@ -360,7 +365,8 @@ public class DbTypeAttribute : Attribute
 
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";
-    public const string Postgres_UuidGenerateV1 = "uuid_generate_v1()";
+    public const string Postgres_UuidGenerateV1 = "uuid_generate_v1()"; //Requires uuid-ossp extension
+    public const string Postgres_UuidV7 = "uuidv7()"; //Native in PostgreSQL 18+, time-ordered
 
     public DateTimeKind DateTimeKind { get; set; }
 }
@@ -386,7 +392,7 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
             if (Type == typeof(Guid) && identityBehaviour)
             {
                 this.DefaultSqlServer = SqlServer_NewId;
-                this.DefaultPostgres = Postgres_UuidGenerateV1;
+                this.DefaultPostgres = Postgres_UuidV7;
             }
         }
     }

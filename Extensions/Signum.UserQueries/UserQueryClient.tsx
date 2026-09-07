@@ -132,6 +132,11 @@ export namespace UserQueryClient {
     SearchControlLoaded.onDrilldown = async (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => {
       return onDrilldownSearchControl(scl, row, options);
     }
+
+    SearchControlLoaded.getCreateTitle = scl => {
+      var model = scl.getCurrentUserQuery?.()?.model as UserQueryLiteModel | undefined;
+      return model?.createTitle ?? undefined;
+    }
   
     DashboardClient.registerRenderer(ValueUserQueryListPartEntity, {
       component: () => import('./Dashboard/View/ValueUserQueryListPart').then(a => a.default),

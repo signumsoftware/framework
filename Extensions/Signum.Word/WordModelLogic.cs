@@ -160,7 +160,7 @@ public static class WordModelLogic
             {
                 Entity = se,
                 se.Id,
-                se.FullClassName,
+                se.ClassName,
             });
 
         RegisterWordModel<MultiEntityWord>(null);
@@ -186,8 +186,8 @@ public static class WordModelLogic
             return EnumerableExtensions.JoinRelaxed(
                 dbWordModels, 
                 registeredWordModels.Keys, 
-                swr => swr.FullClassName, 
-                type => type.FullName!,
+                swr => swr.ClassName, 
+                type => type.Name,
                 (swr, type) => KeyValuePair.Create(type, swr), 
                 "caching " + nameof(WordModelEntity)).ToFrozenDictionaryEx();
         }, new InvalidateWith(typeof(WordModelEntity)));
@@ -215,7 +215,7 @@ public static class WordModelLogic
         WordTemplateEntity template = info.DefaultTemplateConstructor();
 
         if (template.Name == null)
-            template.Name = wordModel.FullClassName;
+            template.Name = wordModel.ClassName;
 
         template.Model = wordModel;
 
@@ -252,9 +252,10 @@ public static class WordModelLogic
         return new FileContent(box.FileName!, bytes);
     }
 
-    public static WordModelEntity GetWordModelEntity(string fullClassName)
+    //className can also be a legacy full class name, from XMLs exported before WordModels were keyed by class name
+    public static WordModelEntity GetWordModelEntity(string className)
     {
-        return WordModelTypeToEntity.Value.Where(x => x.Key.FullName == fullClassName).FirstOrDefault().Value;
+        return WordModelTypeToEntity.Value.Where(x => x.Key.Name == className || x.Key.FullName == className).FirstOrDefault().Value;
     }
 
     public static WordModelEntity GetWordModelEntity(Type type)
@@ -308,7 +309,7 @@ public static class WordModelLogic
     internal static List<WordModelEntity> GenerateTemplates()
     {
         var list = (from type in registeredWordModels.Keys
-                    select new WordModelEntity { FullClassName = type.FullName! }).ToList();
+                    select new WordModelEntity { ClassName = type.Name }).ToList();
         return list;
     }
 
@@ -318,9 +319,17 @@ public static class WordModelLogic
     {
         Table table = Schema.Current.Table<WordModelEntity>();
 
-        Dictionary<string, WordModelEntity> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+        Dictionary<string, WordModelEntity> should = GenerateTemplates().ToDictionary(s => s.ClassName);
         Dictionary<string, WordModelEntity> old = Administrator.TryRetrieveAll<WordModelEntity>(replacements).ToDictionary(c =>
-            c.FullClassName);
+            c.ClassName);
+
+        //WordModels used to be keyed by full class name, migrate those without asking.
+        foreach (var oldKey in old.Keys.Where(k => k.Contains('.')))
+        {
+            var className = oldKey.AfterLast('.');
+            if (should.ContainsKey(className) && !old.ContainsKey(className))
+                replacements.GetOrCreate(wordModelReplacementKey)[oldKey] = className;
+        }
 
         replacements.AskForReplacements(
             old.Keys.ToHashSet(),
@@ -331,12 +340,12 @@ public static class WordModelLogic
         using (replacements.WithReplacedDatabaseName())
             return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                 createNew: (tn, s) => table.InsertSqlSync(s),
-                removeOld: (tn, c) => table.DeleteSqlSync(c, swt => swt.FullClassName == c.FullClassName),
+                removeOld: (tn, c) => table.DeleteSqlSync(c, swt => swt.ClassName == c.ClassName),
                 mergeBoth: (tn, s, c) =>
                 {
-                    var oldClassName = c.FullClassName;
-                    c.FullClassName = s.FullClassName;
-                    return table.UpdateSqlSync(c, swt => swt.FullClassName == oldClassName);
+                    var oldClassName = c.ClassName;
+                    c.ClassName = s.ClassName;
+                    return table.UpdateSqlSync(c, swt => swt.ClassName == oldClassName);
                 });
     }
 
@@ -348,6 +357,11 @@ public static class WordModelLogic
 
     public static void RegisterWordModel(Type wordModelType, Func<WordTemplateEntity>? defaultTemplateConstructor = null, object? queryName = null)
     {
+        //WordModels are keyed by class name, so the namespace can not be used to disambiguate.
+        var repeated = registeredWordModels.Keys.FirstOrDefault(t => t != wordModelType && t.Name == wordModelType.Name);
+        if (repeated != null)
+            throw new InvalidOperationException($"There is already a WordModel named {wordModelType.Name} ({repeated.FullName}), rename one of them or {wordModelType.FullName} will not be distinguishable");
+
         registeredWordModels[wordModelType] = new WordModelInfo(wordModelType, queryName)
         {
             DefaultTemplateConstructor = defaultTemplateConstructor,

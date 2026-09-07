@@ -134,8 +134,8 @@ export interface ExceptionEntity extends Entities.Entity {
 
 export const ExceptionOrigin: EnumType<ExceptionOrigin> = new EnumType<ExceptionOrigin>("ExceptionOrigin");
 export type ExceptionOrigin =
-  "Backend_DotNet" |
-  "Frontend_React";
+  "Backend" |
+  "Frontend";
 
 export interface IEmailOwnerEntity extends Entities.Entity {
 }
@@ -203,7 +203,8 @@ export interface TypeEntity extends Entities.Entity {
   Type: "Type";
   tableName: string;
   cleanName: string;
-  namespace: string;
+  namespace: string | null;
+  package: string | null;
   className: string;
 }
 

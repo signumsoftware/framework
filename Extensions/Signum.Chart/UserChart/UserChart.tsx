@@ -75,14 +75,14 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): Re
               {!ctx.value.isNew &&
                 <div>
                   <h2 className="h5 mt-0">{UserAssetMessage.UsedBy.niceToString()}</h2>
-                  <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
-                  <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+                  {ToolbarMenuEntity.memberImplements(a => a.elements[0].element.content, UserChartEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
+                  {ToolbarEntity.memberImplements(a => a.elements[0].element.content, UserChartEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
                   <SearchValueLine ctx={ctx4} findOptions={DashboardEntity.findOptions(token => ({
                     filterOptions: [
                       token(a => a.entity.parts).any().filterGroup("Or", {}, t => [
-                          t(a => a.content).cast(UserChartPartEntity).append(a => a.userChart).filter("EqualTo", ctx.value),
-                          t(a => a.content).cast(CombinedUserChartPartEntity).append(a => a.userCharts).any().append(a => a.userChart).filter("EqualTo", ctx.value),
-                        ])
+                        DashboardEntity.memberImplements(a => a.parts[0].element.content, UserChartPartEntity) ? t(a => a.content).cast(UserChartPartEntity).append(a => a.userChart).filter("EqualTo", ctx.value) : null,
+                        DashboardEntity.memberImplements(a => a.parts[0].element.content, CombinedUserChartPartEntity) ? t(a => a.content).cast(CombinedUserChartPartEntity).append(a => a.userCharts).any().append(a => a.userChart).filter("EqualTo", ctx.value) : null,
+                      ])
                     ]
                   }))} />
                 </div>

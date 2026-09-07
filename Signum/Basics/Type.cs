@@ -11,7 +11,10 @@ public class TypeEntity : Entity
     public string CleanName { get; set; }
 
     [StringLengthValidator(Max = 200)]
-    public string Namespace { get; set; }
+    public string? Namespace { get; set; }
+
+    [StringLengthValidator(Max = 200)]
+    public string? Package { get; set; }
 
     [StringLengthValidator(Max = 200)]
     public string ClassName { get; set; }

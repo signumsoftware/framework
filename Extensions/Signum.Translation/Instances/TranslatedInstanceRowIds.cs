@@ -88,7 +88,41 @@ public static class TranslatedInstanceRowIds
             WHERE pr.{Esc(pr_Path.Name)} LIKE '{pathPattern}'
             """;
 
-        return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
+        //Rows whose MList row had already been deleted match no _old value, so the UPDATE above leaves them
+        //holding a row id of the previous type. RowId is a string, so nothing catches that at the database level,
+        //but TranslatedInstanceLogic parses it against the MList's primary key type while loading its GlobalLazy
+        //(ReflectionTools.Parse(ti.RowId!, type)), so a leftover "134" throws "Unrecognized Guid format." for every
+        //request. Nulling it is not an option either - an MList route dereferences RowId - so the dead row goes.
+        var orphanComment = $"--Translations of {mlistTable.Name} rows that no longer exist: their row id can not be remapped, and parsing it as {newPk.DbType.ToString(isPostgres)} would throw";
+
+        var stillOld = $"NOT EXISTS (SELECT 1 FROM {mlistTable.Name} mle WHERE ti.{Esc(ti_RowId.Name)} = {newValue})";
+
+        var deleteSql = isPostgres ?
+            $"""
+            {orphanComment}
+            DELETE FROM {ti.Name} ti
+            USING {pr.Name} pr, {type.Name} t
+            WHERE ti.{Esc(ti_PropertyRoute.Name)} = pr.{Esc(pr.PrimaryKey.Name)}
+                AND pr.{Esc(pr_RootType.Name)} = t.{Esc(type.PrimaryKey.Name)}
+                AND t.{Esc(type_CleanName.Name)} = '{cleanName}'
+                AND pr.{Esc(pr_Path.Name)} LIKE '{pathPattern}'
+                AND ti.{Esc(ti_RowId.Name)} IS NOT NULL
+                AND {stillOld}
+            """ :
+            $"""
+            {orphanComment}
+            DELETE ti
+            FROM {ti.Name} ti
+            JOIN {pr.Name} pr ON ti.{Esc(ti_PropertyRoute.Name)} = pr.{Esc(pr.PrimaryKey.Name)}
+            JOIN {type.Name} t ON pr.{Esc(pr_RootType.Name)} = t.{Esc(type.PrimaryKey.Name)} AND t.{Esc(type_CleanName.Name)} = '{cleanName}'
+            WHERE pr.{Esc(pr_Path.Name)} LIKE '{pathPattern}'
+                AND ti.{Esc(ti_RowId.Name)} IS NOT NULL
+                AND {stillOld}
+            """;
+
+        return SqlPreCommand.Combine(Spacing.Double,
+            new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true),
+            new SqlPreCommandSimple(deleteSql).Do(a => a.GoAfter = true))!;
 
         string Esc(string name) => name.SqlEscape(isPostgres);
     }

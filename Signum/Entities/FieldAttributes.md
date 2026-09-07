@@ -127,6 +127,10 @@ It also contains two properties to determine if the primary key is `Identity` (a
 
 The difference is necessary because Sql Server implements `Identity` in `Guid` using `DEFAULT` constraints instead of normal `Identity`. Actually there are two options, `DEFAULT(NEWID())` (for random GUIDs) or `DEFAULT(NEWSEQUENTIALID())` (for faster sequential GUIDs).
 
+In PostgreSQL the same trick is used. The default is `DEFAULT uuidv7()` (time-ordered UUIDs, built-in since PostgreSQL 18); on older servers it degrades automatically to `DEFAULT uuid_generate_v1()`, which requires the `uuid-ossp` extension. The decision is taken by `Connector.Current.SupportsUuidV7`, based on the `Version` detected by `PostgresVersionDetector.Detect`, and the `uuid-ossp` extension is only created when some column actually defaults to `uuid_generate_*()`.
+
+Note that when the version can not be detected (for example when the database does not exist yet and `Detect` was called with a `null` fallback), the modern `uuidv7()` is assumed. If you target PostgreSQL 17 or older, pass an explicit fallback `Version` to `Detect` so the first schema creation does not fail with `function uuidv7() does not exist`.
+
 Example: 
 
 ```C#
