@@ -114,4 +114,13 @@ public class ChartColumnEmbedded : EmbeddedEntity
     {
         return token?.ToString() ?? "";
     }
+
+    public ChartColumnEmbedded Clone() => new ChartColumnEmbedded
+    {
+        Token = Token?.Clone(), //Assigned first on purpose: its setter resets DisplayName and Format
+        DisplayName = DisplayName,
+        Format = Format,
+        OrderByIndex = OrderByIndex,
+        OrderByType = OrderByType,
+    };
 }

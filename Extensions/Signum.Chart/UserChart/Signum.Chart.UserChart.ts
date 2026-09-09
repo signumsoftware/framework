@@ -62,6 +62,7 @@ export interface UserChartLiteModel extends Entities.ModelEntity {
 
 export namespace UserChartOperation {
   export const Save : Operations.ExecuteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Save");
+  export const Clone : Operations.ConstructSymbol_From<UserChartEntity, UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Clone");
   export const Delete : Operations.DeleteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Delete");
 }
 
