@@ -366,7 +366,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
     <>
       <AccessibleRow key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td>
-          {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
+          {!p.tctx.readOnly && (conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0) ?
             <LinkButton className="sf-condition-icon" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
               await addConditionClick(TypeAllowed, conditions, rule.allowed, rule.resource);
               p.updateFrame();
@@ -417,7 +417,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
       {rule.allowed.conditionRules.map(mle => mle.element).map((cr, i) => {
         let b = Binding.create(cr, ca => ca.allowed);
 
-        var drag = rule.allowed.conditionRules.length > 1 ? getConfig(i) : null;
+        var drag = !p.tctx.readOnly && rule.allowed.conditionRules.length > 1 ? getConfig(i) : null;
 
         return (
           <AccessibleRow key={rule.resource.namespace + "." + rule.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")}
@@ -427,11 +427,13 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             onDrop={drag?.onDrop}
           >
             <td>
-              <LinkButton className="sf-condition-icon me-1 ms-3" title={AuthAdminMessage.RemoveCondition.niceToString()} aria-label={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
-                handleRemoveConditionClick(rule.allowed, cr);
-              }}>
-                <FontAwesomeIcon aria-hidden="true" icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
-              </LinkButton>
+              {p.tctx.readOnly ?
+                <FontAwesomeIcon aria-hidden="true" icon="circle" className="sf-placeholder-icon me-1 ms-3" /> :
+                <LinkButton className="sf-condition-icon me-1 ms-3" title={AuthAdminMessage.RemoveCondition.niceToString()} aria-label={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
+                  handleRemoveConditionClick(rule.allowed, cr);
+                }}>
+                  <FontAwesomeIcon aria-hidden="true" icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
+                </LinkButton>}
               {drag && <LinkButton className="sf-condition-icon me-1" aria-label={drag.title} title={drag.title}
                 onClick={e => { e.stopPropagation(); }}
                 draggable={true}

@@ -9,7 +9,6 @@ import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessag
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { is } from '@framework/Signum.Entities';
-import { useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
 import SelectorModal from '../../../Signum/React/SelectorModal';
 import { AccessibleTable, AccessibleRow } from '../../../Signum/React/Basics/AccessibleTable';
@@ -157,8 +156,6 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, r
 
 function PropertyRow(p: { tctx: TypeContext<PropertyAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<PropertyAllowed>) => Binding<PropertyAllowed> }): React.JSX.Element {
   
-  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
-
   const allowedBinding = p.getBidning(p.tctx.value.allowed);
   const allowedBaseBinding = p.getBidning(p.tctx.value.allowedBase);
   const coercedBinding = p.getBidning(p.tctx.value.coerced);
