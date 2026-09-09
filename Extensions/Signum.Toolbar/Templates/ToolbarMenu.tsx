@@ -34,8 +34,8 @@ export default function ToolbarMenu(p: { ctx: TypeContext<ToolbarMenuEntity> }):
           <h2 className="mt-3 h5">{UserAssetMessage.UsedBy.niceToString()}</h2>
           <div className="row">
             <div className="col-sm-6">
-              <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
-              <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />
+              {ToolbarMenuEntity.memberImplements(a => a.elements[0].element.content, ToolbarMenuEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarMenuEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
+              {ToolbarEntity.memberImplements(a => a.elements[0].element.content, ToolbarMenuEntity) && <SearchValueLine ctx={ctx4} findOptions={ToolbarEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.elements).any().append(a => a.content).filter("EqualTo", ctx.value)] }))} />}
             </div>
             <div className="col-sm-6">
               <SearchValueLine ctx={ctx4} findOptions={ToolbarSwitcherEntity.findOptions(token => ({ filterOptions: [token(a => a.entity.options).any().append(a => a.toolbarMenu).filter("EqualTo", ctx.value)] }))} />

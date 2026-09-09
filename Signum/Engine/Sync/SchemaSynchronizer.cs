@@ -538,13 +538,13 @@ public static class SchemaSynchronizer
 
                                     var addColumn = tabCol.PrimaryKey ? 
                                         sqlBuilder.AlterTableAddColumn(tab, tabCol) :  //Default NewID()
-                                        AlterTableAddColumnDefaultZero(sqlBuilder, tab, tabCol, forHistory: false, replacingExistingColumn: true);
+                                        AlterTableAddColumnDefaultZero(sqlBuilder, tab, tabCol, forHistory: false);
 
                                     if (withHistory)
                                     {
                                         return new SqlPreCommand_WithHistory(
                                             normal: addColumn,
-                                            history: AlterTableAddColumnDefaultZero(sqlBuilder, tab, tabCol, forHistory: true, replacingExistingColumn: true)
+                                            history: AlterTableAddColumnDefaultZero(sqlBuilder, tab, tabCol, forHistory: true)
                                         );
                                     }
 
@@ -1044,24 +1044,11 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
       
     }
 
-    /// <param name="replacingExistingColumn">
-    /// True when the column already exists and is only being re-created to change its type, so the values are about
-    /// to be copied over from the renamed _old column. A temp default must not be used for a column that is nullable
-    /// in SQL then: ADD COLUMN ... DEFAULT writes the default into EVERY existing row, and the copy only touches the
-    /// rows that had a value, so a row that was NULL would keep the manufactured default. For an IsNullable.Forced
-    /// foreign key (nullable only because its embedded entity is nullable) that leaves a zero Guid behind, which
-    /// then breaks the foreign key when it is re-added.
-    /// </param>
-    private static SqlPreCommand AlterTableAddColumnDefaultZero(SqlBuilder sqlBuilder, ITable table, IColumn column, bool forHistory = false, bool replacingExistingColumn = false)
+    private static SqlPreCommand AlterTableAddColumnDefaultZero(SqlBuilder sqlBuilder, ITable table, IColumn column, bool forHistory = false)
     {
         var tableName = forHistory ? table.SystemVersioned!.TableName : table.Name;
 
         if (!NeedsDefaultValue(table, column, forHistory))
-            return sqlBuilder.AlterTableAddColumn(tableName, column);
-
-        //A NOT NULL column still needs one: it can not be added to a non-empty table without a value, and the copy
-        //below fills every row of it anyway.
-        if (replacingExistingColumn && column.Nullable != IsNullable.No)
             return sqlBuilder.AlterTableAddColumn(tableName, column);
 
         var defaultValue =
@@ -1111,7 +1098,9 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsNumber() ? "0" :
             column.DbType.IsString() ? "''" :
             column.DbType.IsDate() ? (Schema.Current.Settings.IsPostgres ? "now()" : "GetDate()") :
-            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ? "uuid_generate_v1()" : "NEWID()") :
+            column.DbType.IsGuid() ? (Schema.Current.Settings.IsPostgres ?
+                (Connector.Current.SupportsUuidV7 ? DbTypeAttribute.Postgres_UuidV7 : DbTypeAttribute.Postgres_UuidGenerateV1) :
+                DbTypeAttribute.SqlServer_NewId) :
             column.DbType.IsTime() ? "'00:00'" :
             column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), NULL, '[)')" :
             "?");
@@ -1373,7 +1362,13 @@ SELECT @{1} = COALESCE(@{1},'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..S
 EXEC(@{1})".FormatWith(databaseName.Name, variableName));
     }
 
-    public static SqlPreCommand? SyncPostgresExtensions(Replacements replacements)
+    //Runs before the tables, so the extensions are available for the columns/types that need them
+    public static SqlPreCommand? SyncPostgresExtensionsCreate(Replacements replacements) => SyncPostgresExtensions(create: true);
+
+    //Runs after the tables, so a no-longer-needed extension is dropped once the columns depending on it are gone
+    public static SqlPreCommand? SyncPostgresExtensionsDrop(Replacements replacements) => SyncPostgresExtensions(create: false);
+
+    static SqlPreCommand? SyncPostgresExtensions(bool create)
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
@@ -1389,8 +1384,8 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
         var result = Synchronizer.SynchronizeScript(Spacing.Simple,
               newDictionary: should,
               oldDictionary: current,
-              createNew: (key, n) => isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
-              removeOld: (key, o) => isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
+              createNew: (key, n) => !create || isAzure && key == "plpgsql" ? null : sb.CreateExtensionIfNotExist(key), // Skip plpgsql creation in Azure
+              removeOld: (key, o) => create || isAzure && key == "plpgsql" ? null : sb.DropExtension(key), // Skip plpgsql drop in Azure
               mergeBoth: (k, n, o) => null);
 
         return result;

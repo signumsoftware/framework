@@ -927,7 +927,7 @@ public class SchemaBuilder
 
         var primaryKeyTypes = Settings.ImplementedByAllPrimaryKeyTypes;
 
-        var idNullable = primaryKeyTypes.Count() > 1 && nullable == IsNullable.No ? IsNullable.Forced : nullable;
+        var idNullable = primaryKeyTypes.Count() > 1 ? IsNullable.Yes : nullable;
 
         var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(
             FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()),

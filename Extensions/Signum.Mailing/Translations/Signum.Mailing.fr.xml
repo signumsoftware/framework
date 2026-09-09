@@ -115,7 +115,7 @@
     <Member Name="SentException" Description="Erreur d’envoi" />
   </Type>
   <Type Name="EmailModelEntity" Description="le modèle d’email" PluralDescription="Modèles d’email">
-    <Member Name="FullClassName" Description="Nom complet de la classe" />
+    <Member Name="ClassName" Description="Nom de la classe" />
   </Type>
   <Type Name="EmailOwnerData" Description="Données du propriétaire de l’e-mail">
     <Member Name="AzureUserId" Description="ID utilisateur Azure" />
