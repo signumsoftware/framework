@@ -241,9 +241,12 @@ class RedundantSubqueryRemover : DbExpressionVisitor
             if (select.OrderBy.Count != fromSelect.OrderBy.Count)
                 return false;
 
+            //Both sides are translated: fromSelect can also refer to its own columns (SELECT expr as c0 ... ORDER BY c0)
             return select.OrderBy.ZipStrict(fromSelect.OrderBy).All(p =>
                 p.first.OrderType == p.second.OrderType &&
-                DbExpressionComparer.AreEqual(SubqueryRemover.Remove(p.first.Expression, new[] { fromSelect }), p.second.Expression));
+                DbExpressionComparer.AreEqual(
+                    SubqueryRemover.Remove(p.first.Expression, new[] { fromSelect }),
+                    SubqueryRemover.Remove(p.second.Expression, new[] { fromSelect })));
         }
 
         static bool IsColumnProjection(SelectExpression select)

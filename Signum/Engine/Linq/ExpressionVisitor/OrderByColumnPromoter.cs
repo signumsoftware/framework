@@ -22,7 +22,7 @@ internal class OrderByColumnPromoter : DbExpressionVisitor
 
     protected internal override Expression VisitSelect(SelectExpression select)
     {
-        select = (SelectExpression)base.VisitSelect(select);
+        select = ReuseOwnColumns((SelectExpression)base.VisitSelect(select));
 
         if (select.From is not SelectExpression from || !CanAddColumns(from))
             return select;
@@ -32,11 +32,40 @@ internal class OrderByColumnPromoter : DbExpressionVisitor
         var columns = RowNumberPromoter.Promote(select.Columns, ref newFrom);
         var orderBy = PromoteOrderings(select.OrderBy, ref newFrom);
 
+        if (newFrom != from)
+            newFrom = ReuseOwnColumns(newFrom); //It could have got the column that its own ORDER BY is repeating
+
         if (newFrom == from && columns == select.Columns && orderBy == select.OrderBy)
             return select;
 
         return new SelectExpression(select.Alias, select.IsDistinct, select.Top, columns, newFrom, select.Where,
             orderBy, select.GroupBy, select.SelectOptions);
+    }
+
+    /// <summary>
+    /// A select can order by an expression that it is already returning as a column, referring to it by the bare
+    /// column alias (SELECT expr as c0 ... ORDER BY c0). No column is added, only repetitions are removed.
+    /// </summary>
+    static SelectExpression ReuseOwnColumns(SelectExpression select)
+    {
+        if (!select.OrderBy.Any(o => IsComplex(o.Expression)))
+            return select;
+
+        var orderBy = select.OrderBy.Select(o =>
+        {
+            if (!IsComplex(o.Expression))
+                return o;
+
+            var cd = FindColumn(select, RemoveNullify(o.Expression));
+
+            return cd == null ? o : new OrderExpression(o.OrderType, new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name!));
+        }).ToReadOnly();
+
+        if (orderBy.ZipStrict(select.OrderBy).All(p => p.first == p.second))
+            return select;
+
+        return new SelectExpression(select.Alias, select.IsDistinct, select.Top, select.Columns, select.From,
+            select.Where, orderBy, select.GroupBy, select.SelectOptions);
     }
 
     /// <param name="orderings">Expressed in the scope of the select that has <paramref name="from"/> in the FROM</param>
