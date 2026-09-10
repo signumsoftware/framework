@@ -230,6 +230,22 @@ class RedundantSubqueryRemover : DbExpressionVisitor
             return select;
         }
 
+        /// <summary>
+        /// True when the ORDER BY of <paramref name="select"/> is, once translated to the scope of
+        /// <paramref name="fromSelect"/>, exactly the ORDER BY that fromSelect already has. Happens when an outer
+        /// select is just re-projecting the columns of a TOP / ROW_NUMBER select: the OrderByRewriter gives the
+        /// same orderings to both, and keeping the two selects apart only duplicates them in the SQL.
+        /// </summary>
+        static bool IsSameOrderBy(SelectExpression select, SelectExpression fromSelect)
+        {
+            if (select.OrderBy.Count != fromSelect.OrderBy.Count)
+                return false;
+
+            return select.OrderBy.ZipStrict(fromSelect.OrderBy).All(p =>
+                p.first.OrderType == p.second.OrderType &&
+                DbExpressionComparer.AreEqual(SubqueryRemover.Remove(p.first.Expression, new[] { fromSelect }), p.second.Expression));
+        }
+
         static bool IsColumnProjection(SelectExpression select)
         {
             for (int i = 0, n = select.Columns.Count; i < n; i++)
@@ -256,8 +272,8 @@ class RedundantSubqueryRemover : DbExpressionVisitor
 
             bool frmHasOrderBy = fromSelect.OrderBy.Count > 0;
             bool frmHasGroupBy = fromSelect.GroupBy.Count > 0;
-            // both cannot have orderby
-            if (selHasOrderBy && frmHasOrderBy)
+            // both cannot have orderby, unless it is the very same one (an outer select that only re-projects a TOP)
+            if (selHasOrderBy && frmHasOrderBy && !IsSameOrderBy(select, fromSelect))
                 return false;
             // both cannot have groupby
             if (selHasGroupBy && frmHasGroupBy)
