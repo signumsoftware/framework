@@ -282,7 +282,7 @@ public static class EmailTemplateLogic
             if (model == null)
                 model = EmailModelLogic.CreateModel(template.Model, modifiableEntity);
             else if (template.Model.ToType() != model.GetType())
-                throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.FullClassName, model.GetType().FullName));
+                throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.ClassName, model.GetType().FullName));
         }
         else
         {
@@ -667,7 +667,7 @@ public static class EmailTemplateLogic
             }
             catch (Exception ex)
             {
-                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.ClassName, ex.Message.Indent(4)));
             }
         }
 

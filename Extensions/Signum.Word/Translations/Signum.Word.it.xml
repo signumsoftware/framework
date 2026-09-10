@@ -8,7 +8,7 @@
   </Type>
   <Type Name="WordConverterSymbol" Description="Word converter" />
   <Type Name="WordModelEntity" Description="il modello Word" PluralDescription="Modelli di parole">
-    <Member Name="FullClassName" Description="Nome completo della classe" />
+    <Member Name="ClassName" Description="Nome della classe" />
   </Type>
   <Type Name="WordTemplateEntity" Description="Modello Word" PluralDescription="Modelli Word">
     <Member Name="Applicable" Description="Applicabile" />

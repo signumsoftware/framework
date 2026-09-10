@@ -82,13 +82,18 @@ public static class AuthServer
 
                     if (ta.Fallback == TypeAllowed.None)
                     {
-                        var conditions = ta.ConditionRules.SelectMany(a => a.TypeConditions)
-                            .Distinct()
-                            .Where(a => TypeConditionLogic.IsQueryAuditor(t, a))
-                            .Select(a => a.Key);
+                        var accessRules = ta.ConditionRules.Where(cr => cr.Allowed.GetUI() != TypeAllowedBasic.None).ToList();
 
-                        if (conditions.Any())
+                        //Only if every rule that gives access requires a QueryAuditor the user is forced to filter first
+                        if (accessRules.Any() && accessRules.All(cr => cr.TypeConditions.Any(tc => TypeConditionLogic.IsQueryAuditor(t, tc))))
+                        {
+                            var conditions = accessRules.SelectMany(a => a.TypeConditions)
+                                .Distinct()
+                                .Where(a => TypeConditionLogic.IsQueryAuditor(t, a))
+                                .Select(a => a.Key);
+
                             ti.Extension.Add("queryAuditors", conditions.ToList());
+                        }
                     }
 
                     return ti;

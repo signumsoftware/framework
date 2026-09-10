@@ -24,18 +24,18 @@ public class QueryFilterer : ExpressionVisitor
 
         using (HeavyProfiler.LogNoStackTrace("VisitConstant"))
         {
-            if (disableQueryFilter)
-                return base.VisitConstant(c);
-
             if (typeof(IQueryable).IsAssignableFrom(c.Type))
             {
                 IQueryable query = (IQueryable)c.Value!;
+
+                //DisableQueryFilter should only avoid the query filters, complex IQueryable constants still need to be inlined
+                var applyFilter = filter && !disableQueryFilter;
 
                 if (query.IsBase())
                 {
                     Type queryType = c.Type.GetGenericArguments().SingleEx();
 
-                    if (filter)
+                    if (applyFilter)
                     {
                         if (typeof(Entity).IsAssignableFrom(queryType))
                             using (HeavyProfiler.LogNoStackTrace("queryType"))
@@ -76,7 +76,7 @@ public class QueryFilterer : ExpressionVisitor
                     /// <summary>
                     /// Replaces every expression like ConstantExpression{ Type = IQueryable, Value = complexExpr } by complexExpr
                     /// </summary>
-                    return DbQueryProvider.Clean(query.Expression, filter, null)!;
+                    return DbQueryProvider.Clean(query.Expression, applyFilter, null)!;
                 }
             }
 
