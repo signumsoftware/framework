@@ -483,8 +483,11 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   return (
     <>
+      {/* as="li" below: Nav.Item renders a <div> by default, and this sits directly inside the toolbar's
+          <ul> alongside real <li> items. A <ul> may only contain <li>, which breaks both the parsing of
+          the list and the count assistive technology announces for it (WCAG 1.3.1 and 4.1.1). */}
       {entityType && (
-        <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
+        <Nav.Item as="li" title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
@@ -615,7 +618,8 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   return (
     <li>
       <ul>
-        <Nav.Item 
+        {/* as="li": see the sibling case above — Nav.Item's default <div> is not a permitted child of <ul>. */}
+        <Nav.Item as="li"
         data-toolbar-content={liteKeyOrQuery(p.response.content)}
         title={title} className="d-flex mb-2">
           {icon}
