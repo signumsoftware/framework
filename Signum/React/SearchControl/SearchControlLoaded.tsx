@@ -1981,9 +1981,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       };
 
       var tr = (
+        // No hardcoded aria-describedby here: the tooltip it named is rendered only for rows that carry a
+        // mark message, and even then only while the overlay is open, so on every other row the reference
+        // pointed at an element that never exists — one dangling reference per result row (WCAG 4.1.2).
+        // The OverlayTrigger below already sets aria-describedby on this row while its tooltip is shown,
+        // which is where the description actually exists.
         <tr
           key={i}
-          aria-describedby={`result_row_${i}_tooltip`}
           aria-selected={selected}
           ref={this.rowRefs[i]}
           data-row-index={i}
@@ -2074,12 +2078,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
+    // The tooltip id is deliberately distinct from the row tooltip's: both describe the same row, so a
+    // shared id produced a duplicate in the document whenever both were open (WCAG 4.1.1).
     return (
       <span className="row-mark-icon">
         {mark.message ?
           <OverlayTrigger
             trigger="click"
-            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_mark_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
             {icon}
           </OverlayTrigger> : icon}
       </span>
