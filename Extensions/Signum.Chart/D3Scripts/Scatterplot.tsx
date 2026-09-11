@@ -94,7 +94,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Scatterplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
   return (
     <>
-      <svg direction="ltr" width={width} height={height} role="img">
+      <svg direction="ltr" width={width} height={height} role="group">
         <title id="scatterplotlCoodinatesChartTitle">{titleMessage}</title>
         <g opacity={dashboardFilter ? .5 : undefined}>
           <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />

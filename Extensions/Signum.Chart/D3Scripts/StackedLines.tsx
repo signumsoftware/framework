@@ -118,7 +118,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
+    <svg direction="ltr" width={width} height={height} role="group">
       <title id="stackedLinesChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedLines), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :

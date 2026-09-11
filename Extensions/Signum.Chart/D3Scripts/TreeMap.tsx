@@ -94,7 +94,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
     <svg direction="ltr"
       width={width}
       height={height}
-      role="img">
+      role="group">
       <title id="treeMapChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Treemap), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {nodes.map((d, i) => {
         const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
