@@ -281,7 +281,12 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
-      formatter: col => new Finder.CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
+      // Named from its column: this checkbox displays a value rather than accepting one, and without a
+      // label it was announced as an anonymous "checkbox, checked" with no clue which column it belonged
+      // to (WCAG 4.1.2). The disabled state already conveys that it is not operable.
+      formatter: col => new Finder.CellFormatter((cell: boolean | undefined, ctx, column) => cell == undefined ? undefined :
+        <input type="checkbox" className="form-check-input" disabled={true} checked={cell}
+          aria-label={column?.column?.displayName ?? column?.column?.token?.niceName ?? col?.niceName} />, false, "centered-cell")
     },
     {
       name: "Phone",
