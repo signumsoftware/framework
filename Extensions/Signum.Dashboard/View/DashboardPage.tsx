@@ -65,11 +65,18 @@ export default function DashboardPage(): React.JSX.Element {
                         }
                         <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
                       </h1>
-                      <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>
+                      {/* Same as below: no title means no empty heading. */}
+                      {dashboard.hideDisplayName ? null :
+                        <h2 className="display-7 h4">{DashboardClient.Options.customTitle(dashboard)}</h2>}
                     </>
                 }
               </div> :
-              <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
+              // hideDisplayName makes the title render as nothing, which left an empty <h1> in the page: a
+              // screen reader's heading list showed a blank level-1 entry and jumping to the first heading
+              // landed on nothing (WCAG 1.3.1). Gating on the flag rather than on customTitle's return value,
+              // because that always yields an element and only renders empty.
+              dashboard.hideDisplayName ? null :
+                <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
             }
           </div>
           <div className="ms-auto">

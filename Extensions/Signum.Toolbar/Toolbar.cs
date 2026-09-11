@@ -1,4 +1,4 @@
-using Signum.Authorization;
+﻿using Signum.Authorization;
 using Signum.UserAssets;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
@@ -292,6 +292,8 @@ public enum LayoutMessage
     JumpToMainContent,
     [Description("Select a {0}")]
     SelectA0_G,
+    [Description("Main navigation")]
+    MainNavigation,
 }
 
 [AllowUnauthenticated]

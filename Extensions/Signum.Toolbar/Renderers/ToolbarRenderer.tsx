@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, EngineMessage, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, EngineMessage, getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
@@ -67,10 +67,14 @@ export default function ToolbarRenderer(p: {
 
   return (
     <div className={"sidebar-inner"}>
-      <div className={"close-sidebar"}
+      {/* A <div> with onClick is reachable by mouse only, so on narrow viewports — where this is the only way
+          to dismiss the sidebar overlay — keyboard and screen reader users were stuck with it open (WCAG 2.1.1).
+          The label sat on the icon, which is aria-hidden, so it never reached the accessible name either. */}
+      <button type="button" className={"close-sidebar"}
+        aria-label={JavascriptMessage.Close.niceToString()}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} aria-label="Close" />
-      </div>
+        <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} />
+      </button>
 
       <ul>
         {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
@@ -248,7 +252,8 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
           <li key={key} className={"nav-item-header"}>
             {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
             <span className={"nav-item-text"}>{res.label}</span>
-            <div className={"nav-item-float"}>{res.label}</div>
+            {/* Same hover-only duplicate of the label as in ToolbarNavItem. */}
+            <div aria-hidden={true} className={"nav-item-float"}>{res.label}</div>
           </li>
         );
       }
@@ -653,7 +658,10 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
 
   return (
     <li className="nav-item d-flex">
+      {/* Nav.Link's `active` only adds a class, so which item was the current page was conveyed by colour
+          alone and never announced (WCAG 1.3.1). aria-current says it. */}
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
+        aria-current={p.active ? "page" : undefined}
         data-toolbar-content={liteKeyOrQuery(p.content)}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
@@ -661,7 +669,9 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
         {p.extraIcons}
-        <div className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
+        {/* Hover-only visual tooltip repeating the label of the collapsed sidebar. Left exposed it doubled the
+            accessible name ("Dashboard Dashboard") whenever it was shown. */}
+        <div aria-hidden={true} className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
     </li>
   );
