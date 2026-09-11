@@ -61,10 +61,14 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
 
   var errors = operationResultsRef.current.filter(a => a.error != null);
 
+  // aria-labelledby names the dialog from its own title: it carried role="dialog" and aria-modal but no
+  // accessible name, so it was announced as just "dialog" (WCAG 4.1.2). useId because dialogs here are
+  // opened nested, so a fixed id could appear twice in the document.
+  const titleId = React.useId();
   return (
-    <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited}>
+    <Modal show={show} className="message-modal" backdrop="static" onExited={handleOnExited} aria-labelledby={titleId}>
       <div className="modal-header">
-        <h5 className="modal-title">{
+        <h5 id={titleId} className="modal-title">{
           p.operation.operationType == "Delete" ? OperationMessage.Deleting.niceToString() :
             p.operation.operationType == "ConstructorFrom" ? p.operation.niceName :
               OperationMessage.Executing0.niceToString(p.operation.niceName)}</h5>

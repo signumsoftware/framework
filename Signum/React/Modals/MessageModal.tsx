@@ -44,6 +44,10 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
 
   const [show, setShow] = React.useState(true);
 
+  // Unique per instance: confirmations are opened from inside other dialogs, so a fixed id would appear more
+  // than once in the document.
+  const titleId = React.useId();
+
   const selectedValue = React.useRef<MessageModalResult | undefined>(undefined);
 
   React.useImperativeHandle(p.modalRef, () => {
@@ -166,15 +170,18 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
     }, [p.autoFocusonTitle]);  
 
     return (
-      <h1 ref={titleRef} tabIndex={0} className="modal-title h5">
+      <h1 ref={titleRef} id={titleId} tabIndex={0} className="modal-title h5">
         {iconSpan}{iconSpan && <span>&nbsp;&nbsp;</span>}{p.title}
       </h1>
     );
   }
 
   return (
+    // aria-labelledby: the dialog had role="dialog" and aria-modal but no accessible name, so every
+    // confirmation and alert in the application was announced as just "dialog" (WCAG 4.1.2).
     <Modal show={show} onExited={handleOnExited} backdrop={p.shouldSelect ? 'static' : undefined}
       dialogClassName={classes("message-modal", p.size && "modal-" + p.size, p.additionalDialogClassName)}
+      aria-labelledby={titleId}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", dialogHeaderClass(p.style))}>
         {renderTitle()}
