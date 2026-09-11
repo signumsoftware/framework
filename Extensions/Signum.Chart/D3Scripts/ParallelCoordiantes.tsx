@@ -100,7 +100,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
     ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
 
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
+    <svg direction="ltr" width={width} height={height} role="group">
       <title id="parallelCoodinatesChartTitle">{titleMessage}</title>
       <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
         {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"

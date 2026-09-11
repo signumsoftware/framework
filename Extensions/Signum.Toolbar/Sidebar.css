@@ -14,6 +14,12 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  /* min-width: 0 so this can actually shrink. As a flex item it defaults to min-width: auto, which refuses
+     to go below the intrinsic width of its content, so at 320px the container stayed ~696px wide and took
+     the whole document with it — the page could only be read by scrolling sideways (WCAG 1.4.10).
+     The same gotcha is already handled for the page container above 768px further down this file; it was
+     simply never applied to the layout used below that width. */
+  min-width: 0;
 }
 
 

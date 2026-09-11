@@ -53,9 +53,14 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
   var numFormat = toNumberFormat('0.#K');
+  const chartTitle = ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Pie), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "));
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
-      <title id="pieChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Pie), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+    // role="group", not "img": the slices below are focusable buttons, and role="img" makes everything
+    // inside presentational, so they were reachable by keyboard yet absent from the accessibility tree.
+    // The name is repeated as aria-label rather than referenced through the <title> id, because that id is
+    // fixed and would be ambiguous with two charts on one page.
+    <svg direction="ltr" width={width} height={height} role="group" aria-label={chartTitle}>
+      <title id="pieChartTitle">{chartTitle}</title>
       <g className="shape" transform={translate(width / 2, height / 2)}>
         {orderedPie.map(slice => {
           var active = detector?.(slice.data);
@@ -73,7 +78,10 @@ export default function renderPie({ data, width, height, parameters, loading, on
           return (
             <g key={slice.index} className="slice hover-group">
               <title>{`${keyColumn.getValueNiceName(slice.data)}: ${valueText}`}</title>
+              {/* aria-label on the path itself: an SVG <title> names its own parent, which is the <g>, so
+                  the focusable path had no name of its own (WCAG 4.1.2). Same text as the tooltip above. */}
               <path className="shape sf-transition hover-target" d={arc(slice)!}
+                aria-label={`${keyColumn.getValueNiceName(slice.data)}: ${valueText}`}
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "var(--bs-body-color)" : undefined}
                 strokeWidth={active == true ? 3 : undefined}

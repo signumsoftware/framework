@@ -79,7 +79,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
   var numberSizeLimit = parseInt(parameters["NumberSizeLimit"]);
 
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
+    <svg direction="ltr" width={width} height={height} role="group">
       <title id="bubblePackChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.BubblePack), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {
         nodes.orderByDescending(a => a.r).map(d => {
