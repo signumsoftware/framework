@@ -8,7 +8,7 @@ import {
   FindOptions, isFilterCondition, withoutPinned
 } from '../FindOptions'
 import { getTokenParents, hasElement, hasManual, hasOperation, hasToArray, QueryToken, SubTokensOptions } from '../QueryToken'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, EntityControlMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType, getTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -1585,7 +1585,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           }
         </th>
         }
-        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {/* entityColumnHeader() is empty by default, which left this column with no header at all, so its
+            cells had no column name to be announced with (WCAG 1.3.1). When nothing is configured a
+            visually hidden one is supplied, keeping the column as narrow as before. */}
+        {(this.props.view || this.props.findOptions.groupResults) && <th scope="col" className="sf-small-column sf-th-entity" data-column-name="Entity">
+          {Finder.Options.entityColumnHeader() || <span className="visually-hidden">{EntityControlMessage.View.niceToString()}</span>}
+        </th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
           <th key={i}
             scope="col"
