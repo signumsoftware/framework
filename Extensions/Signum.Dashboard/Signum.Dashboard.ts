@@ -93,6 +93,7 @@ export namespace DashboardMessage {
   export const LasUpdateWasOn0: MessageKey = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
   export const TheUserQuery0HasNoColumnWithSummaryHeader: MessageKey = new MessageKey("DashboardMessage", "TheUserQuery0HasNoColumnWithSummaryHeader");
   export const Edit: MessageKey = new MessageKey("DashboardMessage", "Edit");
+  export const MoreInformation: MessageKey = new MessageKey("DashboardMessage", "MoreInformation");
   export const CLickInOneChartToFilterInTheOthers: MessageKey = new MessageKey("DashboardMessage", "CLickInOneChartToFilterInTheOthers");
   export const CtrlClickToFilterByMultipleElements: MessageKey = new MessageKey("DashboardMessage", "CtrlClickToFilterByMultipleElements");
   export const AltClickToOpenResultsInAModalWindow: MessageKey = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");

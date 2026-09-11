@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, translated, toLite } from '@framework/Signum.Entities'
+import { Entity, parseLite, getToString, JavascriptMessage, EntityControlMessage, EntityPack, translated, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import { Navigator } from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Dashboard'
@@ -61,7 +61,10 @@ export default function DashboardPage(): React.JSX.Element {
                       <h1 tabIndex={0} className="h3" aria-label={getToString(entity) + (entity ? "" : " " + Navigator.getTypeSubTitle(entity, undefined))}>
                         <span className="display-6">{getToString(entity)}</span>
                         {Navigator.isViewable({ entity: entity, canExecute: {} } as EntityPack<Entity>) &&
-                          <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
+                          // The icon is aria-hidden and there is no text, so this link had no accessible name
+                          // at all and was announced as bare "link" (WCAG 4.1.2).
+                          <Link className="display-6 ms-2" to={Navigator.navigateRoute(entity)}
+                            aria-label={EntityControlMessage.Navigate.niceToString()}><FontAwesomeIcon aria-hidden={true} icon="external-link" /></Link>
                         }
                         <small className="ms-1 sf-type-nice-name text-muted"> - {Navigator.getTypeSubTitle(entity, undefined)}</small>
                       </h1>
@@ -73,9 +76,12 @@ export default function DashboardPage(): React.JSX.Element {
               </div> :
               // hideDisplayName makes the title render as nothing, which left an empty <h1> in the page: a
               // screen reader's heading list showed a blank level-1 entry and jumping to the first heading
-              // landed on nothing (WCAG 1.3.1). Gating on the flag rather than on customTitle's return value,
+              // landed on nothing (WCAG 1.3.1). Dropping the heading entirely is no better — the page would
+              // have no level-1 heading to navigate to at all — so the name it is configured to hide is kept
+              // for assistive technology only. Gating on the flag rather than on customTitle's return value,
               // because that always yields an element and only renders empty.
-              dashboard.hideDisplayName ? null :
+              dashboard.hideDisplayName ?
+                <h1 className="visually-hidden">{translated(dashboard, d => d.displayName)}</h1> :
                 <h1 className="display-6 h3">{DashboardClient.Options.customTitle(dashboard)}</h1>
             }
           </div>

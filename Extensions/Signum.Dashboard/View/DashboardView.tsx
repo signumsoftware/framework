@@ -361,19 +361,14 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     <FontAwesomeIcon aria-hidden={true} icon={fallbackIcon(icon)} color={iconColor ?? undefined} className="me-1" style={{ fontSize: "16px" }} />
   ) : null;
 
-  const title = part.hideTitle ? null : !icon ? (
+  // A panel's title is the heading of that panel, but it was plain bold text in the card-header, so a
+  // dashboard was a flat wall of content with nothing to navigate between (WCAG 1.3.1). h2 sits under the
+  // page's own h1; `font: inherit` keeps the card-header's existing size and weight, and m-0 its spacing,
+  // so nothing moves. Parts registered with withPanel: false render no header and supply their own heading.
+  const headingStyle: React.CSSProperties = { font: "inherit", margin: 0 };
+
+  const titleInner = (
     <>
-      {titleText}
-      {tooltipHtml && (
-        <DashboardTooltipIcon
-          tooltipHtml={tooltipHtml}
-          className="ms-2"
-          iconClassName="sf-tooltip-icon"
-        />
-      )}
-    </>
-  ) : (
-    <span>
       {iconElement}{titleText}
       {tooltipHtml && (
         <DashboardTooltipIcon
@@ -382,8 +377,14 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
           iconClassName="sf-tooltip-icon"
         />
       )}
-    </span>
+    </>
   );
+
+  // Only an actual title becomes a heading. A part can have an empty title and still show a header for its
+  // icon or its tooltip, and an <h2> with no text would put a blank entry in the heading list.
+  const title = part.hideTitle ? null :
+    titleText ? <h2 style={headingStyle}>{titleInner}</h2> :
+      (icon || tooltipHtml) ? <span>{titleInner}</span> : null;
 
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
 
