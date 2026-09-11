@@ -1047,6 +1047,24 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.forceUpdate();
   }
 
+  // Reordering a column was possible by dragging its header and no other way, so it could not be done
+  // without a pointer at all (WCAG 2.1.1), and dragging is the only route even with one (SC 2.5.7 in
+  // WCAG 2.2). This is the same move the drop handler performs, reachable from the column menu.
+  handleMoveColumn = (direction: -1 | 1): void => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+    const from = cm.columnIndex!;
+    const to = from + direction;
+    if (to < 0 || to >= fo.columnOptions.length)
+      return;
+
+    const col = fo.columnOptions[from];
+    fo.columnOptions.removeAt(from);
+    fo.columnOptions.insertAt(to, col);
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+  }
+
   handleRemoveColumn = (): void => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
@@ -1226,6 +1244,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
           {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        </Dropdown.Item>);
+
+        // The pointer-free way to reorder columns; dragging the header remains available.
+        menuItems.push(<Dropdown.Item className="sf-move-column-left" disabled={cm.columnIndex === 0}
+          onClick={() => this.handleMoveColumn(-1)}>
+          <FontAwesomeIcon aria-hidden={true} icon="arrow-left" />&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
+        </Dropdown.Item>);
+
+        menuItems.push(<Dropdown.Item className="sf-move-column-right" disabled={cm.columnIndex === this.props.findOptions.columnOptions.length - 1}
+          onClick={() => this.handleMoveColumn(1)}>
+          <FontAwesomeIcon aria-hidden={true} icon="arrow-right" />&nbsp;{EntityControlMessage.MoveRight.niceToString()}
         </Dropdown.Item>);
 
 
@@ -1592,8 +1621,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {Finder.Options.entityColumnHeader() || <span className="visually-hidden">{EntityControlMessage.View.niceToString()}</span>}
         </th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
+          // tabIndex: the header is operable — it sorts on click and opens the column menu on the context
+          // menu key — but it was not reachable without a pointer at all (WCAG 2.1.1). Focusable, Enter or
+          // Space sorts exactly as a click does, and from there the context menu key reaches "move left" and
+          // "move right", which is what makes reordering possible without dragging.
           <th key={i}
             scope="col"
+            tabIndex={0}
+            onKeyDown={e => {
+              if ((e.key === "Enter" || e.key === " ") && this.canOrder(co)) {
+                e.preventDefault();
+                this.handleHeaderClick(e as unknown as React.MouseEvent<any>);
+              }
+            }}
             draggable={true}
             className={classes(
               cellFormatter?.fillWidth == false ? "sf-small-column" : undefined,
