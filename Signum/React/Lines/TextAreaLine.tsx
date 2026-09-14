@@ -39,7 +39,9 @@ export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
   }
 
   var htmlAtts = c.props.valueHtmlAttributes;
-  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+  // valueHtmlAttributes last, matching the editable path below: what the caller passes explicitly has
+  // to beat the generated defaults, or a line cannot correct the name of the control it wraps.
+  var mergedHtmlReadOnly = { ...ariaAtts, ...htmlAtts };
 
   var autoResize = p.autoResize ?? (htmlAtts?.style?.height == null && htmlAtts?.rows == null);
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
