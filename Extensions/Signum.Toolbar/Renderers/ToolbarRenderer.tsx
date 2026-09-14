@@ -213,7 +213,10 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
 
   switch (res.type) {
     case "Divider":
-      return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
+      // Wrapped in an <li>: these are rendered into the sidebar's <ul>, where an <hr> is not a permitted
+      // child. A list with a stray child can be announced with the wrong item count, or lose its list
+      // semantics altogether. The <hr> keeps its own separator role inside.
+      return <li key={key}><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
     case "Header":
     case "Item":
       if (ToolbarMenuEntity.isLite(res.content)) {
