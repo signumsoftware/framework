@@ -65,15 +65,19 @@ public class NumberLineProxy : BaseLineProxy
     }
 
     public async Task<IFormattable?> GetValueAsync()
+        => await ExtractValueAsync(InputLocator);
+
+    public async Task<IFormattable?> GetValueReadonlyAsync()
+        => await ExtractValueAsync(AnyReadonlyLocator.First);
+
+    private async Task<IFormattable?> ExtractValueAsync(ILocator locator)
     {
-        var input = InputLocator;
+        await locator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached });
 
-        await input.WaitForAsync(new LocatorWaitForOptions
-        {
-            State = WaitForSelectorState.Attached
-        });
-
-        var strValue = await input.InputValueAsync();
+        var tagName = await locator.EvaluateAsync<string>("e => e.tagName");
+        var strValue = tagName == "DIV"
+            ? await locator.InnerTextAsync()
+            : await locator.InputValueAsync();
 
         return string.IsNullOrWhiteSpace(strValue)
             ? null

@@ -97,6 +97,7 @@ function SelectorModal(p: SelectorModalProps): React.ReactElement {
                       {" "}{o.displayName}
                     </label> :
                     <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
+                      onMouseDown={e => e.preventDefault()}
                       className={"sf-chooser-button sf-close-button btn btn-tertiary"} >
                       {o.displayName}
                     </button>)
