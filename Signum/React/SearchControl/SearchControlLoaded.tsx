@@ -592,8 +592,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table aria-multiselectable="true" role="grid"
-                  aria-label={this.createCaption()}
+                {/* A plain data table, not role="grid". role="grid" promises the ARIA grid keyboard model —
+                    one tab stop for the whole widget and arrow keys between cells — which this control does
+                    not implement: the rows are not focusable, so the ArrowUp/ArrowDown handler on <tr> below
+                    can never fire. Claiming the role made things actively worse than not claiming it, because
+                    a screen reader switches to focus mode inside a grid, which suppresses the browse-mode
+                    table commands that a plain <table> gets for free. Without it, reading the table cell by
+                    cell with the screen reader's own table navigation works again (WCAG 4.1.2). */}
+                <table aria-label={this.createCaption()}
                   className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
                   {AccessibleTable.Options.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
@@ -2033,7 +2039,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         // which is where the description actually exists.
         <tr
           key={i}
-          aria-selected={selected}
           ref={this.rowRefs[i]}
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}

@@ -50,8 +50,13 @@ export const TextAreaLine: (props: TextAreaLineProps) => React.ReactNode | null
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => <>
           {getTimeMachineIcon({ ctx: p.ctx })}
+          {/* readOnly, not disabled. A disabled control is out of the tab order and its value is not
+              announced, so every read-only multi-line field in the application — a returned report's
+              Chancellery comment, for one — was simply missing for a screen reader user (WCAG 4.1.2).
+              readOnly keeps it uneditable while leaving it focusable and readable, and the grey
+              background is the same either way. */}
           <TextArea id={inputId} {...mergedHtmlReadOnly} autoResize={autoResize} className={classes(htmlAtts?.className, p.ctx.formControlClass, c.mandatoryClass)} value={p.ctx.value || ""}
-            disabled />
+            readOnly />
         </>}
       </FormGroup>
     );
