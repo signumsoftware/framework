@@ -315,6 +315,11 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
 
   const customDataRef = React.useRef<any>(undefined);
 
+  // Names the panel's region from its own title, so moving into a panel says which one it is. Declared up
+  // here with the other hooks: there are two early returns below, and a hook after them changes the hook
+  // count between renders.
+  const titleId = React.useId();
+
   const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });
 
@@ -383,7 +388,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   // Only an actual title becomes a heading. A part can have an empty title and still show a header for its
   // icon or its tooltip, and an <h2> with no text would put a blank entry in the heading list.
   const title = part.hideTitle ? null :
-    titleText ? <h2 style={headingStyle}>{titleInner}</h2> :
+    titleText ? <h2 id={titleId} style={headingStyle}>{titleInner}</h2> :
       (icon || tooltipHtml) ? <span>{titleInner}</span> : null;
 
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
@@ -393,7 +398,12 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   }
 
   const cardContent = (
-    <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")} style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
+    // A titled panel is a region named by its own title. A heading alone is only found by someone going
+    // looking for it; a landmark is announced on the way in, which is what tells a screen reader user that
+    // they have moved from one panel of the dashboard to another.
+    <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")}
+      role={titleText ? "region" : undefined} aria-labelledby={titleText ? titleId : undefined}
+      style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
       {title &&
         <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
           style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined }}
