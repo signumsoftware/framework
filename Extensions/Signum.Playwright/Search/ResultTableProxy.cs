@@ -282,7 +282,7 @@ public class ResultRowProxy
 
     public ILocator CellElement(int columnIndex) => Locator.Locator($"td[data-column-index='{columnIndex}']");
 
-    public ILocator EntityLink() => Locator.Locator("td:not(data-column-index) a.sf-line-button.sf-view");
+    public ILocator EntityLink() => Locator.Locator("td:not([data-column-index]) a.sf-line-button.sf-view");
 
     private Task<string?> GetEntityKeyAsync() => Locator.GetAttributeAsync("data-entity");
     public async Task<Lite<Entity>?> GetEntityAsync()
