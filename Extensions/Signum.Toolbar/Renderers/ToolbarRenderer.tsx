@@ -245,7 +245,10 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.content) {
         const config = ToolbarClient.getConfig(res);
         if (!config)
-          return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
+          // as="li": these render into the sidebar's <ul>, where Nav.Item's default <div> is not a
+          // permitted child. Misconfiguration paths, but they are the ones a screen reader meets on a
+          // broken toolbar, and a stray child can cost the list its semantics entirely.
+          return <Nav.Item as="li" className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
         return config.getMenuItem(res, key, ctx, selectedEntity);
       }
@@ -261,7 +264,7 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
         );
       }
 
-      return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+      return <Nav.Item as="li" key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
     default:
       throw new Error("Unexpected " + res.type);
