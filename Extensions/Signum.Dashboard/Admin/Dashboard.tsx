@@ -251,6 +251,7 @@ export function DashboardPart(p: {
         tc.value.customColor = result.customColor;
         tc.value.interactionGroup = result.interactionGroup;
         tc.value.tooltip = result.tooltip;
+        tc.value.defaultOpen = result.defaultOpen;
         tc.value.modified = true;
         forceUpdate();
       }

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getContrastingTextColorWCAG } from '@framework/Globals'
 import { MListElementBinding } from '@framework/Reflection'
-import { Entity, JavascriptMessage, getToString, liteKey, toLite, translated } from '@framework/Signum.Entities'
+import { Entity, EntityControlMessage, JavascriptMessage, getToString, liteKey, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { DashboardClient, PanelPartContentProps } from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Dashboard'
@@ -311,7 +311,8 @@ export interface PanelPartProps {
 }
 
 export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
-  const content = p.ctx.value.content;
+  const part = p.ctx.value;
+  const content = part.content;
 
   const customDataRef = React.useRef<any>(undefined);
 
@@ -320,13 +321,12 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   // count between renders.
   const titleId = React.useId();
 
+  const [isOpen, setIsOpen] = React.useState<boolean>(() => { const o = part.defaultOpen ?? true; part.isOpen = o; return o; });
   const state = useAPI(signal => DashboardClient.partRenderers[content.Type].component().then(c => ({ component: c, lastType: content.Type })),
     [content.Type], { avoidReset: true });
 
   if (state == null || state.lastType == null)
     return null;
-
-  const part = p.ctx.value;
 
   const renderer = DashboardClient.partRenderers[content.Type];
 
@@ -391,6 +391,10 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     titleText ? <h2 id={titleId} style={headingStyle}>{titleInner}</h2> :
       (icon || tooltipHtml) ? <span>{titleInner}</span> : null;
 
+  // The collapse toggle sits in the card-header, so a part that renders no header (hideTitle, or nothing to
+  // put in it) has no way back from collapsed and always shows its content.
+  const showContent = title == null || isOpen;
+
   var dashboardFilter = p.dashboardController?.filters.get(p.ctx.value);
 
   function handleClearFilter(e: React.MouseEvent) {
@@ -403,7 +407,7 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
     // they have moved from one panel of the dashboard to another.
     <div className={classes("card", !part.customColor && "border-tertiary", "shadow-sm", "mb-4")}
       role={titleText ? "region" : undefined} aria-labelledby={titleText ? titleId : undefined}
-      style={{ flex: p.flex ? 1 : undefined,/* overflow: "hidden"*/ }}>
+      style={{ flex: (p.flex && showContent) ? 1 : undefined,/* overflow: "hidden"*/ }}>
       {title &&
         <div className={classes("card-header fw-bold", "sf-show-hover", "d-flex", !part.customColor)}
           style={{ backgroundColor: part.customColor ?? undefined, color: part.customColor ? getContrastingTextColorWCAG(part.customColor) : undefined }}
@@ -431,24 +435,28 @@ export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
                 <FontAwesomeIcon aria-hidden={true} icon="pen-to-square" className="me-1" />
               </LinkButton>
             }
+            <LinkButton className="sf-pointer sf-hide" onClick={e => { part.isOpen = !isOpen; setIsOpen(!isOpen); }} title={isOpen ? EntityControlMessage.Collapse.niceToString() : EntityControlMessage.Expand.niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon={isOpen ? "chevron-up" : "chevron-down"} />
+            </LinkButton>
           </div>
         </div>
       }
-      <div data-part-content={partContentKey} className="card-body py-2 px-3 d-flex flex-column">
-        <ErrorBoundary>
-          {
-            React.createElement(state.component, {
-              partEmbedded: part,
-              content: content,
-              entity: lite,
-              deps: p.deps,
-              dashboardController: p.dashboardController,
-              cachedQueries: p.cachedQueries,
-              customDataRef: customDataRef,
-            } as PanelPartContentProps<IPartEntity>)
-          }
-        </ErrorBoundary>
-      </div>
+      {showContent &&
+        <div data-part-content={partContentKey} className="card-body py-2 px-3 d-flex flex-column">
+          <ErrorBoundary>
+            {
+              React.createElement(state.component, {
+                partEmbedded: part,
+                content: content,
+                entity: lite,
+                deps: p.deps,
+                dashboardController: p.dashboardController,
+                cachedQueries: p.cachedQueries,
+                customDataRef: customDataRef,
+              } as PanelPartContentProps<IPartEntity>)
+            }
+          </ErrorBoundary>
+        </div>}
     </div>
   );
 

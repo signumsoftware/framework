@@ -58,6 +58,7 @@ public static class EmailLogic
             FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
         sb.Include<EmailMessageEntity>()
+            .WithIndex(e => new { e.State, e.CreationDate })
             .WithQuery(() => e => new
             {
                 Entity = e,

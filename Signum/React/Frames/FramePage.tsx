@@ -349,7 +349,7 @@ export default function FramePage(): React.ReactElement {
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">
-          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
+          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} operations={QueryString.parse(location.search)["operations"]} />}
         </div>
         <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
         <WidgetEmbedded widgetContext={wc} >

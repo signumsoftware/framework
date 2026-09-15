@@ -68,9 +68,9 @@ public class NumberLineProxy : BaseLineProxy
         => await ExtractValueAsync(AnyInputLocator.First);
 
     public async Task<IFormattable?> GetValueReadonlyAsync()
-        => await ExtractValueAsync(AnyReadonlyLocator.First);
+        => await ExtractValueAsync(AnyReadonlyLocator.First, formatted: true);
 
-    private async Task<IFormattable?> ExtractValueAsync(ILocator locator)
+    private async Task<IFormattable?> ExtractValueAsync(ILocator locator, bool formatted = false)
     {
         await locator.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached });
 
@@ -78,6 +78,20 @@ public class NumberLineProxy : BaseLineProxy
         var strValue = tagName == "DIV"
             ? await locator.InnerTextAsync()
             : await locator.InputValueAsync();
+
+        if (formatted && !string.IsNullOrWhiteSpace(strValue))
+        {
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            var numberFormat = culture.NumberFormat;
+            bool percentage = strValue.Contains(numberFormat.PercentSymbol);
+            var groupSeparator = percentage ? numberFormat.PercentGroupSeparator : numberFormat.NumberGroupSeparator;
+            if (!string.IsNullOrEmpty(groupSeparator))
+                strValue = strValue.Replace(groupSeparator, "");
+
+            if (percentage)
+                return (IFormattable?)ReflectionTools.ParsePercentage(
+                    strValue.Replace(numberFormat.PercentSymbol, "").Trim(), this.Route.Type, culture);
+        }
 
         return string.IsNullOrWhiteSpace(strValue)
             ? null

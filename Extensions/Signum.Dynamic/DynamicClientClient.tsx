@@ -36,9 +36,9 @@ export namespace DynamicClientClient {
   
       cs.forEach(c => {
         try {
-          var start = eval(`(function start${c.name}(modules){
+          var start = new Function("modules", `
   ${c.code}
-  })`);
+  `);
           start(globalModules);
         } catch (e) {
           console.error(`Error in DynamicClient (${c.name}), consider using ${window.location}?safeMode`);

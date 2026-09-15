@@ -83,6 +83,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
       p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
     }
 
+    return () => p.dashboardController.tryRemoveInvalidations(p.partEmbedded);
   }, [chartRequest]);
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userChart))];
@@ -113,6 +114,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   React.useEffect(() => {
     p.dashboardController.registerInvalidations(p.partEmbedded, () => setRefreshKey(a => a + 1));
+    return () => p.dashboardController.tryRemoveInvalidations(p.partEmbedded);
   }, [p.partEmbedded])
 
   const [showData, setShowData] = React.useState(p.content.showData);
