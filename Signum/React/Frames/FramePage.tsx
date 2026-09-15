@@ -56,11 +56,12 @@ export default function FramePage(): React.ReactElement {
   // A new entity has no toString yet, so every /create/<Type> page fell back to the bare application name
   // and none of them could be told apart in the tab or by a screen reader (WCAG 2.4.2). The same wording the
   // heading uses, so the two agree.
+  // isNew first, in the same order Navigator.renderEntity uses for the heading — a new entity can carry a
+  // blank-but-not-empty toString, which short-circuits ahead of it and leaves the tab reading " - PMflexONE"
+  // while the heading says "New Milestone". Falling back to the type name keeps it from ever being empty.
   useTitle(
-    getToString(state?.pack.entity) ||
-    (state == null ? "" :
-      state.pack.entity.isNew ? FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) :
-        ti.niceName ?? ti.name),
+    state?.pack.entity.isNew ? FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) :
+      getToString(state?.pack.entity) || (ti.niceName ?? ti.name),
     [state?.pack.entity]);
 
   usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
