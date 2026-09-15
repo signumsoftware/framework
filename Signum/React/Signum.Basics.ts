@@ -206,6 +206,7 @@ export interface TypeEntity extends Entities.Entity {
   namespace: string | null;
   package: string | null;
   className: string;
+  isPart: boolean | null;
 }
 
 export const VisualTipConsumedEntity: Type<VisualTipConsumedEntity> = new Type<VisualTipConsumedEntity>("VisualTipConsumed");
