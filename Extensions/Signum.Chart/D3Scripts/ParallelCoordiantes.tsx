@@ -101,7 +101,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="parallelCoodinatesChartTitle">{titleMessage}</title>
+      <title>{titleMessage}</title>
       <g className="x-tick" transform={translate(xRule.start('content') + x.bandwidth() / 2, yRule.start('content'))}>
         {cords.map(d => <line key={d.column.name} className="x-tick sf-transition"
           transform={translate(x(d.column.name)!, 0)}

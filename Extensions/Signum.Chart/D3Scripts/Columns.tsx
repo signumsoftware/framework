@@ -77,7 +77,7 @@ export default function renderColumns({ data, width, height, parameters, loading
       width={width}
       height={height}
       role="group">
-      <title id="columnChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Columns), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Columns), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={y} />

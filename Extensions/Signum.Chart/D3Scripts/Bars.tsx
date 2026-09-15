@@ -83,7 +83,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
       width={width}
       height={height}
       role="group">
-      <title id="barChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bars), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bars), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} x={x} />
       </g>

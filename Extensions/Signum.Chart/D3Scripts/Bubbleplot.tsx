@@ -98,7 +98,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="bubbleplotChartTitle">{titleMessage}</title>
+      <title>{titleMessage}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />

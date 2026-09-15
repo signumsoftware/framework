@@ -117,7 +117,7 @@ export default function renderCalendarStream({ data, width, height, parameters, 
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="calendarStreamChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.CalendarStream), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, dateColumn.title].join(", "))}</title>
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.CalendarStream), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, dateColumn.title].join(", "))}</title>
       <g transform={translate(xRule.start("content"), yRule.start("content"))}>
         {years.map((yr, i) => <CalendarYear key={yr}
           transform={rules == vertical ?

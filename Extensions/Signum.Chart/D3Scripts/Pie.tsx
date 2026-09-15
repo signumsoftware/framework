@@ -60,7 +60,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     // The name is repeated as aria-label rather than referenced through the <title> id, because that id is
     // fixed and would be ambiguous with two charts on one page.
     <svg direction="ltr" width={width} height={height} role="group" aria-label={chartTitle}>
-      <title id="pieChartTitle">{chartTitle}</title>
+      <title>{chartTitle}</title>
       <g className="shape" transform={translate(width / 2, height / 2)}>
         {orderedPie.map(slice => {
           var active = detector?.(slice.data);
@@ -83,8 +83,13 @@ export default function renderPie({ data, width, height, parameters, loading, on
               <path className="shape sf-transition hover-target" d={arc(slice)!}
                 aria-label={`${keyColumn.getValueNiceName(slice.data)}: ${valueText}`}
                 opacity={active == false ? .5 : undefined}
-                stroke={active == true ? "var(--bs-body-color)" : undefined}
-                strokeWidth={active == true ? 3 : undefined}
+                // A separating stroke on every slice, not only the highlighted one. Categorical palettes
+                // are built to differ in hue, not in luminance — every palette shipped here has adjacent
+                // colours far below 3:1 — so two neighbouring slices can be impossible to tell apart. A
+                // stroke in the page background separates them whatever the fill colours turn out to be,
+                // which no choice of palette can guarantee on its own.
+                stroke={active == true ? "var(--bs-body-color)" : "var(--bs-body-bg)"}
+                strokeWidth={active == true ? 3 : 1}
                 transform={initialLoad ? scale(0, 0) : scale(1, 1)}
                 fill={sliceColor}
                 shapeRendering="initial"

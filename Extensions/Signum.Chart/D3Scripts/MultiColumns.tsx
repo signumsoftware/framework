@@ -84,7 +84,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="multiColumnsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
+      <title>{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.MultiColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
       <g opacity={dashboardFilter ? .5 : undefined}>
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} />

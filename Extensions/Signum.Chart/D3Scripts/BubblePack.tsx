@@ -80,7 +80,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="bubblePackChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.BubblePack), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.BubblePack), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {
         nodes.orderByDescending(a => a.r).map(d => {
           const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);

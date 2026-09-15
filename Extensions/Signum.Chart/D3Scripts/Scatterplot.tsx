@@ -95,7 +95,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
   return (
     <>
       <svg direction="ltr" width={width} height={height} role="group">
-        <title id="scatterplotlCoodinatesChartTitle">{titleMessage}</title>
+        <title>{titleMessage}</title>
         <g opacity={dashboardFilter ? .5 : undefined}>
           <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={horizontalColumn} x={x} />
           <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={verticalColumn} y={y} />

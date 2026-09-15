@@ -106,7 +106,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
-      <title id="stackedColumnsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
+      <title>{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedColumns), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XTitle xRule={xRule} yRule={yRule} keyColumn={keyColumn} />
         <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} y={y} format={format} />
