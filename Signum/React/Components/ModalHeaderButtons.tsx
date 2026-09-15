@@ -58,9 +58,12 @@ export function ModalFooterButtons(p: ModalFooterButtonsProps): React.ReactEleme
 
   return (
     <div className="modal-footer" {...p.htmlAttributes}>
-      <h1 className="modal-title h4" >
-        {p.children}
-      </h1>
+      {/* Only when there is something to put in it. Most footers pass no children, which left an empty <h1>
+          in every such dialog — a blank entry in the heading list, and one at level 1. */}
+      {p.children &&
+        <h1 className="modal-title h4" >
+          {p.children}
+        </h1>}
       {(p.onCancel || p.onOk) &&
         <div className="btn-toolbar" style={{ flexWrap: "nowrap" }}>
           {p.onOk && <button

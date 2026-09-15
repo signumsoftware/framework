@@ -1614,9 +1614,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
+        {/* Single selection renders no select-all checkbox, which left this header completely empty, so the
+            column was announced as a blank one with every row. A hidden label names it instead. */}
         {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
-          {this.props.allowSelection == true &&
-            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true ?
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} /> :
+            <span className="visually-hidden">{EntityControlMessage.Selected.niceToString()}</span>
           }
         </th>
         }
@@ -2063,7 +2066,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
-                  aria-label={`Select row ${i + 1}`}
+                  aria-label={SearchMessage.SelectRow0_.niceToString(i + 1)}
                   data-index={i} />}
             </td>
           }
