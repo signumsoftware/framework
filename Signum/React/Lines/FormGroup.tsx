@@ -28,12 +28,21 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
     "data-error-path": tCtx.prefix
   };
 
+  // The control's aria-describedby points at this id whenever it is invalid, but nothing ever rendered it,
+  // so the reference was dead: a screen reader said the field was invalid without saying why. The message
+  // was only in a title attribute, which is a tooltip and reaches nobody who is not using a mouse. Hidden
+  // rather than shown, because the visible red styling and the validation summary already cover the sighted
+  // case and putting it inline would restyle every invalid field in the application.
+  const errorMessage = error &&
+    <span id={tCtx.getUniqueId("error")} className="visually-hidden">{error}</span>;
+
   if (ctx.formGroupStyle == "None") {
     const c = p.children?.(controlId);
 
     return (
       <span {...p.htmlAttributes} className={classes(errorClass, p.htmlAttributes?.className)} {...errorAtts}>
         {c}
+        {errorMessage}
       </span>
     );
   }
@@ -72,12 +81,13 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
             <div className={ctx.valueColumnsCss} >
               {p.helpTextOnTop && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpTextOnTop}</small>}
               {p.children?.(controlId)}
-              {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
+              {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small id={tCtx.getUniqueId("help")} className="form-text d-block">{p.helpText}</small>}
             </div>
           )
       }
       {(ctx.formGroupStyle == "BasicDown" || ctx.formGroupStyle == "FloatingLabel") && label}
-      {p.helpText && ctx.formGroupStyle != "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
+      {p.helpText && ctx.formGroupStyle != "LabelColumns" && <small id={tCtx.getUniqueId("help")} className="form-text d-block">{p.helpText}</small>}
+      {errorMessage}
     </div>
   );
 
