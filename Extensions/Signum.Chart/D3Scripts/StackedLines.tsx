@@ -129,7 +129,9 @@ export default function renderStackedLines({ data, width, height, parameters, lo
       </g>
       {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} opacity={dashboardFilter && !(c.c1 && detector?.({ c1: columnsByKey[s.key].value }) == true) ? .5 : undefined} className="shape-serie"
         transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))}>
-        <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
+        {/* Separating stroke, as on the pie: stacked areas share an edge, and adjacent palette colours are
+            not guaranteed to differ in luminance. */}
+        <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} stroke="var(--bs-body-bg)" strokeWidth={1} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
           <title>
             {columnsByKey[s.key].niceName!}
           </title>

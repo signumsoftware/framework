@@ -128,9 +128,13 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
           return (
             <g className="hover-group" key={keyColumn.getKey(r.data.rowValue)}>
+              {/* Separating stroke, as on the pie: adjacent palette colours are not guaranteed to differ in
+                  luminance, so stacked neighbours can be indistinguishable without one. */}
               <rect className="shape sf-transition hover-target"
                 transform={translate(x(keyColumn.getKey(r.data.rowValue))! + bandMargin, -y(r[1])!) + (initialLoad ? scale(1, 0) : scale(1, 1))}
                 opacity={active == false ? .5 : undefined}
+                stroke="var(--bs-body-bg)"
+                strokeWidth={1}
                 fill={colorByKey[s.key] ?? color(s.key)}
                 width={x.bandwidth() - bandMargin * 2}
                 height={y(r[1])! - y(r[0])!}
