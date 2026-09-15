@@ -99,8 +99,12 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
         log.Switch("Redundant");
         Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
+        log.Switch("OrderByColumn");
+        Expression orderByPromoted = OrderByColumnPromoter.Promote(subqueryCleaned);
+        //Once the orderings are simple columns, an outer select that only re-projects a TOP can be merged away
+        Expression orderByCleaned = orderByPromoted == subqueryCleaned ? orderByPromoted : RedundantSubqueryRemover.Remove(orderByPromoted);
         log.Switch("Condition");
-        Expression rewriteConditions = isPostgres ? ConditionsRewriterPostgres.Rewrite(subqueryCleaned) : ConditionsRewriter.Rewrite(subqueryCleaned);
+        Expression rewriteConditions = isPostgres ? ConditionsRewriterPostgres.Rewrite(orderByCleaned) : ConditionsRewriter.Rewrite(orderByCleaned);
         log.Switch("Scalar");
         Expression scalar = ScalarSubqueryRewriter.Rewrite(rewriteConditions);
         return scalar;

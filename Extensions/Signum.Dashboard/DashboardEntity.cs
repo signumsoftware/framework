@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Collections.Specialized;
 using Signum.UserAssets;
 using System.Xml.Linq;
@@ -339,6 +339,10 @@ public enum DashboardMessage
     TheUserQuery0HasNoColumnWithSummaryHeader,
 
     Edit,
+
+
+    [Description("More information")]
+    MoreInformation,
 
 
     [Description("Click in one chart to filter in the others")]

@@ -57,10 +57,14 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
   const hasReferences = references != null && references.length > 0;
   const entityTypeName = getTypeInfo(p.lite.EntityType).niceName;
 
+  // aria-labelledby names the dialog from its own title: it carried role="dialog" and aria-modal but no
+  // accessible name, so it was announced as just "dialog" (WCAG 4.1.2). useId because dialogs here are
+  // opened nested, so a fixed id could appear twice in the document.
+  const titleId = React.useId();
   return (
-    <Modal show={show} onExited={handleOnExited} onHide={handleClose} size="lg">
+    <Modal show={show} onExited={handleOnExited} onHide={handleClose} size="lg" aria-labelledby={titleId}>
       <Modal.Header closeButton>
-        <Modal.Title>
+        <Modal.Title id={titleId}>
           <FontAwesomeIcon icon="triangle-exclamation" className="text-warning me-2" />
           {CascadeDeleteMessage.ThisEntityIsStillReferenced.niceToString()}
         </Modal.Title>

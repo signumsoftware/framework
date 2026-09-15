@@ -77,6 +77,11 @@ function SearchPage(): React.ReactElement {
         {SearchPage.renderTitle(searchControl.current?.searchControlLoaded, <span>{getQueryNiceName(fo.queryName)}</span>)}
         {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
+      {/* enableAutoFocus is false on a page: 200ms after loading it moved focus into the pinned filters —
+          on a query with several of them that is more than twenty tab stops in, past the skip link, which
+          is the very first one. A keyboard user then had to tab the whole page on every visit with the skip
+          link behind them. A dialog is the opposite case and SearchModal still sets it, because there focus
+          does have to move inside. */}
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
@@ -93,7 +98,7 @@ function SearchPage(): React.ReactElement {
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
-        enableAutoFocus={true}
+        enableAutoFocus={false}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
         onPageTitleChanged={forceUpdate}

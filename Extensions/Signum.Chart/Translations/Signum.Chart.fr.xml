@@ -138,6 +138,7 @@
     <Member Name="Query" Description="Requête" />
   </Type>
   <Type Name="UserChartOperation">
+    <Member Name="Clone" Description="Clone" />
     <Member Name="Delete" Description="Supprimer" />
     <Member Name="Save" Description="Sauvegarder" />
   </Type>

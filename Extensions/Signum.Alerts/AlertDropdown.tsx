@@ -202,11 +202,20 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
   var divRef = React.useRef<HTMLDivElement>(null);
   useRootClose(divRef as any, () => setIsOpen(false), { disabled: !isOpen });
 
+  const alertsLabel = (countResult ? AlertEntity.niceCount(countResult.numAlerts) : AlertEntity.nicePluralName())
+    + (ringing ? " " + AlertMessage.Ringing.niceToString() : "");
+
   return (
     <>
-      <button className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined} style={{ border: 0, backgroundColor: 'var(--alert-bg)' }}>
+      {/* The only thing left in the accessible name was the badge number, because the icon carrying the
+          real description is aria-hidden — so the button announced as just "32, button". The description
+          the icon already computes belongs on the button itself (WCAG 4.1.2), along with whether the
+          panel it toggles is open. */}
+      <button className="nav-link sf-bell-container" onClick={handleOnToggle} title={window.__disableSignalR ?? undefined}
+        aria-label={alertsLabel} aria-expanded={isOpen}
+        style={{ border: 0, backgroundColor: 'var(--alert-bg)' }}>
         <FontAwesomeIcon aria-hidden={true} icon={window.__disableSignalR ? "bell-slash" : "bell"}
-          title={(countResult ? AlertEntity.niceCount(countResult.numAlerts) : AlertEntity.nicePluralName()) + (ringing ? " " + AlertMessage.Ringing.niceToString() : "")}
+          title={alertsLabel}
           className={classes("sf-bell", ringing && "ringing", isOpen && "open", countResult && countResult.numAlerts > 0 && "active")} />
         {countResult && countResult.numAlerts > 0 && <span className="badge text-bg-danger badge-pill sf-alerts-badge" 
         style={{

@@ -7,6 +7,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { Tabs, Tab } from 'react-bootstrap'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateMessage, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { replaceCidImages } from './CidImages'
 
 export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -47,6 +48,12 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
       forceUpdate();
   }
 
+  function manipulateDom(doc: Document) {
+    const template = p.ctx.tryFindParent(EmailMasterTemplateEntity);
+    if (template != null)
+      replaceCidImages(doc, template.attachments);
+  }
+
   const ec = p.ctx;
   return (
     <div className="sf-email-template-message">
@@ -61,7 +68,7 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </LinkButton>
-        {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} manipulateDom={manipulateDom} />}
       </div>
     </div>
   );

@@ -399,16 +399,6 @@ internal static class TypeConditionMerger
                 }
             }
 
-            try
-            {
-                if (currentValue == null)
-                    throw new InvalidOperationException("Array is empty!");
-            }
-            catch (Exception)
-            {
-                //For debugging
-            }
-
             return currentValue;
         }
 

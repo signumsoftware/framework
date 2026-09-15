@@ -109,8 +109,8 @@ export default function renderStackedBars({ data, width, height, parameters, loa
   const bandMargin = y.bandwidth() > 20 ? 2 : y.bandwidth() > 10 ? 1 : 0;
 
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
-      <title id="stackedBarsChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedBars), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
+    <svg direction="ltr" width={width} height={height} role="group">
+      <title>{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedBars), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
       <g opacity={dashboardFilter ? .5 : undefined}>
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn0} x={x} format={format} />
       </g>
@@ -135,9 +135,13 @@ export default function renderStackedBars({ data, width, height, parameters, loa
             
             return (
               <g className="hover-group" key={key}>
+                {/* Separating stroke, as on the pie: adjacent palette colours are not guaranteed to differ
+                    in luminance, so stacked neighbours can be indistinguishable without one. */}
                 <rect className="shape sf-transition hover-target"
                   transform={translate(x(r[0])!, y(key)! + bandMargin) + (initialLoad ? scale(0, 1) : scale(1, 1))}
                   opacity={active == false ? .5 : undefined}
+                  stroke="var(--bs-body-bg)"
+                  strokeWidth={1}
                   fill={colorByKey[s.key] ?? color(s.key)}
                   height={y.bandwidth() - bandMargin * 2}
                   width={x(r[1])! - x(r[0])!}

@@ -314,7 +314,7 @@ public static class EmailLogic
             {
                 CanBeNew = true,
                 CanBeModified = true,
-                FromStates = { EmailMessageState.Created, EmailMessageState.Outdated },
+                FromStates = { EmailMessageState.Created, EmailMessageState.Outdated, EmailMessageState.Draft },
                 ToStates = { EmailMessageState.Draft },
                 Execute = (m, _) =>
                 {

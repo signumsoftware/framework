@@ -68,4 +68,13 @@ public class QueryColumnEmbedded : EmbeddedEntity
     {
         return "{0} {1}".FormatWith(Token, displayName);
     }
+
+    public QueryColumnEmbedded Clone() => new QueryColumnEmbedded
+    {
+        Token = Token.Clone(),
+        DisplayName = DisplayName,
+        SummaryToken = SummaryToken?.Clone(),
+        HiddenColumn = HiddenColumn,
+        CombineRows = CombineRows,
+    };
 }

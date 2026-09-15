@@ -5,7 +5,7 @@ import { Constructor } from '../Constructor'
 import { useBlocker, useLocation, useParams } from "react-router-dom"
 import { Finder } from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
-import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
+import { Entity, Lite, getToString, EntityPack, FrameMessage, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
@@ -53,7 +53,16 @@ export default function FramePage(): React.ReactElement {
   if (state && id != null && state.pack.entity.id != id)
     state = undefined;
 
-  useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
+  // A new entity has no toString yet, so every /create/<Type> page fell back to the bare application name
+  // and none of them could be told apart in the tab or by a screen reader (WCAG 2.4.2). The same wording the
+  // heading uses, so the two agree.
+  // isNew first, in the same order Navigator.renderEntity uses for the heading — a new entity can carry a
+  // blank-but-not-empty toString, which short-circuits ahead of it and leaves the tab reading " - PMflexONE"
+  // while the heading says "New Milestone". Falling back to the type name keeps it from ever being empty.
+  useTitle(
+    state?.pack.entity.isNew ? FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) :
+      getToString(state?.pack.entity) || (ti.niceName ?? ti.name),
+    [state?.pack.entity]);
 
   usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
 

@@ -8,7 +8,7 @@ import {
   FindOptions, isFilterCondition, withoutPinned
 } from '../FindOptions'
 import { getTokenParents, hasElement, hasManual, hasOperation, hasToArray, QueryToken, SubTokensOptions } from '../QueryToken'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, EntityControlMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType, getTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -596,8 +596,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table aria-multiselectable="true" role="grid"
-                  aria-label={this.createCaption()}
+                {/* A plain data table, not role="grid". role="grid" promises the ARIA grid keyboard model —
+                    one tab stop for the whole widget and arrow keys between cells — which this control does
+                    not implement: the rows are not focusable, so the ArrowUp/ArrowDown handler on <tr> below
+                    can never fire. Claiming the role made things actively worse than not claiming it, because
+                    a screen reader switches to focus mode inside a grid, which suppresses the browse-mode
+                    table commands that a plain <table> gets for free. Without it, reading the table cell by
+                    cell with the screen reader's own table navigation works again (WCAG 4.1.2). */}
+                <table aria-label={this.createCaption()}
                   className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
                   {AccessibleTable.Options.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
@@ -1051,6 +1057,24 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.forceUpdate();
   }
 
+  // Reordering a column was possible by dragging its header and no other way, so it could not be done
+  // without a pointer at all (WCAG 2.1.1), and dragging is the only route even with one (SC 2.5.7 in
+  // WCAG 2.2). This is the same move the drop handler performs, reachable from the column menu.
+  handleMoveColumn = (direction: -1 | 1): void => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+    const from = cm.columnIndex!;
+    const to = from + direction;
+    if (to < 0 || to >= fo.columnOptions.length)
+      return;
+
+    const col = fo.columnOptions[from];
+    fo.columnOptions.removeAt(from);
+    fo.columnOptions.insertAt(to, col);
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+  }
+
   handleRemoveColumn = (): void => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
@@ -1230,6 +1254,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
           {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        </Dropdown.Item>);
+
+        // The pointer-free way to reorder columns; dragging the header remains available.
+        menuItems.push(<Dropdown.Item className="sf-move-column-left" disabled={cm.columnIndex === 0}
+          onClick={() => this.handleMoveColumn(-1)}>
+          <FontAwesomeIcon aria-hidden={true} icon="arrow-left" />&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
+        </Dropdown.Item>);
+
+        menuItems.push(<Dropdown.Item className="sf-move-column-right" disabled={cm.columnIndex === this.props.findOptions.columnOptions.length - 1}
+          onClick={() => this.handleMoveColumn(1)}>
+          <FontAwesomeIcon aria-hidden={true} icon="arrow-right" />&nbsp;{EntityControlMessage.MoveRight.niceToString()}
         </Dropdown.Item>);
 
 
@@ -1583,16 +1618,35 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
+        {/* Single selection renders no select-all checkbox, which left this header completely empty, so the
+            column was announced as a blank one with every row. A hidden label names it instead. */}
         {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
-          {this.props.allowSelection == true &&
-            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true ?
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} /> :
+            <span className="visually-hidden">{EntityControlMessage.Selected.niceToString()}</span>
           }
         </th>
         }
-        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {/* entityColumnHeader() is empty by default, which left this column with no header at all, so its
+            cells had no column name to be announced with (WCAG 1.3.1). When nothing is configured a
+            visually hidden one is supplied, keeping the column as narrow as before. */}
+        {(this.props.view || this.props.findOptions.groupResults) && <th scope="col" className="sf-small-column sf-th-entity" data-column-name="Entity">
+          {Finder.Options.entityColumnHeader() || <span className="visually-hidden">{EntityControlMessage.View.niceToString()}</span>}
+        </th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
+          // tabIndex: the header is operable — it sorts on click and opens the column menu on the context
+          // menu key — but it was not reachable without a pointer at all (WCAG 2.1.1). Focusable, Enter or
+          // Space sorts exactly as a click does, and from there the context menu key reaches "move left" and
+          // "move right", which is what makes reordering possible without dragging.
           <th key={i}
             scope="col"
+            tabIndex={0}
+            onKeyDown={e => {
+              if ((e.key === "Enter" || e.key === " ") && this.canOrder(co)) {
+                e.preventDefault();
+                this.handleHeaderClick(e as unknown as React.MouseEvent<any>);
+              }
+            }}
             draggable={true}
             className={classes(
               cellFormatter?.fillWidth == false ? "sf-small-column" : undefined,
@@ -1985,10 +2039,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       };
 
       var tr = (
+        // No hardcoded aria-describedby here: the tooltip it named is rendered only for rows that carry a
+        // mark message, and even then only while the overlay is open, so on every other row the reference
+        // pointed at an element that never exists — one dangling reference per result row (WCAG 4.1.2).
+        // The OverlayTrigger below already sets aria-describedby on this row while its tooltip is shown,
+        // which is where the description actually exists.
         <tr
           key={i}
-          aria-describedby={`result_row_${i}_tooltip`}
-          aria-selected={selected}
           ref={this.rowRefs[i]}
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
@@ -2013,7 +2070,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
-                  aria-label={`Select row ${i + 1}`}
+                  aria-label={SearchMessage.SelectRow0_.niceToString(i + 1)}
                   data-index={i} />}
             </td>
           }
@@ -2078,12 +2135,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
+    // The tooltip id is deliberately distinct from the row tooltip's: both describe the same row, so a
+    // shared id produced a duplicate in the document whenever both were open (WCAG 4.1.1).
     return (
       <span className="row-mark-icon">
         {mark.message ?
           <OverlayTrigger
             trigger="click"
-            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_mark_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
             {icon}
           </OverlayTrigger> : icon}
       </span>
