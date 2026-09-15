@@ -128,6 +128,8 @@ export interface SearchControlLoadedProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
   onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
+  /** Selects every row of the first completed search. Later searches keep the normal behaviour. */
+  selectAllOnLoad?: boolean;
   ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -371,7 +373,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           dataChanged: undefined,
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
-          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ?? [],
+          //searchCount is still the previous one here, so == null means this is the first completed search
+          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ??
+            (this.props.selectAllOnLoad && this.state.searchCount == null ? rt.rows.clone() : []),
           currentMenuPack: undefined,
           markedRows: undefined,
           searchCount: (this.state.searchCount ?? 0) + 1
