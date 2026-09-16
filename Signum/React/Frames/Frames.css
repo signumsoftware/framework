@@ -251,6 +251,10 @@ background: var(--bs-body-bg);
 .sf-entity-sub-title {
     display: flex;
     flex-wrap: wrap;
+    /* This block used to sit inside the page heading and take its font size, which is what sized the
+       <small> type name inside it. It is a sibling of the heading now, so the size is stated here to
+       keep it looking the same. .sf-widgets pins its own size and is unaffected either way. */
+    font-size: 1.5rem;
 }
 
 .sf-frame-modal .modal-title {
