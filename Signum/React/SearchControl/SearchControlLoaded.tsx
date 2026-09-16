@@ -1269,12 +1269,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         // The pointer-free way to reorder columns; dragging the header remains available.
         menuItems.push(<Dropdown.Item className="sf-move-column-left" disabled={cm.columnIndex === 0}
           onClick={() => this.handleMoveColumn(-1)}>
-          <FontAwesomeIcon aria-hidden={true} icon="arrow-left" />&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
+          {getMoveColumnLeftIcon()}&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-move-column-right" disabled={cm.columnIndex === this.props.findOptions.columnOptions.length - 1}
           onClick={() => this.handleMoveColumn(1)}>
-          <FontAwesomeIcon aria-hidden={true} icon="arrow-right" />&nbsp;{EntityControlMessage.MoveRight.niceToString()}
+          {getMoveColumnRightIcon()}&nbsp;{EntityControlMessage.MoveRight.niceToString()}
         </Dropdown.Item>);
 
 
@@ -2415,6 +2415,20 @@ export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
     <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="var(--bs-orange)" />
+  </span>
+}
+
+// A bare FontAwesomeIcon is not the fixed width the rest of the column menu uses, so these two arrows sat
+// off the shared icon column. Same `fa-layers fa-fw icon` wrapper as the others, so everything lines up.
+export function getMoveColumnLeftIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-left" color="var(--bs-body-color)" />
+  </span>
+}
+
+export function getMoveColumnRightIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-right" color="var(--bs-body-color)" />
   </span>
 }
 
