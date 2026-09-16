@@ -1042,8 +1042,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     };
 
     const cm = this.state.contextualMenu!;
+
+    // The filler header that takes the remaining width when every column is small has no column of its own,
+    // and neither do the selection and entity headers, so there is nothing to insert before or after there:
+    // the new column goes at the end.
+    const index = cm.columnIndex == null ? this.props.findOptions.columnOptions.length : cm.columnIndex + cm.columnOffset!;
+
     this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
-    this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
+    this.props.findOptions.columnOptions.insertAt(index, newColumn);
 
     this.forceUpdate();
   }
@@ -1242,12 +1248,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       menuItems.push(<Dropdown.Header>{SearchMessage.Columns.niceToString()}</Dropdown.Header>);
 
-      if (cm.columnIndex != null) {
-        menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
-          {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
-          {cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
-        </Dropdown.Item>);
+      // Insert is offered on the headers that have no column of their own too — the filler one that appears
+      // when every column is small, and the selection and entity ones — where it appends at the end instead,
+      // so the only route to a new column is not a right click that happens to land on a real header.
+      menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
+        {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+        {cm.columnIndex == null ? "" :
+          cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
+      </Dropdown.Item>);
 
+      if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
           {getEditColumnIcon()}&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
