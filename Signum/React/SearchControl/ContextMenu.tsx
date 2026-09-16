@@ -61,13 +61,28 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
   }
     };
 
+    // Escape is handled on the document and not on the menu because the menu can be opened with the context
+    // menu key while the focus is still on the element that opened it (a column header), and the handler that
+    // was on the menu never saw the key, so the menu could not be closed at all (WCAG 2.1.2). Capture phase
+    // and stopPropagation so that the menu, being the topmost layer, is the only thing that closes, instead
+    // of also closing the modal or the page underneath it.
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        onHide();
+      }
+    };
+
     const oldResize = window.onresize;
 
     window.onresize = (e) => { oldResize?.call(window, e); forceUpdate(); };
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape, true);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape, true);
       window.onresize = oldResize;
     };
   }, [onHide]);
@@ -75,12 +90,6 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
 
   const handleMenuClick = (e: React.MouseEvent<HTMLElement>) => {
     (e.target as HTMLElement).matches(".dropdown-item:not(input, .disabled)") && onHide();
-  }
-
-  const handleKeyDown = (event: React.KeyboardEvent<any>) => {
-    if (event.key === 'Escape') {
-      onHide();
-    }
   }
 
   return (
@@ -94,7 +103,7 @@ export default function ContextMenu({ position, onHide, children, alignRight, it
       }}
       {...rest as any}
     >
-      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown} className="sf-context-menu">
+      <Dropdown.Menu onClick={handleMenuClick} className="sf-context-menu">
         {children}
       </Dropdown.Menu>
     </Dropdown>
