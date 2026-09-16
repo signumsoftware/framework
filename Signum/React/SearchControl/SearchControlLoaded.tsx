@@ -170,6 +170,11 @@ export interface SearchControlLoadedState {
 
 type SearchControlFilterMode = "Simple" | "Advanced" | "Pinned";
 
+// Two search controls on one page - a dashboard with two grids, a page with a grid beside a related one -
+// each rendered the same fixed element ids, leaving the document with duplicates that anything resolving
+// an id (a label, a test, the browser itself) may resolve either way. Every instance takes its own number.
+let searchControlInstanceCount = 0;
+
 export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState> {
 
   constructor(props: SearchControlLoadedProps) {
@@ -179,6 +184,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       refreshMode: props.defaultRefreshMode,
       filterMode: props.showFilters ? "Advanced" : "Simple",
     };
+  }
+
+  instanceNumber: number = ++searchControlInstanceCount;
+
+  getUniqueId(suffix: string): string {
+    return suffix + "_sc" + this.instanceNumber;
   }
 
   static maxToArrayElements = 100;
@@ -960,7 +971,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id={this.getUniqueId("selectedButton")} title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -1618,7 +1629,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             column was announced as a blank one with every row. A hidden label names it instead. */}
         {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
           {this.props.allowSelection == true ?
-            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} /> :
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id={this.getUniqueId("cbSelectAll")} onChange={this.handleToggleAll} checked={this.allSelected()} /> :
             <span className="visually-hidden">{EntityControlMessage.Selected.niceToString()}</span>
           }
         </th>
