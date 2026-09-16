@@ -26,6 +26,10 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
 
   const [excelReports, setExcelReports] = React.useState<Lite<ExcelReportEntity>[] | undefined>(undefined);
 
+  // See UserChartMenu: this menu, that one and the other shared one fixed id between them, so a
+  // single search control rendering two of them was already enough to duplicate it.
+  const toggleId = React.useId();
+
   function handleSelectedToggle() {
     if (isOpen == false && excelReports == undefined && p.excelReport)
       reloadExcelReports();
@@ -72,7 +76,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
 
   return (
     <Dropdown show={isOpen} onToggle={handleSelectedToggle} title={ExcelMessage.ExcelReport.niceToString()}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary">
+      <Dropdown.Toggle id={toggleId} variant="tertiary">
       {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>
