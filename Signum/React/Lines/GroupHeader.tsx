@@ -64,10 +64,12 @@ export function GroupHeader(p: {
   return (
     <fieldset className={p.fieldsetClassName} {...p.fieldsetHtmlAttributes}>
       {(p.label || p.labelIcon || p.buttons) && < legend >
-        <div>
+        {/* A span, not a div: a legend takes phrasing content only. d-block keeps the full-width box that
+            EntityAccordion's float-end buttons need. */}
+        <span className="d-block">
           <span>{p.label}{p.labelIcon}</span>
           {p.buttons}
-        </div>
+        </span>
       </legend>
       }
       <div className={p.className} {...p.htmlAttributes}>

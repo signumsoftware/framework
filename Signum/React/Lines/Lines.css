@@ -255,7 +255,7 @@ fieldset>legend {
     float: none;
 }
 
-fieldset>legend>div>span.pull-right {
+fieldset>legend>span>span.pull-right {
     margin-left: 5px;
 }
 
