@@ -171,7 +171,12 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   extendedAriaAttributes(): React.AriaAttributes {
     return {
       ...this.baseAriaAttributes(),
-      "aria-required": this.mandatoryClass ? true : this.props.mandatory ? true : false,
+      // The visible asterisk comes from propertyRoute.member.required (see FormGroup), and it is
+      // aria-hidden, so this attribute is the only thing that tells a screen reader a field is required.
+      // Reading it from `mandatory` alone meant every field required by the schema but not marked at the
+      // call site showed the asterisk and reported aria-required="false" - the opposite of the truth
+      // (WCAG 3.3.2). Same source as the indicator, and omitted rather than false so it is stated once.
+      "aria-required": this.mandatoryClass || this.props.mandatory || this.props.ctx.propertyRoute?.member?.required ? true : undefined,
       "aria-invalid": !!this.getError() || undefined
     };
   }
