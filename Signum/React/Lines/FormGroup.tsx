@@ -57,8 +57,34 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
 
   let pr = tCtx.propertyRoute;
   var labelText = p.label ?? (pr?.member?.niceName);
+
+  // Not every line puts controlId on a real element: one that hands it to a third-party widget ends up
+  // with the id on a wrapper or suffixed (react-widgets makes `${id}_input`), and one that renders a link
+  // rather than a field has nothing to put it on at all. The label then pointed at an id that does not
+  // exist, so clicking it focused nothing - measurable on a date, an entity picker and a markdown line -
+  // and the association it claimed was not there. Those controls carry their own aria-label, so the name
+  // survives; what is restored here is the click. The attribute is dropped rather than left dangling, so
+  // the markup does not claim an association it does not have.
+  const groupRef = React.useRef<HTMLDivElement>(null);
+  const [hasControl, setHasControl] = React.useState(true);
+  React.useLayoutEffect(() => { setHasControl(document.getElementById(controlId) != null); });
+
+  function focusControl(e: React.MouseEvent<HTMLLabelElement>) {
+    if (hasControl)
+      return;
+    // Links too: an entity line holding a value renders the entity as a link rather than a field, and that
+    // link is what the label names.
+    const target = groupRef.current?.querySelector<HTMLElement>(
+      'input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [contenteditable="true"], a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    if (target) {
+      e.preventDefault();
+      target.focus();
+    }
+  }
+
   const label = (
-    <label htmlFor={controlId} {...p.labelHtmlAttributes} className={classes(p.labelHtmlAttributes?.className, labelClasses)} >
+    <label htmlFor={hasControl ? controlId : undefined} onClick={focusControl}
+      {...p.labelHtmlAttributes} className={classes(p.labelHtmlAttributes?.className, labelClasses)} >
       {labelText}{requiredIndicator && <span aria-hidden="true" className="required-indicator">*</span>} {p.labelIcon}
     </label>
   );
@@ -69,6 +95,7 @@ export function FormGroup(p: FormGroupProps): React.ReactElement {
     errorClass);
   return (
     <div
+      ref={groupRef}
       title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
       {...p.htmlAttributes}
       className={classes(p.htmlAttributes?.className, formGroupClasses)}
