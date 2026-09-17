@@ -678,6 +678,7 @@
     <Member Name="_0Rows_N" Description="{0} Zeile[n]" />
     <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
+    <Member Name="AddField" Description="Feld hinzufügen" />
     <Member Name="AddFilter" Description="Filter hinzufügen" />
     <Member Name="AddOrGroup" Description="OR-Gruppe hinzufügen" />
     <Member Name="AddValue" Description="Wert hinzufügen" />

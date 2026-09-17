@@ -231,6 +231,8 @@ public enum SearchMessage
     ColumnField,
     [Description("Add column")]
     AddColumn,
+    // Names the plus button that continues a field expression in the query token builder.
+    AddField,
     CollectionsCanNotBeAddedAsColumns,
     InvalidColumnExpression,
     [Description("Add filter")]

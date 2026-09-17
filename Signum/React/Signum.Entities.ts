@@ -678,6 +678,7 @@ export namespace SearchMessage {
   export const Field: MessageKey = new MessageKey("SearchMessage", "Field");
   export const ColumnField: MessageKey = new MessageKey("SearchMessage", "ColumnField");
   export const AddColumn: MessageKey = new MessageKey("SearchMessage", "AddColumn");
+  export const AddField: MessageKey = new MessageKey("SearchMessage", "AddField");
   export const CollectionsCanNotBeAddedAsColumns: MessageKey = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
   export const InvalidColumnExpression: MessageKey = new MessageKey("SearchMessage", "InvalidColumnExpression");
   export const AddFilter: MessageKey = new MessageKey("SearchMessage", "AddFilter");
