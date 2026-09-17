@@ -64,6 +64,8 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
         label={label}
         labelIcon={p.labelIcon}
         avoidFieldSet={p.avoidFieldSet}
+        role="group"
+        ariaAttributes={groupAriaAtts}
         buttons={undefined}
         htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
         {renderContent()}

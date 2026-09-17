@@ -14,14 +14,14 @@ export function NextHeadingLevel(p: { children: React.ReactNode }): React.ReactE
   return <HeadingLevelContext.Provider value={Math.min(level + 1, 6)}>{p.children}</HeadingLevelContext.Provider>;
 }
 
-export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: StyleContext }): React.ReactElement {
+export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: StyleContext, id?: string }): React.ReactElement {
 
   //For groups that behave like a single field (a checkbox list, a set of radios) instead of a section.
   if (p.type == "label")
-    return <label className={p.ctx?.labelClass}>{p.children}</label>;
+    return <label className={p.ctx?.labelClass} id={p.id}>{p.children}</label>;
 
   if (p.type == "lead")
-    return <p className={classes("mt-3", "lead")}>{p.children}</p>;
+    return <p className={classes("mt-3", "lead")} id={p.id}>{p.children}</p>;
 
   // HeaderType used to pick the element, so a form whose title is an <h1> jumped straight to the <h5> its
   // sections wanted to look like, and a screen reader reading the heading list saw four levels missing
@@ -31,7 +31,7 @@ export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: St
   const level = React.useContext(HeadingLevelContext);
   const ElementType = ("h" + level) as "h1";
 
-  return <ElementType className={classes("mt-3", p.type)}>{p.children}</ElementType>;
+  return <ElementType className={classes("mt-3", p.type)} id={p.id}>{p.children}</ElementType>;
 }
 
 export function GroupHeader(p: {
@@ -46,17 +46,32 @@ export function GroupHeader(p: {
   fieldsetHtmlAttributes?: React.HTMLAttributes<HTMLFieldSetElement>
   /** Only used by the "label" HeaderType, to get the labelClass of the form size. */
   ctx?: StyleContext;
+  /** Pass "group" when the children are a set of form controls that belong together - a checkbox list, a
+   * set of radios. The fieldset branch gets this from <fieldset> and <legend> for free, but avoidFieldSet
+   * renders a plain div, and then nothing tied the controls to the label a sighted user reads above them
+   * (WCAG 1.3.1). Left unset for a section that merely has a heading, so an ordinary group of lines is not
+   * announced as something it is not. */
+  role?: "group";
+  /** Applied beside the role - aria-required, aria-invalid and aria-describedby belong to the set as a
+   * whole rather than to each option. */
+  ariaAttributes?: React.AriaAttributes;
 }): React.ReactElement {
+
+  const titleId = React.useId();
 
   if (p.avoidFieldSet) {
 
     // Only a real heading opens a level for what follows it: "label" renders a <label> and the fieldset
     // branch below renders a <legend>, and neither is a heading.
     const rendersHeading = p.avoidFieldSet != true && p.avoidFieldSet != "label" && p.avoidFieldSet != "lead";
+    const hasTitle = p.avoidFieldSet != true;
 
     return (
-      <div className={p.className} {...p.htmlAttributes}>
-        {p.avoidFieldSet != true && <Title type={p.avoidFieldSet} ctx={p.ctx}>{p.label}{p.labelIcon} {p.buttons}</Title>}
+      <div className={p.className} {...p.htmlAttributes}
+        role={p.role}
+        {...(p.role ? p.ariaAttributes : undefined)}
+        aria-labelledby={p.role && hasTitle ? titleId : undefined}>
+        {hasTitle && <Title type={p.avoidFieldSet as HeaderType} ctx={p.ctx} id={titleId}>{p.label}{p.labelIcon} {p.buttons}</Title>}
         {rendersHeading ? <NextHeadingLevel>{p.children}</NextHeadingLevel> : p.children}
       </div>
     );
