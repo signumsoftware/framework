@@ -23,8 +23,12 @@ export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, 
   // role="alert" so the summary is announced when it appears after a failed save. Until now it was inserted
   // silently, which is why a screen reader reported the field as invalid but never said why (WCAG 4.1.3).
   // "alert" rather than "status": this interrupts, which is right for an error blocking the save.
+  // The role goes on a wrapper, not on the <ul>: a role replaces the element's own, so role="alert" on the
+  // list made it stop being a list and left every <li> an orphan - axe reports both halves. A plain div
+  // announces just the same and the list stays a list.
   return (
-    <ul className="validaton-summary alert alert-danger" role="alert">
+    <div role="alert">
+    <ul className="validaton-summary alert alert-danger">
       {Dic.map(modelState, (key, value) => <li
         key={key}
         style={{ cursor: "pointer", whiteSpace: "pre-wrap" }}
@@ -33,6 +37,7 @@ export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, 
         {value.join("\n")}
       </li>)}
     </ul>
+    </div>
   );
 
   function handleOnClick(key: string) {
