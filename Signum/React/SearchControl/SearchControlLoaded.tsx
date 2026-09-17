@@ -1698,7 +1698,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             </div>
           </th>
         )}
-        {allSmall && <th></th>}
+        {/* A spacer that soaks up the leftover width when every column is small. No body row emits a
+            matching cell, so it is not a column at all: presentation keeps it out of the table's structure
+            and stops it being announced as a header with no name. */}
+        {allSmall && <th role="presentation"></th>}
       </tr>
     );
   }
