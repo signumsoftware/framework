@@ -844,6 +844,12 @@
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
   </Type>
+  <Type Name="ThemeModeMessage">
+    <Member Name="Auto" Description="Automatisch" />
+    <Member Name="Dark" Description="Dunkel" />
+    <Member Name="Light" Description="Hell" />
+    <Member Name="Theme" Description="Darstellung" />
+  </Type>
   <Type Name="TimeSeriesUnit">
     <Member Name="Day" Description="Tag" />
     <Member Name="Hour" Description="Stunde" />

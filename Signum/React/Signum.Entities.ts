@@ -811,6 +811,13 @@ export namespace SynchronizerMessage {
   export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
 }
 
+export namespace ThemeModeMessage {
+  export const Theme: MessageKey = new MessageKey("ThemeModeMessage", "Theme");
+  export const Light: MessageKey = new MessageKey("ThemeModeMessage", "Light");
+  export const Dark: MessageKey = new MessageKey("ThemeModeMessage", "Dark");
+  export const Auto: MessageKey = new MessageKey("ThemeModeMessage", "Auto");
+}
+
 export namespace VoidEnumMessage {
   export const Instance: MessageKey = new MessageKey("VoidEnumMessage", "Instance");
 }

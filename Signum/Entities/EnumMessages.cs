@@ -779,3 +779,14 @@ public enum FontSizeMessage
     ResetFontSize,
     IncreaseFontSize,
 }
+
+// Unauthenticated like FontSizeMessage: the theme dropdown is in the toolbar on the login page too, so
+// these have to reach the client before anyone has signed in.
+[AllowUnauthenticated]
+public enum ThemeModeMessage
+{
+    Theme,
+    Light,
+    Dark,
+    Auto,
+}
