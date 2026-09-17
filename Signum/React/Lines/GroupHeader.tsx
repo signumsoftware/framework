@@ -26,7 +26,8 @@ export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: St
   // HeaderType used to pick the element, so a form whose title is an <h1> jumped straight to the <h5> its
   // sections wanted to look like, and a screen reader reading the heading list saw four levels missing
   // (WCAG 1.3.1). The level now comes from how deep the section actually is and the requested type becomes
-  // the Bootstrap size class, so nothing changes visually.
+  // the Bootstrap size class, which is what keeps the size identical: Bootstrap's _type.scss declares
+  // .hN as @extend hN, so a stylesheet rule written for the element already applies to the class.
   const level = React.useContext(HeadingLevelContext);
   const ElementType = ("h" + level) as "h1";
 
