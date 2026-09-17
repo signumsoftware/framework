@@ -2,6 +2,7 @@ import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
+import { dropdownActive } from '@framework/Components/DropdownActive'
 import { WorkflowClient } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
@@ -186,7 +187,7 @@ export default class CaseFlowViewerComponent extends React.Component<CaseFlowVie
 
   menuItem(color: CaseFlowColor): React.JSX.Element {
     return (
-      <Dropdown.Item onClick={() => this.handleChangeColor(color)} active={this.state.caseFlowColor == color}>
+      <Dropdown.Item onClick={() => this.handleChangeColor(color)} {...dropdownActive(this.state.caseFlowColor == color)}>
         {CaseFlowColor.niceToString(color)}
       </Dropdown.Item>
     );

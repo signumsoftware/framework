@@ -12,7 +12,8 @@ import { StyleContext } from '../Lines'
 import { Binding, IsByAll, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { dropdownActive } from '../Components/DropdownActive';;
 import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
 import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
@@ -987,7 +988,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.ReactEleme
 
         <Dropdown.Menu>
           {PinnedFilterActive.values().map(v =>
-            <Dropdown.Item key={v} active={v == value} onClick={() => { binding.setValue(v == "Always" ? undefined : v); p.onChange(); }}>
+            <Dropdown.Item key={v} {...dropdownActive(v == value)} onClick={() => { binding.setValue(v == "Always" ? undefined : v); p.onChange(); }}>
               {PinnedFilterActive.niceToString(v)}
             </Dropdown.Item>)
           }
@@ -1007,7 +1008,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
 
       <Dropdown.Menu>
         {[undefined, ...DashboardBehaviour.values()].map(v =>
-          <Dropdown.Item key={v ?? "-"} active={v == p.filter.dashboardBehaviour} onClick={() => {
+          <Dropdown.Item key={v ?? "-"} {...dropdownActive(v == p.filter.dashboardBehaviour)} onClick={() => {
 
             p.filter.dashboardBehaviour = v;
             if (v == "PromoteToDasboardPinnedFilter" && p.filter.pinned == null)

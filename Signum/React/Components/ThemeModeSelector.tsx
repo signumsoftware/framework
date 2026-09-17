@@ -6,6 +6,7 @@ import { JSX } from "react/jsx-runtime";
 import { useWindowEvent } from "../Hooks";
 import { ThemeModeMessage } from "../Signum.Entities";
 import { MessageKey } from "../Reflection";
+import { dropdownActive } from "./DropdownActive";
 
 type BootstrapThemeModes = "light" | "dark" | "auto";
 
@@ -83,7 +84,7 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
         {BOOTSTRAP_MODES.map((theme) => (
           <NavDropdown.Item
             key={theme}
-            active={bootstrapMode === theme}
+            {...dropdownActive(bootstrapMode === theme)}
             onClick={() => setBootstrapMode(theme)}
           >
             <FontAwesomeIcon aria-hidden={true} icon={ICONS[theme]} className="me-2" />
