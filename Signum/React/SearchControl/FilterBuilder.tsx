@@ -13,6 +13,7 @@ import { Binding, IsByAll, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FilterFieldMessage } from '../Signum.DynamicQuery.Tokens'
 import { dropdownActive } from '../Components/DropdownActive';;
 import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
@@ -634,7 +635,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps): React.React
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return Finder.renderFilterValue(f, { ctx, queryDescription: p.queryDescription, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
+    // label: the context is built with formGroupStyle "None", so no <label> is rendered and this is what
+    // gives the value editor its name. It is the word the filter designer's own help text uses.
+    return Finder.renderFilterValue(f, { ctx, label: FilterFieldMessage.Value.niceToString(), queryDescription: p.queryDescription, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
   }
 
   function handleValueChange() {
@@ -835,7 +838,8 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
         </td>
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
-            <select className="form-select form-select-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
+            <select className="form-select form-select-xs" aria-label={FilterFieldMessage.Operator.niceToString()}
+              value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
               {f.token.filterType && getFilterOperations(f.token)
                 .map((ft, i) => <option key={i} value={ft as any} title={FilterOperation.niceToString(ft)}>{niceNameOrSymbol(ft)}</option>)}
             </select>}
@@ -885,7 +889,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps): Reac
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return Finder.renderFilterValue(f, { ctx: ctx, queryDescription: p.queryDescription, filterOptions: p.allFilterOptions, handleValueChange });
+    // label: see the filter group's value editor above - formGroupStyle "None" renders no <label>, so this
+    // is what names the control.
+    return Finder.renderFilterValue(f, { ctx: ctx, label: FilterFieldMessage.Value.niceToString(), queryDescription: p.queryDescription, filterOptions: p.allFilterOptions, handleValueChange });
   }
 
   function handleValueChange() {
