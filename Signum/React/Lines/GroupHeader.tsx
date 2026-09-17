@@ -3,20 +3,34 @@ import { StyleContext } from '../Lines';
 import { classes } from '../Globals';
 
 export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7" | "lead" | "label";
+
+/** The level the next section heading should use. The frames render the page or dialog title as the <h1>,
+ * so the sections below it start at 2, and every group that renders a heading moves its own children one
+ * level further down. */
+export const HeadingLevelContext: React.Context<number> = React.createContext<number>(2);
+
+export function NextHeadingLevel(p: { children: React.ReactNode }): React.ReactElement {
+  const level = React.useContext(HeadingLevelContext);
+  return <HeadingLevelContext.Provider value={Math.min(level + 1, 6)}>{p.children}</HeadingLevelContext.Provider>;
+}
+
 export function Title(p: { children: React.ReactNode, type: HeaderType, ctx?: StyleContext }): React.ReactElement {
 
   //For groups that behave like a single field (a checkbox list, a set of radios) instead of a section.
   if (p.type == "label")
     return <label className={p.ctx?.labelClass}>{p.children}</label>;
 
-  var ElementType =
-    p.type == "lead" ? "p" as const :
-    p.type.contains("display-") ? ("h" + p.type.after("display-")) as "h1" :
-    p.type as "h1";
+  if (p.type == "lead")
+    return <p className={classes("mt-3", "lead")}>{p.children}</p>;
 
-  const className = p.type.contains("display-") || p.type == "lead" ? p.type : undefined;
+  // HeaderType used to pick the element, so a form whose title is an <h1> jumped straight to the <h5> its
+  // sections wanted to look like, and a screen reader reading the heading list saw four levels missing
+  // (WCAG 1.3.1). The level now comes from how deep the section actually is and the requested type becomes
+  // the Bootstrap size class, so nothing changes visually.
+  const level = React.useContext(HeadingLevelContext);
+  const ElementType = ("h" + level) as "h1";
 
-  return <ElementType className={classes("mt-3", className)}>{p.children}</ElementType>;
+  return <ElementType className={classes("mt-3", p.type)}>{p.children}</ElementType>;
 }
 
 export function GroupHeader(p: {
@@ -35,10 +49,14 @@ export function GroupHeader(p: {
 
   if (p.avoidFieldSet) {
 
+    // Only a real heading opens a level for what follows it: "label" renders a <label> and the fieldset
+    // branch below renders a <legend>, and neither is a heading.
+    const rendersHeading = p.avoidFieldSet != true && p.avoidFieldSet != "label" && p.avoidFieldSet != "lead";
+
     return (
       <div className={p.className} {...p.htmlAttributes}>
         {p.avoidFieldSet != true && <Title type={p.avoidFieldSet} ctx={p.ctx}>{p.label}{p.labelIcon} {p.buttons}</Title>}
-        {p.children}
+        {rendersHeading ? <NextHeadingLevel>{p.children}</NextHeadingLevel> : p.children}
       </div>
     );
   }
