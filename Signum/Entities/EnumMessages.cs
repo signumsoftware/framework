@@ -170,6 +170,8 @@ public enum EntityControlMessage
     Added,
     RemovedAndSelectedAgain,
     Selected,
+    // Names the column of row action buttons, which otherwise has an empty header.
+    Actions,
     Edit,
     Reload,
     Download,

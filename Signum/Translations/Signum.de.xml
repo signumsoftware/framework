@@ -176,6 +176,7 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
+    <Member Name="Actions" Description="Aktionen" />
     <Member Name="_0Characters" Description="{0} Charakter[e]" />
     <Member Name="_0CharactersRemaining" Description="{0} verbleibenden[n] Charakter(e)" />
     <Member Name="Add" Description="hinzufügen..." />

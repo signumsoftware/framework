@@ -429,6 +429,7 @@ export namespace EntityControlMessage {
   export const Added: MessageKey = new MessageKey("EntityControlMessage", "Added");
   export const RemovedAndSelectedAgain: MessageKey = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
   export const Selected: MessageKey = new MessageKey("EntityControlMessage", "Selected");
+  export const Actions: MessageKey = new MessageKey("EntityControlMessage", "Actions");
   export const Edit: MessageKey = new MessageKey("EntityControlMessage", "Edit");
   export const Reload: MessageKey = new MessageKey("EntityControlMessage", "Reload");
   export const Download: MessageKey = new MessageKey("EntityControlMessage", "Download");
