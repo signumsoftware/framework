@@ -625,18 +625,23 @@ function getDomainFindOptions(filterToken: QueryToken, ffc: Finder.FilterFormatt
       else allDomains.push(val);
     }
   }
-  if (allDomains.length == 0)
+  const extraFilters = entry.extraFilters?.(ffc.queryDescription.queryKey)?.notNull() ?? [];
+
+  if (allDomains.length == 0 && extraFilters.length == 0)
     return undefined;
 
   var distinctDomains = allDomains.distinctBy(liteKey);
 
   return {
     queryName: entry.type,
-    filterOptions: [{
-      token: entry.type.token((a: any) => a.entity).append(entry.getDomainField),
-      operation: distinctDomains.length > 1 ? "IsIn" : "EqualTo",
-      value: distinctDomains.length > 1 ? distinctDomains : distinctDomains[0]
-    }]
+    filterOptions: [
+      ...(distinctDomains.length == 0 ? [] : [{
+        token: entry.type.token((a: any) => a.entity).append(entry.getDomainField),
+        operation: (distinctDomains.length > 1 ? "IsIn" : "EqualTo") as FilterOperation,
+        value: distinctDomains.length > 1 ? distinctDomains : distinctDomains[0]
+      }]),
+      ...extraFilters,
+    ]
   };
 }
 
