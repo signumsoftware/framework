@@ -164,6 +164,9 @@ export interface SearchControlLoadedState {
     fromKeyboard?: boolean;
   };
 
+  /** Which result row currently carries the table's single tab stop (roving tabindex). */
+  rowFocusIndex?: number;
+
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
@@ -2054,6 +2057,18 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   rowRefs: React.RefObject<HTMLTableRowElement | null>[] = [];
 
+  /** Moves the table's one tab stop to the next row that can be opened, in the given direction, and takes
+   * focus with it. Rows that do nothing when clicked carry no tabindex and are stepped over. */
+  focusRow = (from: number, direction: 1 | -1): void => {
+    for (let i = from + direction; i >= 0 && i < this.rowRefs.length; i += direction) {
+      const tr = this.rowRefs[i]?.current;
+      if (tr?.hasAttribute("tabindex")) {
+        this.setState({ rowFocusIndex: i }, () => tr.focus());
+        return;
+      }
+    }
+  }
+
   renderRows(): React.ReactNode {
     const columnOptions = this.getVisibleColumn();
     const columnsCount = columnOptions.length +
@@ -2078,6 +2093,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     // Row refs für Fokus-Handling erstellen
     this.rowRefs = resultTable.rows.map(() => React.createRef<HTMLTableRowElement>());
+
+    // Whether clicking a row does anything - the same condition the stylesheet ties the pointer cursor to,
+    // so a row that looks clickable is exactly the one that can be reached and opened from the keyboard.
+    const canOpenRow = (row: ResultRow) =>
+      !(!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false);
+
+    // One tab stop for the whole table rather than one per row (WAI-ARIA's roving tabindex): tabbing
+    // through a hundred rows to get past a grid is not navigation. The arrow keys move within it.
+    const storedFocus = this.state.rowFocusIndex;
+    const rowFocusIndex = storedFocus != null && storedFocus < resultTable.rows.length && canOpenRow(resultTable.rows[storedFocus]) ?
+      storedFocus : resultTable.rows.findIndex(canOpenRow);
 
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
@@ -2123,17 +2149,32 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
+          // A row opens its entity on a double-click and the arrow keys below step from row to row, and
+          // both needed the row to be focusable, which it was not: everything the row itself offered was
+          // mouse-only (WCAG 2.1.1). The entity column's own link still opens the same row, so this adds a
+          // second way to what it does rather than the first, but it is what makes the table navigable.
+          tabIndex={canOpenRow(row) ? (i == rowFocusIndex ? 0 : -1) : undefined}
           onKeyDown={e => {
+            // Only when the row itself is the one with focus: a link or a check box inside it answers for
+            // its own keys, and Enter on the link must not also open the row underneath it.
+            if (e.target !== e.currentTarget)
+              return;
+
             if (e.key === "ArrowDown") {
               e.preventDefault();
-              this.rowRefs[i + 1]?.current?.focus();
+              this.focusRow(i, 1);
             } else if (e.key === "ArrowUp") {
               e.preventDefault();
-              this.rowRefs[i - 1]?.current?.focus();
+              this.focusRow(i, -1);
+            } else if (e.key === "Enter") {
+              // What the double-click does, Ctrl included: held down it opens in a new tab, as it does
+              // with the mouse, because handleDoubleClick reads ctrlKey and a keyboard event carries it.
+              e.preventDefault();
+              this.handleDoubleClick(e as unknown as React.MouseEvent<any>, row, resultTable.columns);
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", !canOpenRow(row) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">
