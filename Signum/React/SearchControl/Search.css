@@ -148,6 +148,21 @@ tr.drag-bottom td {
         text-align: center;
     }
 
+    /* The pointer cursor above belongs to a data column header, which sorts on a click and opens its menu.
+       These two do neither: the selection column's header holds the select-all box and nothing else, and
+       the entity column's header holds only the hidden column name, so a click anywhere in them does
+       nothing at all. Offering the hand anyway is a control that is not there - and an audit reading the
+       DOM counts every element that looks clickable without being reachable from the keyboard, which is
+       what these two were. The select-all box inside keeps its own. */
+    .sf-search-results > thead > tr > th.sf-th-selection,
+    .sf-search-results > thead > tr > th.sf-th-entity {
+        cursor: default;
+    }
+
+        .sf-search-results > thead > tr > th.sf-th-selection > input[type="checkbox"] {
+            cursor: pointer;
+        }
+
     .sf-search-results > thead > tr > th.noOrder {
         cursor: default;
     }
