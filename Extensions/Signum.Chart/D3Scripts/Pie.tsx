@@ -104,6 +104,18 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 }}
                 onClick={e => onDrillDown(slice.data, e)}>
               </path>
+              {/* Second outline along the same arc, with no stroke of its own: it is the half of a
+                  two-coloured slice border that an application can switch on from its stylesheet (PMFlexOne
+                  does it in high contrast). The stroke above is the page background, so it disappears
+                  against a pale fill; a line in the text colour on top of it does not, and the two together
+                  mark the boundary whatever the fills and whichever theme is on. Painted after the slice so
+                  it is not covered by it, and inert so it changes neither hit testing nor what is read out. */}
+              <path className="slice-separator sf-transition" d={arc(slice)!} fill="none"
+                opacity={active == false ? .5 : undefined}
+                transform={initialLoad ? scale(0, 0) : scale(1, 1)}
+                shapeRendering="initial"
+                pointerEvents="none"
+                aria-hidden={true} />
               <SliceText value={pValue == 'OnArc' ? valueText : undefined} percent={pPercent == 'OnArc' ? percentText : undefined} slice={slice} innerRadius={rInner} outerRadius={outerRadious} color={textColor} />
               <g key={slice.index} className="color-legend">
                 {/* The arc name/value labels are redundant once the side legend is shown, so drop them then. */}
