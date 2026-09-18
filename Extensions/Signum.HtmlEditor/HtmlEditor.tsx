@@ -137,8 +137,12 @@ function HtmlEditor(
               // dashboard greeting was read out as an empty, unnamed edit field (axe aria-input-field-name,
               // WCAG 4.1.2), and giving it a name would only have made the phantom field easier to find.
               // It is static text, so it is left as a plain div and read as text. aria-readonly goes with
-              // the role it belongs to - spread last, these win over what Lexical sets.
-              {...(readOnly ? { role: "presentation", "aria-readonly": undefined } : { ariaLabel: props.ariaLabel })}
+              // the role it belongs to, and so does aria-autocomplete: Lexical hard-codes it to "none" on
+              // the non-editable branch, where it was left behind by the role it used to belong to, and
+              // aria-autocomplete is not allowed on role="presentation" (axe aria-allowed-attr). The
+              // kebab-case keys are the ones the element spreads last, so these win over what Lexical sets;
+              // the camelCase props it destructures would not.
+              {...(readOnly ? { role: "presentation", "aria-readonly": undefined, "aria-autocomplete": undefined } : { ariaLabel: props.ariaLabel })}
               onFocus={(event: React.FocusEvent) => {
                 props.onEditorFocus?.(event, controller);
               }}
