@@ -43,6 +43,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
         p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
       }
     }
+    return () => p.dashboardController.tryRemoveInvalidations(p.partEmbedded);
   }, [fo, p.partEmbedded]);
 
   const cachedQuery = p.cachedQueries[liteKey(toLite(p.content.userQuery))];

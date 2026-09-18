@@ -129,6 +129,8 @@ export interface SearchControlLoadedProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
   onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
+  /** Selects every row of the first completed search. Later searches keep the normal behaviour. */
+  selectAllOnLoad?: boolean;
   ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -389,7 +391,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           dataChanged: undefined,
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
-          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ?? [],
+          //searchCount is still the previous one here, so == null means this is the first completed search
+          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ??
+            (this.props.selectAllOnLoad && this.state.searchCount == null ? rt.rows.clone() : []),
           currentMenuPack: undefined,
           markedRows: undefined,
           searchCount: (this.state.searchCount ?? 0) + 1
@@ -1103,8 +1107,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     };
 
     const cm = this.state.contextualMenu!;
+
+    // The filler header that takes the remaining width when every column is small has no column of its own,
+    // and neither do the selection and entity headers, so there is nothing to insert before or after there:
+    // the new column goes at the end.
+    const index = cm.columnIndex == null ? this.props.findOptions.columnOptions.length : cm.columnIndex + cm.columnOffset!;
+
     this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
-    this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
+    this.props.findOptions.columnOptions.insertAt(index, newColumn);
 
     this.forceUpdate();
   }
@@ -1303,12 +1313,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       menuItems.push(<Dropdown.Header>{SearchMessage.Columns.niceToString()}</Dropdown.Header>);
 
-      if (cm.columnIndex != null) {
-        menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
-          {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
-          {cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
-        </Dropdown.Item>);
+      // Insert is offered on the headers that have no column of their own too — the filler one that appears
+      // when every column is small, and the selection and entity ones — where it appends at the end instead,
+      // so the only route to a new column is not a right click that happens to land on a real header.
+      menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
+        {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+        {cm.columnIndex == null ? "" :
+          cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
+      </Dropdown.Item>);
 
+      if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
           {getEditColumnIcon()}&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
@@ -1320,12 +1334,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         // The pointer-free way to reorder columns; dragging the header remains available.
         menuItems.push(<Dropdown.Item className="sf-move-column-left" disabled={cm.columnIndex === 0}
           onClick={() => this.handleMoveColumn(-1)}>
-          <FontAwesomeIcon aria-hidden={true} icon="arrow-left" />&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
+          {getMoveColumnLeftIcon()}&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-move-column-right" disabled={cm.columnIndex === this.props.findOptions.columnOptions.length - 1}
           onClick={() => this.handleMoveColumn(1)}>
-          <FontAwesomeIcon aria-hidden={true} icon="arrow-right" />&nbsp;{EntityControlMessage.MoveRight.niceToString()}
+          {getMoveColumnRightIcon()}&nbsp;{EntityControlMessage.MoveRight.niceToString()}
         </Dropdown.Item>);
 
 
@@ -2519,6 +2533,20 @@ export function getEditColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
     <FontAwesomeIcon aria-hidden={true} icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="var(--bs-orange)" />
+  </span>
+}
+
+// A bare FontAwesomeIcon is not the fixed width the rest of the column menu uses, so these two arrows sat
+// off the shared icon column. Same `fa-layers fa-fw icon` wrapper as the others, so everything lines up.
+export function getMoveColumnLeftIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-left" color="var(--bs-body-color)" />
+  </span>
+}
+
+export function getMoveColumnRightIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-right" color="var(--bs-body-color)" />
   </span>
 }
 
