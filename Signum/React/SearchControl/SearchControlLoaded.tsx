@@ -159,6 +159,9 @@ export interface SearchControlLoadedState {
     columnOffset?: number;
     rowIndex: number | null;
     filter?: string;
+    // Opened with the keyboard rather than with a right-click: focus has to be taken into the menu and
+    // given back to the header afterwards, neither of which a pointer needs.
+    fromKeyboard?: boolean;
   };
 
   refreshMode?: RefreshMode;
@@ -986,8 +989,55 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   // CONTEXT MENU
 
+  /** The header the column menu was opened from with the keyboard, to hand focus back to on close. The
+   * column is remembered by name as well as by element: "move right" reorders the columns but reuses the
+   * header elements, so the element that was focused before now belongs to the column that swapped with
+   * it - and pressing the key again would move that one instead of the one being moved. */
+  keyboardMenuOrigin?: { element: HTMLElement; table: HTMLElement; columnName: string | null };
+
+  /** The menu a right-click on a column header opens, placed under the header instead of under a pointer. */
+  handleHeaderContextMenuKey = (th: HTMLElement, columnIndex: number): void => {
+
+    const table = DomUtils.closest(th, "table")!;
+    const opRec = DomUtils.offsetParent(table)?.getBoundingClientRect();
+    const thRec = th.getBoundingClientRect();
+
+    this.keyboardMenuOrigin = { element: th, table: table, columnName: th.getAttribute("data-column-name") };
+
+    this.setState({
+      contextualMenu: {
+        position: {
+          left: opRec == null ? thRec.left + window.scrollX : thRec.left - opRec.left,
+          top: opRec == null ? thRec.bottom + window.scrollY : thRec.bottom - opRec.top,
+        },
+        columnIndex,
+        rowIndex: null,
+        // Which side of the header the pointer was on decides whether a new column is inserted before or
+        // after it. There is no pointer here, so the header's own left edge stands in: insert before.
+        columnOffset: this.getOffset(thRec.left, thRec, Number.MAX_VALUE),
+        fromKeyboard: true,
+      }
+    });
+  }
+
   handleContextOnHide = (): void => {
-    this.setState({ contextualMenu: undefined });
+    const origin = this.keyboardMenuOrigin;
+    this.keyboardMenuOrigin = undefined;
+    this.setState({ contextualMenu: undefined }, () => {
+      // Back to the header the menu was opened from, or the keyboard is left at the top of the document.
+      // Only when nothing else has taken focus in the meantime: an item like "edit column" opens a modal
+      // that focuses itself, and pulling focus back to the table behind it would be worse than losing it.
+      if (origin == null || !(document.activeElement == null || document.activeElement == document.body))
+        return;
+
+      const moved = origin.columnName && origin.table.isConnected ?
+        origin.table.querySelector<HTMLElement>(`th[data-column-name="${CSS.escape(origin.columnName)}"]`) : null;
+
+      // The column itself when it is still there (it may have moved), the header in its old place when the
+      // menu was "remove column" and there is no column to go back to.
+      const target = moved ?? (origin.element.isConnected ? origin.element : null);
+      target?.focus();
+    });
   }
 
 
@@ -1338,7 +1388,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}
+        autoFocus={cm.fromKeyboard}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
@@ -1653,6 +1704,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               if ((e.key === "Enter" || e.key === " ") && this.canOrder(co)) {
                 e.preventDefault();
                 this.handleHeaderClick(e as unknown as React.MouseEvent<any>);
+              }
+              // Filtering, grouping, inserting, removing and reordering a column all live in the menu a
+              // right-click opens, and a right-click was the only way to it (WCAG 2.1.1). The context menu
+              // key and Shift+F10 are that same gesture on a keyboard. Handled here rather than left to the
+              // contextmenu event the browser would fire next, because that event carries the pointer's
+              // coordinates - none, so the menu landed in the corner of the table - and preventing the key
+              // is what stops it from opening a second time.
+              else if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleHeaderContextMenuKey(e.currentTarget as HTMLElement, i);
               }
             }}
             draggable={true}
