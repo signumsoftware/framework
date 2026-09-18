@@ -45,6 +45,9 @@ export interface HtmlEditorProps {
   placeholder?: React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
+  /** Names the editable area. A label element cannot do it: `for` only binds to form controls, and this is
+   * a contenteditable div, so without this the text box reaches a screen reader unnamed. */
+  ariaLabel?: string;
   onEditorFocus?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
   onEditorBlur?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
 }
@@ -128,6 +131,14 @@ function HtmlEditor(
               ref={controller.setContentEditableRef}
               id={editableId}
               className="public-DraftEditor-content"
+              // Lexical gives its div role="textbox" whether or not the editor is editable, and adds
+              // aria-readonly when it is not. Read-only, that div has contentEditable={false} and no
+              // tabindex, so the text box it announces can be neither reached nor edited by anyone: a
+              // dashboard greeting was read out as an empty, unnamed edit field (axe aria-input-field-name,
+              // WCAG 4.1.2), and giving it a name would only have made the phantom field easier to find.
+              // It is static text, so it is left as a plain div and read as text. aria-readonly goes with
+              // the role it belongs to - spread last, these win over what Lexical sets.
+              {...(readOnly ? { role: "presentation", "aria-readonly": undefined } : { ariaLabel: props.ariaLabel })}
               onFocus={(event: React.FocusEvent) => {
                 props.onEditorFocus?.(event, controller);
               }}
