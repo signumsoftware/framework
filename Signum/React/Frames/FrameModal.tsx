@@ -172,22 +172,7 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
   }
 
   function hasChanges() {
-
-    const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
-    if (hc?.entityHasChanges) {
-      var result = hc.entityHasChanges();
-      if (result != null)
-        return result;
-    }
-
-    if (state == null)
-      return false;
-
-    const entity = state.pack.entity;
-
-    const ge = GraphExplorer.propagateAll(entity);
-
-    return entity.modified && JSON.stringify(entity) != state.lastEntity;
+    return state != null && computeHasChanges(state, entityComponent);
   }
 
   function handleCancelClicked() {
@@ -440,5 +425,33 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
+}
+
+export interface HasChangesState {
+  executing?: boolean;
+  lastEntity: string;
+  pack: EntityPack<ModifiableEntity>;
+}
+
+export function computeHasChanges(state: HasChangesState, entityComponent: React.RefObject<React.Component | null>): boolean {
+
+  if (state.executing)
+    return false;
+
+  const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
+  if (hc?.entityHasChanges) {
+    var result = hc.entityHasChanges();
+    if (result != null)
+      return result;
+  }
+
+  const entity = state.pack.entity;
+
+  GraphExplorer.propagateAll(entity);
+  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
+    return true
+  }
+
+  return false;
 }
 

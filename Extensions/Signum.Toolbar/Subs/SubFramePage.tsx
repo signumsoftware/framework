@@ -21,12 +21,13 @@ import { FunctionalAdapter } from '@framework/Modals'
 import { QueryString } from '@framework/QueryString'
 import { classes } from '@framework/Globals'
 import FramePage from '../../../Signum/React/Frames/FramePage'
+import { computeHasChanges } from '../../../Signum/React/Frames/FrameModal'
 import { SubsClient } from './SubsClient'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityLink } from '@framework/Search'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-interface FramePageState {
+interface SubFramePageState {
   pack: EntityPack<Entity>;
   lastEntity: string;
   getComponent: (ctx: TypeContext<Entity>) => React.ReactElement;
@@ -36,7 +37,7 @@ interface FramePageState {
 
 export default function SubFramePage(): React.ReactElement {
 
-  let [state, setState] = useStateWithPromise<FramePageState | undefined>(undefined);
+  let [state, setState] = useStateWithPromise<SubFramePageState | undefined>(undefined);
   const stateRef = useUpdatedRef(state);
   const buttonBar = React.useRef<ButtonBarHandle>(null);
   const entityComponent = React.useRef<React.Component | null>(null);
@@ -63,7 +64,7 @@ export default function SubFramePage(): React.ReactElement {
 
   const blocker = useBlocker(() => {
     const s = stateRef.current;
-    return !!s && hasChanges(s);
+    return !!s && computeHasChanges(s, entityComponent);
   });
 
   React.useEffect(() => {
@@ -115,7 +116,7 @@ export default function SubFramePage(): React.ReactElement {
 
 
   useWindowEvent("beforeunload", e => {
-    if (stateRef.current && hasChanges(stateRef.current)) {
+    if (stateRef.current && computeHasChanges(stateRef.current, entityComponent)) {
       e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
       e.returnValue = '';   // Chrome requires returnValue to be set
     }
@@ -273,23 +274,5 @@ export default function SubFramePage(): React.ReactElement {
       </h1>
     );
   }
-}
-
-function hasChanges(state: FramePageState) {
-
-  if (state.executing)
-    return false;
-
-  const entity = state.pack.entity;
-
-  if (entity.isNew)
-    return true;
-
-  const ge = GraphExplorer.propagateAll(entity);
-  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
-    return true
-  }
-
-  return false;
 }
 
