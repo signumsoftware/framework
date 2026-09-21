@@ -171,6 +171,68 @@ public class OrderByTest
             Database.Query<AlbumEntity>().OrderBy(a => a.Name).Contains(null!);
     }
 
+    [Fact]
+    public void OrderByComplexExpressionPromotedToColumn()
+    {
+        //Ordering by something that is not a column (a correlated sub-query here) used to be repeated verbatim
+        //in every ORDER BY, even when the very same sub-query was already one of the selected columns.
+        var query = Database.Query<ArtistEntity>()
+            .Where(a => !a.Dead)
+            .OrderByDescending(a => a.Friends.Count)
+            .ThenByDescending(a => a.Albums().Count())
+            .Select(a => new { a.Name, Albums = a.Albums().Count() })
+            .Take(20);
+
+        var text = query.QueryText();
+        Assert.Equal(2, text.CountRepetitions("COUNT(*)"));
+        Assert.Equal(1, text.CountRepetitions("ORDER BY"));
+
+        var result = query.ToList();
+        Assert.Equal(result.OrderByDescending(a => a.Albums).Select(a => a.Albums).ToList(), result.Select(a => a.Albums).ToList());
+    }
+
+    [Fact]
+    public void OrderByComplexExpressionPromotedToColumnPaginated()
+    {
+        //Like a paginated SearchControl query: the orderings have to travel through the TOP select and the
+        //outer-most one, and each level used to get its own copy of the sub-query (5 COUNT(*) instead of 2).
+        var query = Database.Query<ArtistEntity>()
+            .Where(a => !a.Dead)
+            .OrderByDescending(a => a.Friends.Count)
+            .ThenByDescending(a => a.Albums().Count())
+            .Select(a => new { a.Name, Albums = a.Albums().Count(), a.Id })
+            .Take(20)
+            .Select(a => new { a.Name, a.Albums });
+
+        var text = query.QueryText();
+        Assert.Equal(2, text.CountRepetitions("COUNT(*)"));
+        Assert.Equal(1, text.CountRepetitions("ORDER BY"));
+
+        var result = query.ToList();
+        Assert.Equal(result.OrderByDescending(a => a.Albums).Select(a => a.Albums).ToList(), result.Select(a => a.Albums).ToList());
+    }
+
+    [Fact]
+    public void OrderByComplexExpressionPromotedToColumnSkip()
+    {
+        //Same, but the Skip makes the orderings end up also inside the ORDER BY of a ROW_NUMBER.
+        var query = Database.Query<ArtistEntity>()
+            .Where(a => !a.Dead)
+            .OrderByDescending(a => a.Friends.Count)
+            .ThenByDescending(a => a.Albums().Count())
+            .Select(a => new { a.Name, Albums = a.Albums().Count(), a.Id })
+            .Skip(1).Take(20)
+            .Select(a => new { a.Name, a.Albums });
+
+        var text = query.QueryText();
+        Assert.Equal(2, text.CountRepetitions("COUNT(*)"));
+        Assert.Equal(2, text.CountRepetitions("ORDER BY")); //the ROW_NUMBER window and the final one
+
+        var result = query.ToList();
+        Assert.Equal(result.OrderByDescending(a => a.Albums).Select(a => a.Albums).ToList(), result.Select(a => a.Albums).ToList());
+    }
+
+
 
 
     public IDisposable AsserNoQueryWith(string text)

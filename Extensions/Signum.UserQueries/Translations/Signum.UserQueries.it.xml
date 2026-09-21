@@ -50,6 +50,7 @@
     <Member Name="Use0ToFilterCurrentEntity" Description="Utilizzare {0} per filtrare l'attuale entità" />
   </Type>
   <Type Name="UserQueryOperation">
+    <Member Name="Clone" Description="Clone" />
     <Member Name="Delete" Description="Elimina" />
     <Member Name="Save" Description="Salva" />
   </Type>

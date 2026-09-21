@@ -514,16 +514,17 @@ export function evalWithScope(code: string, modules: any, props: any, locals: an
   // Lines
   var AutoLine = Lines.AutoLine;
 
-  return eval(code);
+  var func = new Function("modules", "props", "locals", "AutoLine", "return (" + code + ");");
+  return func(modules, props, locals, AutoLine);
 }
 
 export function asFieldFunction(field: string): (e: ModifiableEntity) => any {
   const fixedRoute = TypeHelpComponent.getExpression("e", field, "TypeScript");
 
-  const code = "(function(e){ return " + fixedRoute + ";})";
+  const code = "return (function(e){ return " + fixedRoute + ";});";
 
   try {
-    return eval(code);
+    return new Function(code)();
   } catch (e) {
     throw new Error("Syntax in '" + fixedRoute + "':\n" + code + "\n" + (e as Error).message);
   }

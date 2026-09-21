@@ -350,6 +350,7 @@
     <Member Name="Query" Description="Quesito" />
   </Type>
   <Type Name="UserChartOperation">
+    <Member Name="Clone" Description="Clone" />
     <Member Name="Delete" Description="Eliminare" />
     <Member Name="Save" Description="Salvare" />
   </Type>

@@ -57,6 +57,8 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
     document.body.classList.add("sidebar-resizing");
   }
 
+  // The page has two navigation landmarks (this and the main toolbar). Without a name this one was announced
+  // as just "navigation", so the landmark list gave no way to tell them apart (WCAG 1.3.1).
   function renderSideBar() {
     return (
       <nav
@@ -67,6 +69,7 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
           p.isMobile && "mobile"
         )}
         role="navigation"
+        aria-label={LayoutMessage.MainNavigation.niceToString()}
       >
         {p.sidebarContent}
 

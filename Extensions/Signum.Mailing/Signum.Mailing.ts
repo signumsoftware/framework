@@ -123,7 +123,7 @@ export type EmailMessageState =
 export const EmailModelEntity: Type<EmailModelEntity> = new Type<EmailModelEntity>("EmailModel");
 export interface EmailModelEntity extends Entities.Entity {
   Type: "EmailModel";
-  fullClassName: string;
+  className: string;
 }
 
 export const EmailRecipientEmbedded: Type<EmailRecipientEmbedded> = new Type<EmailRecipientEmbedded>("EmailRecipientEmbedded");

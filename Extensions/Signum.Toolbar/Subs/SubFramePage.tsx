@@ -259,11 +259,15 @@ export default function SubFramePage(): React.ReactElement {
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
+    // As in FramePage: the sub-title block is not phrasing content, so it cannot sit inside the heading.
+    // The breadcrumb and the title stay in the h1; the block moves out beside it.
     return (
-      <h1 className={classes("border-bottom pb-3 mb-2 sf-breadcrumb-title", settings?.stickyHeader && "sf-sticky-header")} >
-        <EntityLink lite={parentLite} inPlaceNavigation />
-        <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
-        {title}
+      <div className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
+        <h1 className="sf-breadcrumb-title mb-0">
+          <EntityLink lite={parentLite} inPlaceNavigation />
+          <FontAwesomeIcon aria-hidden={true} className="mx-2" icon="chevron-right" />
+          {title}
+        </h1>
         {(subTitle || widgets) &&
           <div className="sf-entity-sub-title mt-2">
             {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
@@ -271,7 +275,7 @@ export default function SubFramePage(): React.ReactElement {
             <br />
           </div>
         }
-      </h1>
+      </div>
     );
   }
 }

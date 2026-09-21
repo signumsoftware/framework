@@ -94,7 +94,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
         state.columns = Dic.getKeys(elementPr.subMembers())
           .filter(a => a != "Id" && !a.startsWith("["))
           .map(memberName => ({
-            property: eval("(function(e){ return e." + memberName.firstLower() + "; })")
+            property: new Function("return e => e." + memberName.firstLower() + ";")()
           }) as EntityTableColumn<V, RS>);
       }
       else {
@@ -258,7 +258,11 @@ export function EntityTable<V extends ModifiableEntity, RS>(props: EntityTablePr
             !isEmpty &&
             <thead ref={c.thead}>
               <tr className={p.theadClasses}>
-                {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}></th>}
+                {/* The column of row buttons had an empty header, so its cells had no column name to be
+                    announced with (WCAG 1.3.1). Visually hidden, so the column stays as narrow as it was. */}
+                {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}>
+                  <span className="visually-hidden">{EntityControlMessage.Actions.niceToString()}</span>
+                </th>}
                 {
                   cleanColumns.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}

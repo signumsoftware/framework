@@ -211,12 +211,38 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         return base.PropertyValidation(pi);
     }
 
+    public UserChartEntity Clone()
+    {
+        var result = new UserChartEntity
+        {
+            Query = this.Query,
+            EntityType = this.EntityType,
+            HideQuickLink = this.HideQuickLink,
+            Owner = this.Owner,
+            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
+            IncludeDefaultFilters = this.IncludeDefaultFilters,
+            MaxRows = this.MaxRows,
+            ChartTimeSeries = this.ChartTimeSeries?.Clone(),
+            ChartScript = this.ChartScript,
+            //Replaces the columns and parameters that the ChartScript setter just pre-created
+            Columns = this.Columns.Select(c => c.Clone()).ToMList(),
+            Parameters = this.Parameters.Select(p => p.Clone()).ToMList(),
+            Filters = this.Filters.Select(f => f.Clone()).ToMList(),
+            CustomDrilldowns = this.CustomDrilldowns.ToMList(),
+        };
+
+        //The cloned columns and parameters are brand new instances: bind them to the chart script again
+        result.GetChartScript().SynchronizeColumns(result, null);
+
+        return result;
+    }
 }
 
 [AutoInit]
 public static class UserChartOperation
 {
     public static ExecuteSymbol<UserChartEntity> Save;
+    public static ConstructSymbol<UserChartEntity>.From<UserChartEntity> Clone;
     public static DeleteSymbol<UserChartEntity> Delete;
 }
 

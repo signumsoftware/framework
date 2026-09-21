@@ -83,7 +83,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             new XAttribute("Guid", (Guid)Id),
             new XAttribute("DisableAuthorization", DisableAuthorization),
             Query == null ? null : new XAttribute("Query", Query.Key),
-            Model?.Let(m => new XAttribute("Model", m.FullClassName)),
+            Model?.Let(m => new XAttribute("Model", m.ClassName)),
             new XAttribute("Culture", Culture.Name),
             new XAttribute("FileName", FileName),
             WordTransformer?.Let(wt => new XAttribute("WordTransformer", wt.Key)),

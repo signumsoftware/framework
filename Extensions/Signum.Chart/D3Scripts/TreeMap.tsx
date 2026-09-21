@@ -94,8 +94,8 @@ export default function renderTreeMap({ data, width, height, parameters, loading
     <svg direction="ltr"
       width={width}
       height={height}
-      role="img">
-      <title id="treeMapChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Treemap), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+      role="group">
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Treemap), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {nodes.map((d, i) => {
         const active = activeDetector?.(isFolder(d.data) ? ({ c2: d.data.folder }) : d.data);
 
@@ -106,8 +106,8 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               width={nodeWidth(d)}
               height={nodeHeight(d)}
               fill={parentColumn!.getColor(d.data.folder) ?? folderColor!(d.data.folder)}
-              stroke={active == true ? "var(--bs-body-color)" : undefined}
-              strokeWidth={active == true ? 3 : undefined}
+              stroke={active == true ? "var(--bs-body-color)" : "var(--bs-body-bg)"}
+              strokeWidth={active == true ? 3 : 1}
               onClick={e => onDrillDown({ c2: (d.data as Folder).folder }, e)}
               cursor="pointer"
               role="button"
@@ -125,8 +125,8 @@ export default function renderTreeMap({ data, width, height, parameters, loading
               width={nodeWidth(d)}
               height={nodeHeight(d)}
               fill={color(d.data)!}
-              stroke={active == true ? "var(--bs-body-color)" : undefined}
-              strokeWidth={active == true ? 3 : undefined}
+              stroke={active == true ? "var(--bs-body-color)" : "var(--bs-body-bg)"}
+              strokeWidth={active == true ? 3 : 1}
               onClick={e => onDrillDown(d.data as ChartRow, e)}
               cursor="pointer"
               role="button"

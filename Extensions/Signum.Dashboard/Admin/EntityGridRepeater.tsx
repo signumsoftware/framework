@@ -215,7 +215,9 @@ export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(pro
   return (
     <fieldset className={classes("sf-grid-repeater-field sf-control-container", c.getErrorClass())} {...c.errorAttributes()}>
       <legend>
-        <div>
+        {/* A span, not a div: a legend takes phrasing content only. d-block keeps the full-width box
+            that the float-end buttons need. */}
+        <span className="d-block">
           <span>{p.label}</span>
           <span className="float-end ms-2">
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
@@ -223,7 +225,7 @@ export function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(pro
             {c.renderFindButton(false)}
             {p.extraButtons && p.extraButtons(c)}
           </span>
-        </div>
+        </span>
       </legend>
       <div className="row sf-rule">
         {Array.range(0, 12).map(i =>

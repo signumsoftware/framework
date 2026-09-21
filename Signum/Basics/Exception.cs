@@ -21,7 +21,7 @@ public class ExceptionEntity : Entity
 
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
-        this.Origin = ExceptionOrigin.Frontend_React;
+        this.Origin = ExceptionOrigin.Frontend;
     }
 
     public ExceptionEntity(Exception ex)
@@ -34,7 +34,7 @@ public class ExceptionEntity : Entity
         ex.Data[ExceptionDataKey] = this;
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
-        this.Origin = ExceptionOrigin.Backend_DotNet;
+        this.Origin = ExceptionOrigin.Backend;
         this.TraceId = Activity.Current?.Id;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
@@ -143,8 +143,8 @@ public class ExceptionEntity : Entity
 
 public enum ExceptionOrigin
 {
-    Backend_DotNet,
-    Frontend_React
+    Backend,
+    Frontend
 }
 
 

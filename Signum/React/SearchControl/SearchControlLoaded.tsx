@@ -8,7 +8,7 @@ import {
   FindOptions, isFilterCondition, withoutPinned
 } from '../FindOptions'
 import { getTokenParents, hasElement, hasManual, hasOperation, hasToArray, QueryToken, SubTokensOptions } from '../QueryToken'
-import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
+import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, EntityControlMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType, getTypeInfo } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -33,6 +33,7 @@ import "./Search.css"
 import "./SearchMobile.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
+import { dropdownActive } from '../Components/DropdownActive';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Button, ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints, useForceUpdate, useAPI } from '../Hooks'
@@ -128,6 +129,8 @@ export interface SearchControlLoadedProps {
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
   onResult?: (table: ResultTable, dataChange: boolean, sc: SearchControlLoaded) => void;
+  /** Selects every row of the first completed search. Later searches keep the normal behaviour. */
+  selectAllOnLoad?: boolean;
   ctx?: StyleContext;
   customRequest?: (req: QueryRequest, fop: FindOptionsParsed) => Promise<ResultTable>,
   onPageTitleChanged?: () => void;
@@ -158,7 +161,13 @@ export interface SearchControlLoadedState {
     columnOffset?: number;
     rowIndex: number | null;
     filter?: string;
+    // Opened with the keyboard rather than with a right-click: focus has to be taken into the menu and
+    // given back to the header afterwards, neither of which a pointer needs.
+    fromKeyboard?: boolean;
   };
+
+  /** Which result row currently carries the table's single tab stop (roving tabindex). */
+  rowFocusIndex?: number;
 
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
@@ -170,6 +179,11 @@ export interface SearchControlLoadedState {
 
 type SearchControlFilterMode = "Simple" | "Advanced" | "Pinned";
 
+// Two search controls on one page - a dashboard with two grids, a page with a grid beside a related one -
+// each rendered the same fixed element ids, leaving the document with duplicates that anything resolving
+// an id (a label, a test, the browser itself) may resolve either way. Every instance takes its own number.
+let searchControlInstanceCount = 0;
+
 export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState> {
 
   constructor(props: SearchControlLoadedProps) {
@@ -179,6 +193,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       refreshMode: props.defaultRefreshMode,
       filterMode: props.showFilters ? "Advanced" : "Simple",
     };
+  }
+
+  instanceNumber: number = ++searchControlInstanceCount;
+
+  getUniqueId(suffix: string): string {
+    return suffix + "_sc" + this.instanceNumber;
   }
 
   static maxToArrayElements = 100;
@@ -371,7 +391,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           dataChanged: undefined,
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
-          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ?? [],
+          //searchCount is still the previous one here, so == null means this is the first completed search
+          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ??
+            (this.props.selectAllOnLoad && this.state.searchCount == null ? rt.rows.clone() : []),
           currentMenuPack: undefined,
           markedRows: undefined,
           searchCount: (this.state.searchCount ?? 0) + 1
@@ -592,8 +614,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               <div ref={d => { this.containerDiv = d; }}
                 className="sf-scroll-table-container table-responsive"
                 style={{ maxHeight: this.props.maxResultsHeight }}>
-                <table aria-multiselectable="true" role="grid"
-                  aria-label={this.createCaption()}
+                {/* A plain data table, not role="grid". role="grid" promises the ARIA grid keyboard model —
+                    one tab stop for the whole widget and arrow keys between cells — which this control does
+                    not implement: the rows are not focusable, so the ArrowUp/ArrowDown handler on <tr> below
+                    can never fire. Claiming the role made things actively worse than not claiming it, because
+                    a screen reader switches to focus mode inside a grid, which suppresses the browse-mode
+                    table commands that a plain <table> gets for free. Without it, reading the table cell by
+                    cell with the screen reader's own table navigation works again (WCAG 4.1.2). */}
+                <table aria-label={this.createCaption()}
                   className={classes("sf-search-results table table-hover table-sm", this.props.view && "sf-row-view")} onContextMenu={this.props.showContextMenu(this.props.findOptions) != false ? this.handleOnContextMenu : undefined}>
                   {AccessibleTable.Options.ariaLabelAsCaption && <caption>{this.createCaption()}</caption>}
                   <thead>
@@ -954,7 +982,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id={this.getUniqueId("selectedButton")} title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -968,8 +996,55 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   // CONTEXT MENU
 
+  /** The header the column menu was opened from with the keyboard, to hand focus back to on close. The
+   * column is remembered by name as well as by element: "move right" reorders the columns but reuses the
+   * header elements, so the element that was focused before now belongs to the column that swapped with
+   * it - and pressing the key again would move that one instead of the one being moved. */
+  keyboardMenuOrigin?: { element: HTMLElement; table: HTMLElement; columnName: string | null };
+
+  /** The menu a right-click on a column header opens, placed under the header instead of under a pointer. */
+  handleHeaderContextMenuKey = (th: HTMLElement, columnIndex: number): void => {
+
+    const table = DomUtils.closest(th, "table")!;
+    const opRec = DomUtils.offsetParent(table)?.getBoundingClientRect();
+    const thRec = th.getBoundingClientRect();
+
+    this.keyboardMenuOrigin = { element: th, table: table, columnName: th.getAttribute("data-column-name") };
+
+    this.setState({
+      contextualMenu: {
+        position: {
+          left: opRec == null ? thRec.left + window.scrollX : thRec.left - opRec.left,
+          top: opRec == null ? thRec.bottom + window.scrollY : thRec.bottom - opRec.top,
+        },
+        columnIndex,
+        rowIndex: null,
+        // Which side of the header the pointer was on decides whether a new column is inserted before or
+        // after it. There is no pointer here, so the header's own left edge stands in: insert before.
+        columnOffset: this.getOffset(thRec.left, thRec, Number.MAX_VALUE),
+        fromKeyboard: true,
+      }
+    });
+  }
+
   handleContextOnHide = (): void => {
-    this.setState({ contextualMenu: undefined });
+    const origin = this.keyboardMenuOrigin;
+    this.keyboardMenuOrigin = undefined;
+    this.setState({ contextualMenu: undefined }, () => {
+      // Back to the header the menu was opened from, or the keyboard is left at the top of the document.
+      // Only when nothing else has taken focus in the meantime: an item like "edit column" opens a modal
+      // that focuses itself, and pulling focus back to the table behind it would be worse than losing it.
+      if (origin == null || !(document.activeElement == null || document.activeElement == document.body))
+        return;
+
+      const moved = origin.columnName && origin.table.isConnected ?
+        origin.table.querySelector<HTMLElement>(`th[data-column-name="${CSS.escape(origin.columnName)}"]`) : null;
+
+      // The column itself when it is still there (it may have moved), the header in its old place when the
+      // menu was "remove column" and there is no column to go back to.
+      const target = moved ?? (origin.element.isConnected ? origin.element : null);
+      target?.focus();
+    });
   }
 
 
@@ -1032,8 +1107,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     };
 
     const cm = this.state.contextualMenu!;
+
+    // The filler header that takes the remaining width when every column is small has no column of its own,
+    // and neither do the selection and entity headers, so there is nothing to insert before or after there:
+    // the new column goes at the end.
+    const index = cm.columnIndex == null ? this.props.findOptions.columnOptions.length : cm.columnIndex + cm.columnOffset!;
+
     this.setState({ editingColumn: newColumn }, () => this.handleHeightChanged());
-    this.props.findOptions.columnOptions.insertAt(cm.columnIndex! + cm.columnOffset!, newColumn);
+    this.props.findOptions.columnOptions.insertAt(index, newColumn);
 
     this.forceUpdate();
   }
@@ -1045,6 +1126,24 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.setState({ editingColumn: fo.columnOptions[cm.columnIndex!] }, () => this.handleHeightChanged());
 
     this.forceUpdate();
+  }
+
+  // Reordering a column was possible by dragging its header and no other way, so it could not be done
+  // without a pointer at all (WCAG 2.1.1), and dragging is the only route even with one (SC 2.5.7 in
+  // WCAG 2.2). This is the same move the drop handler performs, reachable from the column menu.
+  handleMoveColumn = (direction: -1 | 1): void => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+    const from = cm.columnIndex!;
+    const to = from + direction;
+    if (to < 0 || to >= fo.columnOptions.length)
+      return;
+
+    const col = fo.columnOptions[from];
+    fo.columnOptions.removeAt(from);
+    fo.columnOptions.insertAt(to, col);
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
   }
 
   handleRemoveColumn = (): void => {
@@ -1214,18 +1313,33 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       menuItems.push(<Dropdown.Header>{SearchMessage.Columns.niceToString()}</Dropdown.Header>);
 
-      if (cm.columnIndex != null) {
-        menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
-          {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
-          {cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
-        </Dropdown.Item>);
+      // Insert is offered on the headers that have no column of their own too — the filler one that appears
+      // when every column is small, and the selection and entity ones — where it appends at the end instead,
+      // so the only route to a new column is not a right click that happens to land on a real header.
+      menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
+        {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+        {cm.columnIndex == null ? "" :
+          cm.columnOffset === 0 ? ` (${SearchMessage.Before.niceToString()})` : cm.columnOffset === 1 ? ` (${SearchMessage.After.niceToString()})` : ""}
+      </Dropdown.Item>);
 
+      if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
           {getEditColumnIcon()}&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
           {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        </Dropdown.Item>);
+
+        // The pointer-free way to reorder columns; dragging the header remains available.
+        menuItems.push(<Dropdown.Item className="sf-move-column-left" disabled={cm.columnIndex === 0}
+          onClick={() => this.handleMoveColumn(-1)}>
+          {getMoveColumnLeftIcon()}&nbsp;{EntityControlMessage.MoveLeft.niceToString()}
+        </Dropdown.Item>);
+
+        menuItems.push(<Dropdown.Item className="sf-move-column-right" disabled={cm.columnIndex === this.props.findOptions.columnOptions.length - 1}
+          onClick={() => this.handleMoveColumn(1)}>
+          {getMoveColumnRightIcon()}&nbsp;{EntityControlMessage.MoveRight.niceToString()}
         </Dropdown.Item>);
 
 
@@ -1291,7 +1405,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}
+        autoFocus={cm.fromKeyboard}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
@@ -1579,16 +1694,46 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <tr>
+        {/* Single selection renders no select-all checkbox, which left this header completely empty, so the
+            column was announced as a blank one with every row. A hidden label names it instead. */}
         {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
-          {this.props.allowSelection == true &&
-            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} />
+          {this.props.allowSelection == true ?
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id={this.getUniqueId("cbSelectAll")} onChange={this.handleToggleAll} checked={this.allSelected()} /> :
+            <span className="visually-hidden">{EntityControlMessage.Selected.niceToString()}</span>
           }
         </th>
         }
-        {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
+        {/* entityColumnHeader() is empty by default, which left this column with no header at all, so its
+            cells had no column name to be announced with (WCAG 1.3.1). When nothing is configured a
+            visually hidden one is supplied, keeping the column as narrow as before. */}
+        {(this.props.view || this.props.findOptions.groupResults) && <th scope="col" className="sf-small-column sf-th-entity" data-column-name="Entity">
+          {Finder.Options.entityColumnHeader() || <span className="visually-hidden">{EntityControlMessage.View.niceToString()}</span>}
+        </th>}
         {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
+          // tabIndex: the header is operable — it sorts on click and opens the column menu on the context
+          // menu key — but it was not reachable without a pointer at all (WCAG 2.1.1). Focusable, Enter or
+          // Space sorts exactly as a click does, and from there the context menu key reaches "move left" and
+          // "move right", which is what makes reordering possible without dragging.
           <th key={i}
             scope="col"
+            tabIndex={0}
+            onKeyDown={e => {
+              if ((e.key === "Enter" || e.key === " ") && this.canOrder(co)) {
+                e.preventDefault();
+                this.handleHeaderClick(e as unknown as React.MouseEvent<any>);
+              }
+              // Filtering, grouping, inserting, removing and reordering a column all live in the menu a
+              // right-click opens, and a right-click was the only way to it (WCAG 2.1.1). The context menu
+              // key and Shift+F10 are that same gesture on a keyboard. Handled here rather than left to the
+              // contextmenu event the browser would fire next, because that event carries the pointer's
+              // coordinates - none, so the menu landed in the corner of the table - and preventing the key
+              // is what stops it from opening a second time.
+              else if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleHeaderContextMenuKey(e.currentTarget as HTMLElement, i);
+              }
+            }}
             draggable={true}
             className={classes(
               cellFormatter?.fillWidth == false ? "sf-small-column" : undefined,
@@ -1632,7 +1777,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             </div>
           </th>
         )}
-        {allSmall && <th></th>}
+        {/* A spacer that soaks up the leftover width when every column is small. No body row emits a
+            matching cell, so it is not a column at all: presentation keeps it out of the table's structure
+            and stops it being announced as a header with no name. */}
+        {allSmall && <th role="presentation"></th>}
       </tr>
     );
   }
@@ -1923,6 +2071,18 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   rowRefs: React.RefObject<HTMLTableRowElement | null>[] = [];
 
+  /** Moves the table's one tab stop to the next row that can be opened, in the given direction, and takes
+   * focus with it. Rows that do nothing when clicked carry no tabindex and are stepped over. */
+  focusRow = (from: number, direction: 1 | -1): void => {
+    for (let i = from + direction; i >= 0 && i < this.rowRefs.length; i += direction) {
+      const tr = this.rowRefs[i]?.current;
+      if (tr?.hasAttribute("tabindex")) {
+        this.setState({ rowFocusIndex: i }, () => tr.focus());
+        return;
+      }
+    }
+  }
+
   renderRows(): React.ReactNode {
     const columnOptions = this.getVisibleColumn();
     const columnsCount = columnOptions.length +
@@ -1947,6 +2107,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     // Row refs für Fokus-Handling erstellen
     this.rowRefs = resultTable.rows.map(() => React.createRef<HTMLTableRowElement>());
+
+    // Whether clicking a row does anything - the same condition the stylesheet ties the pointer cursor to,
+    // so a row that looks clickable is exactly the one that can be reached and opened from the keyboard.
+    const canOpenRow = (row: ResultRow) =>
+      !(!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false);
+
+    // One tab stop for the whole table rather than one per row (WAI-ARIA's roving tabindex): tabbing
+    // through a hundred rows to get past a grid is not navigation. The arrow keys move within it.
+    const storedFocus = this.state.rowFocusIndex;
+    const rowFocusIndex = storedFocus != null && storedFocus < resultTable.rows.length && canOpenRow(resultTable.rows[storedFocus]) ?
+      storedFocus : resultTable.rows.findIndex(canOpenRow);
 
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
@@ -1981,25 +2152,43 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       };
 
       var tr = (
+        // No hardcoded aria-describedby here: the tooltip it named is rendered only for rows that carry a
+        // mark message, and even then only while the overlay is open, so on every other row the reference
+        // pointed at an element that never exists — one dangling reference per result row (WCAG 4.1.2).
+        // The OverlayTrigger below already sets aria-describedby on this row while its tooltip is shown,
+        // which is where the description actually exists.
         <tr
           key={i}
-          aria-describedby={`result_row_${i}_tooltip`}
-          aria-selected={selected}
           ref={this.rowRefs[i]}
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
+          // A row opens its entity on a double-click and the arrow keys below step from row to row, and
+          // both needed the row to be focusable, which it was not: everything the row itself offered was
+          // mouse-only (WCAG 2.1.1). The entity column's own link still opens the same row, so this adds a
+          // second way to what it does rather than the first, but it is what makes the table navigable.
+          tabIndex={canOpenRow(row) ? (i == rowFocusIndex ? 0 : -1) : undefined}
           onKeyDown={e => {
+            // Only when the row itself is the one with focus: a link or a check box inside it answers for
+            // its own keys, and Enter on the link must not also open the row underneath it.
+            if (e.target !== e.currentTarget)
+              return;
+
             if (e.key === "ArrowDown") {
               e.preventDefault();
-              this.rowRefs[i + 1]?.current?.focus();
+              this.focusRow(i, 1);
             } else if (e.key === "ArrowUp") {
               e.preventDefault();
-              this.rowRefs[i - 1]?.current?.focus();
+              this.focusRow(i, -1);
+            } else if (e.key === "Enter") {
+              // What the double-click does, Ctrl included: held down it opens in a new tab, as it does
+              // with the mouse, because handleDoubleClick reads ctrlKey and a keyboard event carries it.
+              e.preventDefault();
+              this.handleDoubleClick(e as unknown as React.MouseEvent<any>, row, resultTable.columns);
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", !canOpenRow(row) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">
@@ -2009,7 +2198,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                   className="sf-td-selection form-check-input"
                   checked={this.state.selectedRows!.contains(row)}
                   onChange={e => this.handleChecked(e, i)}
-                  aria-label={`Select row ${i + 1}`}
+                  aria-label={SearchMessage.SelectRow0_.niceToString(i + 1)}
                   data-index={i} />}
             </td>
           }
@@ -2074,12 +2263,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
+    // The tooltip id is deliberately distinct from the row tooltip's: both describe the same row, so a
+    // shared id produced a duplicate in the document whenever both were open (WCAG 4.1.1).
     return (
       <span className="row-mark-icon">
         {mark.message ?
           <OverlayTrigger
             trigger="click"
-            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
+            overlay={<Tooltip placement="bottom" id={"result_row_" + rowIndex + "_mark_tooltip"}>{mark.message.split("\n").map((s, i) => <p key={i}>{s}</p>)}</Tooltip>}>
             {icon}
           </OverlayTrigger> : icon}
       </span>
@@ -2345,6 +2536,20 @@ export function getEditColumnIcon(): React.ReactElement {
   </span>
 }
 
+// A bare FontAwesomeIcon is not the fixed width the rest of the column menu uses, so these two arrows sat
+// off the shared icon column. Same `fa-layers fa-fw icon` wrapper as the others, so everything lines up.
+export function getMoveColumnLeftIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-left" color="var(--bs-body-color)" />
+  </span>
+}
+
+export function getMoveColumnRightIcon(): React.ReactElement {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon aria-hidden={true} icon="arrow-right" color="var(--bs-body-color)" />
+  </span>
+}
+
 export function getInsertColumnIcon(): React.ReactElement {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon aria-hidden={true} icon="table-columns" transform="left-2" color="var(--bs-secondary-color)" />
@@ -2449,9 +2654,9 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
       </Button>
       <Dropdown.Toggle variant="tertiary" split className="px-2" aria-label={SearchMessage.FilterTypeSelection.niceToString()}></Dropdown.Toggle>
       <Dropdown.Menu aria-label={SearchMessage.FilterMenu.niceToString()}>
-        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Simple')} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Advanced')} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Pinned')} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
         {props.showSystemTimeButton && <Dropdown.Divider />}
         {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
         <Dropdown.Divider />

@@ -110,6 +110,7 @@ export namespace UserQueryMessage {
 
 export namespace UserQueryOperation {
   export const Save : Operations.ExecuteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Save");
+  export const Clone : Operations.ConstructSymbol_From<UserQueryEntity, UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Clone");
   export const Delete : Operations.DeleteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Delete");
 }
 

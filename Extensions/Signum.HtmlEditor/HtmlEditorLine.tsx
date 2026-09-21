@@ -57,6 +57,11 @@ export default function HtmlEditorLine({
                 binding={ctx.binding}
                 ref={htmlEditorRef}
                 extensionsMemo={p.extensionsMemo}
+                // The FormGroup's label cannot name this one: `for` binds to form controls and the editable
+                // area is a contenteditable div, so the text box was reaching a screen reader with no name
+                // at all (axe aria-input-field-name, WCAG 4.1.2). The property's own label text, the same
+                // words shown above the field. Before the spread, so a caller can still pass its own.
+                ariaLabel={ctx.propertyRoute?.member?.niceName}
                 {...p}
                 onEditorBlur={(e, controller) => {
                   forceUpdate();

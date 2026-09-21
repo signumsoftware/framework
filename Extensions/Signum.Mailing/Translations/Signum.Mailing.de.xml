@@ -129,7 +129,7 @@
     <Member Name="SentException" Description="Sendungsausnahme" />
   </Type>
   <Type Name="EmailModelEntity" Description="E-Mail-Modell" Gender="n">
-    <Member Name="FullClassName" Description="Full Class Name" />
+    <Member Name="ClassName" Description="Class Name" />
   </Type>
   <Type Name="EmailPackageEntity" Description="E-Mail-Paket" PluralDescription="E-Mail-Pakete" Gender="n">
     <Member Name="Name" Description="Name" />

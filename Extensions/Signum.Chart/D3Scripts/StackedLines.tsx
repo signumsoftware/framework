@@ -118,8 +118,8 @@ export default function renderStackedLines({ data, width, height, parameters, lo
   var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
-      <title id="stackedLinesChartTitle">{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedLines), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
+    <svg direction="ltr" width={width} height={height} role="group">
+      <title>{ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.StackedLines), getQueryNiceName(chartRequest.queryKey), [keyColumn.title, valueColumn0.title].join(", "), [c.c1, c.c3, c.c4, c.c5, c.c6].filter(cn => cn != undefined).map(cn => cn.title).join(", "))}</title>  
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} isActive={detector && (val => detector!({ c0: val }))} onDrillDown={(v, e) => onDrillDown({ c0: v }, e)} />
@@ -129,7 +129,9 @@ export default function renderStackedLines({ data, width, height, parameters, lo
       </g>
       {stackedSeries.orderBy(s => s.key).map(s => <g key={s.key} opacity={dashboardFilter && !(c.c1 && detector?.({ c1: columnsByKey[s.key].value }) == true) ? .5 : undefined} className="shape-serie"
         transform={translate(xRule.start('content') + bw / 2, yRule.end('content'))}>
-        <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
+        {/* Separating stroke, as on the pie: stacked areas share an edge, and adjacent palette colours are
+            not guaranteed to differ in luminance. */}
+        <path className="shape sf-transition" fill={colorByKey[s.key] ?? color(s.key)} stroke="var(--bs-body-bg)" strokeWidth={1} shapeRendering="initial" d={area(s)!} transform={(initialLoad ? scale(1, 0) : scale(1, 1))}>
           <title>
             {columnsByKey[s.key].niceName!}
           </title>

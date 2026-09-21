@@ -68,7 +68,7 @@ export namespace HelpClient {
   export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) : void {
     if (state.labelIcon === undefined &&
       state.ctx.propertyRoute &&
-      state.ctx.frame?.pack.typeHelp
+      state.ctx.frame?.pack?.typeHelp
     ) {
       state.labelIcon = <HelpIcon ctx={state.ctx} />;
     }

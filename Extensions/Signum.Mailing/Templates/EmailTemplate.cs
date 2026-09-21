@@ -130,7 +130,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             new XAttribute("DisableAuthorization", DisableAuthorization),
             Query == null ? null : new XAttribute("Query", Query.Key),
             new XAttribute("EditableMessage", EditableMessage),
-            Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.FullClassName),
+            Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.ClassName),
             MasterTemplate == null ? null! : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
             new XAttribute("GroupResults", GroupResults),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),

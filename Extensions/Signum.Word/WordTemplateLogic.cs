@@ -360,7 +360,7 @@ public static class WordTemplateLogic
                     if (model == null)
                         model = WordModelLogic.CreateDefaultWordModel(template.Model, modifiableEntity);
                     else if (template.Model.ToType() != model.GetType())
-                        throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.FullClassName, model.GetType().FullName));
+                        throw new ArgumentException("model should be a {0} instead of {1}".FormatWith(template.Model.ClassName, model.GetType().FullName));
                 }
                 else
                 {
@@ -857,7 +857,7 @@ public static class WordTemplateLogic
             }
             catch (Exception ex)
             {
-                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                exceptions.Add("{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.ClassName, ex.Message.Indent(4)));
             }
         }
 
@@ -886,7 +886,7 @@ public static class WordTemplateLogic
                     if (already == null)
                     {
                         defaultTemplate.Save();
-                        SafeConsole.WriteLineColor(ConsoleColor.Green, $"Created {se.FullClassName}");
+                        SafeConsole.WriteLineColor(ConsoleColor.Green, $"Created {se.ClassName}");
                     }
                     else
                     {
@@ -898,19 +898,19 @@ public static class WordTemplateLogic
                             {
                                 toModify.Template = defaultTemplate.Template;
                                 toModify.Save();
-                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Initialized {se.FullClassName}");
+                                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Initialized {se.ClassName}");
                             }
                             else if (MemoryExtensions.SequenceEqual<byte>(toModify.Template.Retrieve().BinaryFile, defaultTemplate.Template.Entity.BinaryFile))
                             {
-                                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.FullClassName}");
+                                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, $"Identical {se.ClassName}");
                             }
                             else
                             {
-                                if (SafeConsole.Ask(ref rememberedAnswer, $"Override {se.FullClassName}?"))
+                                if (SafeConsole.Ask(ref rememberedAnswer, $"Override {se.ClassName}?"))
                                 {
                                     toModify.Template = defaultTemplate.Template;
                                     toModify.Save();
-                                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.FullClassName}");
+                                    SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Overriden {se.ClassName}");
                                 }
                             }
                         }
@@ -919,8 +919,8 @@ public static class WordTemplateLogic
             }
             catch (Exception ex)
             {
-                SafeConsole.WriteLineColor(ConsoleColor.Red, se.FullClassName);
-                SafeConsole.WriteLineColor(ConsoleColor.Red, "{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.FullClassName, ex.Message.Indent(4)));
+                SafeConsole.WriteLineColor(ConsoleColor.Red, se.ClassName);
+                SafeConsole.WriteLineColor(ConsoleColor.Red, "{0} in {1}:\n{2}".FormatWith(ex.GetType().Name, se.ClassName, ex.Message.Indent(4)));
             }
         }
     }

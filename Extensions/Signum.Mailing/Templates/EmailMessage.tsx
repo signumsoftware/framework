@@ -9,6 +9,10 @@ import { useForceUpdate } from '@framework/Hooks'
 import { EmailTemplateMessage } from '../Signum.Mailing.Templates'
 import IFrameRenderer from './IframeRenderer'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { dataUrl, forEachCidImage } from './CidImages'
+import { FilePathEmbedded } from '../../Signum.Files/Signum.Files'
+import { getConfiguration } from '../../Signum.Files/Components/FileDownloader'
+import * as Services from '@framework/Services'
 
 export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -48,7 +52,7 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
 
         <EntityDetail ctx={ctx.subCtx(f => f.from)} />
         <EntityAccordion avoidFieldSet ctx={ctx.subCtx(s => s.recipients)}
-          getTitle={(ctx: TypeContext<EmailRecipientEmbedded>) => <span>
+          getTitle={ctx => <span>
             {ctx.value.kind && <strong className="me-1">{ctx.value.kind}:</strong>}
             {ctx.value.displayName && <span className="me-1">{ctx.value.displayName}</span>}
             {ctx.value.emailAddress && <span>{"<"}{ctx.value.emailAddress}{">"}</span>}
@@ -83,11 +87,45 @@ export interface EmailMessageComponentProps {
 
 export function EmailMessageComponent(p: EmailMessageComponentProps): React.JSX.Element {
   const [showPreview, setShowPreview] = React.useState(true);
+  const objectUrls = React.useRef(new Map<string, string>());
+
+  React.useEffect(() => () => {
+    objectUrls.current.forEach(url => URL.revokeObjectURL(url));
+    objectUrls.current.clear();
+  }, []);
 
   function handlePreviewClick(e: React.FormEvent<any>) {
     setShowPreview(!showPreview);
   }
 
+  //The attachment url can not be used as an img src, downloading it requires the authorization header.
+  function manipulateDom(doc: Document) {
+    forEachCidImage(doc, (img, contentId) => {
+
+      const cached = objectUrls.current.get(contentId);
+      if (cached != null) {
+        img.src = cached;
+        return;
+      }
+
+      const file = p.ctx.value.attachments.firstOrNull(a => a.element.contentId == contentId)?.element.file;
+      if (file == null)
+        return;
+
+      if (file.fullWebPath)
+        img.src = file.fullWebPath;
+      else if (file.binaryFile != null) //not saved yet
+        img.src = dataUrl(file);
+      else if (file.entityId != null)
+        Services.ajaxGetRaw({ url: getConfiguration(FilePathEmbedded)!.fileUrl!(file), cache: "default" })
+          .then(r => r.blob())
+          .then(blob => {
+            const objectUrl = URL.createObjectURL(blob);
+            objectUrls.current.set(contentId, objectUrl);
+            img.src = objectUrl;
+          });
+    });
+  }
 
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (
@@ -99,7 +137,7 @@ export function EmailMessageComponent(p: EmailMessageComponentProps): React.JSX.
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </LinkButton>
-        {showPreview && <IFrameRenderer style={{ width: "100%", height: "800px" }} html={ec.value.body.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", height: "800px" }} html={ec.value.body.text} manipulateDom={manipulateDom} />}
       </div>
     </div>
   );

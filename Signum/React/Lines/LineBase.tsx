@@ -162,16 +162,31 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
     if (p.helpText) ids.push(this.props.ctx.getUniqueId("help"));
     if (this.getError()) ids.push(this.props.ctx.getUniqueId("error"));
 
+    // formGroupStyle "None" renders no <label> element at all, so a line using it left its control with
+    // no name unless the call site remembered to spell one out - the trap AGENTS.md lists. The label the
+    // line was given is the name it would have had, so it becomes the control's own. Only for "None":
+    // every other style renders a real label, and "SrOnly" renders one that is merely hidden.
+    // Never over an aria-label the call site spelled out: the lines disagree about whether they spread
+    // valueHtmlAttributes before or after these, so the order cannot be relied on to settle it.
+    const explicit = (p as { valueHtmlAttributes?: React.HTMLAttributes<any> }).valueHtmlAttributes?.["aria-label"];
+    const label = explicit ?? (typeof p.label == "string" ? p.label : p.ctx.propertyRoute?.member?.niceName);
+
     return {
       "aria-readonly": p.ctx.readOnly || undefined,
-      "aria-describedby": ids.length ? ids.join(" ") : undefined
+      "aria-describedby": ids.length ? ids.join(" ") : undefined,
+      "aria-label": p.ctx.formGroupStyle == "None" ? label : undefined
     };
   }
 
   extendedAriaAttributes(): React.AriaAttributes {
     return {
       ...this.baseAriaAttributes(),
-      "aria-required": this.mandatoryClass ? true : this.props.mandatory ? true : false,
+      // The visible asterisk comes from propertyRoute.member.required (see FormGroup), and it is
+      // aria-hidden, so this attribute is the only thing that tells a screen reader a field is required.
+      // Reading it from `mandatory` alone meant every field required by the schema but not marked at the
+      // call site showed the asterisk and reported aria-required="false" - the opposite of the truth
+      // (WCAG 3.3.2). Same source as the indicator, and omitted rather than false so it is stated once.
+      "aria-required": this.mandatoryClass || this.props.mandatory || this.props.ctx.propertyRoute?.member?.required ? true : undefined,
       "aria-invalid": !!this.getError() || undefined
     };
   }

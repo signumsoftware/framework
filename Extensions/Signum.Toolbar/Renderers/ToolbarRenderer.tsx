@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useDocumentEvent, useUpdatedRef, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
-import { Entity, EngineMessage, getToString, Lite } from '@framework/Signum.Entities'
+import { Entity, EngineMessage, getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { ToolbarUrl } from '../ToolbarUrl';
 import { classes } from '@framework/Globals';
@@ -67,10 +67,14 @@ export default function ToolbarRenderer(p: {
 
   return (
     <div className={"sidebar-inner"}>
-      <div className={"close-sidebar"}
+      {/* A <div> with onClick is reachable by mouse only, so on narrow viewports — where this is the only way
+          to dismiss the sidebar overlay — keyboard and screen reader users were stuck with it open (WCAG 2.1.1).
+          The label sat on the icon, which is aria-hidden, so it never reached the accessible name either. */}
+      <button type="button" className={"close-sidebar"}
+        aria-label={JavascriptMessage.Close.niceToString()}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
-        <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} aria-label="Close" />
-      </div>
+        <FontAwesomeIcon aria-hidden={true} icon={"angles-left"} />
+      </button>
 
       <ul>
         {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, i, ctx, null))}
@@ -209,7 +213,10 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
 
   switch (res.type) {
     case "Divider":
-      return <hr style={{ margin: "10px 0 5px 0px" }} key={key}></hr>;
+      // Wrapped in an <li>: these are rendered into the sidebar's <ul>, where an <hr> is not a permitted
+      // child. A list with a stray child can be announced with the wrong item count, or lose its list
+      // semantics altogether. The <hr> keeps its own separator role inside.
+      return <li key={key}><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
     case "Header":
     case "Item":
       if (ToolbarMenuEntity.isLite(res.content)) {
@@ -238,7 +245,10 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
       if (res.content) {
         const config = ToolbarClient.getConfig(res);
         if (!config)
-          return <Nav.Item className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
+          // as="li": these render into the sidebar's <ul>, where Nav.Item's default <div> is not a
+          // permitted child. Misconfiguration paths, but they are the ones a screen reader meets on a
+          // broken toolbar, and a stray child can cost the list its semantics entirely.
+          return <Nav.Item as="li" className="text-danger">{res.content!.EntityType + "ToolbarConfig not registered"}</Nav.Item>;
 
         return config.getMenuItem(res, key, ctx, selectedEntity);
       }
@@ -248,12 +258,13 @@ export function renderNavItem(res: ToolbarResponse<any>, key: string | number, c
           <li key={key} className={"nav-item-header"}>
             {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
             <span className={"nav-item-text"}>{res.label}</span>
-            <div className={"nav-item-float"}>{res.label}</div>
+            {/* Same hover-only duplicate of the label as in ToolbarNavItem. */}
+            <div aria-hidden={true} className={"nav-item-float"}>{res.label}</div>
           </li>
         );
       }
 
-      return <Nav.Item key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
+      return <Nav.Item as="li" key={key} style={{ color: "red" }}>{"No Content or Url found"}</Nav.Item>;
 
     default:
       throw new Error("Unexpected " + res.type);
@@ -483,8 +494,11 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
 
   return (
     <>
+      {/* as="li" below: Nav.Item renders a <div> by default, and this sits directly inside the toolbar's
+          <ul> alongside real <li> items. A <ul> may only contain <li>, which breaks both the parsing of
+          the list and the count assistive technology announces for it (WCAG 1.3.1 and 4.1.1). */}
       {entityType && (
-        <Nav.Item title={ti.niceName} className="d-flex mx-2 mb-2">
+        <Nav.Item as="li" title={ti.niceName} className="d-flex mx-2 mb-2">
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
@@ -615,7 +629,8 @@ function ToolbarSwitcher(p: { response: ToolbarResponse<ToolbarSwitcherEntity>, 
   return (
     <li>
       <ul>
-        <Nav.Item 
+        {/* as="li": see the sibling case above — Nav.Item's default <div> is not a permitted child of <ul>. */}
+        <Nav.Item as="li"
         data-toolbar-content={liteKeyOrQuery(p.response.content)}
         title={title} className="d-flex mb-2">
           {icon}
@@ -649,7 +664,10 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
 
   return (
     <li className="nav-item d-flex">
+      {/* Nav.Link's `active` only adds a class, so which item was the current page was conveyed by colour
+          alone and never announced (WCAG 1.3.1). aria-current says it. */}
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100"
+        aria-current={p.active ? "page" : undefined}
         data-toolbar-content={liteKeyOrQuery(p.content)}>
         <div>{p.icon}</div>
         <span className={classes("nav-item-text", p.isGroup && "nav-item-group")}>
@@ -657,7 +675,9 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
         {p.extraIcons}
-        <div className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
+        {/* Hover-only visual tooltip repeating the label of the collapsed sidebar. Left exposed it doubled the
+            accessible name ("Dashboard Dashboard") whenever it was shown. */}
+        <div aria-hidden={true} className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
     </li>
   );

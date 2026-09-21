@@ -106,7 +106,7 @@
     <Member Name="SentException" Description="Excepción envío" />
   </Type>
   <Type Name="EmailModelEntity" Description="Modelo de e-Mail">
-    <Member Name="FullClassName" Description="Full Class Name" />
+    <Member Name="ClassName" Description="Class Name" />
   </Type>
   <Type Name="EmailRecipientEmbedded" Description="Destinatario de correo electrónico">
     <Member Name="Kind" Description="Tipo" />

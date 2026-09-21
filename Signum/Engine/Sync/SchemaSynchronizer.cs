@@ -507,7 +507,7 @@ public static class SchemaSynchronizer
                                         if (disableSystemVersioning != null && guidToSteal == null)
                                             delayedUpdatesHistory.Add(pkUpdater.UpdateHistoryTable(tab, dif.Name, tabCol, difCol));
 
-                                        var updateIBA = tab is Table t ? pkUpdater.UpdateImplementedByAll(t, dif.Name, tabCol, difCol) : null;
+                                        var updateIBA = tab is Table t ? pkUpdater.UpdateImplementedByAll(t, dif.Name, tabCol, difCol, replacements) : null;
                                         if (updateIBA != null)
                                             delayedUpdatesFks.Add(updateIBA);
 
@@ -1048,7 +1048,10 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
     {
         var tableName = forHistory ? table.SystemVersioned!.TableName : table.Name;
 
-        if (!NeedsDefaultValue(table, column, forHistory))
+        //IsNullable.Forced columns are nullable in the database, so NULL is already a valid placeholder.
+        //A DEFAULT would be back-filled into every existing row (Postgres) and survive in the rows that the
+        //follow-up UPDATE ... FROM ... WHERE old_column = ... does not match, breaking the re-created foreign key.
+        if (column.Nullable.ToBool() || !NeedsDefaultValue(table, column, forHistory))
             return sqlBuilder.AlterTableAddColumn(tableName, column);
 
         var defaultValue =

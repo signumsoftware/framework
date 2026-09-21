@@ -54,6 +54,7 @@
     <Member Name="Query" Description="Consulta" />
   </Type>
   <Type Name="UserChartOperation">
+    <Member Name="Clone" Description="Clonar" />
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
   </Type>

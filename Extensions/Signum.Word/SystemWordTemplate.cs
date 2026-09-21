@@ -5,9 +5,9 @@ namespace Signum.Word;
 public class WordModelEntity : Entity
 {
     [StringLengthValidator(Max = 200), UniqueIndex]
-    public string FullClassName { get; set; }
+    public string ClassName { get; set; }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => FullClassName);
+    public override string ToString() => As.Expression(() => ClassName);
 }
 

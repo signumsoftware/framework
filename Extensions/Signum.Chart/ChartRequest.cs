@@ -172,4 +172,14 @@ public class ChartTimeSeriesEmbedded : EmbeddedEntity
 
         return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
+
+    internal ChartTimeSeriesEmbedded Clone() => new ChartTimeSeriesEmbedded
+    {
+        StartDate = StartDate,
+        EndDate = EndDate,
+        TimeSeriesUnit = TimeSeriesUnit,
+        TimeSeriesStep = TimeSeriesStep,
+        TimeSeriesMaxRowsPerStep = TimeSeriesMaxRowsPerStep,
+        SplitQueries = SplitQueries,
+    };
 }
