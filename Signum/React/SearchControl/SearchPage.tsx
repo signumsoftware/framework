@@ -77,11 +77,12 @@ function SearchPage(): React.ReactElement {
         {SearchPage.renderTitle(searchControl.current?.searchControlLoaded, <span>{getQueryNiceName(fo.queryName)}</span>)}
         {searchControl.current?.searchControlLoaded && SearchPage.renderTitleElements(searchControl.current.searchControlLoaded)}
       </h1>
-      {/* enableAutoFocus is false on a page: 200ms after loading it moved focus into the pinned filters —
-          on a query with several of them that is more than twenty tab stops in, past the skip link, which
-          is the very first one. A keyboard user then had to tab the whole page on every visit with the skip
-          link behind them. A dialog is the opposite case and SearchModal still sets it, because there focus
-          does have to move inside. */}
+      {/* Turning this off is what a keyboard user may want: 200ms after loading, focus moves into the
+          pinned filters, and on a query with several of them that is more than twenty tab stops in, past
+          the skip link, which is the very first one - so the whole page has to be tabbed on every visit
+          with the skip link behind them. It is off by default here only in the sense that the application
+          decides; the framework keeps the original behaviour. A dialog is the opposite case and SearchModal
+          still sets it, because there focus does have to move inside. */}
       {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
@@ -98,7 +99,7 @@ function SearchPage(): React.ReactElement {
         avoidChangeUrl={false}
         view={qs?.inPlaceNavigation ? "InPlace" : undefined}
         maxResultsHeight={"none"}
-        enableAutoFocus={false}
+        enableAutoFocus={SearchPage.Options.enableAutoFocus()}
         onHeighChanged={onResize}
         onSearch={result => changeUrl()}
         onPageTitleChanged={forceUpdate}
@@ -113,10 +114,14 @@ namespace SearchPage {
     marginDown: number;
     minHeight: number;
     showFilters: (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => boolean;
+    /** Whether the page moves focus into the pinned filters once it has loaded. An application that offers
+     * this as a reader preference replaces it; the default keeps the original behaviour. */
+    enableAutoFocus: () => boolean;
   } = {
     marginDown: 70,
     minHeight: 600,
-    showFilters: () => false
+    showFilters: () => false,
+    enableAutoFocus: () => true
   };
 
 

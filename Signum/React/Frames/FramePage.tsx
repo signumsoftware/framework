@@ -20,6 +20,7 @@ import { useTitle } from '../AppContext'
 import { FunctionalAdapter, usePageUIState } from '../Modals'
 import { QueryString } from '../QueryString'
 import { classes } from '../Globals'
+import { computeHasChanges } from './FrameModal'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
@@ -119,7 +120,7 @@ export default function FramePage(): React.ReactElement {
 
 
   useWindowEvent("beforeunload", e => {
-    if (stateRef.current && hasChanges(stateRef.current)) {
+    if (stateRef.current && computeHasChanges(stateRef.current, entityComponent)) {
       e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
       e.returnValue = '';   // Chrome requires returnValue to be set
     }
@@ -373,12 +374,14 @@ export default function FramePage(): React.ReactElement {
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
+    // The sub-title and the widgets are a block of their own, which a heading is not allowed to contain.
+    // The heading keeps the entity title alone - which is also what should name the page - and the block
+    // becomes its sibling, with the wrapper carrying the framing the h1 used to.
     return (
-      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
-        {title && <>
-          <span className="sf-entity-title">{title}</span>&nbsp;
-        </>
-        }
+      <div className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
+        <h1 className="h4 mb-0">
+          {title && <span className="sf-entity-title">{title}</span>}
+        </h1>
         {(subTitle || widgets) &&
           <div className="sf-entity-sub-title mt-2">
             {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
@@ -386,26 +389,10 @@ export default function FramePage(): React.ReactElement {
             <br />
           </div>
         }
-      </h1>
+      </div>
     );
   }
 }
-
-function hasChanges(state: FramePageState) {
-
-  if (state.executing)
-    return false;
-
-  const entity = state.pack.entity;
-  const ge = GraphExplorer.propagateAll(entity);
-  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
-    return true
-  }
-
-  return false;
-}
-
-
 
 export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }): void {
 

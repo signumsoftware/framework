@@ -33,6 +33,7 @@ import "./Search.css"
 import "./SearchMobile.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
+import { dropdownActive } from '../Components/DropdownActive';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Button, ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints, useForceUpdate, useAPI } from '../Hooks'
@@ -160,7 +161,13 @@ export interface SearchControlLoadedState {
     columnOffset?: number;
     rowIndex: number | null;
     filter?: string;
+    // Opened with the keyboard rather than with a right-click: focus has to be taken into the menu and
+    // given back to the header afterwards, neither of which a pointer needs.
+    fromKeyboard?: boolean;
   };
+
+  /** Which result row currently carries the table's single tab stop (roving tabindex). */
+  rowFocusIndex?: number;
 
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
@@ -172,6 +179,11 @@ export interface SearchControlLoadedState {
 
 type SearchControlFilterMode = "Simple" | "Advanced" | "Pinned";
 
+// Two search controls on one page - a dashboard with two grids, a page with a grid beside a related one -
+// each rendered the same fixed element ids, leaving the document with duplicates that anything resolving
+// an id (a label, a test, the browser itself) may resolve either way. Every instance takes its own number.
+let searchControlInstanceCount = 0;
+
 export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState> {
 
   constructor(props: SearchControlLoadedProps) {
@@ -181,6 +193,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       refreshMode: props.defaultRefreshMode,
       filterMode: props.showFilters ? "Advanced" : "Simple",
     };
+  }
+
+  instanceNumber: number = ++searchControlInstanceCount;
+
+  getUniqueId(suffix: string): string {
+    return suffix + "_sc" + this.instanceNumber;
   }
 
   static maxToArrayElements = 100;
@@ -964,7 +982,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <Dropdown
           show={this.state.isSelectOpen}
           onToggle={this.handleSelectedToggle}>
-          <Dropdown.Toggle id="selectedButton" title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
+          <Dropdown.Toggle id={this.getUniqueId("selectedButton")} title={SearchMessage.OperationsForSelectedElements.niceToString()} variant="light" className="sf-query-button sf-tm-selected ms-2" disabled={this.state.selectedRows!.length == 0}>
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
@@ -978,8 +996,55 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   // CONTEXT MENU
 
+  /** The header the column menu was opened from with the keyboard, to hand focus back to on close. The
+   * column is remembered by name as well as by element: "move right" reorders the columns but reuses the
+   * header elements, so the element that was focused before now belongs to the column that swapped with
+   * it - and pressing the key again would move that one instead of the one being moved. */
+  keyboardMenuOrigin?: { element: HTMLElement; table: HTMLElement; columnName: string | null };
+
+  /** The menu a right-click on a column header opens, placed under the header instead of under a pointer. */
+  handleHeaderContextMenuKey = (th: HTMLElement, columnIndex: number): void => {
+
+    const table = DomUtils.closest(th, "table")!;
+    const opRec = DomUtils.offsetParent(table)?.getBoundingClientRect();
+    const thRec = th.getBoundingClientRect();
+
+    this.keyboardMenuOrigin = { element: th, table: table, columnName: th.getAttribute("data-column-name") };
+
+    this.setState({
+      contextualMenu: {
+        position: {
+          left: opRec == null ? thRec.left + window.scrollX : thRec.left - opRec.left,
+          top: opRec == null ? thRec.bottom + window.scrollY : thRec.bottom - opRec.top,
+        },
+        columnIndex,
+        rowIndex: null,
+        // Which side of the header the pointer was on decides whether a new column is inserted before or
+        // after it. There is no pointer here, so the header's own left edge stands in: insert before.
+        columnOffset: this.getOffset(thRec.left, thRec, Number.MAX_VALUE),
+        fromKeyboard: true,
+      }
+    });
+  }
+
   handleContextOnHide = (): void => {
-    this.setState({ contextualMenu: undefined });
+    const origin = this.keyboardMenuOrigin;
+    this.keyboardMenuOrigin = undefined;
+    this.setState({ contextualMenu: undefined }, () => {
+      // Back to the header the menu was opened from, or the keyboard is left at the top of the document.
+      // Only when nothing else has taken focus in the meantime: an item like "edit column" opens a modal
+      // that focuses itself, and pulling focus back to the table behind it would be worse than losing it.
+      if (origin == null || !(document.activeElement == null || document.activeElement == document.body))
+        return;
+
+      const moved = origin.columnName && origin.table.isConnected ?
+        origin.table.querySelector<HTMLElement>(`th[data-column-name="${CSS.escape(origin.columnName)}"]`) : null;
+
+      // The column itself when it is still there (it may have moved), the header in its old place when the
+      // menu was "remove column" and there is no column to go back to.
+      const target = moved ?? (origin.element.isConnected ? origin.element : null);
+      target?.focus();
+    });
   }
 
 
@@ -1340,7 +1405,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} itemsCount={menuPack?.items.length ?? 0}
+        autoFocus={cm.fromKeyboard}>
         {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
@@ -1632,7 +1698,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             column was announced as a blank one with every row. A hidden label names it instead. */}
         {this.props.allowSelection && <th scope="col" className="sf-small-column sf-th-selection">
           {this.props.allowSelection == true ?
-            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id="cbSelectAll" onChange={this.handleToggleAll} checked={this.allSelected()} /> :
+            <input type="checkbox" aria-label={SearchMessage.SelectAllResults.niceToString()} className="form-check-input" id={this.getUniqueId("cbSelectAll")} onChange={this.handleToggleAll} checked={this.allSelected()} /> :
             <span className="visually-hidden">{EntityControlMessage.Selected.niceToString()}</span>
           }
         </th>
@@ -1655,6 +1721,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               if ((e.key === "Enter" || e.key === " ") && this.canOrder(co)) {
                 e.preventDefault();
                 this.handleHeaderClick(e as unknown as React.MouseEvent<any>);
+              }
+              // Filtering, grouping, inserting, removing and reordering a column all live in the menu a
+              // right-click opens, and a right-click was the only way to it (WCAG 2.1.1). The context menu
+              // key and Shift+F10 are that same gesture on a keyboard. Handled here rather than left to the
+              // contextmenu event the browser would fire next, because that event carries the pointer's
+              // coordinates - none, so the menu landed in the corner of the table - and preventing the key
+              // is what stops it from opening a second time.
+              else if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleHeaderContextMenuKey(e.currentTarget as HTMLElement, i);
               }
             }}
             draggable={true}
@@ -1700,7 +1777,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             </div>
           </th>
         )}
-        {allSmall && <th></th>}
+        {/* A spacer that soaks up the leftover width when every column is small. No body row emits a
+            matching cell, so it is not a column at all: presentation keeps it out of the table's structure
+            and stops it being announced as a header with no name. */}
+        {allSmall && <th role="presentation"></th>}
       </tr>
     );
   }
@@ -1991,6 +2071,18 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   rowRefs: React.RefObject<HTMLTableRowElement | null>[] = [];
 
+  /** Moves the table's one tab stop to the next row that can be opened, in the given direction, and takes
+   * focus with it. Rows that do nothing when clicked carry no tabindex and are stepped over. */
+  focusRow = (from: number, direction: 1 | -1): void => {
+    for (let i = from + direction; i >= 0 && i < this.rowRefs.length; i += direction) {
+      const tr = this.rowRefs[i]?.current;
+      if (tr?.hasAttribute("tabindex")) {
+        this.setState({ rowFocusIndex: i }, () => tr.focus());
+        return;
+      }
+    }
+  }
+
   renderRows(): React.ReactNode {
     const columnOptions = this.getVisibleColumn();
     const columnsCount = columnOptions.length +
@@ -2015,6 +2107,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     // Row refs für Fokus-Handling erstellen
     this.rowRefs = resultTable.rows.map(() => React.createRef<HTMLTableRowElement>());
+
+    // Whether clicking a row does anything - the same condition the stylesheet ties the pointer cursor to,
+    // so a row that looks clickable is exactly the one that can be reached and opened from the keyboard.
+    const canOpenRow = (row: ResultRow) =>
+      !(!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false);
+
+    // One tab stop for the whole table rather than one per row (WAI-ARIA's roving tabindex): tabbing
+    // through a hundred rows to get past a grid is not navigation. The arrow keys move within it.
+    const storedFocus = this.state.rowFocusIndex;
+    const rowFocusIndex = storedFocus != null && storedFocus < resultTable.rows.length && canOpenRow(resultTable.rows[storedFocus]) ?
+      storedFocus : resultTable.rows.findIndex(canOpenRow);
 
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
@@ -2060,17 +2163,32 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           data-row-index={i}
           data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
+          // A row opens its entity on a double-click and the arrow keys below step from row to row, and
+          // both needed the row to be focusable, which it was not: everything the row itself offered was
+          // mouse-only (WCAG 2.1.1). The entity column's own link still opens the same row, so this adds a
+          // second way to what it does rather than the first, but it is what makes the table navigable.
+          tabIndex={canOpenRow(row) ? (i == rowFocusIndex ? 0 : -1) : undefined}
           onKeyDown={e => {
+            // Only when the row itself is the one with focus: a link or a check box inside it answers for
+            // its own keys, and Enter on the link must not also open the row underneath it.
+            if (e.target !== e.currentTarget)
+              return;
+
             if (e.key === "ArrowDown") {
               e.preventDefault();
-              this.rowRefs[i + 1]?.current?.focus();
+              this.focusRow(i, 1);
             } else if (e.key === "ArrowUp") {
               e.preventDefault();
-              this.rowRefs[i - 1]?.current?.focus();
+              this.focusRow(i, -1);
+            } else if (e.key === "Enter") {
+              // What the double-click does, Ctrl included: held down it opens in a new tab, as it does
+              // with the mouse, because handleDoubleClick reads ctrlKey and a keyboard event carries it.
+              e.preventDefault();
+              this.handleDoubleClick(e as unknown as React.MouseEvent<any>, row, resultTable.columns);
             }
           }}
           {...ra}
-          className={classes(markClassName, ra?.className, selected && "sf-row-selected", (!row.entity || Navigator.entitySettings[row.entity.EntityType]?.isViewableLite?.(row.entity, { isSearch: "main" }) === false) ? "sf-row-no-view" : null)}
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected", !canOpenRow(row) ? "sf-row-no-view" : null)}
         >
           {this.props.allowSelection &&
             <td className="centered-cell">
@@ -2536,9 +2654,9 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
       </Button>
       <Dropdown.Toggle variant="tertiary" split className="px-2" aria-label={SearchMessage.FilterTypeSelection.niceToString()}></Dropdown.Toggle>
       <Dropdown.Menu aria-label={SearchMessage.FilterMenu.niceToString()}>
-        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Simple')} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Advanced')} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} {...dropdownActive(filterMode == 'Pinned')} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
         {props.showSystemTimeButton && <Dropdown.Divider />}
         {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon aria-hidden={true} icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
         <Dropdown.Divider />

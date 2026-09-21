@@ -176,6 +176,7 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
+    <Member Name="Actions" Description="Aktionen" />
     <Member Name="_0Characters" Description="{0} Charakter[e]" />
     <Member Name="_0CharactersRemaining" Description="{0} verbleibenden[n] Charakter(e)" />
     <Member Name="Add" Description="hinzufügen..." />
@@ -677,6 +678,7 @@
     <Member Name="_0Rows_N" Description="{0} Zeile[n]" />
     <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
+    <Member Name="AddField" Description="Feld hinzufügen" />
     <Member Name="AddFilter" Description="Filter hinzufügen" />
     <Member Name="AddOrGroup" Description="OR-Gruppe hinzufügen" />
     <Member Name="AddValue" Description="Wert hinzufügen" />
@@ -843,6 +845,12 @@
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
+  </Type>
+  <Type Name="ThemeModeMessage">
+    <Member Name="Auto" Description="Automatisch" />
+    <Member Name="Dark" Description="Dunkel" />
+    <Member Name="Light" Description="Hell" />
+    <Member Name="Theme" Description="Darstellung" />
   </Type>
   <Type Name="TimeSeriesUnit">
     <Member Name="Day" Description="Tag" />

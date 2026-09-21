@@ -5,7 +5,7 @@ import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
 import { classes } from "../Globals";
-import { getTypeInfo } from '../Reflection';
+import { getTypeInfo, tryGetTypeInfo } from '../Reflection';
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
@@ -38,11 +38,20 @@ export default function EntityLink(p: EntityLinkProps): React.ReactElement | nul
   if (isDeleted)
     return <span data-entity={liteKey(lite)} className={classes("try-no-wrap", shy ? "sf-shy-link" : null)}>{p.children ?? toString}</span>;
 
+  // An entity whose ToString is blank left nothing to name the link with: the title is that same empty
+  // string, and the children are either the empty ToString or an icon that carries no text, so the link
+  // reached a screen reader unnamed (WCAG 4.1.2). The type and the id always identify the row, and this
+  // only applies when there is nothing better - a caller passing its own aria-label still wins, because
+  // htmlAtts is spread after.
+  const fallbackName = toString?.trim() ? undefined :
+    (tryGetTypeInfo(lite.EntityType)?.niceName ?? lite.EntityType) + " " + lite.id;
+
   return (
     <Link
       ref={p.innerRef as any}
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
+      aria-label={fallbackName}
       data-entity={liteKey(lite)}
       className={classes(settings?.allowWrapEntityLink ? undefined : "try-no-wrap", shy ? "sf-shy-link" : null)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
