@@ -210,11 +210,14 @@ public class ConditionCompare : ConditionBase
         if (obj == null)
             return false;
 
-        if (obj is bool)
-            return ((bool)obj);
+        if (obj is bool b)
+            return b;
 
-        if (obj is string)
-            return ((string)obj) != "";
+        if (obj is string str)
+            return str != "";
+
+        if (obj is ResultTable rt)
+            return rt.Rows.Length > 0;
 
         return true;
     }
