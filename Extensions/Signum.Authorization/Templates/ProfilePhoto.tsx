@@ -47,11 +47,14 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
     setImageError(false);
   }, [url]);
 
+  // A <span>, not a <div>: this sits beside the user's name inside the inline <span> that renderLite
+  // returns, and a div is not allowed there. The class makes it an inline-flex box, so it keeps the
+  // layout it had both as a flex item and inline next to text.
   return (
-    <div className={classes("small-user-profile-photo", p.className)}>
+    <span className={classes("small-user-profile-photo", p.className)}>
       {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} alt={getToString(p.user)} onError={(e) => setImageError(true)} title={getToString(p.user)} /> :
         p.fallback ?? <UserCircle user={p.user } />}
-    </div>
+    </span>
   );
 }
 

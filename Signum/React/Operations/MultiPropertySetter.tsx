@@ -10,6 +10,8 @@ import { EntityRepeater } from '../Lines/EntityRepeater';
 import { MultiValueLine } from '../Lines/MultiValueLine';
 import { Operations } from '../Operations';
 import { useForceUpdate } from '../Hooks'
+import { FilterFieldMessage } from '../Signum.DynamicQuery.Tokens'
+import { useDropdownListSearchLabel } from '../Components/DropdownListSearch'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DropdownList } from 'react-widgets-up'
 import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
@@ -422,6 +424,10 @@ interface PropertyPartProps {
 
 export function PropertyPart(p: PropertyPartProps): React.ReactElement | null {
 
+  // Before the early returns below, because it is a hook. The widget's own typeahead input has no name of
+  // its own - see useDropdownListSearchLabel - and this picker chooses a field to set.
+  const searchLabel = useDropdownListSearchLabel(FilterFieldMessage.Field.niceToString());
+
   if (p.parentRoute.propertyRouteType != "Mixin") {
     var tr = p.parentRoute.typeReference();
     if (tr.name.contains(",") || tr.name == IsByAll)
@@ -440,6 +446,7 @@ export function PropertyPart(p: PropertyPartProps): React.ReactElement | null {
   return (
     <div className="sf-property-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
       <DropdownList
+        {...searchLabel}
         filter="contains"
         data={subMembers}
         value={p.selectedRoute?.member}

@@ -95,10 +95,12 @@ export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(pr
               {p.extraButtons && p.extraButtons(c)}
             </label>
             :
-            <div>
+            // A span, not a div: a legend takes phrasing content only. d-block keeps the full-width box
+            // that renderButtons' float-end needs.
+            <span className="d-block">
               <span>{p.label} {renderType()}</span>
               {renderButtons()}
-            </div>
+            </span>
           }
         </legend>
         <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />

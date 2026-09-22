@@ -143,8 +143,11 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
               subTokenOptions={subTokenOptions} onTokenChanged={() => p.onTokenChange()} />
           </div>
           <span style={{
-            color: ctx.value.token == null ? "#ddd" :
-              ChartClient.isChartColumnType(ctx.value.token.token, sc.columnType) ? "#52b980" : "#ff7575",
+            // Theme tokens rather than fixed hex: #ddd measured 1.35:1 on the light page and #52b980
+            // 2.43:1, against the 4.5:1 this text needs, and all three were unreadable on the dark one
+            // because they never changed with it.
+            color: ctx.value.token == null ? "var(--bs-secondary-color)" :
+              ChartClient.isChartColumnType(ctx.value.token.token, sc.columnType) ? "var(--bs-success-text-emphasis)" : "var(--bs-danger-text-emphasis)",
             marginLeft: "10px",
             cursor: "default"
           }} title={getTitle(sc.columnType, ctx.value.token?.token)}>

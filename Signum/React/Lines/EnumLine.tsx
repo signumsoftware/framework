@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { DropdownList, Combobox, Value } from 'react-widgets-up'
+import { useDropdownListSearchLabel } from '../Components/DropdownListSearch'
 import { Dic, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
 import { genericMemo, LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
@@ -58,6 +59,10 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
 
   var optionItems = getOptionsItems(c);
   const p = c.props;
+
+  // The aria-label in inputProps below never arrives: DropdownListInput destructures the props it knows
+  // and drops the rest. This is what actually names the widget and the typeahead input it builds itself.
+  const searchLabel = useDropdownListSearchLabel(typeof p.label == "string" ? p.label : p.ctx.propertyRoute?.member?.niceName);
   if (!p.type!.isNotNullable || p.ctx.value == undefined)
     optionItems = [{ value: null, label: p.emptyLabel ?? " - " }].concat(optionItems);
 
@@ -121,7 +126,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <DropdownList<OptionItem> className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass, "p-0")} data={optionItems}
+          <DropdownList<OptionItem> {...searchLabel} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass, "p-0")} data={optionItems}
             id={inputId}
             onChange={(oe, md) => c.setValue(oe.value, md.originalEvent)}
             value={oi}
@@ -159,7 +164,9 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
     return (
       <FormGroup ctx={p.ctx} error={p.error} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes} ariaAttributes={ariaAtts}>
         {inputId => c.withItemGroup(
-          <select id={inputId} title={niceValue} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
+          // ariaAtts, like every sibling renderer: this branch passed them to the FormGroup only, so the
+          // select itself carried no aria-required, aria-invalid or aria-describedby.
+          <select id={inputId} title={niceValue} {...ariaAtts} {...c.props.valueHtmlAttributes} value={toStr(p.ctx.value)} className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formSelectClass, c.mandatoryClass)} onChange={handleEnumOnChange} >
             {!optionItems.some(a => toStr(a.value) == toStr(p.ctx.value)) && <option key={-1} value={toStr(p.ctx.value)}>{toStr(p.ctx.value)}</option>}
             {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)} {...p.optionHtmlAttributes?.(oi)}>{oi.label}</option>)}
           </select>)

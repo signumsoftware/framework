@@ -170,6 +170,8 @@ public enum EntityControlMessage
     Added,
     RemovedAndSelectedAgain,
     Selected,
+    // Names the column of row action buttons, which otherwise has an empty header.
+    Actions,
     Edit,
     Reload,
     Download,
@@ -229,6 +231,8 @@ public enum SearchMessage
     ColumnField,
     [Description("Add column")]
     AddColumn,
+    // Names the plus button that continues a field expression in the query token builder.
+    AddField,
     CollectionsCanNotBeAddedAsColumns,
     InvalidColumnExpression,
     [Description("Add filter")]
@@ -778,4 +782,15 @@ public enum FontSizeMessage
     ReduceFontSize,
     ResetFontSize,
     IncreaseFontSize,
+}
+
+// Unauthenticated like FontSizeMessage: the theme dropdown is in the toolbar on the login page too, so
+// these have to reach the client before anyone has signed in.
+[AllowUnauthenticated]
+public enum ThemeModeMessage
+{
+    Theme,
+    Light,
+    Dark,
+    Auto,
 }
