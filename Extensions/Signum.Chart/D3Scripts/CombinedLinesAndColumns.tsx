@@ -12,6 +12,7 @@ import { ChartScriptHorizontalProps, paintLine } from './Line';
 import { paintColumns } from './Columns';
 import { ReactChartCombinedInfo } from './Components/ReactChartCombined';
 import { D3ChartScript } from '../Signum.Chart';
+import { getQueryNiceName } from '@framework/Reflection';
 import { MemoRepository } from './Components/ReactChart';
 
 const supportedTypes = [
@@ -110,7 +111,11 @@ export function renderCombinedLinesAndColumns({ infos, width, height, initialLoa
   const colCount = infos.filter(a => a.chartRequest.chartScript.key == D3ChartScript.Columns.key).length;  
   let colIndex = 0;
   return (
-    <svg direction="ltr" width={width} height={height} role="img">
+    // role="group", not "img": the lines and columns painted below are the same interactive segments the
+    // standalone Line and Columns charts draw, and role="img" flattens everything inside it, so a screen
+    // reader saw one unlabelled picture instead of the segments it can actually operate.
+    <svg direction="ltr" width={width} height={height} role="group">
+      <title>{infos.map(i => getQueryNiceName(i.chartRequest.queryKey)).distinctBy(a => a).join(", ")}</title>
 
       <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x} showLines={x.bandwidth() > 5} />
       <YScaleTicks xRule={xRule} yRule={yRule} valueColumn={valueColumn} y={yScales[0]!} />

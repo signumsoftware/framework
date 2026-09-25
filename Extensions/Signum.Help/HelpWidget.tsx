@@ -34,7 +34,9 @@ export function HelpWidget(p: HelpWidgetProps): React.JSX.Element {
   }, [hasContent])
 
   return (
-    <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.typeUrl(entity.Type))} role="button" target="_blank" className={hasContent ? "sf-help-button active" : "sf-help-button"}>
+    <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.typeUrl(entity.Type))} role="button" target="_blank"
+      aria-label={HelpMessage.Help.niceToString()}
+      className={hasContent ? "sf-help-button active" : "sf-help-button"}>
       <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
     </a>
   );
@@ -97,7 +99,9 @@ interface TypeHelpIconProps extends React.HTMLAttributes<HTMLAnchorElement>{
 export function TypeHelpIcon({type, className, ...props} : TypeHelpIconProps): React.JSX.Element {
 
   return (
-    <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.typeUrl(type))} role="button" target="_blank" className={classes("sf-help-button", className)} {...props}>
+    <a href={AppContext.toAbsoluteUrl(HelpClient.Urls.typeUrl(type))} role="button" target="_blank"
+      aria-label={HelpMessage.Help.niceToString()}
+      className={classes("sf-help-button", className)} {...props}>
       <FontAwesomeIcon aria-hidden={true} icon="circle-question" />
     </a>
   );

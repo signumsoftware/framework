@@ -21,6 +21,13 @@ export namespace CultureClient {
       .then(ci => {
         currentCulture = ci;
         AppContext.setCurrentCulture(ci.name);
+        // SC 3.1.1: the document language has to be the language the application actually renders in.
+        // Index.cshtml stamps lang from the server's CurrentUICulture, which is negotiated from the request
+        // (Accept-Language) and can differ from the signed-in user's stored culture — a German browser with
+        // an English account produced <html lang="de-DE"> over an English interface, and nothing corrected
+        // it, because lang was only ever set when the user actively switched culture.
+        // Setting it here covers both paths: startup, and changeCurrentCulture, which routes through this.
+        document.documentElement.setAttribute("lang", ci.name ?? "en");
         onCultureLoaded.forEach(f => f(ci));
       });
   }
@@ -33,8 +40,8 @@ export namespace CultureClient {
   export function changeCurrentCulture(newCulture: Lite<CultureInfoEntity>): void {
     const previousCulture = currentCulture;
     API.setCurrentCulture(newCulture)
+      // lang is now set inside loadCurrentCulture, so the separate call that used to follow here is gone.
       .then(() => loadCurrentCulture())
-      .then(() => document.documentElement.setAttribute("lang", currentCulture.name ?? "en"))
       .then(() => reloadTypes())
       .then(() => AppContext.resetUI())
       .then(() => onCultureChanged(toLite(previousCulture), newCulture));

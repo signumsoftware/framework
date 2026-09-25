@@ -281,7 +281,12 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Bool",
       isApplicable: qt => qt.filterType == "Boolean",
-      formatter: col => new Finder.CellFormatter((cell: boolean | undefined) => cell == undefined ? undefined : <input type="checkbox" className="form-check-input" disabled={true} checked={cell} />, false, "centered-cell")
+      // Named from its column: this checkbox displays a value rather than accepting one, and without a
+      // label it was announced as an anonymous "checkbox, checked" with no clue which column it belonged
+      // to (WCAG 4.1.2). The disabled state already conveys that it is not operable.
+      formatter: col => new Finder.CellFormatter((cell: boolean | undefined, ctx, column) => cell == undefined ? undefined :
+        <input type="checkbox" className="form-check-input" disabled={true} checked={cell}
+          aria-label={column?.column?.displayName ?? column?.column?.token?.niceName ?? col?.niceName} />, false, "centered-cell")
     },
     {
       name: "Phone",
@@ -620,18 +625,23 @@ function getDomainFindOptions(filterToken: QueryToken, ffc: Finder.FilterFormatt
       else allDomains.push(val);
     }
   }
-  if (allDomains.length == 0)
+  const extraFilters = entry.extraFilters?.(ffc.queryDescription.queryKey)?.notNull() ?? [];
+
+  if (allDomains.length == 0 && extraFilters.length == 0)
     return undefined;
 
   var distinctDomains = allDomains.distinctBy(liteKey);
 
   return {
     queryName: entry.type,
-    filterOptions: [{
-      token: entry.type.token((a: any) => a.entity).append(entry.getDomainField),
-      operation: distinctDomains.length > 1 ? "IsIn" : "EqualTo",
-      value: distinctDomains.length > 1 ? distinctDomains : distinctDomains[0]
-    }]
+    filterOptions: [
+      ...(distinctDomains.length == 0 ? [] : [{
+        token: entry.type.token((a: any) => a.entity).append(entry.getDomainField),
+        operation: (distinctDomains.length > 1 ? "IsIn" : "EqualTo") as FilterOperation,
+        value: distinctDomains.length > 1 ? distinctDomains : distinctDomains[0]
+      }]),
+      ...extraFilters,
+    ]
   };
 }
 

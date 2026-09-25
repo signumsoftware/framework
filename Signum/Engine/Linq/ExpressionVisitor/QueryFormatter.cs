@@ -524,7 +524,7 @@ internal class QueryFormatter : DbExpressionVisitor
         {
             this.AppendNewLine(Indentation.Same);
             sb.Append("ORDER BY ");
-            VisitOrderBys(select.OrderBy);
+            VisitOrderBys(select.OrderBy, select.Alias);
         }
 
         if (select.Top != null && this.isPostgres)
@@ -549,7 +549,7 @@ internal class QueryFormatter : DbExpressionVisitor
         return select;
     }
 
-    private void VisitOrderBys(ReadOnlyCollection<OrderExpression> orderBys)
+    private void VisitOrderBys(ReadOnlyCollection<OrderExpression> orderBys, Alias? selfAlias = null)
     {
         for (int i = 0, n = orderBys.Count; i < n; i++)
         {
@@ -558,7 +558,11 @@ internal class QueryFormatter : DbExpressionVisitor
             {
                 sb.Append(", ");
             }
-            this.Visit(exp.Expression);
+            //A select can order by one of its own columns, but only by the bare alias (SELECT expr as c0 ... ORDER BY c0)
+            if (selfAlias != null && exp.Expression is ColumnExpression self && self.Alias == selfAlias && self.Name != null)
+                sb.Append(self.Name.SqlEscape(isPostgres));
+            else
+                this.Visit(exp.Expression);
             if (exp.OrderType == OrderType.Ascending)
                 sb.Append("");
             else

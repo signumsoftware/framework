@@ -314,7 +314,7 @@ export namespace DynamicViewClient {
   }
   
   function evalWithScope(code: string, modules: any) {
-    return eval(code);
+    return new Function("modules", "return (" + code + ");")(modules);
   }
   
   interface DynamiViewOverridePair {
@@ -371,31 +371,37 @@ export namespace DynamicViewClient {
   
   
     var modules = globalModules;
-  
-    code = "(function(vr){ " + code + "})";
-  
+
+    const funcBody = "return (function(vr){ " + code + "});";
+
     try {
-      return eval(code);
+      return new Function(
+        "AutoLine", "EntityLine", "EntityCombo", "EnumCheckboxList", "EntityCheckboxList", "EntityDetail", "EntityList", "EntityRepeater", "EntityTabRepeater", "EntityStrip", "EntityTable", "FormGroup", "FormControlReadonly", "FileLine",
+        "SearchControl", "SearchControlLoaded", "SearchValue", "SearchValueLine",
+        "Button", "Dropdown", "DropdownItem", "Modal", "NavItem", "Tooltip", "Overlay", "OverlayTrigger", "Tab", "Tabs", "LinkContainer",
+        "modules",
+        funcBody
+      )(
+        AutoLine, EntityLine, EntityCombo, EnumCheckboxList, EntityCheckboxList, EntityDetail, EntityList, EntityRepeater, EntityTabRepeater, EntityStrip, EntityTable, FormGroup, FormControlReadonly, FileLine,
+        SearchControl, SearchControlLoaded, SearchValue, SearchValueLine,
+        Button, Dropdown, DropdownItem, Modal, NavItem, Tooltip, Overlay, OverlayTrigger, Tab, Tabs, LinkContainer,
+        modules
+      );
     } catch (e) {
       throw new Error("Syntax in DynamicViewOverride for '" + getToString(dvo.entityType) + "':\n" + code + "\n" + (e as Error).message);
     }
   }
   
   export function createDefaultDynamicView(typeName: string): Promise<DynamicViewEntity> {
-    return loadNodes().then(nodes =>
-      Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
+    return Navigator.API.getType(typeName).then(t => DynamicViewEntity.New({
         entityType: t!,
         viewName: "My View",
         locals: `{
     const forceUpdate = modules.Hooks.useForceUpdate();
     return { forceUpdate };
   }`,
-        viewContent: JSON.stringify(nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
-      })));
-  }
-  
-  export function loadNodes(): Promise<typeof Nodes> {
-    return import("./View/Nodes");
+        viewContent: JSON.stringify(Nodes.NodeConstructor.createDefaultNode(getTypeInfo(typeName))),
+      }));
   }
   
   export function getDynamicViewEntity(typeName: string, viewName: string): ViewPromise<ModifiableEntity> {

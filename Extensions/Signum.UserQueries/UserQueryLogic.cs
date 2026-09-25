@@ -74,6 +74,11 @@ public static class UserQueryLogic
                 uq.Owner,
             });
 
+        new Graph<UserQueryEntity>.ConstructFrom<UserQueryEntity>(UserQueryOperation.Clone)
+        {
+            Construct = (uq, _) => uq.Clone()
+        }.Register();
+
         sb.Schema.WhenIncluded<ToolbarEntity>(() =>
         {
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserQueryEntity));

@@ -229,10 +229,14 @@ function ColumnEditorModal(p: ColumnEditorModalProps): React.ReactElement {
     },
   ];
 
+  // aria-labelledby names the dialog from its own title: it carried role="dialog" and aria-modal but no
+  // accessible name, so it was announced as just "dialog" (WCAG 4.1.2). useId because dialogs here are
+  // opened nested, so a fixed id could appear twice in the document.
+  const titleId = React.useId();
   return (
-    <Modal show={show} onExited={handleExited} onHide={handleCancel} size="lg">
+    <Modal show={show} onExited={handleExited} onHide={handleCancel} size="lg" aria-labelledby={titleId}>
       <div className="modal-header bg-primary text-light">
-        <h5 className="modal-title">{SearchMessage.EditAllColumns.niceToString()}</h5>
+        <h5 id={titleId} className="modal-title">{SearchMessage.EditAllColumns.niceToString()}</h5>
       </div>
       <div className="modal-body">
         {resetting ? <div className="text-center p-3">{JavascriptMessage.loading.niceToString()}</div> : (<>

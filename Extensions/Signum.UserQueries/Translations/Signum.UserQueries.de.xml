@@ -77,6 +77,7 @@
     <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
   </Type>
   <Type Name="UserQueryOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tooltip } from 'react-bootstrap'
 import { Overlay } from 'react-bootstrap'
 import HtmlViewer from '../../Signum.HtmlEditor/HtmlViewer';
+import { DashboardMessage } from '../Signum.Dashboard';
 
 export interface DashboardTooltipIconProps {
   tooltipHtml: string;
@@ -13,7 +14,12 @@ export interface DashboardTooltipIconProps {
 
 export function DashboardTooltipIcon(p: DashboardTooltipIconProps): React.JSX.Element {
   const [show, setShow] = React.useState(false);
-  const targetRef = React.useRef<HTMLSpanElement>(null);
+  // A <button>, not a <span>: the trigger is what opens the explanation, and as a span with an onClick it
+  // could not be reached or activated from the keyboard at all (WCAG 2.1.1).
+  const targetRef = React.useRef<HTMLButtonElement>(null);
+  // Unique per instance: a dashboard renders one of these per part, and the tooltip id is referenced by
+  // aria-describedby, so a fixed id would point every trigger at the same element.
+  const tooltipId = React.useId();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,29 +33,43 @@ export function DashboardTooltipIcon(p: DashboardTooltipIconProps): React.JSX.El
     }
   }, []);
 
+  // Dismissing was mousedown-outside only, which leaves a keyboard user with no way to close it again.
+  const handleKeyDown = React.useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShow(false);
+      targetRef.current?.focus();
+    }
+  }, []);
+
   React.useEffect(() => {
     if (show) {
       document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
       return () => {
         document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [show, handleClickOutside]);
+  }, [show, handleClickOutside, handleKeyDown]);
 
   return (
     <>
-      <span
+      <button
+        type="button"
         ref={targetRef}
         className={p.className}
         onClick={handleClick}
-        style={{ cursor: 'pointer' }}
+        aria-label={DashboardMessage.MoreInformation.niceToString()}
+        aria-expanded={show}
+        aria-describedby={show ? tooltipId : undefined}
+        style={{ cursor: 'pointer', background: 'none', border: 0, padding: 0, lineHeight: 1, color: 'inherit' }}
       >
         <FontAwesomeIcon
           aria-hidden={true}
           icon="circle-info"
           className={p.iconClassName}
         />
-      </span>
+      </button>
       <Overlay
         show={show}
         target={targetRef.current}
@@ -86,7 +106,7 @@ export function DashboardTooltipIcon(p: DashboardTooltipIconProps): React.JSX.El
           ],
         }}
       >
-        <Tooltip id="dashboard-tooltip-popover" className="dashboard-tooltip-content">
+        <Tooltip id={tooltipId} className="dashboard-tooltip-content">
           <HtmlViewer text={p.tooltipHtml} />
         </Tooltip>
       </Overlay>

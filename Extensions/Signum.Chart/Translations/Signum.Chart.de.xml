@@ -366,6 +366,7 @@
     <Member Name="Query" Description="Abfrage" />
   </Type>
   <Type Name="UserChartOperation">
+    <Member Name="Clone" Description="Klonen" />
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>

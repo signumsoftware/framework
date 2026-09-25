@@ -7,20 +7,26 @@ namespace Signum.Playwright.ModalProxies;
 /// </summary>
 public class AutoLineModalProxy : ModalProxy
 {
-    private PropertyRoute route;
+    public readonly PropertyRoute Route;
 
     public AutoLineModalProxy(ILocator element, PropertyRoute route) : base(element)
     {
-        this.route = route;
+        this.Route = route;
     }
 
     public async Task<BaseLineProxy> GetAutoLineAsync()
     {
         // Warten bis die form-group sichtbar ist
+        ILocator formGroup = await GetLocator();
+
+        return BaseLineProxy.AutoLine(formGroup, Route);
+    }
+
+    public async Task<ILocator> GetLocator()
+    {
         var formGroup = this.Modal.Locator("div.modal-body div.form-group");
         await formGroup.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
-
-        return BaseLineProxy.AutoLine(formGroup, route);
+        return formGroup;
     }
 
     public async Task SetValueOk(string kommentar)

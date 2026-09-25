@@ -49,7 +49,9 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }): R
           <ColorLine ctx={settingsCtx.subCtx(pp => pp.customColor)} onChange={() => forceUpdate()} />
         </div>
       </div>
-      
+
+      <AutoLine ctx={settingsCtx.subCtx(pp => pp.defaultOpen)} />
+
       <EnumLine ctx={settingsCtx.subCtx(pp => pp.interactionGroup)}
         onRenderDropDownListItem={(io) => (
           <span className="sf-dot-container">

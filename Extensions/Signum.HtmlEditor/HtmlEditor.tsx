@@ -45,6 +45,9 @@ export interface HtmlEditorProps {
   placeholder?: React.ReactNode;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
+  /** Names the editable area. A label element cannot do it: `for` only binds to form controls, and this is
+   * a contenteditable div, so without this the text box reaches a screen reader unnamed. */
+  ariaLabel?: string;
   onEditorFocus?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
   onEditorBlur?: (e: React.FocusEvent, controller: HtmlEditorController) => void;
 }
@@ -92,7 +95,30 @@ function HtmlEditor(
   return (
     <div
       title={error}
-      onClick={() => controller.editor?.focus()}
+      onClick={e => {
+        // Lexical's editor.focus() only sets the editor's own selection; it never focuses the
+        // contenteditable. That selection reaches the DOM - and so drags the focus into the editing host -
+        // only once the reconciler can resolve a DOM node for it, and in an empty editor there is nothing
+        // to resolve, so it gives up and the focus never arrives. A click that misses the editable area
+        // then leaves the focus wherever the browser put it, on the nearest focusable ancestor. The box is
+        // routinely taller than the editable - the PSC detail panel asks for 140px while `small` caps the
+        // editable at 50 - so the miss is the empty space below the text, and there the panel itself is
+        // focusable and drew its focus ring around the whole view while the typing went nowhere, however
+        // often the user clicked. Focus the editable ourselves, and start at the end when the click landed
+        // below it, past the text the user was aiming beyond.
+        const editable = controller.editableElement;
+        if (controller.readOnly || !editable || !controller.editor)
+          return;
+
+        if (editable.contains(e.target as Node)) {
+          controller.editor.focus();
+          return;
+        }
+
+        const below = e.clientY > editable.getBoundingClientRect().bottom;
+        controller.editor.focus(undefined, { defaultSelection: below ? "rootEnd" : "rootStart" });
+        editable.focus({ preventScroll: true });
+      }}
       {...htmlAttributes}
       className={classes(
         "sf-html-editor",
@@ -128,6 +154,18 @@ function HtmlEditor(
               ref={controller.setContentEditableRef}
               id={editableId}
               className="public-DraftEditor-content"
+              // Lexical gives its div role="textbox" whether or not the editor is editable, and adds
+              // aria-readonly when it is not. Read-only, that div has contentEditable={false} and no
+              // tabindex, so the text box it announces can be neither reached nor edited by anyone: a
+              // dashboard greeting was read out as an empty, unnamed edit field (axe aria-input-field-name,
+              // WCAG 4.1.2), and giving it a name would only have made the phantom field easier to find.
+              // It is static text, so it is left as a plain div and read as text. aria-readonly goes with
+              // the role it belongs to, and so does aria-autocomplete: Lexical hard-codes it to "none" on
+              // the non-editable branch, where it was left behind by the role it used to belong to, and
+              // aria-autocomplete is not allowed on role="presentation" (axe aria-allowed-attr). The
+              // kebab-case keys are the ones the element spreads last, so these win over what Lexical sets;
+              // the camelCase props it destructures would not.
+              {...(readOnly ? { role: "presentation", "aria-readonly": undefined, "aria-autocomplete": undefined } : { ariaLabel: props.ariaLabel })}
               onFocus={(event: React.FocusEvent) => {
                 props.onEditorFocus?.(event, controller);
               }}

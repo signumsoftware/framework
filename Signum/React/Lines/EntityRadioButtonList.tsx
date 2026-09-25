@@ -61,6 +61,8 @@ export function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: En
       label={<>{getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}{p.label}</>}
       labelIcon={p.labelIcon}
       avoidFieldSet={p.avoidFieldSet}
+      role="group"
+      ariaAttributes={p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes()}
       buttons={renderButtons()}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...c.errorAttributes() }} >
       {renderRadioList()}

@@ -30,6 +30,9 @@ function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
     setShow(false);
   }
 
+  // Unique per instance: this can be raised from a dialog that is itself open.
+  const titleId = React.useId();
+
   function handleCancelClicked() {
     setShow(false);
   }
@@ -39,13 +42,17 @@ function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
   }
 
   return (
+    // aria-labelledby: the dialog had no accessible name, so it was announced as just "dialog" (WCAG 4.1.2).
+    // The header text was a bare <span>, which is also why the dialog had no heading to name it with; it is
+    // now the same modal-title h1 that MessageModal uses inside this same message-modal layout.
     <Modal show={show} onExited={handleOnExited}
       dialogClassName={classes("message-modal")}
+      aria-labelledby={titleId}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", "dialog-header-wait")}>
-        <span>
+        <h1 id={titleId} className="modal-title h5">
           {SaveChangesMessage.ThereAreChanges.niceToString()}
-        </span>
+        </h1>
       </div>
       <div className="modal-body">
         {SaveChangesMessage.YoureTryingToCloseAnEntityWithChanges.niceToString()}

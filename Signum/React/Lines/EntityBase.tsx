@@ -65,6 +65,13 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   static getMoveIcon = (): React.ReactElement => <FontAwesomeIcon icon="bars" aria-hidden />;
   static getPasteIcon = (): React.ReactElement => <FontAwesomeIcon icon="clipboard" aria-hidden />;
 
+  // These buttons show only an icon, so this title is also their accessible name. The label is appended to
+  // say which line the button belongs to, but it is optional and it is a ReactNode: when it is missing or is
+  // markup rather than plain text, the name has to stay the bare action instead of trailing a stray space.
+  static buttonTitle(action: string, label: React.ReactNode): string {
+    return typeof label == "string" && label.trim() ? action + " " + label.trim() : action;
+  }
+
   static hasChildrens(element: React.ReactElement): any {
      
     return (element.props as any).children && React.Children.toArray((element.props as any).children).length;
@@ -208,7 +215,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-view", btn ?  "input-group-text" : undefined)}
         onClick={this.handleViewClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() + " " + (this.props.label ?? "") : undefined}>
+        title={this.props.ctx.titleLabels ? EntityBaseController.buttonTitle(EntityControlMessage.View.niceToString(), this.props.label) : undefined}>
         {EntityBaseController.getViewIcon()}
       </LinkButton>
     );
@@ -329,7 +336,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-create", btn ? "input-group-text" : undefined)}
         onClick={this.handleCreateClick}
-        title={this.props.ctx.titleLabels ? (createMessage ?? EntityControlMessage.Create.niceToString() + " " + (this.props.label ?? "")) : undefined}>
+        title={this.props.ctx.titleLabels ? (createMessage ?? EntityBaseController.buttonTitle(EntityControlMessage.Create.niceToString(), this.props.label)) : undefined}>
         {EntityBaseController.getCreateIcon()}
       </LinkButton>
     );
@@ -399,7 +406,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-find", btn ? "input-group-text" : undefined)}
         onClick={this.handleFindClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.Find.niceToString() + " " + (this.props.label ?? "") : undefined}>
+        title={this.props.ctx.titleLabels ? EntityBaseController.buttonTitle(EntityControlMessage.Find.niceToString(), this.props.label) : undefined}>
         {EntityBaseController.getFindIcon()}
       </LinkButton>
     );
@@ -425,7 +432,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return (
       <LinkButton className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
         onClick={this.handleRemoveClick}
-        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() + " " + (this.props.label ?? "") : undefined}>
+        title={this.props.ctx.titleLabels ? EntityBaseController.buttonTitle(EntityControlMessage.Remove.niceToString(), this.props.label) : undefined}>
         {EntityBaseController.getRemoveIcon()}
       </LinkButton>
     );

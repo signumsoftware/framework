@@ -13,6 +13,8 @@ public static class AsyncEmailSender
     static bool running = false;
     static CancellationTokenSource CancelProcess = null!;
     static long queuedItems;
+    static int consecutiveErrors;
+    const int MaxConsecutiveErrors = 3;
     static int? initialDelayMilliseconds;
     static Guid processIdentifier;
     static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
@@ -30,6 +32,7 @@ public static class AsyncEmailSender
             LastExecutionFinishedOn = lastExecutionFinishedOn,
             IsCancelationRequested = CancelProcess != null && CancelProcess.IsCancellationRequested,
             QueuedItems = queuedItems,
+            ConsecutiveErrors = consecutiveErrors,
         };
     }
 
@@ -65,6 +68,7 @@ public static class AsyncEmailSender
                 try
                 {
                     running = true;
+                    consecutiveErrors = 0;
                     CancelProcess = new CancellationTokenSource();
                     autoResetEvent.Set();
 
@@ -105,54 +109,80 @@ public static class AsyncEmailSender
 
                             using (HeavyProfiler.Log("EmailAsyncSender", () => "Execute process"))
                             {
-                                processIdentifier = Guid.NewGuid();
-                                if (RecruitQueuedItems())
+                                try
                                 {
-                                    while (queuedItems > 0 || RecruitQueuedItems())
+                                    processIdentifier = Guid.NewGuid();
+                                    if (RecruitQueuedItems())
                                     {
-                                        var items = Database.Query<EmailMessageEntity>().Where(m =>
-                                            m.ProcessIdentifier == processIdentifier &&
-                                            m.State == EmailMessageState.RecruitedForSending)
-                                            .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
-                                        queuedItems = items.Count;
-                                        foreach (var email in items)
+                                        while (queuedItems > 0 || RecruitQueuedItems())
                                         {
-                                            CancelProcess.Token.ThrowIfCancellationRequested();
+                                            var items = Database.Query<EmailMessageEntity>().Where(m =>
+                                                m.ProcessIdentifier == processIdentifier &&
+                                                m.State == EmailMessageState.RecruitedForSending)
+                                                .Take(EmailLogic.Configuration.ChunkSizeSendingEmails).ToList();
+                                            queuedItems = items.Count;
+                                            foreach (var email in items)
+                                            {
+                                                CancelProcess.Token.ThrowIfCancellationRequested();
 
-                                            try
-                                            {
-                                                using (var tr = Transaction.ForceNew())
-                                                {
-                                                    EmailLogic.SendMail(email);
-                                                    tr.Commit();
-                                                }
-                                            }
-                                            catch
-                                            {
                                                 try
                                                 {
-                                                    if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
+                                                    using (var tr = Transaction.ForceNew())
                                                     {
-                                                        using (var tr = Transaction.ForceNew())
-                                                        {
-                                                            var nm = email.ToLite().RetrieveAndRemember();
-                                                            nm.SendRetries += 1;
-                                                            nm.State = EmailMessageState.ReadyToSend;
-                                                            nm.Save();
-                                                            tr.Commit();
-                                                        }
+                                                        EmailLogic.SendMail(email);
+                                                        tr.Commit();
                                                     }
                                                 }
-                                                catch { }
+                                                catch
+                                                {
+                                                    try
+                                                    {
+                                                        if (email.SendRetries < EmailLogic.Configuration.MaxEmailSendRetries)
+                                                        {
+                                                            using (var tr = Transaction.ForceNew())
+                                                            {
+                                                                var nm = email.ToLite().RetrieveAndRemember();
+                                                                nm.SendRetries += 1;
+                                                                nm.State = EmailMessageState.ReadyToSend;
+                                                                nm.Save();
+                                                                tr.Commit();
+                                                            }
+                                                        }
+                                                    }
+                                                    catch { }
+                                                }
+                                                queuedItems--;
                                             }
-                                            queuedItems--;
+                                            queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
+                                                m.ProcessIdentifier == processIdentifier &&
+                                                m.State == EmailMessageState.RecruitedForSending).Count();
                                         }
-                                        queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
-                                            m.ProcessIdentifier == processIdentifier &&
-                                            m.State == EmailMessageState.RecruitedForSending).Count();
+                                        lastExecutionFinishedOn = Clock.Now;
                                     }
-                                    lastExecutionFinishedOn = Clock.Now;
+
+                                    consecutiveErrors = 0;
                                 }
+                                catch (OperationCanceledException)
+                                {
+                                    throw;
+                                }
+                                catch (Exception e)
+                                {
+                                    consecutiveErrors++;
+                                    try
+                                    {
+                                        e.LogException(edn =>
+                                        {
+                                            edn.ControllerName = "EmailAsyncSender";
+                                            edn.ActionName = "ExecuteProcess";
+                                        });
+                                    }
+                                    catch { }
+
+                                    if (consecutiveErrors >= MaxConsecutiveErrors)
+                                        throw new InvalidOperationException($"EmailAsyncSender stopped after {MaxConsecutiveErrors} consecutive errors.", e);
+                                }
+
                                 SetTimer();
                                 if (CacheLogic.WithSqlDependency)
                                 {
@@ -208,8 +238,9 @@ public static class AsyncEmailSender
 
         queuedItems = Database.Query<EmailMessageEntity>().Where(m =>
             m.State == EmailMessageState.ReadyToSend &&
-            m.CreationDate  < Clock.Now &&
-            (firstDate == null ? true : m.CreationDate >= firstDate)).UnsafeUpdate()
+            (firstDate == null || m.CreationDate >= firstDate))
+            .Take(EmailLogic.Configuration.ChunkSizeSendingEmails)
+            .UnsafeUpdate()
                 .Set(m => m.ProcessIdentifier, m => processIdentifier)
                 .Set(m => m.State, m => EmailMessageState.RecruitedForSending)
                 .Execute();
@@ -267,6 +298,7 @@ public class AsyncEmailSenderState
     public DateTime? LastExecutionFinishedOn;
     public long QueuedItems;
     public Guid CurrentProcessIdentifier;
+    public int ConsecutiveErrors;
 
 }
 #pragma warning restore CS8618 // Das Non-Nullable-Feld ist nicht initialisiert. Deklarieren Sie das Feld ggf. als "Nullable".

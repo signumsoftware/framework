@@ -164,9 +164,16 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
 
   const okEnabled = p.isMany ? (p.allowNoSelection || selectedRows.current.length > 0) : selectedRows.current.length == 1;
 
+  // Unique per instance: this application opens search, selector and frame dialogs nested, so a fixed id
+  // would appear several times in the document and the reference would be ambiguous.
+  const titleId = React.useId();
+
   return (
-    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal">
-      <ModalHeaderButtons onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
+    // aria-labelledby: the dialog carries role="dialog" and aria-modal but had no accessible name, so it was
+    // announced only as "dialog". Pointing at the title heading below names it (WCAG 4.1.2).
+    <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal"
+      aria-labelledby={titleId}>
+      <ModalHeaderButtons titleId={titleId} onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
         <span className="sf-entity-title">
           {p.title}
           &nbsp;

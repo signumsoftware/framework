@@ -3,6 +3,7 @@ import { Dic } from '../Globals';
 import { Lite, is, getToString } from '../Signum.Entities'
 import { CultureInfoEntity } from '../Signum.Basics'
 import { CultureClient } from './CultureClient'
+import { dropdownActive } from '../Components/DropdownActive'
 import { NavDropdown } from 'react-bootstrap';
 import { useAPI } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -30,7 +31,7 @@ export default function CultureDropdown(p: { fullName?: boolean; isMobile?: bool
   return (
     <NavDropdown data-culture={current.name} title={dropdownTitle} className="sf-culture-dropdown">
       {Dic.map(cultures, (name, c, i) =>
-        <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
+        <NavDropdown.Item key={i} data-culture={name} {...dropdownActive(is(c, current))} onClick={() => handleSelect(c)}>
           {p.fullName ? getToString(c) : simplifyName(getToString(c)!)}
         </NavDropdown.Item>
       )}
@@ -88,7 +89,7 @@ export function CultureDropdownMenuItem(props: {
       </button>
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
-          <NavDropdown.Item key={i} data-culture={name} active={is(c, current)} onClick={() => handleSelect(c)}>
+          <NavDropdown.Item key={i} data-culture={name} {...dropdownActive(is(c, current))} onClick={() => handleSelect(c)}>
             {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
           </NavDropdown.Item>
         )}

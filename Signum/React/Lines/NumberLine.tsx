@@ -52,7 +52,9 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
   }
 
   var htmlAtts = c.props.valueHtmlAttributes;
-  var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
+  // valueHtmlAttributes last: what a caller passes explicitly has to beat the generated defaults, or a
+  // line cannot correct the name of the control it wraps. Same order as TextBoxLine and TextAreaLine.
+  var mergedHtmlReadOnly = { ...ariaAtts, ...htmlAtts };
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
@@ -88,7 +90,7 @@ function numericTextBox(c: NumberLineController, validateKey: (e: React.Keyboard
     onKeyDown: (c.props.incrementWithArrow || c.props.incrementWithArrow == undefined ) ? handleKeyDown : undefined,
     ...c.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
-  var mergedHtml = { ...htmlAttributes, ...ariaAtts };
+  var mergedHtml = { ...ariaAtts, ...htmlAttributes };
 
   const limits = numberLimits[p.type?.name!];
 

@@ -17,9 +17,12 @@ export function PaginationSelector(p: PaginationSelectorProps): React.ReactEleme
   if (!p.pagination)
     return null;
 
+  // role="status" makes the already localized result count a live region, so filtering, sorting, paging and
+  // re-running a search are announced instead of changing the table silently (WCAG 4.1.3). The role implies
+  // aria-live="polite" and aria-atomic="true", which suits this text because it is replaced as a whole.
   return (
     <div className="sf-search-footer">
-      <div className="sf-pagination-left">{renderLeft()}</div>
+      <div className="sf-pagination-left" role="status">{renderLeft()}</div>
       {renderCenter()}
       <div className="sf-pagination-right">{renderRight()}</div>
     </div>

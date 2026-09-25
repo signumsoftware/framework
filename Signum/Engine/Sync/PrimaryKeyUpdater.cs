@@ -16,6 +16,9 @@ internal class PrimaryKeyUpdater
     private IColumn type_Id;
     private IColumn type_TableName;
 
+    //Answer to the question asked by FixUnmatched, remembered for the whole synchronization when answered with '!'
+    private bool? deleteUnmatchedIBARows;
+
     public PrimaryKeyUpdater(bool isPostgres, Dictionary<string, ITable> modelTables)
     {
         this.isPostgres = isPostgres;
@@ -75,6 +78,40 @@ internal class PrimaryKeyUpdater
                     {setClause.Indent(4)}
                     FROM {targetTable} {targetAlias}
                     JOIN {sourceTable} {sourceAlias} ON {joinCondition}{(extraTable != null ? $"\nJOIN {extraTable.Value.fromEntry} ON {extraTable.Value.condition}" : "")}
+                    """;
+
+            return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
+        }
+    }
+
+    SqlPreCommandSimple DeleteJoin(
+        ObjectName targetTable,
+        Alias targetAlias,
+        ObjectName sourceTable,
+        Alias sourceAlias,
+        string joinCondition,
+        string? comment = null)
+    {
+        var header = comment == null ? "" : "--" + comment + "\n";
+
+        if (isPostgres)
+        {
+            // PostgreSQL syntax: DELETE FROM target_table target_alias USING source_table source_alias WHERE ...
+            var sql = $"""
+                    {header}DELETE FROM {targetTable} {targetAlias}
+                    USING {sourceTable} {sourceAlias}
+                    WHERE {joinCondition}
+                    """;
+
+            return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
+        }
+        else
+        {
+            // SQL Server syntax: DELETE t FROM target_table t JOIN source_table s ON ...
+            var sql = $"""
+                    {header}DELETE {targetAlias}
+                    FROM {targetTable} {targetAlias}
+                    JOIN {sourceTable} {sourceAlias} ON {joinCondition}
                     """;
 
             return new SqlPreCommandSimple(sql).Do(a => a.GoAfter = true);
@@ -224,7 +261,7 @@ internal class PrimaryKeyUpdater
         return update;
     }
 
-    public SqlPreCommand? UpdateImplementedByAll(Table table, ObjectName oldTableName, IColumn newId, DiffColumn oldId)
+    public SqlPreCommand? UpdateImplementedByAll(Table table, ObjectName oldTableName, IColumn newId, DiffColumn oldId, Replacements rep)
     {
         List<SqlPreCommand> commands = new List<SqlPreCommand>();
         foreach (var typeKvp in ibas)
@@ -237,13 +274,13 @@ internal class PrimaryKeyUpdater
                 var ibaOldId = ibKvp.Value.OfType<ImplementedByAllIdColumn>().SingleEx(a => a.DbType.Equals(oldId.DbType));
                 var ibaNewId = ibKvp.Value.OfType<ImplementedByAllIdColumn>().SingleEx(a => a.DbType.Equals(newId.DbType));
 
-                var iba = UpdateIBAIfNecesary(table, oldTableName, newId, oldId, ibaTable.Name, ibaType, ibaOldId, ibaNewId);
+                var iba = UpdateIBAIfNecesary(table, oldTableName, newId, oldId, ibaTable.Name, ibaType, ibaOldId, ibaNewId, rep);
                 if (iba != null)
                     commands.Add(iba);
 
                 if (ibaTable.SystemVersioned != null)
                 {
-                    var ibaH = UpdateIBAIfNecesary(table, oldTableName, newId, oldId, ibaTable.SystemVersioned.TableName, ibaType, ibaOldId, ibaNewId);
+                    var ibaH = UpdateIBAIfNecesary(table, oldTableName, newId, oldId, ibaTable.SystemVersioned.TableName, ibaType, ibaOldId, ibaNewId, rep);
                     if (ibaH != null)
                         commands.Add(ibaH);
                 }
@@ -258,7 +295,7 @@ internal class PrimaryKeyUpdater
     private string Esc(DiffColumn col) => col.Name.SqlEscape(isPostgres);
 
 
-    private SqlPreCommand? UpdateIBAIfNecesary(ITable table, ObjectName oldTableName, IColumn newId, DiffColumn oldId, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId, IColumn ibaNewId)
+    private SqlPreCommand? UpdateIBAIfNecesary(ITable table, ObjectName oldTableName, IColumn newId, DiffColumn oldId, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId, IColumn ibaNewId, Replacements rep)
     {
         var count = Convert.ToInt32(Executor.ExecuteScalar($"""
                     SELECT Count(*) 
@@ -288,7 +325,7 @@ internal class PrimaryKeyUpdater
                 joinCondition: $"{tableAlias}.{Esc(oldId)} = {ibaAlias}.{Esc(ibaOldId)}",
                 extraTable: ($"{type_Table.Name} type", $"type.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)} AND type.{Esc(type_TableName)} = '{oldTableName}'"));
 
-            return SqlPreCommand.Combine(Spacing.Double, simple, NullOutUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId))!;
+            return SqlPreCommand.Combine(Spacing.Double, simple, FixUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId, rep))!;
         }
         else
         {
@@ -314,23 +351,40 @@ internal class PrimaryKeyUpdater
 
             update.AlterSql(cte + "\n" + update.Sql);
 
-            return SqlPreCommand.Combine(Spacing.Double, update, NullOutUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId))!;
+            return SqlPreCommand.Combine(Spacing.Double, update, FixUnmatched(ag, oldTableName, ibaTable, ibaType, ibaOldId, rep))!;
         }
     }
 
     /// <summary>
-    /// Clears the old-typed id column of the rows the remap above could not reach: a row whose target entity had
-    /// already been deleted matches no <c>_old</c> value, so it would keep an id of the previous type for a type
-    /// that is now keyed differently. Reading such a row throws (e.g. "XEntity requires ids of type Guid, not int"),
-    /// and because these references are usually loaded through a cached table or a GlobalLazy, one stale row can
-    /// break every request rather than only the record that holds it.
-    /// <para>Only the id is cleared, not the row: the reference becomes empty instead of invalid. A table that can
-    /// not represent an empty reference has to clean up after itself, the way TranslatedInstanceRowIds does.</para>
+    /// Deals with the rows the remap above could not reach: a row whose target entity had already been deleted
+    /// matches no <c>_old</c> value, so it would keep an id of the previous type for a type that is now keyed
+    /// differently. Reading such a row throws (e.g. "XEntity requires ids of type Guid, not int"), and because
+    /// these references are usually loaded through a cached table or a GlobalLazy, one stale row can break every
+    /// request rather than only the record that holds it.
+    /// <para>What to do with the row depends on whether the reference is optional, which is what the type column
+    /// records: the id columns are always nullable when more than one primary key type is configured, so they say
+    /// nothing about the field. An optional reference (OperationLog.Target) just becomes empty and the row, which
+    /// is meaningful on its own, is kept. A required one (TranslatedInstance.Instance) can not become empty, and a
+    /// row with no id in any of its id columns is no more readable than the stale one, so the row goes with its
+    /// target, after asking: deleting rows is not something to decide on the author's behalf.</para>
     /// </summary>
-    private SqlPreCommand NullOutUnmatched(AliasGenerator ag, ObjectName oldTableName, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId)
+    private SqlPreCommand FixUnmatched(AliasGenerator ag, ObjectName oldTableName, ObjectName ibaTable, IColumn ibaType, IColumn ibaOldId, Replacements rep)
     {
         var ibaAlias = ag.NextTableAlias(ibaTable.Name);
         var typeAlias = ag.NextTableAlias(type_Table.Name.Name);
+
+        var condition = $"""
+            {typeAlias}.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)}
+                AND {typeAlias}.{Esc(type_TableName)} = '{oldTableName}'
+                AND {ibaAlias}.{Esc(ibaOldId)} IS NOT NULL
+            """;
+
+        if (!ibaType.Nullable.ToBool() && AskDeleteUnmatched(oldTableName, ibaTable, ibaType, rep))
+            return DeleteJoin(
+                targetTable: ibaTable, targetAlias: ibaAlias,
+                sourceTable: type_Table.Name, sourceAlias: typeAlias,
+                joinCondition: condition,
+                comment: $"The target no longer exists, so the remap above could not reach this row, and {ibaTable.Name}.{ibaType.Name} can not be null: the row is deleted");
 
         return UpdateJoin(
             targetTable: ibaTable, targetAlias: ibaAlias,
@@ -339,11 +393,22 @@ internal class PrimaryKeyUpdater
             {Esc(ibaOldId)} = null
             """,
             sourceTable: type_Table.Name, sourceAlias: typeAlias,
-            joinCondition: $"""
-            {typeAlias}.{Esc(type_Id)} = {ibaAlias}.{Esc(ibaType)}
-                AND {typeAlias}.{Esc(type_TableName)} = '{oldTableName}'
-                AND {ibaAlias}.{Esc(ibaOldId)} IS NOT NULL
-            """);
+            joinCondition: condition);
+    }
+
+    /// <summary>
+    /// Asks before emitting the DELETE of <see cref="FixUnmatched"/>. Answering no falls back to clearing the id,
+    /// which leaves rows the application can not read, so it is worth seeing the question rather than the script.
+    /// Unattended, the rows are deleted: the script is still reviewed before it is run.
+    /// </summary>
+    private bool AskDeleteUnmatched(ObjectName oldTableName, ObjectName ibaTable, IColumn ibaType, Replacements rep)
+    {
+        if (!rep.Interactive)
+            return true;
+
+        return SafeConsole.Ask(ref deleteUnmatchedIBARows,
+            $"Delete the rows of {ibaTable} that point to a {oldTableName} that no longer exists? " +
+            $"({ibaTable.Name}.{ibaType.Name} is not nullable, so they can not be emptied instead)");
     }
 
     #region TEMPORARY Guid primary key migration (added 2026-09)

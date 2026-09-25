@@ -132,7 +132,7 @@
     <Member Name="SentException" Description="Errore invio" />
   </Type>
   <Type Name="EmailModelEntity" Description="il modello Email" PluralDescription="Modelli di posta elettronica">
-    <Member Name="FullClassName" Description="Nome completo della classe" />
+    <Member Name="ClassName" Description="Nome della classe" />
   </Type>
   <Type Name="EmailPackageEntity" Description="Pacchetto di posta elettronica">
     <Member Name="Name" Description="Nome" />

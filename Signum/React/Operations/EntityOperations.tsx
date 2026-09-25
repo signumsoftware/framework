@@ -26,6 +26,8 @@ export namespace EntityOperations {
     const operations = Operations.operationInfos(ti)
       .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
       .filter(oi => ctx.pack.entity.isNew || oi.key in ctx.pack.canExecute)
+      .filter(oi => !ctx.filter || ctx.filter.split("~").some(f => oi.niceName.toLowerCase().includes(f.toLowerCase())))
+      .filter(oi => !ctx.operations || ctx.operations.split("~").some(opt => oi.key.toLowerCase().endsWith(`.${opt.toLowerCase()}`)))
       .map(oi => {
 
         const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
@@ -40,6 +42,9 @@ export namespace EntityOperations {
       .filter(eoc => eoc.isVisibleInButtonBar(ctx));
 
     operations.forEach(eoc => eoc.complete());
+
+    if (ctx.filter || ctx.operations)
+      return operations.flatMap((eoc, j) => eoc.createButton()); 
 
     const groups = operations.groupBy(eoc => eoc.group && eoc.group.key || "");
 

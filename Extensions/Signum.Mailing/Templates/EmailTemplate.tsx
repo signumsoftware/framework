@@ -18,6 +18,7 @@ import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Qu
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
 import { SubTokensOptions } from '@framework/QueryToken'
 import { LinkButton } from '@framework/Basics/LinkButton'
+import { replaceCidImages } from './CidImages'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
@@ -248,6 +249,12 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
       forceUpdate();
   }
 
+  function manipulateDom(doc: Document) {
+    const template = p.ctx.tryFindParent(EmailTemplateEntity);
+    if (template != null)
+      replaceCidImages(doc, template.attachments);
+  }
+
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (
     <div className="sf-email-template-message">
@@ -269,7 +276,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
             EmailTemplateMessage.HidePreview.niceToString() :
             EmailTemplateMessage.ShowPreview.niceToString()}
         </LinkButton>}
-        {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} />}
+        {showPreview && <IFrameRenderer style={{ width: "100%", minHeight: "800px" }} html={ec.value.text} manipulateDom={manipulateDom} />}
       </div>
     </div>
   );

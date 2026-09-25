@@ -472,6 +472,8 @@ export interface ButtonsContext {
   frame: EntityFrame<ModifiableEntity>;
   isOperationVisible?: (eoc: EntityOperationContext<any /*Entity*/>) => boolean;
   tag?: string;
+  operations?: string;
+  filter?: string;
 }
 
 export interface ButtonBarElement {

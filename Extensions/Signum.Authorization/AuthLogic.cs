@@ -663,6 +663,9 @@ public static class AuthLogic
             roles.Values.SaveList();
     }
 
+    public static void SynchronizeRoles(string fileName = "AuthRules.xml", bool interactive = false, Func<AutoReplacementContext, Selection?>? autoReplacement = null) =>
+        SynchronizeRoles(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, fileName)), false, autoReplacement);
+
     public static void SynchronizeRoles(XDocument doc, bool interactive, Func<AutoReplacementContext, Selection?>? autoReplacement = null)
     {
         Table table = Schema.Current.Table(typeof(RoleEntity));
@@ -871,37 +874,29 @@ public static class AuthLogic
     }
 
 
-    public static void AutomaticImportAuthRules()
-    {
-        AutomaticImportAuthRules("AuthRules.xml");
-    }
+    public static void ImportAuthRules(string fileName = "AuthRules.xml", bool interactive = false) =>
+        ImportAuthRules(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, fileName)), false);
 
     public static void ImportAuthRules(XDocument authRules, bool interactive)
     {
-        AuthLogic.ImportRulesScript(authRules, interactive: interactive)?.PlainSqlCommand().ExecuteLeaves();
-
-        Schema.Current.InvalidateCache();
-    }
-
-    public static void AutomaticImportAuthRules(string fileName)
-    {
         Schema.Current.Initialize();
-        var script = AuthLogic.ImportRulesScript(XDocument.Load(Path.Combine(AppDomain.CurrentDomain.BaseDirectory!, fileName)), interactive: false);
+        var script = AuthLogic.ImportRulesScript(authRules, interactive: false);
         if (script == null)
         {
-            SafeConsole.WriteColor(ConsoleColor.Green, "AuthRules already synchronized");
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "AuthRules already synchronized");
             return;
         }
 
         using (var tr = new Transaction())
         {
-            SafeConsole.WriteColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
-            SafeConsole.WriteColor(ConsoleColor.DarkYellow, script.PlainSql());
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, script.PlainSql());
 
             script.PlainSqlCommand().ExecuteLeaves();
             tr.Commit();
         }
 
+        Schema.Current.InvalidateCache();
         SystemEventLogLogic.Log("Import AuthRules");
     }
 

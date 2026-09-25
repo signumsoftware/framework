@@ -10,7 +10,6 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { OperationSymbol } from '@framework/Signum.Operations'
 import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
-import { useDragAndDrop } from './TypeRulePackControl'
 import SelectorModal from '../../../Signum/React/SelectorModal';
 import { AccessibleRow, AccessibleTable } from '../../../Signum/React/Basics/AccessibleTable'
 import { LinkButton } from '../../../Signum/React/Basics/LinkButton'
@@ -181,8 +180,6 @@ function OperationTable(p: {
 }
 
 function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<OperationAllowed>) => Binding<OperationAllowed> }): React.JSX.Element {
-  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
-
   const allowedBinding = p.getBidning(p.tctx.value.allowed);
   const allowedBaseBinding = p.getBidning(p.tctx.value.allowedBase);
   const coercedBinding = p.getBidning(p.tctx.value.coerced);

@@ -34,7 +34,9 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity>, smallMod
       return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
 
     if (p.ctx.value.textPartType == "HTML")
-      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)}  />)
+      // Named explicitly: this is the bare editor rather than HtmlEditorLine, so there is no label beside
+      // it, and an editable div reaches a screen reader with no name of its own (WCAG 4.1.2).
+      return (<HtmlEditor binding={Binding.create(ctx.value, e => e.textContent)} ariaLabel={ctx.niceName(e => e.textContent)} />)
 
     return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
   }

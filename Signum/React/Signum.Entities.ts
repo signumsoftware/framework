@@ -429,6 +429,7 @@ export namespace EntityControlMessage {
   export const Added: MessageKey = new MessageKey("EntityControlMessage", "Added");
   export const RemovedAndSelectedAgain: MessageKey = new MessageKey("EntityControlMessage", "RemovedAndSelectedAgain");
   export const Selected: MessageKey = new MessageKey("EntityControlMessage", "Selected");
+  export const Actions: MessageKey = new MessageKey("EntityControlMessage", "Actions");
   export const Edit: MessageKey = new MessageKey("EntityControlMessage", "Edit");
   export const Reload: MessageKey = new MessageKey("EntityControlMessage", "Reload");
   export const Download: MessageKey = new MessageKey("EntityControlMessage", "Download");
@@ -677,6 +678,7 @@ export namespace SearchMessage {
   export const Field: MessageKey = new MessageKey("SearchMessage", "Field");
   export const ColumnField: MessageKey = new MessageKey("SearchMessage", "ColumnField");
   export const AddColumn: MessageKey = new MessageKey("SearchMessage", "AddColumn");
+  export const AddField: MessageKey = new MessageKey("SearchMessage", "AddField");
   export const CollectionsCanNotBeAddedAsColumns: MessageKey = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
   export const InvalidColumnExpression: MessageKey = new MessageKey("SearchMessage", "InvalidColumnExpression");
   export const AddFilter: MessageKey = new MessageKey("SearchMessage", "AddFilter");
@@ -809,6 +811,13 @@ export namespace SelectorMessage {
 export namespace SynchronizerMessage {
   export const EndOfSyncScript: MessageKey = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
   export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
+}
+
+export namespace ThemeModeMessage {
+  export const Theme: MessageKey = new MessageKey("ThemeModeMessage", "Theme");
+  export const Light: MessageKey = new MessageKey("ThemeModeMessage", "Light");
+  export const Dark: MessageKey = new MessageKey("ThemeModeMessage", "Dark");
+  export const Auto: MessageKey = new MessageKey("ThemeModeMessage", "Auto");
 }
 
 export namespace VoidEnumMessage {

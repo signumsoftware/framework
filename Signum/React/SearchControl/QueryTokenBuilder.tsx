@@ -4,10 +4,13 @@ import { Finder } from '../Finder'
 import { QueryDescription } from '../FindOptions'
 import { SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../QueryToken'
 import { QueryToken } from '../QueryToken';
+import { FilterFieldMessage } from '../Signum.DynamicQuery.Tokens'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets-up'
+import { useDropdownListSearchLabel } from '../Components/DropdownListSearch'
 import { StyleContext } from '../Lines';
+import { SearchMessage } from '../Signum.Entities';
 import { useAPI, useForceUpdate } from '../Hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -170,6 +173,10 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
 
   const [open, setOpen] = React.useState(p.defaultOpen)
 
+  // The widget's own typeahead input has no name of its own - see useDropdownListSearchLabel. This picker
+  // chooses a field of the query, which is what it is called everywhere else in the filter designer.
+  const searchLabel = useDropdownListSearchLabel(FilterFieldMessage.Field.niceToString());
+
 
   if (subTokens != undefined && subTokens.length == 0)
     return null;
@@ -179,6 +186,7 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
     <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
       {p.selectedToken || p.parentToken == null || p.defaultOpen ?
         <DropdownList
+          {...searchLabel}
           disabled={p.readOnly}
           selectIcon={open && doAutoExpand ? <FontAwesomeIcon aria-hidden={true} icon="magnifying-glass" /> : undefined}
           onToggle={isOpen => setOpen(isOpen)}
@@ -196,7 +204,9 @@ export function QueryTokenPart(p: QueryTokenPartProps): React.ReactElement | nul
           renderListItem={a => <QueryTokenListItem item={a.item} ancestor={p.parentToken} />}
           defaultOpen={p.defaultOpen}
           busy={!p.readOnly && subTokens == undefined}
-        /> : <button type="button" className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
+        /> : <button type="button" className="btn btn-sm sf-query-token-plus"
+          aria-label={SearchMessage.AddField.niceToString()} title={SearchMessage.AddField.niceToString()}
+          onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
           <FontAwesomeIcon aria-hidden={true} icon="plus" />
         </button>}
     </div>

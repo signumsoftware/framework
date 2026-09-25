@@ -44,6 +44,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
   const forceUpdate = useForceUpdate();
   const location = useLocation();
 
+  // See UserChartMenu: this menu, that one and the other shared one fixed id between them, so a
+  // single search control rendering two of them was already enough to duplicate it.
+  const toggleId = React.useId();
+
 
   function setCurrentEntity(entity: Lite<Entity> | undefined) {
     setCurrentEntityInternal(entity);
@@ -328,7 +332,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
     <Dropdown
       title={[UserQueryEntity.nicePluralName(), currentUserQueryToStr].notNull().join(" - ")}
       onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary" >
+      <Dropdown.Toggle id={toggleId} variant="tertiary" >
         {label}
       </Dropdown.Toggle>
       <Dropdown.Menu>

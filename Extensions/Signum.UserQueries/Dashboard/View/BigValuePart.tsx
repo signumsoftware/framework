@@ -55,6 +55,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
         p.dashboardController.registerInvalidations(p.partEmbedded, () => updateVersion());
       }
     }
+    return () => p.dashboardController.tryRemoveInvalidations(p.partEmbedded);
   }, [fo, p.partEmbedded]);
 
   //const cachedQuery = p.content.userQuery && p.cachedQueries[liteKey(toLite(p.content.userQuery))];

@@ -58,6 +58,7 @@ public static class EmailLogic
             FileTypeLogic.Register(EmailFileType.Attachment, attachment);
 
         sb.Include<EmailMessageEntity>()
+            .WithIndex(e => new { e.State, e.CreationDate })
             .WithQuery(() => e => new
             {
                 Entity = e,
@@ -314,7 +315,7 @@ public static class EmailLogic
             {
                 CanBeNew = true,
                 CanBeModified = true,
-                FromStates = { EmailMessageState.Created, EmailMessageState.Outdated },
+                FromStates = { EmailMessageState.Created, EmailMessageState.Outdated, EmailMessageState.Draft },
                 ToStates = { EmailMessageState.Draft },
                 Execute = (m, _) =>
                 {

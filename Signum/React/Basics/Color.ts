@@ -184,8 +184,19 @@ export class Color {
     );
   }
 
+  /** Black or white, whichever contrasts more against this colour. */
   opositePole(): Color {
-    return (this.r + this.g + this.b) / 3 > (256 / 2) ? Color.Black : Color.White;
+    // Relative luminance, not the plain RGB average. Green contributes far more to perceived brightness
+    // than blue does, and the average also sits exactly on the fence for mid grey: #808080 averages to
+    // 128, failed the `> 128` test and so got white text at 3.94:1, where black would have given 5.32:1.
+    const toLinear = (v: number) => {
+      const s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+    };
+    const l = 0.2126 * toLinear(this.r) + 0.7152 * toLinear(this.g) + 0.0722 * toLinear(this.b);
+    const contrastWithBlack = (l + 0.05) / 0.05;
+    const contrastWithWhite = 1.05 / (l + 0.05);
+    return contrastWithBlack >= contrastWithWhite ? Color.Black : Color.White;
   }
 
   static parse(color: string): Color {

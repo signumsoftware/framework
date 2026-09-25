@@ -15,6 +15,7 @@ export interface IToolbarEntity extends Entities.Entity {
 export namespace LayoutMessage {
   export const JumpToMainContent: MessageKey = new MessageKey("LayoutMessage", "JumpToMainContent");
   export const SelectA0_G: MessageKey = new MessageKey("LayoutMessage", "SelectA0_G");
+  export const MainNavigation: MessageKey = new MessageKey("LayoutMessage", "MainNavigation");
 }
 
 export const ShowCount: EnumType<ShowCount> = new EnumType<ShowCount>("ShowCount");

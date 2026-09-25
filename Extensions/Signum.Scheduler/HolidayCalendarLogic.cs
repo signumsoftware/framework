@@ -89,6 +89,24 @@ public static class HolidayCalendarLogic
         }.Register();
     }
 
+    public static DateOnly AddWorkingDays(DateOnly date, int workingDays, HolidayCalendarEntity? calendar)
+    {
+        while (workingDays > 0)
+        {
+            date = date.AddDays(1);
+
+            if (date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
+                continue;
+
+            if (calendar != null && calendar.IsHoliday(date))
+                continue;
+
+            workingDays--;
+        }
+
+        return date;
+    }
+
     public static List<string>? GetCountries()
     {
         var countriesJson = new HttpClient().GetStringAsync("https://date.nager.at/api/v3/AvailableCountries").Result;

@@ -61,6 +61,11 @@ public static class UserChartLogic
                 uq.Owner,
             });
 
+        new Graph<UserChartEntity>.ConstructFrom<UserChartEntity>(UserChartOperation.Clone)
+        {
+            Construct = (uc, _) => uc.Clone()
+        }.Register();
+
         sb.Schema.WhenIncluded<ToolbarEntity>(() =>
         {
             sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserChartEntity));

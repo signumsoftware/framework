@@ -164,7 +164,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         if (result.EntityType != type)
             throw new InvalidOperationException("Types don't match");
 
-        if (result.IdOrNull != idOrNull)
+        if (idOrNull != null && result.IdOrNull != idOrNull)
             throw new InvalidOperationException("Id's don't match");
 
         var existing = existingValue as Lite<T>;

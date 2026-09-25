@@ -19,6 +19,11 @@ export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAt
 
   const helpTextOnTopResolved: React.ReactNode = typeof helpTextOnTop == "function" ? undefined : helpTextOnTop;
 
+  // The visible label sits on the FormGroup below, while the control inside it is named from the property,
+  // so the field said one thing on screen ("Please describe the current status of implementation") and
+  // announced another ("Implementation status and schedule") — WCAG 2.5.3, and confusing either way.
+  const accessibleLabel = typeof label === "string" ? label : ctx.niceName();
+
   React.useEffect(() => {
     setPreview(isReadOnly);
   }, [isReadOnly]);
@@ -68,6 +73,7 @@ export function MarkdownLine({ ctx, markdownOption, readOnly, label, valueHtmlAt
             {...p}
             valueHtmlAttributes={{
               ...valueHtmlAttributes,
+              "aria-label": accessibleLabel,
               style: { minHeight: 80, ...valueHtmlAttributes?.style },
             }} />}
       </FormGroup>

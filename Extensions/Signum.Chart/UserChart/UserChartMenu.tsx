@@ -28,6 +28,10 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
   const forceUpdate = useForceUpdate();
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState(false);
+  // Three separate menus - this one, the user query menu and the Excel menu - all carried the same
+  // fixed id, so a search control showing two of them put a duplicate in the document on its own,
+  // without needing a second search control. useId gives each instance its own.
+  const toggleId = React.useId();
   const [userCharts, setUserCharts] = React.useState<Lite<UserChartEntity>[] | undefined>(undefined);
 
   React.useEffect(() => {
@@ -177,7 +181,7 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
 
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
-      <Dropdown.Toggle id="userQueriesDropDown" variant="tertiary">
+      <Dropdown.Toggle id={toggleId} variant="tertiary">
         <span><FontAwesomeIcon icon="chart-bar" /> &nbsp; {label}</span>
       </Dropdown.Toggle>
       <Dropdown.Menu>

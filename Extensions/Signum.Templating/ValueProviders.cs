@@ -285,7 +285,7 @@ public class TokenValueProvider : ValueProviderBase
         var cat = ParsedToken.QueryToken?.HasCollectionToArray();
         if (cat != null)
         {
-            var array = (IEnumerable<object>)(value ?? Array.Empty<object>());
+            var array = ((value as IEnumerable)?.Cast<object>() ?? Array.Empty<object>());
 
             var separator = cat.ToArrayType == CollectionToArrayType.SeparatedByNewLine || cat.ToArrayType == CollectionToArrayType.SeparatedByNewLineDistinct ? "\n" : ", ";
 

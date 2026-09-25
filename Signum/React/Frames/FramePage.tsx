@@ -5,7 +5,7 @@ import { Constructor } from '../Constructor'
 import { useBlocker, useLocation, useParams } from "react-router-dom"
 import { Finder } from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
-import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
+import { Entity, Lite, getToString, EntityPack, FrameMessage, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'
 import { getTypeInfo, TypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, parseId, OperationType } from '../Reflection'
 import { renderWidgets,  WidgetContext } from './Widgets'
@@ -20,6 +20,7 @@ import { useTitle } from '../AppContext'
 import { FunctionalAdapter, usePageUIState } from '../Modals'
 import { QueryString } from '../QueryString'
 import { classes } from '../Globals'
+import { computeHasChanges } from './FrameModal'
 
 interface FramePageState {
   pack: EntityPack<Entity>;
@@ -53,7 +54,16 @@ export default function FramePage(): React.ReactElement {
   if (state && id != null && state.pack.entity.id != id)
     state = undefined;
 
-  useTitle(getToString(state?.pack.entity) ?? "", [state?.pack.entity]);
+  // A new entity has no toString yet, so every /create/<Type> page fell back to the bare application name
+  // and none of them could be told apart in the tab or by a screen reader (WCAG 2.4.2). The same wording the
+  // heading uses, so the two agree.
+  // isNew first, in the same order Navigator.renderEntity uses for the heading — a new entity can carry a
+  // blank-but-not-empty toString, which short-circuits ahead of it and leaves the tab reading " - PMflexONE"
+  // while the heading says "New Milestone". Falling back to the type name keeps it from ever being empty.
+  useTitle(
+    state?.pack.entity.isNew ? FrameMessage.New0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) :
+      getToString(state?.pack.entity) || (ti.niceName ?? ti.name),
+    [state?.pack.entity]);
 
   usePageUIState(() => ({ name: "FramePage", context: state?.pack ?? null }));
 
@@ -110,7 +120,7 @@ export default function FramePage(): React.ReactElement {
 
 
   useWindowEvent("beforeunload", e => {
-    if (stateRef.current && hasChanges(stateRef.current)) {
+    if (stateRef.current && computeHasChanges(stateRef.current, entityComponent)) {
       e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
       e.returnValue = '';   // Chrome requires returnValue to be set
     }
@@ -340,7 +350,7 @@ export default function FramePage(): React.ReactElement {
       {renderTitle()}
       <div style={state.executing == true ? { opacity: ".7" } : undefined}>
         <div className="sf-button-widget-container">
-          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} />}
+          {entityComponent.current && <ButtonBar ref={buttonBar} frame={frame} pack={state.pack} operations={QueryString.parse(location.search)["operations"]} />}
         </div>
         <ValidationErrors ref={validationErrors} entity={state.pack.entity} prefix="framePage" />
         <WidgetEmbedded widgetContext={wc} >
@@ -364,12 +374,14 @@ export default function FramePage(): React.ReactElement {
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 
+    // The sub-title and the widgets are a block of their own, which a heading is not allowed to contain.
+    // The heading keeps the entity title alone - which is also what should name the page - and the block
+    // becomes its sibling, with the wrapper carrying the framing the h1 used to.
     return (
-      <h1 className={classes("border-bottom pb-3 mb-2 h4", settings?.stickyHeader && "sf-sticky-header")} >
-        {title && <>
-          <span className="sf-entity-title">{title}</span>&nbsp;
-        </>
-        }
+      <div className={classes("border-bottom pb-3 mb-2", settings?.stickyHeader && "sf-sticky-header")}>
+        <h1 className="h4 mb-0">
+          {title && <span className="sf-entity-title">{title}</span>}
+        </h1>
         {(subTitle || widgets) &&
           <div className="sf-entity-sub-title mt-2">
             {subTitle && <small className="sf-type-nice-name text-muted"> {subTitle}</small>}
@@ -377,26 +389,10 @@ export default function FramePage(): React.ReactElement {
             <br />
           </div>
         }
-      </h1>
+      </div>
     );
   }
 }
-
-function hasChanges(state: FramePageState) {
-
-  if (state.executing)
-    return false;
-
-  const entity = state.pack.entity;
-  const ge = GraphExplorer.propagateAll(entity);
-  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
-    return true
-  }
-
-  return false;
-}
-
-
 
 export function useLooseChanges(pair?: { entity: ModifiableEntity, lastEntity: string }): void {
 

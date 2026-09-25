@@ -55,9 +55,13 @@ function TreeModal(p : TreeModalProps): React.JSX.Element {
 
   const okEnabled = selectedNodeRef.current != null;
 
+  // aria-labelledby names the dialog from its own title: it carried role="dialog" and aria-modal but no
+  // accessible name, so it was announced as just "dialog" (WCAG 4.1.2). useId because dialogs here are
+  // opened nested, so a fixed id could appear twice in the document.
+  const titleId = React.useId();
   return (
-    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited}>
-      <ModalHeaderButtons onClose={handleCancelClicked}>
+    <Modal size="lg" onHide={handleCancelClicked} show={show} onExited={handleOnExited} aria-labelledby={titleId}>
+      <ModalHeaderButtons titleId={titleId} onClose={handleCancelClicked}>
         <span className="sf-entity-title"> {p.title ?? getTypeInfo(p.treeOptions.typeName).nicePluralName}</span>
         &nbsp;
         <LinkButton className="sf-popup-fullscreen" title={FrameMessage.Fullscreen.niceToString()} onClick={(e) => treeViewRef.current

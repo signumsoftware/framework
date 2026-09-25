@@ -258,9 +258,12 @@ function CaseFramePage(): React.JSX.Element {
     const subTitle = CaseFramePage.Options.showSubTitle ? Navigator.getTypeSubTitle(pack.activity, undefined) : undefined;
     var settings = mainEntity && Navigator.getSettings(mainEntity.Type);
 
+    // As in FramePage: the sub-title block cannot sit inside the heading.
     return (
-      <h3 className="border-bottom pb-3">
-        <span className="sf-entity-title">{Navigator.renderEntity(pack.activity)}</span>
+      <div className="border-bottom pb-3">
+        <h3 className="mb-0">
+          <span className="sf-entity-title">{Navigator.renderEntity(pack.activity)}</span>
+        </h3>
         {
           (subTitle || widgets) &&
           <div className="sf-entity-sub-title">
@@ -268,7 +271,7 @@ function CaseFramePage(): React.JSX.Element {
             {widgets}
           </div>
         }
-      </h3>
+      </div>
     );
   }
 }

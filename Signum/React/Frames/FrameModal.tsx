@@ -64,6 +64,9 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
   const entityComponent = React.useRef<React.Component>(null);
   const validationErrors = React.useRef<ValidationErrorsHandle>(null);
   const frameRef = React.useRef<EntityFrame<T> | undefined>(undefined);
+  // Names the dialog via aria-labelledby on the <Modal> below (WCAG 4.1.2). Unique per instance because
+  // search, selector and frame dialogs are opened nested here, so a fixed id would be ambiguous.
+  const titleId = React.useId();
 
   const forceUpdate = useForceUpdate();
 
@@ -172,22 +175,7 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
   }
 
   function hasChanges() {
-
-    const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
-    if (hc?.entityHasChanges) {
-      var result = hc.entityHasChanges();
-      if (result != null)
-        return result;
-    }
-
-    if (state == null)
-      return false;
-
-    const entity = state.pack.entity;
-
-    const ge = GraphExplorer.propagateAll(entity);
-
-    return entity.modified && JSON.stringify(entity) != state.lastEntity;
+    return state != null && computeHasChanges(state, entityComponent);
   }
 
   function handleCancelClicked() {
@@ -308,8 +296,9 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
       dialogClassName={classes(settings?.modalDialogClass, settings?.modalMaxWidth ? "modal-max-width" : undefined)}
       enforceFocus={settings?.enforceFocusInModal ?? true}
       fullscreen={settings?.modalFullScreen ? true : undefined}
+      aria-labelledby={titleId}
     >
-      <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
+      <ModalHeaderButtons titleId={titleId} onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
         <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
       </ModalHeaderButtons>
       {state && renderBody(state)}
@@ -440,5 +429,33 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
     var vp = getViewPromise && getViewPromise(entity);
     AppContext.pushOrOpenInTab(Navigator.navigateRoute(entity as Entity, typeof vp == "string" ? vp : undefined), e);
   }
+}
+
+export interface HasChangesState {
+  executing?: boolean;
+  lastEntity: string;
+  pack: EntityPack<ModifiableEntity>;
+}
+
+export function computeHasChanges(state: HasChangesState, entityComponent: React.RefObject<React.Component | null>): boolean {
+
+  if (state.executing)
+    return false;
+
+  const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
+  if (hc?.entityHasChanges) {
+    var result = hc.entityHasChanges();
+    if (result != null)
+      return result;
+  }
+
+  const entity = state.pack.entity;
+
+  GraphExplorer.propagateAll(entity);
+  if (entity.modified && JSON.stringify(entity) != state.lastEntity) {
+    return true
+  }
+
+  return false;
 }
 

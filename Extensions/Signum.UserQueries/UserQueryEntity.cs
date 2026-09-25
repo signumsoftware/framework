@@ -186,6 +186,33 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             default: return null;
         }
     }
+
+    public UserQueryEntity Clone()
+    {
+        return new UserQueryEntity
+        {
+            Query = this.Query,
+            GroupResults = this.GroupResults,
+            EntityType = this.EntityType,
+            HideQuickLink = this.HideQuickLink,
+            ShowTitleAsBreadcrumb = this.ShowTitleAsBreadcrumb,
+            IncludeDefaultFilters = this.IncludeDefaultFilters,
+            Owner = this.Owner,
+            DisplayName = "Clone {0}".FormatWith(this.DisplayName),
+            CreateTitle = this.CreateTitle,
+            AppendFilters = this.AppendFilters,
+            RefreshMode = this.RefreshMode,
+            Filters = this.Filters.Select(f => f.Clone()).ToMList(),
+            Orders = this.Orders.Select(o => o.Clone()).ToMList(),
+            ColumnsMode = this.ColumnsMode,
+            Columns = this.Columns.Select(c => c.Clone()).ToMList(),
+            PaginationMode = this.PaginationMode,
+            ElementsPerPage = this.ElementsPerPage,
+            SystemTime = this.SystemTime?.Clone(),
+            HealthCheck = this.HealthCheck?.Clone(),
+            CustomDrilldowns = this.CustomDrilldowns.ToMList(),
+        };
+    }
 }
 
 public class SystemTimeEmbedded : EmbeddedEntity
@@ -273,6 +300,18 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
         return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
+
+    internal SystemTimeEmbedded Clone() => new SystemTimeEmbedded
+    {
+        Mode = Mode,
+        StartDate = StartDate,
+        EndDate = EndDate,
+        JoinMode = JoinMode,
+        TimeSeriesUnit = TimeSeriesUnit,
+        TimeSeriesStep = TimeSeriesStep,
+        TimeSeriesMaxRowsPerStep = TimeSeriesMaxRowsPerStep,
+        SplitQueries = SplitQueries,
+    };
 }
 
 public class UserQueryLiteModel : ModelEntity
@@ -306,6 +345,7 @@ public static class UserQueryPermission
 public static class UserQueryOperation
 {
     public static ExecuteSymbol<UserQueryEntity> Save;
+    public static ConstructSymbol<UserQueryEntity>.From<UserQueryEntity> Clone;
     public static DeleteSymbol<UserQueryEntity> Delete;
 }
 
@@ -594,6 +634,12 @@ public class HealthCheckEmbedded : EmbeddedEntity
 
         return base.PropertyValidation(pi);
     }
+
+    internal HealthCheckEmbedded Clone() => new HealthCheckEmbedded
+    {
+        FailWhen = FailWhen?.Clone(),
+        DegradedWhen = DegradedWhen?.Clone(),
+    };
 }
 
 public class HealthCheckConditionEmbedded : EmbeddedEntity
@@ -604,4 +650,10 @@ public class HealthCheckConditionEmbedded : EmbeddedEntity
 
     [Ignore]
     internal Func<int, bool> _CachedPredicate;
+
+    internal HealthCheckConditionEmbedded Clone() => new HealthCheckConditionEmbedded
+    {
+        Operation = Operation,
+        Value = Value,
+    };
 }

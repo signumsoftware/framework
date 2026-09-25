@@ -55,4 +55,10 @@ public class ChartParameterEmbedded : EmbeddedEntity
     {
         return Name + ": " + Value;
     }
+
+    public ChartParameterEmbedded Clone() => new ChartParameterEmbedded
+    {
+        Name = Name,
+        Value = Value,
+    };
 }

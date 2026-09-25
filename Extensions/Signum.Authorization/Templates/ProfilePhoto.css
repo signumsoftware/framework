@@ -11,6 +11,11 @@
 }
 
 .small-user-profile-photo {
+    /* inline-flex because the element is a span: it has to sit in an inline context without breaking
+       the line, and still center its image the way the block-level wrapper used to. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50% !important;
 }
 .small-user-profile-photo img {

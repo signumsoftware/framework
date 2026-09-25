@@ -153,11 +153,12 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
         {(onRemove || move || drag || itemExtraButtons || title) &&
           <legend>
             {renderLegend ? renderLegend({ title, buttons }) :
-              <div className="d-flex">
+              // A span, not a div: a legend takes phrasing content only. d-flex is unchanged.
+              <span className="d-flex">
                 {buttons}
                 {title && '\xa0'}
                 {title}
-              </div>}
+              </span>}
           </legend>}
         <div className="sf-line-entity">
           <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />

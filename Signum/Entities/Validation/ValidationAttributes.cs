@@ -328,7 +328,7 @@ public class TelephoneValidatorAttribute : RegexValidatorAttribute
 }
 public class AlphanumericOnlyValidatorAttribute : RegexValidatorAttribute
 {
-    public static Regex AlphanumericOnlyRegex = new Regex($@"[A-Za-z0-9]");
+    public static Regex AlphanumericOnlyRegex = new Regex(@"^[A-Za-z0-9]*$");
 
     public AlphanumericOnlyValidatorAttribute()
         : base(AlphanumericOnlyRegex)
@@ -343,7 +343,7 @@ public class AlphanumericOnlyValidatorAttribute : RegexValidatorAttribute
 
 public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
 {
-    public static Regex MultipleTelephoneRegex = new Regex(@"^[\p{Nd}+\-/() ](,\s*[\p{Nd}+\-/() ])*");
+    public static Regex MultipleTelephoneRegex = new Regex(@"^[\p{Nd}+\-/() ]+(,\s*[\p{Nd}+\-/() ]+)*$");
 
     public MultipleTelephoneValidatorAttribute()
         : base(MultipleTelephoneRegex)
@@ -358,8 +358,8 @@ public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
 
 public class IdentifierValidatorAttribute : RegexValidatorAttribute
 {
-    public static Regex PascalAscii = new Regex(@"^[A-Z[_a-zA-Z0-9]*$");
-    public static Regex Ascii = new Regex(@"^[_a-zA-Z[_a-zA-Z0-9]*$");
+    public static Regex PascalAscii = new Regex(@"^[A-Z][_a-zA-Z0-9]*$");
+    public static Regex Ascii = new Regex(@"^[_a-zA-Z][_a-zA-Z0-9]*$");
     public static Regex International = new Regex(@"^[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*$");
 
     public IdentifierType type;
@@ -439,7 +439,7 @@ public class URLValidatorAttribute : RegexValidatorAttribute
 
 public class AzureStorageCollectionNameValidationAttribute : RegexValidatorAttribute
 {
-    static Regex CollectionNameRegex = new Regex(@"^[a-z\-]+");
+    static Regex CollectionNameRegex = new Regex(@"^[a-z\-]+$");
 
     public AzureStorageCollectionNameValidationAttribute() : base(CollectionNameRegex)
     {
@@ -1088,7 +1088,7 @@ public class IsAssignableToValidatorAttribute : ValidatorAttribute
 
 public class IpValidatorAttribute : RegexValidatorAttribute
 {
-    public static Regex IpRegex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+    public static Regex IpRegex = new Regex(@"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$");
 
     public IpValidatorAttribute()
         : base(IpRegex)

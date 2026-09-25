@@ -120,15 +120,28 @@ function Notify(): React.ReactElement {
   const styleLock: React.CSSProperties | undefined = (Notify.Options.lockScreenOnLoading && optionsStack.current.some(o => o.type == "loading") ?
     { zIndex: 100000, position: "fixed", width: "100%", height: "100%" } : undefined);
 
+  const isError = currentOpt?.type == "error";
+
+  // "loading" is raised for every pending request, so announcing it would be constant chatter for no
+  // information; the spinner stays a visual cue only.
+  const liveText = currentOpt && currentOpt.type != "loading" ? currentOpt.text : null;
+
   return (
     <div style={styleLock}>
+      {/* The visible message is hidden from assistive technology and the same text is given once through a
+          live region below, so it is not read twice. The regions themselves are always in the document,
+          empty when there is nothing to say: a live region has to exist before content appears inside it,
+          or the insertion is not announced at all — which is why putting the role on the message element
+          itself, which mounts and unmounts, would not work. */}
       <div id="sfNotify" >
         {currentOpt && (
-          <span className={classes(currentOpt.type, "notify", "in", "notranslate")} translate="no" key={currentOpt.text.toString()}>
+          <span aria-hidden={true} className={classes(currentOpt.type, "notify", "in", "notranslate")} translate="no" key={currentOpt.text.toString()}>
             {getIcon(currentOpt)}&nbsp;{currentOpt.text}
           </span>
         )}
       </div>
+      <span className="visually-hidden" role="status">{isError ? null : liveText}</span>
+      <span className="visually-hidden" role="alert">{isError ? liveText : null}</span>
     </div>
   );
 }

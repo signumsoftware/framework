@@ -1,4 +1,4 @@
-﻿import * as React from 'react'
+import * as React from 'react'
 import {
   WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, ButtonOptionEmbedded, WorkflowActivityMessage,
 } from '../Signum.Workflow'
@@ -146,7 +146,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
   function handleCheckView() {
     const typeName = p.ctx.value.mainEntityType.cleanName;
     const viewName = p.ctx.value.viewName;
-    const props = p.ctx.value.viewNameProps.map(a => a.element).toObject(a => a.name, a => !a.expression ? undefined : eval(a.expression));
+    const props = p.ctx.value.viewNameProps.map(a => a.element).toObject(a => a.name, a => !a.expression ? undefined : new Function("return (" + a.expression + ");")());
 
     const isStaticView = !viewName || viewName == "" || isNamedView(typeName, viewName);
 

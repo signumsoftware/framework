@@ -66,7 +66,7 @@ export default function renderLine({ data, width, height, parameters, loading, c
 
   return (
     <svg direction="ltr" width={width} height={height}>
-      <title id="lineChartTitle">{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Line), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
+      <title>{ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Line), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "))}</title>
       {hasHorizontalScale ?
         <XScaleTicks xRule={xRule} yRule={yRule} valueColumn={keyColumn as ChartColumn<number>} x={x as d3.ScaleContinuousNumeric<number, number>} /> :
         <XKeyTicks xRule={xRule} yRule={yRule} keyValues={keyValues} keyColumn={keyColumn} x={x as d3.ScaleBand<string>} showLines={(x as d3.ScaleBand<string>).bandwidth() > 5}

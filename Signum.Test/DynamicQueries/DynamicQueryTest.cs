@@ -1,3 +1,4 @@
+using System.IO;
 using Signum.DynamicQuery;
 
 namespace Signum.Test.DynamicQueries;
@@ -269,4 +270,118 @@ public class DynamicQueryTest
         Assert.True(rt.Rows.Length > 0);
     }
 
+
+    [Fact]
+    public void OrderAndColumnOnTheSameTokenShareTheSubQuery()
+    {
+        //Ordering and showing the same token (Entity.Albums.Count -> a correlated sub-query) used to translate it
+        //twice: the order is nullified by the QueryToken while the column is not, so they did not look equivalent.
+        var qd = QueryLogic.Queries.QueryDescription(typeof(ArtistEntity));
+
+        var count = QueryUtils.Parse("Entity.Albums.Count", qd, cto);
+
+        var sql = new StringWriter();
+        var oldLogger = Connector.CurrentLogger;
+        Connector.CurrentLogger = sql;
+        ResultTable rt;
+        try
+        {
+            rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            {
+                QueryName = typeof(ArtistEntity),
+                Columns = new List<Column>
+                {
+                    new Column(QueryUtils.Parse("Entity.Name", qd, cto), null),
+                    new Column(count, null),
+                },
+                Filters = new List<DynamicQuery.Filter>(),
+                Orders = new List<Order> { new Order(count, OrderType.Descending) },
+                Pagination = new Pagination.Firsts(20),
+            });
+        }
+        finally
+        {
+            Connector.CurrentLogger = oldLogger;
+        }
+
+        Assert.Equal(1, sql.ToString().CountRepetitions("COUNT(*)"));
+        Assert.Equal(1, sql.ToString().CountRepetitions("ORDER BY"));
+
+        var counts = rt.Rows.Select(r => (int)r[rt.Columns[1]]!).ToList();
+        Assert.Equal(counts.OrderByDescending(a => a).ToList(), counts);
+    }
+
+    [Fact]
+    public void OrderOnATokenThatIsNotAColumnIsTranslatedOnce()
+    {
+        //Ordering (but not showing) Entity.Albums.Count: the paginated select needs the sub-query for its own
+        //ORDER BY and the outer one needs it again, so it used to be translated twice.
+        var qd = QueryLogic.Queries.QueryDescription(typeof(ArtistEntity));
+
+        var sql = new StringWriter();
+        var oldLogger = Connector.CurrentLogger;
+        Connector.CurrentLogger = sql;
+        ResultTable rt;
+        try
+        {
+            rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            {
+                QueryName = typeof(ArtistEntity),
+                Columns = new List<Column>
+                {
+                    new Column(QueryUtils.Parse("Id", qd, cto), null),
+                    new Column(QueryUtils.Parse("Entity.Name", qd, cto), null),
+                },
+                Filters = new List<DynamicQuery.Filter>(),
+                Orders = new List<Order> { new Order(QueryUtils.Parse("Entity.Albums.Count", qd, cto), OrderType.Ascending) },
+                Pagination = new Pagination.Firsts(20),
+            });
+        }
+        finally
+        {
+            Connector.CurrentLogger = oldLogger;
+        }
+
+        Assert.Equal(1, sql.ToString().CountRepetitions("COUNT(*)"));
+        Assert.True(rt.Rows.Length > 0);
+    }
+
+    [Fact]
+    public void PaginateOrderingByASubQueryTranslatesItOnce()
+    {
+        //Paginating puts the ordering inside a ROW_NUMBER, which can not refer to a column of its own select,
+        //so the sub-query has to be evaluated in a nested one and reused from there.
+        var qd = QueryLogic.Queries.QueryDescription(typeof(ArtistEntity));
+
+        var count = QueryUtils.Parse("Entity.Albums.Count", qd, cto);
+
+        var sql = new StringWriter();
+        var oldLogger = Connector.CurrentLogger;
+        Connector.CurrentLogger = sql;
+        ResultTable rt;
+        try
+        {
+            rt = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            {
+                QueryName = typeof(ArtistEntity),
+                Columns = new List<Column>
+                {
+                    new Column(QueryUtils.Parse("Entity.Name", qd, cto), null),
+                    new Column(count, null),
+                },
+                Filters = new List<DynamicQuery.Filter>(),
+                Orders = new List<Order> { new Order(count, OrderType.Descending) },
+                Pagination = new Pagination.Paginate(20, 2),
+            });
+        }
+        finally
+        {
+            Connector.CurrentLogger = oldLogger;
+        }
+
+        Assert.Equal(1, sql.ToString().CountRepetitions("COUNT(*)"));
+
+        var counts = rt.Rows.Select(r => (int)r[rt.Columns[1]]!).ToList();
+        Assert.Equal(counts.OrderByDescending(a => a).ToList(), counts);
+    }
 }

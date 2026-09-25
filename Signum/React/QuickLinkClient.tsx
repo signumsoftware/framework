@@ -251,6 +251,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.ReactElement | n
               <Dropdown id={p.qlc.widgetContext!.frame.prefix + "_" + dd.name} key={i}>
                 <DDToggle as={QuickLinkToggle}
                   title={QuickLinkMessage.Quicklinks.niceToString()}
+                  badgeText={dd.text(gr.elements)}
                   badgeColor={dd.color}
                   content={<>
                     {dd.icon && <FontAwesomeIcon aria-hidden={true} icon={dd.icon} />}
@@ -278,14 +279,20 @@ export interface QuickLinkContext<T extends Entity> {
 
 
 
-function QuickLinkToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeColor: BsColor, ref?: React.Ref<HTMLAnchorElement> }) {
+function QuickLinkToggle(p: { onClick?: React.MouseEventHandler, title: string, content: React.ReactNode, badgeText?: string, badgeColor: BsColor, ref?: React.Ref<HTMLAnchorElement> }) {
 
+  // The badge shows a count and nothing else, but was named "Quick links" alone, so the name did not contain
+  // what is written on it: speech input could not reach it by what the user sees, and a screen reader never
+  // heard the number (WCAG 2.5.3). aria-label separately from title, because the tooltip stays tied to the
+  // titleLabels setting while the name has to be there either way.
+  const label = p.badgeText ? `${p.title} (${p.badgeText})` : p.title;
 
   return (
     <LinkButton
       ref={p.ref}
       className={classes("badge badge-pill sf-quicklinks", "text-bg-" + p.badgeColor)}
-      title={StyleContext.default.titleLabels ? QuickLinkMessage.Quicklinks.niceToString() : undefined}
+      aria-label={label}
+      title={StyleContext.default.titleLabels ? label : undefined}
       data-toggle="dropdown"
       onClick={e => { p.onClick!(e); }}>
       {p.content}

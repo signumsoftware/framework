@@ -2543,11 +2543,19 @@ export namespace Finder {
   export interface DomainRegistryEntry {
     type: Type<any>;
     getDomainField: (e: any) => any;
+    extraFilters?: (queryKey: string) => (FilterOption | null | undefined)[] | undefined;
   }
 
   export const domainRegistry: Map<string, DomainRegistryEntry> = new Map<string, DomainRegistryEntry>();
 
-  export function registerDomainForTokens<T extends Entity, D extends Entity>(type: Type<T>, getDomainField: (a: T) => Lite<D>): void {
-    domainRegistry.set(type.typeName, { type, getDomainField });
+  /**
+   * Restricts the entities offered when this type is used as a filter value.
+   * @param getDomainField the field the candidates have to share with the query being filtered.
+   * @param extraFilters further restrictions, by the key of that query. Unlike the domain they
+   * apply even when the query carries no domain filter.
+   */
+  export function registerDomainForTokens<T extends Entity, D extends Entity>(type: Type<T>, getDomainField: (a: T) => Lite<D>,
+    extraFilters?: (queryKey: string) => (FilterOption | null | undefined)[] | undefined): void {
+    domainRegistry.set(type.typeName, { type, getDomainField, extraFilters });
   }
 }

@@ -69,13 +69,20 @@ function AutoLineModal(p: AutoLineModalProps): React.ReactElement {
 
   const error = p.options.validateValue ? p.options.validateValue(ctx.value) : undefined;
 
+  // Unique per instance: these are opened from inside other dialogs.
+  const titleId = React.useId();
+
 
 
   return (
-    <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
+    // aria-labelledby: the dialog had no accessible name and was announced as just "dialog" (WCAG 4.1.2).
+    <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}
+      aria-labelledby={titleId}>
       <div className="modal-header">
-        <h1 className="modal-title h5">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h1>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
+        <h1 id={titleId} className="modal-title h5">{title ?? member?.niceName ?? SelectorMessage.ChooseAValue.niceToString()}</h1>
+        {/* Localized: "Close" was announced in English whatever the interface language (WCAG 3.1.2). */}
+        <button type="button" className="btn-close" data-dismiss="modal"
+          aria-label={JavascriptMessage.Close.niceToString()} onClick={handleCancelClicked} />
       </div>
       <div className="modal-body" onKeyUp={(member && member.isMultiline || p.options.doNotCloseByEnter) ? undefined : handleFiltersKeyUp}>
         <p>

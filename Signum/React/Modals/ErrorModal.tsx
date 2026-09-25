@@ -26,6 +26,8 @@ const ErrorModal: {
 } = function (p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
+  // Names the dialog via aria-labelledby below; unique per instance since dialogs can be nested here.
+  const titleId = React.useId();
 
   function handleOnExited() {
     p.onExited!(undefined);
@@ -45,9 +47,13 @@ const ErrorModal: {
   const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
   return (
-    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg" dialogClassName="error-modal">
-      <div className="modal-header dialog-header-error" role="dialog">
-        <h1 className="modal-title h5">
+    // aria-labelledby names the dialog from its visible title (WCAG 4.1.2).
+    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg" dialogClassName="error-modal"
+      aria-labelledby={titleId}>
+      {/* The header carried role="dialog" of its own, so a single dialog reported the role twice and the
+          inner one wrapped only the heading. The <Modal> above is the dialog; this is just its header. */}
+      <div className="modal-header dialog-header-error">
+        <h1 className="modal-title h5" id={titleId}>
           {
             se ? renderServiceTitle(se) :
               ve ? renderValidationTitle(ve) :

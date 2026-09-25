@@ -401,7 +401,7 @@ public static class LineContainerExtensions
     }
     public static async Task<ILocator> SelectTabAsync(this ILocator locator, string eventKey)
     {
-        var element = locator.Locator($".nav-tabs .nav-item .nav-link[data-rr-ui-event-key='{eventKey}']");
+        var element = locator.Locator($".nav-tabs .nav-link[data-rr-ui-event-key='{eventKey}']");
         await element.ClickAsync();
         var id = await element.GetIdAsync();
         var tabLocator = locator.Locator($"div.fade.tab-pane.active.show[aria-labelledby='{id}']");
