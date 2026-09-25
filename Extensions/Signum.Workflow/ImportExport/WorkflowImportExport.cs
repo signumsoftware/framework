@@ -299,7 +299,10 @@ public class WorkflowImportExport
         {
             if (this.workflow.IsNew)
             {
+                //A new user asset arrives with its final Guid already set as Id (see UserAssetsImporter.RetrieveOrCreate),
+                //so the identity column's DB-generated default has to be disabled for this explicit insert.
                 using (OperationLogic.AllowSave<WorkflowEntity>())
+                using (this.workflow.IdOrNull != null ? Administrator.DisableIdentity<WorkflowEntity>() : null)
                     this.workflow.Save();
             }
         }
