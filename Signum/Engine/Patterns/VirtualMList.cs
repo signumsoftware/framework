@@ -93,25 +93,27 @@ public static class VirtualMList
 
         Func<T, MList<L>> getMList = GetAccessor(mlistProperty);
 
-        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListRoute, new VirtualMListInfo
-        {
-            MListRoute = mListRoute,
-            MListExpression = mlistProperty,
-            BackReferenceExpression = backReference,
-            BackReferenceRoute = backReferenceRoute,
-            GetMList = e => getMList((T)e)
-        });
-
-        var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
-        var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
-
-        Action<L, Lite<T>>? setter = null;
         bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListRoute)!
             .OfType<PreserveOrderAttribute>()
             .Any();
 
         if (preserveOrder && !typeof(ICanBeOrdered).IsAssignableFrom(typeof(L)))
             throw new InvalidOperationException($"'{typeof(L).Name}' should implement '{nameof(ICanBeOrdered)}' because '{ReflectionTools.GetPropertyInfo(mlistProperty).Name}' contains '[{nameof(PreserveOrderAttribute)}]'");
+
+        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListRoute, new VirtualMListInfo
+        {
+            MListRoute = mListRoute,
+            MListExpression = mlistProperty,
+            BackReferenceExpression = backReference,
+            BackReferenceRoute = backReferenceRoute,
+            GetMList = e => getMList((T)e),
+            PreserveOrder = preserveOrder,
+        });
+
+        var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
+        var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
+
+        Action<L, Lite<T>>? setter = null;
 
         var sb = fi.SchemaBuilder;
 
@@ -433,4 +435,5 @@ public class VirtualMListInfo
     public PropertyRoute BackReferenceRoute { get; init; }
     public LambdaExpression BackReferenceExpression { get; init; }
     public Func<Entity, IMListPrivate?> GetMList { get; init; }
+    public bool PreserveOrder { get; init; }
 }

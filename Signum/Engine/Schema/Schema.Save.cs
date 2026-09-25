@@ -875,10 +875,13 @@ END $$;"); ;
 
         var setter = ReflectionTools.CreateSetter<ModifiableEntity, Lite<T>>((MemberInfo?)vmli.BackReferenceRoute.PropertyInfo ?? vmli.BackReferenceRoute.FieldInfo!)!;
 
-        var inserts = mlist.Select(elem =>
+        var inserts = mlist.Select((elem, i) =>
         {
             setter(getContainer(elem), entity.ToLite());
-            
+
+            if (vmli.PreserveOrder)
+                ((ICanBeOrdered)elem).Order = i;
+
             var result = table.InsertSqlSync(elem);
             return result;
         }).Combine(Spacing.Simple);
@@ -908,6 +911,9 @@ END $$;"); ;
 
         var inserts = mlist.Select((elem, i) =>
         {
+            if (vmli.PreserveOrder)
+                ((ICanBeOrdered)elem).Order = i;
+
             var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i, fixMainCommand: simple =>
             {
                 var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
