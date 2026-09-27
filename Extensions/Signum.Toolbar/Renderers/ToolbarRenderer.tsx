@@ -674,11 +674,13 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
-        {p.extraIcons}
         {/* Hover-only visual tooltip repeating the label of the collapsed sidebar. Left exposed it doubled the
             accessible name ("Dashboard Dashboard") whenever it was shown. */}
         <div aria-hidden={true} className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
+      {/* Beside the link, not inside it: the extra icons are buttons, and a button inside the link's
+          role="button" is invalid nesting that assistive technology cannot reach (WCAG 4.1.2). */}
+      {p.extraIcons}
     </li>
   );
 }
@@ -700,12 +702,20 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
   if (extraIcons == null)
     return undefined;
 
+  // The button shows only an icon (and maybe a count), so without this text it has no accessible name.
+  // Visually hidden rather than aria-label, so a count inside the icon is still read out after the name.
+  function srName(ei: ToolbarResponse<any>) {
+    const name = ei.label || (ei.content ? getToString(ei.content) : undefined);
+    return name ? <span className="visually-hidden">{name}</span> : undefined;
+  }
+
   return (<>
     {extraIcons?.map((ei, i) => {
 
       if (ei.url) {
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
           onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); }}>
+          {srName(ei)}
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }
@@ -723,7 +733,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
             ctx.onAutoClose();
 
-        }} >{config.getIcon(ei, selectedEntity)}</button>
+        }} >{srName(ei)}{config.getIcon(ei, selectedEntity)}</button>
       };
 
     })}

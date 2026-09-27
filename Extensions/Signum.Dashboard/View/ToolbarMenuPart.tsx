@@ -31,7 +31,12 @@ export default function ToolbarPart(p: PanelPartContentProps<ToolbarMenuPartEnti
   return (
     <div className="sidebar sidebar-nav wide" style={{ zIndex: 0 }}>
       {loading || !filtered ? JavascriptMessage.loading.niceToString() :
-        <ToolbarMenuItems response={filtered} ctx={{ active: null, onRefresh: () => { }, onAutoClose: () => { } }} selectedEntity={p.entity ?? null} />
+        // ToolbarMenuItems renders <li> items, so they need the list the main sidebar gives them: bare in a
+        // div they are not a list at all, and neither the structure nor the item count reaches assistive
+        // technology (WCAG 1.3.1). m-0 pt-0 cancel the margin and the .sidebar ul padding a list would add.
+        <ul className="m-0 pt-0">
+          <ToolbarMenuItems response={filtered} ctx={{ active: null, onRefresh: () => { }, onAutoClose: () => { } }} selectedEntity={p.entity ?? null} />
+        </ul>
       }
       </div>
   );

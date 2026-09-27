@@ -117,6 +117,12 @@
   font-weight: bold;
 }
 
+/* The extra icons sit beside the link rather than inside it, so the active row's background is drawn on the
+   item as well, to keep reaching under them as it did when they were inside the link. */
+.sidebar-inner .nav-item:has(> .nav-link.active) {
+  background-color: var(--bs-secondary-bg);
+}
+
 .sidebar-inner .nav-item .sf-extra-icon.active {
   background-color: var(--bs-secondary-bg);
 }
