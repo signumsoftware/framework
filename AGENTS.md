@@ -47,7 +47,7 @@ Detailed guidance is organized in `Framework/Skills/`. Read the relevant file be
   - Use `yarn install` instead of `npm install`
   - Use `yarn add` instead of `npm install <package>`
   - Use `yarn <script>` instead of `npm run <script>`
-- The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected tsconfig using `yarn tsgo --build`.
+- The solution is large; avoid compiling the entire solution unless necessary. Prefer compiling only the affected tsconfig using `yarn tsc --build`.
 - If you change code in C#, you can regenerate the TypeScript definitions just compiling the csproj.
 - Prioritize React and TypeScript for UI code.
 - Use Bootstrap, React-Bootstrap, and Font Awesome icons for UI components.

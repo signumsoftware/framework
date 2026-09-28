@@ -103,6 +103,11 @@
   background-color: var(--bs-body-bg-subtle);
 }
 
+/* The <li> around the divider's <hr> would otherwise add a full line-height of empty space. */
+.sidebar-inner .nav-item-divider {
+  line-height: 0;
+}
+
 .sidebar-inner .nav-item .nav-link {
   padding: 5px 5px 5px 14px;
   transition: all 200ms;

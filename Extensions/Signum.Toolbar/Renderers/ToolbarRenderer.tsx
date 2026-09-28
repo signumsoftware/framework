@@ -21,6 +21,7 @@ import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
 import { QueryEntity } from '@framework/Signum.Basics';
+import { ErrorBoundary } from '@framework/Components';
 
 
 export default function ToolbarRenderer(p: {
@@ -210,13 +211,31 @@ export function inferActive(r: ToolbarResponse<any>, location: Location, query: 
 }
 
 export function renderNavItem(res: ToolbarResponse<any>, key: string | number, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
+  // Each item gets its own boundary, so one broken element only replaces itself and the rest of the toolbar keeps working.
+  return (
+    <ErrorBoundary key={key} deps={[res]} fallback={error => (
+      <li className="nav-item text-danger px-3 py-1" role="alert" title={error?.stack}>
+        <FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" className="me-1" />
+        <small>{error?.message ?? error?.name}</small>
+      </li>
+    )}>
+      <NavItem res={res} ctx={ctx} selectedEntity={selectedEntity} />
+    </ErrorBoundary>
+  );
+}
+
+function NavItem(p: { res: ToolbarResponse<any>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.JSX.Element {
+  return renderNavItemUnsafe(p.res, 0, p.ctx, p.selectedEntity);
+}
+
+function renderNavItemUnsafe(res: ToolbarResponse<any>, key: string | number, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
 
   switch (res.type) {
     case "Divider":
       // Wrapped in an <li>: these are rendered into the sidebar's <ul>, where an <hr> is not a permitted
       // child. A list with a stray child can be announced with the wrong item count, or lose its list
       // semantics altogether. The <hr> keeps its own separator role inside.
-      return <li key={key}><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
+      return <li key={key} className="nav-item-divider"><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
     case "Header":
     case "Item":
       if (ToolbarMenuEntity.isLite(res.content)) {
@@ -720,9 +739,13 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
         </button>;
       }
 
+      // Neither url nor content (e.g. content not visible for the current user): nothing to navigate to.
+      if (ei.content == null)
+        return null;
+
       var config = ToolbarClient.getConfig(ei);
       if (config == null) {
-        return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
+        return <span key={i} className="text-danger sf-extra-icon">{ei.content.EntityType + "ToolbarConfig not registered"}</span>
       }
       else {
 
