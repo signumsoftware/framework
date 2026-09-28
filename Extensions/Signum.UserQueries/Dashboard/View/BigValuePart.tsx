@@ -131,7 +131,9 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
       <>
         <div className="dashboard-flex">
           <div className="left">
-            <h3>
+            {/* The value is not a heading: as an h3 before the part's own h2 below, every big value put a bare
+                number ("2/4") into the heading list and a level out of order (WCAG 1.3.1). The class keeps its size. */}
+            <p className="h3">
               <SearchValue ref={vsc} findOptions={foExpanded} isLink={false} isBadge={false} deps={p.deps}
                 onValueChange={forceUpdate}
                 onInitialValueLoaded={forceUpdate}
@@ -140,7 +142,7 @@ export default function BigValuePart(p: PanelPartContentProps<BigValuePartEntity
                 onRender={custom?.value == null ? undefined : v => custom?.value}
               />
               {/*customRequest={p.cachedQuery && ((req, fop, token) => p.cachedQuery!.then(cq => executeQueryValueCached(req, fop, token, cq)))}*/}
-            </h3>
+            </p>
 
           </div>
           <div className="right">
