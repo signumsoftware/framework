@@ -164,7 +164,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
               onKeyDown={e => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  (onclick as any)?.(e);
+                  (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                 }
               }}
               d={line(cords.map(c => ({ col: c, row: r })))!}>
@@ -192,7 +192,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           onKeyDown={e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              (onclick as any)?.(e);
+              (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
             }
           }}
           onClick={e => setSelectedColumnName(d.column.name)} />)}
