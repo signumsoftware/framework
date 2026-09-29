@@ -31,7 +31,8 @@ export default function UserCircle(p: { user: Lite<UserEntity>, className?: stri
       backgroundColor: color
     }}
       role="img"
-      aria-label={`${getToString(p.user)} icon`}
+      // Named by the title alone. With aria-label="<name> icon" as well, the title became the description and the
+      // name was read twice, plus a hard-coded English "icon" (WCAG 3.1.2).
       title={getToString(p.user)}>
       {getUserInitials(p.user)}
     </span>

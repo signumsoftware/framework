@@ -55,7 +55,8 @@ export namespace AuthAdminClient {
       renderLite: (lite, hl) => {
         if (UserLiteModel.isInstance(lite.model))
           return (
-            <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{hl.highlight(getToString(lite))}</span></span>
+            // The name follows as text, so the photo is decorative: a user in a table was read up to four times.
+            <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" decorative /><span>{hl.highlight(getToString(lite))}</span></span>
           );
   
         if (typeof lite.model == "string")
