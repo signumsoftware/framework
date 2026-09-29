@@ -23,6 +23,9 @@ interface ModalHeaderButtonsProps {
    * gives the dialog its accessible name (WCAG 4.1.2). Generate it with React.useId() in the modal, so
    * nested dialogs — this application opens up to three at once — never collide on the same id. */
   titleId?: string;
+  /** The children render their own <h1> (with titleId) around the title only, so buttons and sub-titles next
+   * to it are not part of the heading and of the dialog's name. The wrapper keeps the modal-title look. */
+  headingInChildren?: boolean;
 }
 
 export function ModalHeaderButtons(p: ModalHeaderButtonsProps): React.ReactElement {
@@ -34,9 +37,11 @@ export function ModalHeaderButtons(p: ModalHeaderButtonsProps): React.ReactEleme
   return (
     <div className={classes("modal-header align-items-start", p.stickyHeader && "sf-sticky-header")} {...p.htmlAttributes } >
       {p.closeBeforeTitle && close}
-      <h1 className="modal-title h4" id={p.titleId}>
-        {p.children}
-      </h1>
+      {p.headingInChildren ?
+        <div className="modal-title h4">{p.children}</div> :
+        <h1 className="modal-title h4" id={p.titleId}>
+          {p.children}
+        </h1>}
       {!p.closeBeforeTitle && close}
     </div>
   );

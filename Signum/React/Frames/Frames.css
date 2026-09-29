@@ -262,6 +262,16 @@ background: var(--bs-body-bg);
     overflow: inherit;
 }
 
+/* The frame modal's heading is only the entity title (FrameModalTitle), inside the .modal-title block that
+   still sets the size. Inherit that size, inline, so the <h1> looks like the span it replaced and not like an
+   h1: the rest of the header sits beside it exactly as before. */
+h1.sf-modal-heading {
+    font: inherit;
+    color: inherit;
+    margin: 0;
+    display: inline;
+}
+
 .modal-max-width {
     max-width: none !important;
     width: calc(100vw - 30px);

@@ -8,7 +8,7 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { classes, ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity, getToString } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -296,10 +296,14 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
       dialogClassName={classes(settings?.modalDialogClass, settings?.modalMaxWidth ? "modal-max-width" : undefined)}
       enforceFocus={settings?.enforceFocusInModal ?? true}
       fullscreen={settings?.modalFullScreen ? true : undefined}
-      aria-labelledby={titleId}
+      // A screen reader names a dialog once, when the focus enters it - before the pack has loaded, while the
+      // title still reads "Loading...", so every dialog was announced as "Loading... dialog" (WCAG 4.1.2).
+      // Until then it is named from what is already known (a lite's toStr, else the type); once loaded, from
+      // the title as before.
+      {...(state?.pack ? { "aria-labelledby": titleId } : { "aria-label": initialName(p.entityOrPack, p.title) })}
     >
-      <ModalHeaderButtons titleId={titleId} onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
-        <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
+      <ModalHeaderButtons headingInChildren onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
+        <FrameModalTitle titleId={titleId} pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
       </ModalHeaderButtons>
       {state && renderBody(state)}
       {p.buttons == "ok_cancel" && <ModalFooterButtons
@@ -342,6 +346,17 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 
 const FrameModalEx = FrameModal;
 
+function initialName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, title: React.ReactNode | undefined): string {
+  if (typeof title == "string" && title)
+    return title;
+
+  const known = isLite(entityOrPack) ? getToString(entityOrPack) :
+    isEntityPack(entityOrPack) ? getToString(entityOrPack.entity) :
+      getToString(entityOrPack);
+
+  return known || tryGetTypeInfo(getTypeName(entityOrPack))?.niceName || JavascriptMessage.loading.niceToString();
+}
+
 function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
   return (entityOrPack as Lite<Entity>).EntityType ??
     (entityOrPack as ModifiableEntity).Type ??
@@ -370,12 +385,16 @@ export namespace FrameModalManager {
   }
 }
 
-export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPromise }: {
-  pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
+// Only the entity title is the heading, and so the dialog's name (aria-labelledby titleId): the whole header
+// used to be one <h1>, so the heading and the name read "DP-100006 - New task Fullscreen Task <guid> Copy
+// Entity Type and Id ..." with every widget button inside it (WCAG 1.3.1, 2.4.6). The expand link, the type
+// sub-title and the widgets sit next to it, where they were; h1.sf-modal-heading keeps the old size.
+export function FrameModalTitle({ titleId, pack, pr, title, subTitle, widgets, getViewPromise }: {
+  titleId?: string, pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
 }): React.ReactElement {
 
   if (!pack)
-    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+    return <h1 className="sf-modal-heading" id={titleId}><span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span></h1>;
 
   const entity = pack.entity;
 
@@ -388,9 +407,10 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
   }
 
   return (
-    <div>
+    // With no title the sub-title block is what names the dialog, as the whole header did before.
+    <div id={title == null ? titleId : undefined}>
       {title != null && <>
-        <span className="sf-entity-title">{title}</span>&nbsp;
+        <h1 className="sf-modal-heading" id={titleId}><span className="sf-entity-title">{title}</span></h1>&nbsp;
         {renderExpandLink(pack.entity)}
       </>
       }

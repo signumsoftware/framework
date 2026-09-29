@@ -75,9 +75,14 @@ export function ThemeModeSelector(p: { onSetMode?: (mode: "dark" | "light") => v
         id="changeTheme"
         title={
           <>
-            {/* The icon is the only visible content of the toggle, so its title is the button's accessible
-                name: it has to say what the button does, not just repeat the mode. */}
-            <FontAwesomeIcon icon={ICONS[bootstrapMode]} title={ThemeModeMessage.Theme.niceToString() + ": " + LABELS[bootstrapMode].niceToString()} />
+            {/* The icon is the only visible content of the toggle, so the toggle's name has to say what it does,
+                not just repeat the mode. As the icon's own SVG title it was read twice ("Theme: Auto Theme:
+                Auto"): once as the toggle's name, once as the graphic inside it. Visually hidden text names
+                the toggle once; the span's title keeps the tooltip. */}
+            <span title={ThemeModeMessage.Theme.niceToString() + ": " + LABELS[bootstrapMode].niceToString()}>
+              <FontAwesomeIcon aria-hidden={true} icon={ICONS[bootstrapMode]} />
+              <span className="visually-hidden">{ThemeModeMessage.Theme.niceToString() + ": " + LABELS[bootstrapMode].niceToString()}</span>
+            </span>
           </>
         }
       >
