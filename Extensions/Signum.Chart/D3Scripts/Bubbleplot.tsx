@@ -92,9 +92,14 @@ export default function renderBubbleplot({ data, width, height, parameters, load
   var aggregateColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [keyColumn, horizontalColumn, verticalColumn].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType == "Aggregate")
 
-  var titleMessage = (aggregateColumns.length != 0) ?
-    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "), aggregateColumns.map(cn => cn.title).join(", ")) :
-    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
+  // Ungrouped both lists above are the entity column, whose title is empty: the chart was named "... of <query>:
+  // per" (WCAG 1.1.1). Named after the columns it draws; keyColumns stays as it is for the row keys.
+  var titleColumns = (data.columns.entity ? [keyColumn, horizontalColumn, verticalColumn] : keyColumns).filter(cn => cn?.title);
+  var titleAggregates = (data.columns.entity ? [] : aggregateColumns).filter(cn => cn?.title);
+
+  var titleMessage = (titleAggregates.length != 0) ?
+    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), titleColumns.map(cn => cn.title).join(", "), titleAggregates.map(cn => cn.title).join(", ")) :
+    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Bubbleplot), getQueryNiceName(chartRequest.queryKey), titleColumns.map(cn => cn.title).join(", "));
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
