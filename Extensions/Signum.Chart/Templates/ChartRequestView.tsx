@@ -60,7 +60,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
     loading: boolean;
   } | undefined>(undefined);
 
-  const userChartEntity = useAPI(signal => p.userChart ? Navigator.API.fetch(p.userChart) : Promise.resolve(undefined), [p.userChart]);
+  const userChartEntity = useAPI(signal => p.userChart ? Navigator.API.fetch(p.userChart) : Promise.resolve(undefined), [p.userChart], { avoidReset: true });
 
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest.queryKey]);
