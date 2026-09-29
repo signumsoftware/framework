@@ -302,8 +302,8 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
       // the title as before.
       {...(state?.pack ? { "aria-labelledby": titleId } : { "aria-label": initialName(p.entityOrPack, p.title) })}
     >
-      <ModalHeaderButtons titleId={titleId} onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
-        <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
+      <ModalHeaderButtons headingInChildren onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
+        <FrameModalTitle titleId={titleId} pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
       </ModalHeaderButtons>
       {state && renderBody(state)}
       {p.buttons == "ok_cancel" && <ModalFooterButtons
@@ -385,12 +385,16 @@ export namespace FrameModalManager {
   }
 }
 
-export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPromise }: {
-  pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
+// Only the entity title is the heading, and so the dialog's name (aria-labelledby titleId): the whole header
+// used to be one <h1>, so the heading and the name read "DP-100006 - New task Fullscreen Task <guid> Copy
+// Entity Type and Id ..." with every widget button inside it (WCAG 1.3.1, 2.4.6). The expand link, the type
+// sub-title and the widgets sit next to it, where they were; h1.sf-modal-heading keeps the old size.
+export function FrameModalTitle({ titleId, pack, pr, title, subTitle, widgets, getViewPromise }: {
+  titleId?: string, pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
 }): React.ReactElement {
 
   if (!pack)
-    return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;
+    return <h1 className="sf-modal-heading" id={titleId}><span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span></h1>;
 
   const entity = pack.entity;
 
@@ -403,9 +407,10 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
   }
 
   return (
-    <div>
+    // With no title the sub-title block is what names the dialog, as the whole header did before.
+    <div id={title == null ? titleId : undefined}>
       {title != null && <>
-        <span className="sf-entity-title">{title}</span>&nbsp;
+        <h1 className="sf-modal-heading" id={titleId}><span className="sf-entity-title">{title}</span></h1>&nbsp;
         {renderExpandLink(pack.entity)}
       </>
       }
