@@ -132,6 +132,13 @@
   background-color: var(--bs-secondary-bg);
 }
 
+/* The extra icon is a .btn with no colour variant, so Bootstrap's .btn:focus-visible sets outline: 0 and a
+   box-shadow built from --bs-btn-focus-shadow-rgb, which only the variants define: the focus was invisible
+   (WCAG 2.4.7). The same ring the nav link beside it draws. */
+.sidebar-inner .nav-item .sf-extra-icon:focus-visible {
+  box-shadow: 0 0 0 .25rem var(--bs-focus-ring-color);
+}
+
 .sidebar-inner .nav-item .sf-extra-icon.active > svg.icon {
   filter: brightness(0.7);
 }
