@@ -8,7 +8,7 @@ import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
 import { classes, ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
-import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity } from '../Signum.Entities'
+import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity, getToString } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
@@ -296,7 +296,11 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
       dialogClassName={classes(settings?.modalDialogClass, settings?.modalMaxWidth ? "modal-max-width" : undefined)}
       enforceFocus={settings?.enforceFocusInModal ?? true}
       fullscreen={settings?.modalFullScreen ? true : undefined}
-      aria-labelledby={titleId}
+      // A screen reader names a dialog once, when the focus enters it - before the pack has loaded, while the
+      // title still reads "Loading...", so every dialog was announced as "Loading... dialog" (WCAG 4.1.2).
+      // Until then it is named from what is already known (a lite's toStr, else the type); once loaded, from
+      // the title as before.
+      {...(state?.pack ? { "aria-labelledby": titleId } : { "aria-label": initialName(p.entityOrPack, p.title) })}
     >
       <ModalHeaderButtons titleId={titleId} onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
         <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
@@ -341,6 +345,17 @@ export function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>): R
 }
 
 const FrameModalEx = FrameModal;
+
+function initialName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, title: React.ReactNode | undefined): string {
+  if (typeof title == "string" && title)
+    return title;
+
+  const known = isLite(entityOrPack) ? getToString(entityOrPack) :
+    isEntityPack(entityOrPack) ? getToString(entityOrPack.entity) :
+      getToString(entityOrPack);
+
+  return known || tryGetTypeInfo(getTypeName(entityOrPack))?.niceName || JavascriptMessage.loading.niceToString();
+}
 
 function getTypeName(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>) {
   return (entityOrPack as Lite<Entity>).EntityType ??
