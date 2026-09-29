@@ -31,7 +31,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
   const { size, setContainer } = useSize({deps: p.sizeDeps});
 
   return (
-    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 300) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
+    <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? ReactChart.Options.defaultMinHeight) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
       {size &&
         p.onRenderChart({
           chartRequest: p.chartRequest,
@@ -52,7 +52,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
 }
 
 namespace ReactChart {
-  export const Options = { maxRowsForAnimation: 500 };
+  export const Options = { maxRowsForAnimation: 500, defaultMinHeight: 300 };
 }
 
 export default ReactChart;
