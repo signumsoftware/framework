@@ -220,7 +220,7 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
 
     const renderedChildren = React.Children.toArray(td.props.children)
       .filter(child => child !== "" && child !== null && child !== undefined);
-    const isEmptyCell = renderedChildren.length === 0; // needed for condinional rendering
+    const isEmptyCell = renderedChildren.length === 0;
 
     if (type == "th" && isEmptyCell)
       handleStructureError("tbody > th should always contain content", td);
@@ -232,12 +232,13 @@ export function AccessibleRow({ focusCells = true, focusHeader = false, sectionT
         ...keyboardCell(focusCells),
       } as React.ThHTMLAttributes<HTMLTableCellElement>);
 
+    // An empty data cell stays empty: a screen reader announces it as blank by itself, in the reader's own
+    // language. It used to get a hidden "Kein Eintrag in diesem Feld", which was German on every page
+    // (WCAG 3.1.2), and whose absolutely positioned box escaped the table's scrolling container and made the
+    // stakeholder page scroll sideways at 400% zoom (WCAG 1.4.10).
     return React.cloneElement(td, {
       role: (tableRole) ? undefined : "gridcell",
       ...keyboardCell(focusCells),
-      children: isEmptyCell
-        ? <span className="sr-only">Kein Eintrag in diesem Feld</span>
-        : td.props.children
     } as React.TdHTMLAttributes<HTMLTableCellElement>);
   }
 
