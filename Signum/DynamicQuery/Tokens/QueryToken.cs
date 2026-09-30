@@ -145,8 +145,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public static Func<QueryToken, BuildExpressionContext, Expression?>? IsValueHidden;
 
-    private Expression WithHidden(Expression expression, BuildExpressionContext context)
+    private Expression WithHidden(Expression expression, BuildExpressionContext context, bool avoidWithHidden)
     {
+        if (avoidWithHidden)
+            return expression;
+
         var isHidden = IsValueHidden?.Invoke(this, context);
 
         if (isHidden == null)
@@ -163,7 +166,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Expression.Condition(isHidden, Expression.Constant(null, expression.Type.Nullify()), expression.Nullify());
     }
 
-    public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false)
+    public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false, bool avoidWithHidden = false)
     {
 
         if (context.Replacements.TryGetValue(this, out var result))
@@ -172,17 +175,17 @@ public abstract class QueryToken : IEquatable<QueryToken>
             if (result.AlreadyHidden)
                 return exp;
 
-            return WithHidden(exp, context);
+            return WithHidden(exp, context, avoidWithHidden);
         }
 
         if (searchToArray)
         {
             var cta = HasToArray();
             if (cta != null)
-                return WithHidden(CollectionToArrayToken.BuildToArrayExpression(this, cta, context), context);
+                return WithHidden(CollectionToArrayToken.BuildToArrayExpression(this, cta, context), context, avoidWithHidden);
         }
 
-        return WithHidden(BuildExpressionInternal(context), context);
+        return WithHidden(BuildExpressionInternal(context), context, avoidWithHidden);
     }
 
   

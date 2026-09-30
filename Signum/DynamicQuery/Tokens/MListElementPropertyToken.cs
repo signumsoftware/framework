@@ -132,7 +132,7 @@ public class MListElementPropertyToken : QueryToken
         ctx.Orders,
         ctx.Pagination);
 
-        var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);
+        var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp, avoidWithHidden: true), param);
 
         var mi = miMListElementsLite.MakeGenericMethod(entityParentType, ept.Type.ElementType()!);
 
