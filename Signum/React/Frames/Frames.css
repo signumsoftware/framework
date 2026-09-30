@@ -199,9 +199,13 @@ a.expand-window:hover {
 }
 
 @media (max-width: 768px) {
+    /* Wrapped, not cut: overflow: hidden lost the end of a long link at 400% zoom, with no ellipsis to show
+       that anything was missing (WCAG 1.4.10). */
     .sf-quicklinks {
         max-width: 300px;
-        overflow: hidden;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: start;
     }
 }
 

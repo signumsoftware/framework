@@ -414,6 +414,14 @@
   display: inline-block;
 }
 
+/* On a narrow screen (a 1280px one at 400% zoom) the labels wrap instead of ending in an ellipsis: the cut
+   text cannot be read any other way there (WCAG 1.4.10). The desktop keeps the one-line ellipsis. */
+@media (max-width: 768px) {
+  .sidebar-nav .nav-item .nav-link > span {
+    white-space: normal;
+  }
+}
+
 .sidebar-container .sidebar {
   border-right: 1px solid var(--bs-border-color) !important;
 }
