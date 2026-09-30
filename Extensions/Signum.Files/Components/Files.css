@@ -65,6 +65,12 @@
     position: relative;
 }
 
+/* The file input lies over the button transparently, so the focus ring it gets is transparent too: the focus
+   was on the page but could not be seen (WCAG 2.4.7). The visible button draws it instead. */
+.sf-upload:has(> input[type="file"]:focus-visible) {
+    box-shadow: 0 0 0 .25rem var(--bs-focus-ring-color);
+}
+
 .sf-upload i {
     padding-right: 10px;
 }

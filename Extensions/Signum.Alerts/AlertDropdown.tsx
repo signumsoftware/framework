@@ -269,7 +269,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
                       background: 'none',
                       border: 'none',
                       color: '#8c8c8c',
-                      fontSize: "0.8rem",
+                      fontSize: "max(0.8rem, var(--sf-small-text-min, 0rem))",
                       fontWeight: 'bold',
                     }}>
                     {AlertMessage.Show0GroupsMore1Remaining.niceToString(MaxNumberOfGroups, alertGroups.filter(a => !a.removing).length - showGroups)}
@@ -339,7 +339,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
 
   const totalExpandedHeight = alerts.filter((a, i) => i < showAlerts).sum((a, i) => (a.height ?? 0));
 
-  const textStyle: React.CSSProperties = { color: 'var(--alert-muted)', fontSize: "0.8rem", fontWeight: 'bold' };
+  const textStyle: React.CSSProperties = { color: 'var(--alert-muted)', fontSize: "max(0.8rem, var(--sf-small-text-min, 0rem))", fontWeight: 'bold' };
   return (
     <div className="sf-alert-group pb-2" style={p.style} ref={htmlRef}>
       <div className="p-2 d-flex" style={{ position: 'relative',  }}>
@@ -412,7 +412,7 @@ export function AlertGroupToast(p: { group: AlertGroupWithSize, onClose: (e: Ale
             background: 'none',
             border: 'none',
             color: '#8c8c8c',
-            fontSize: "0.8rem",
+            fontSize: "max(0.8rem, var(--sf-small-text-min, 0rem))",
             fontWeight: 'bold',
             textDecoration: 'underline',
           }}>

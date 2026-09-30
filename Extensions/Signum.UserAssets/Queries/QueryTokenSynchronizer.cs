@@ -494,12 +494,24 @@ public static class QueryTokenSynchronizer
             pos++;
         }
 
-        while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
+        // Keep at least one part on each side: an empty key (pure insertion, e.g. adding a
+        // "(TransactionItem)" cast after an ImplementedBy generalization) or an empty value (pure
+        // removal) cannot be resolved by TryResolveParts, so anchor the rename on a shared part.
+        while (oldPartsList.Count > 1 && newPartsList.Count > 1 &&
             (oldPartsList[oldPartsList.Count - 1] == newPartsList[newPartsList.Count - 1] ||
              rep(oldPartsList[oldPartsList.Count - 1]) == newPartsList[newPartsList.Count - 1]))
         {
             oldPartsList.RemoveAt(oldPartsList.Count - 1);
             newPartsList.RemoveAt(newPartsList.Count - 1);
+        }
+
+        // The prefix loop can still empty one side when the old token is a prefix of the new one
+        // (or vice versa), with no shared suffix left to anchor on: give back the last shared prefix part.
+        if ((oldPartsList.Count == 0) != (newPartsList.Count == 0) && pos >= 0)
+        {
+            oldPartsList.Insert(0, oldParts[pos]);
+            newPartsList.Insert(0, newParts[pos]);
+            pos--;
         }
 
         var recTokenDic = pos == -1 ?
