@@ -103,6 +103,11 @@
   background-color: var(--bs-body-bg-subtle);
 }
 
+/* The <li> around the divider's <hr> would otherwise add a full line-height of empty space. */
+.sidebar-inner .nav-item-divider {
+  line-height: 0;
+}
+
 .sidebar-inner .nav-item .nav-link {
   padding: 5px 5px 5px 14px;
   transition: all 200ms;
@@ -117,8 +122,21 @@
   font-weight: bold;
 }
 
+/* The extra icons sit beside the link rather than inside it, so the active row's background is drawn on the
+   item as well, to keep reaching under them as it did when they were inside the link. */
+.sidebar-inner .nav-item:has(> .nav-link.active) {
+  background-color: var(--bs-secondary-bg);
+}
+
 .sidebar-inner .nav-item .sf-extra-icon.active {
   background-color: var(--bs-secondary-bg);
+}
+
+/* The extra icon is a .btn with no colour variant, so Bootstrap's .btn:focus-visible sets outline: 0 and a
+   box-shadow built from --bs-btn-focus-shadow-rgb, which only the variants define: the focus was invisible
+   (WCAG 2.4.7). The same ring the nav link beside it draws. */
+.sidebar-inner .nav-item .sf-extra-icon:focus-visible {
+  box-shadow: 0 0 0 .25rem var(--bs-focus-ring-color);
 }
 
 .sidebar-inner .nav-item .sf-extra-icon.active > svg.icon {
@@ -394,6 +412,14 @@
   width: 82%;
   overflow: hidden;
   display: inline-block;
+}
+
+/* On a narrow screen (a 1280px one at 400% zoom) the labels wrap instead of ending in an ellipsis: the cut
+   text cannot be read any other way there (WCAG 1.4.10). The desktop keeps the one-line ellipsis. */
+@media (max-width: 768px) {
+  .sidebar-nav .nav-item .nav-link > span {
+    white-space: normal;
+  }
 }
 
 .sidebar-container .sidebar {

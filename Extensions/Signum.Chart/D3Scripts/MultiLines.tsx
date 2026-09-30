@@ -160,7 +160,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                     onKeyDown={e => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        (onclick as any)?.(e);
+                        (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                       }
                     }}>
                     <title>
@@ -204,7 +204,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                       onKeyDown={e => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          (onclick as any)?.(e);
+                          (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                         }
                       }}>
                       <title>
@@ -223,7 +223,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
                         onKeyDown={e => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
-                            (onclick as any)?.(e);
+                            (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                           }
                         }}
                         shapeRendering="initial">

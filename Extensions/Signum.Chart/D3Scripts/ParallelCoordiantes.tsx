@@ -95,9 +95,15 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
   var aggregateColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [data.columns.c1, data.columns.c2, data.columns.c3, data.columns.c4, data.columns.c5, data.columns.c6, data.columns.c7, data.columns.c8].filter(cn => cn != undefined).filter(a => a.token && a.token.queryTokenType == "Aggregate")
 
-  var titleMessage = (aggregateColumns.length != 0) ?
-    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "), aggregateColumns.map(cn => cn.title).join(", ")) :
-    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), keyColumns.map(cn => cn.title).join(", "));
+  // Ungrouped both lists above are the entity column, whose title is empty: the chart was named "... of <query>:
+  // per" (WCAG 1.1.1). Named after the columns it draws; keyColumns stays as it is for the row keys.
+  var drawnColumns = [data.columns.c1, data.columns.c2, data.columns.c3, data.columns.c4, data.columns.c5, data.columns.c6, data.columns.c7, data.columns.c8].filter(cn => cn != undefined);
+  var titleColumns = (data.columns.entity ? drawnColumns : keyColumns).filter(cn => cn?.title);
+  var titleAggregates = (data.columns.entity ? [] : aggregateColumns).filter(cn => cn?.title);
+
+  var titleMessage = (titleAggregates.length != 0) ?
+    ChartMessage._0Of1_2Per3.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), titleColumns.map(cn => cn!.title).join(", "), titleAggregates.map(cn => cn.title).join(", ")) :
+    ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.ParallelCoordinates), getQueryNiceName(chartRequest.queryKey), titleColumns.map(cn => cn!.title).join(", "));
 
   return (
     <svg direction="ltr" width={width} height={height} role="group">
@@ -164,7 +170,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
               onKeyDown={e => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  (onclick as any)?.(e);
+                  (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                 }
               }}
               d={line(cords.map(c => ({ col: c, row: r })))!}>
@@ -192,7 +198,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
           onKeyDown={e => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              (onclick as any)?.(e);
+              (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
             }
           }}
           onClick={e => setSelectedColumnName(d.column.name)} />)}

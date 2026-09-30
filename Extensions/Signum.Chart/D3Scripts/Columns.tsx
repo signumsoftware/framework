@@ -166,7 +166,7 @@ export function paintColumns({ xRule, yRule, x : x2, y, keyValues, data, paramet
                 onKeyDown={(e: React.KeyboardEvent<SVGRectElement>) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    (onclick as any)?.(e);
+                    (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                   }
                 }}
                 onClick={e => onDrillDown(row!, e)}>

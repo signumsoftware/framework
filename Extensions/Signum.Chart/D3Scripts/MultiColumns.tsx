@@ -132,7 +132,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                   onKeyDown={e => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      (onclick as any)?.(e);
+                      (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                     }
                   }}>
                   <title>
@@ -151,7 +151,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
                     onKeyDown={e => {
                       if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        (onclick as any)?.(e);
+                        (e.currentTarget as Element).dispatchEvent(new MouseEvent("click", { bubbles: true })); // the same drill-down the mouse gets
                       }
                     }}
                     opacity={parameters["NumberOpacity"]}

@@ -403,6 +403,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     key="button"
     title={[(textInTitle ? main.text : undefined), main.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut)].notNull().join(" ")}
     className={classes(disabled ? "disabled" : undefined, main.classes)}
+    // The class alone only looks disabled: the button stays focusable, so the tooltip with the reason can be
+    // reached, but a screen reader announced it as available (WCAG 4.1.2).
+    aria-disabled={disabled ? true : undefined}
     onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
     data-operation={eoc.operationInfo.key}>
     {props.children ?? EntityOperations.withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
@@ -431,6 +434,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
             <Button key={i}
               variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
+              aria-disabled={disabled ? true : undefined}
               onClick={() => aos.onClick(eoc)}
               title={aos.text + (aos.keyboardShortcut ? (" (" + Operations.getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
               <small>{React.isValidElement(aos.icon) ? aos.icon : <FontAwesomeIcon aria-hidden={true} icon={aos.icon!} color={aos.iconColor} className="fa-fw" />}</small>

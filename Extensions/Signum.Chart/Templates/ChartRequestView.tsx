@@ -60,6 +60,8 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
     loading: boolean;
   } | undefined>(undefined);
 
+  const userChartEntity = useAPI(signal => p.userChart ? Navigator.API.fetch(p.userChart) : Promise.resolve(undefined), [p.userChart], { avoidReset: true });
+
   const queryDescription = useAPI(signal => p.chartRequest ? Finder.getQueryDescription(p.chartRequest.queryKey) : Promise.resolve(undefined),
     [p.chartRequest.queryKey]);
 
@@ -226,7 +228,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>
           <Tab eventKey="chart" title={ChartMessage.Chart.niceToString()}>
-            <ChartRenderer userChart={p.userChart} chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={null} />
+            <ChartRenderer userChart={p.userChart} chartRequest={cr} loading={loading == true} autoRefresh={false} lastChartRequest={result?.lastChartRequest} data={result?.chartResult.chartTable} minHeight={userChartEntity?.minHeight ?? null} />
           </Tab>
           {result &&
             <Tab eventKey="data" title={<span>{ChartMessage.Data.niceToString()} (

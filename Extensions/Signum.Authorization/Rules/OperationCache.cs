@@ -22,7 +22,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
     {
         rule.Fallback = allowed.Fallback;
         var oldConditions = rule.ConditionRules.Select(a => new ConditionRule<OperationAllowed>(a.Conditions.ToFrozenSet(), a.Allowed)).ToReadOnly();
-        if (!oldConditions.SequenceEqual(allowed.ConditionRules))
+        if (!oldConditions.SequenceEqual(allowed.ConditionRules) || rule.ConditionRules.Where((c, i) => c.Order != i).Any())
             rule.ConditionRules = allowed.ConditionRules.Select(a => new RuleOperationConditionEntity
             {
                 Allowed = a.Allowed,

@@ -44,7 +44,10 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     public bool? IncludeDefaultFilters { get; set; }
 
     public int? MaxRows { get; set; }
-    
+
+    [Unit("px"), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? MinHeight { get; set; }
+
     public ChartTimeSeriesEmbedded? ChartTimeSeries { get; set; }
 
     ChartScriptSymbol chartScript;
@@ -130,6 +133,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             new XAttribute("ChartScript", ChartScript.Key),
             MaxRows == null ? null : new XAttribute("MaxRows", MaxRows.Value),
+            MinHeight == null ? null : new XAttribute("MinHeight", MinHeight.Value),
             Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
             new XElement("Columns", Columns.SelectWithRowId((c, rowId) => c.ToXml(ctx, rowId)).ToList()),
             Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
@@ -146,6 +150,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
         IncludeDefaultFilters = element.Attribute("IncludeDefaultFilters")?.Let(a => bool.Parse(a.Value));
         ChartScript = SymbolLogic<ChartScriptSymbol>.ToSymbol(element.Attribute("ChartScript")!.Value);
         MaxRows = element.Attribute("MaxRows")?.Let(at => at.Value.ToInt());
+        MinHeight = element.Attribute("MinHeight")?.Let(at => at.Value.ToInt());
 
         var valuePr = PropertyRoute.Construct((UserChartEntity wt) => wt.Filters[0].ValueString);
         Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
@@ -222,6 +227,7 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             DisplayName = "Clone {0}".FormatWith(this.DisplayName),
             IncludeDefaultFilters = this.IncludeDefaultFilters,
             MaxRows = this.MaxRows,
+            MinHeight = this.MinHeight,
             ChartTimeSeries = this.ChartTimeSeries?.Clone(),
             ChartScript = this.ChartScript,
             //Replaces the columns and parameters that the ChartScript setter just pre-created

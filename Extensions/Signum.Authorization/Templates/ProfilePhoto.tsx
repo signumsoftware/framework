@@ -37,7 +37,9 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }): Rea
   );
 }
 
-export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string, fallback?: React.ReactNode }): React.JSX.Element {
+/** decorative: the user's name is shown next to the photo, so the photo is hidden from assistive technology
+ * instead of naming the same user a second time. */
+export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string, fallback?: React.ReactNode, decorative?: boolean }): React.JSX.Element {
   const [imageError, setImageError] = useState(false);
   const size = p.size ?? 22;
 
@@ -51,7 +53,7 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
   // returns, and a div is not allowed there. The class makes it an inline-flex box, so it keeps the
   // layout it had both as a flex item and inline next to text.
   return (
-    <span className={classes("small-user-profile-photo", p.className)}>
+    <span className={classes("small-user-profile-photo", p.className)} aria-hidden={p.decorative ? true : undefined}>
       {url && !imageError ? <img src={url} style={{ maxWidth: `${size}px`, maxHeight: `${size}px` }} alt={getToString(p.user)} onError={(e) => setImageError(true)} title={getToString(p.user)} /> :
         p.fallback ?? <UserCircle user={p.user } />}
     </span>

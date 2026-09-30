@@ -199,9 +199,13 @@ a.expand-window:hover {
 }
 
 @media (max-width: 768px) {
+    /* Wrapped, not cut: overflow: hidden lost the end of a long link at 400% zoom, with no ellipsis to show
+       that anything was missing (WCAG 1.4.10). */
     .sf-quicklinks {
         max-width: 300px;
-        overflow: hidden;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        text-align: start;
     }
 }
 
@@ -260,6 +264,16 @@ background: var(--bs-body-bg);
 .sf-frame-modal .modal-title {
     margin-right: -25px;
     overflow: inherit;
+}
+
+/* The frame modal's heading is only the entity title (FrameModalTitle), inside the .modal-title block that
+   still sets the size. Inherit that size, inline, so the <h1> looks like the span it replaced and not like an
+   h1: the rest of the header sits beside it exactly as before. */
+h1.sf-modal-heading {
+    font: inherit;
+    color: inherit;
+    margin: 0;
+    display: inline;
 }
 
 .modal-max-width {

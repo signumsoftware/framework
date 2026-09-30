@@ -44,6 +44,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   displayName: string;
   includeDefaultFilters: boolean | null;
   maxRows: number | null;
+  minHeight: number | null;
   chartTimeSeries: Chart.ChartTimeSeriesEmbedded | null;
   chartScript: Chart.ChartScriptSymbol;
   parameters: Entities.MList<Chart.ChartParameterEmbedded>;

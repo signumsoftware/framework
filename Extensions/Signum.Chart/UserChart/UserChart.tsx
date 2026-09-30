@@ -1,6 +1,6 @@
 import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine, NumberLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
@@ -19,6 +19,7 @@ import { ToolbarEntity, ToolbarMenuEntity } from '../../Signum.Toolbar/Signum.To
 import { DashboardEntity } from '../../Signum.Dashboard/Signum.Dashboard'
 import { UserAssetMessage } from '../../Signum.UserAssets/Signum.UserAssets'
 import CombinedUserChartPart from '../Dashboard/Admin/CombinedUserChartPart'
+import ReactChart from '../D3Scripts/Components/ReactChart'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {
@@ -93,6 +94,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): Re
       </div>
 
       <AutoLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
+      <NumberLine ctx={ctx.subCtx(e => e.minHeight)} valueHtmlAttributes={{ placeholder: ReactChart.Options.defaultMinHeight.toString() }} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (ctx.value.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0)}
         showPinnedFilterOptions={true}

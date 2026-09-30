@@ -21,6 +21,7 @@ import { Finder } from '../../../Signum/React/Finder';
 import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
 import { QueryEntity } from '@framework/Signum.Basics';
+import { ErrorBoundary } from '@framework/Components';
 
 
 export default function ToolbarRenderer(p: {
@@ -210,13 +211,31 @@ export function inferActive(r: ToolbarResponse<any>, location: Location, query: 
 }
 
 export function renderNavItem(res: ToolbarResponse<any>, key: string | number, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
+  // Each item gets its own boundary, so one broken element only replaces itself and the rest of the toolbar keeps working.
+  return (
+    <ErrorBoundary key={key} deps={[res]} fallback={error => (
+      <li className="nav-item text-danger px-3 py-1" role="alert" title={error?.stack}>
+        <FontAwesomeIcon aria-hidden={true} icon="triangle-exclamation" className="me-1" />
+        <small>{error?.message ?? error?.name}</small>
+      </li>
+    )}>
+      <NavItem res={res} ctx={ctx} selectedEntity={selectedEntity} />
+    </ErrorBoundary>
+  );
+}
+
+function NavItem(p: { res: ToolbarResponse<any>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.JSX.Element {
+  return renderNavItemUnsafe(p.res, 0, p.ctx, p.selectedEntity);
+}
+
+function renderNavItemUnsafe(res: ToolbarResponse<any>, key: string | number, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null): React.JSX.Element {
 
   switch (res.type) {
     case "Divider":
       // Wrapped in an <li>: these are rendered into the sidebar's <ul>, where an <hr> is not a permitted
       // child. A list with a stray child can be announced with the wrong item count, or lose its list
       // semantics altogether. The <hr> keeps its own separator role inside.
-      return <li key={key}><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
+      return <li key={key} className="nav-item-divider"><hr style={{ margin: "10px 0 5px 0px" }} /></li>;
     case "Header":
     case "Item":
       if (ToolbarMenuEntity.isLite(res.content)) {
@@ -502,7 +521,10 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
           <div style={{ width: "100%" }}>
             <EntityLine ctx={ctx} type={{ name: entityType, isLite: true }} view={false} mandatory="warning"
               inputAttributes={{ placeholder: LayoutMessage.SelectA0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName) }}
-              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly" />
+              onChange={e => handleSelect(e.originalEvent)} create={false} createOnFind={false} formGroupStyle="SrOnly"
+              // The SrOnly label was empty (this ctx has no property route to take it from), so the field was
+              // named only by its placeholder, which is gone once an entity is chosen (WCAG 3.3.2, 4.1.2).
+              label={ti.niceName} />
           </div>
           {renderExtraIcons(p.response.extraIcons, p.ctx, selEntityRef.current ?? p.selectedEntity)}
         </Nav.Item>
@@ -674,11 +696,13 @@ export function ToolbarNavItem(p: { title: string | undefined, content?: Lite<En
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon aria-hidden={true} icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
-        {p.extraIcons}
         {/* Hover-only visual tooltip repeating the label of the collapsed sidebar. Left exposed it doubled the
             accessible name ("Dashboard Dashboard") whenever it was shown. */}
         <div aria-hidden={true} className={classes("nav-item-float", p.isGroup && "nav-item-group")}>{p.title}</div>
       </Nav.Link>
+      {/* Beside the link, not inside it: the extra icons are buttons, and a button inside the link's
+          role="button" is invalid nesting that assistive technology cannot reach (WCAG 4.1.2). */}
+      {p.extraIcons}
     </li>
   );
 }
@@ -700,19 +724,31 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
   if (extraIcons == null)
     return undefined;
 
+  // The button shows only an icon (and maybe a count), so without this text it has no accessible name.
+  // Visually hidden rather than aria-label, so a count inside the icon is still read out after the name.
+  function srName(ei: ToolbarResponse<any>) {
+    const name = ei.label || (ei.content ? getToString(ei.content) : undefined);
+    return name ? <span className="visually-hidden">{name}</span> : undefined;
+  }
+
   return (<>
     {extraIcons?.map((ei, i) => {
 
       if (ei.url) {
         return <button type="button" className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", isActive(ctx.active, ei, selectedEntity) && "active")} key={i}
           onClick={e => { e.stopPropagation(); linkClick(ei, selectedEntity, e, ctx); }}>
+          {srName(ei)}
           {ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}
         </button>;
       }
 
+      // Neither url nor content (e.g. content not visible for the current user): nothing to navigate to.
+      if (ei.content == null)
+        return null;
+
       var config = ToolbarClient.getConfig(ei);
       if (config == null) {
-        return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
+        return <span key={i} className="text-danger sf-extra-icon">{ei.content.EntityType + "ToolbarConfig not registered"}</span>
       }
       else {
 
@@ -723,7 +759,7 @@ export function renderExtraIcons(extraIcons: ToolbarResponse<any>[] | undefined,
           if (ctx.onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
             ctx.onAutoClose();
 
-        }} >{config.getIcon(ei, selectedEntity)}</button>
+        }} >{srName(ei)}{config.getIcon(ei, selectedEntity)}</button>
       };
 
     })}

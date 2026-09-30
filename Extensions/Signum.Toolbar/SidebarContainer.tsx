@@ -71,7 +71,7 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element {
         role="navigation"
         aria-label={LayoutMessage.MainNavigation.niceToString()}
       >
-        {p.sidebarContent}
+        <ErrorBoundary>{p.sidebarContent}</ErrorBoundary>
 
         {/* Resize handle (desktop + wide only) */}
         {!p.isMobile && p.mode === "Wide" && (

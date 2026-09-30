@@ -104,11 +104,14 @@ function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
     );
   }
 
+  if (tr.content == null)
+    return null;
+
   const config = ToolbarClient.getConfig(tr);
   if (config == null)
     return (
       <div className="card toolbar-card text-danger">
-        {tr.content!.EntityType} ToolbarConfig not registered
+        {tr.content.EntityType} ToolbarConfig not registered
       </div>
     );
 
