@@ -115,7 +115,7 @@ export function DeleteErrorModal(p: DeleteErrorModalProps): React.ReactElement {
                 <div className="text-danger fw-bold mb-1">{p.serviceError.httpError.exceptionType}</div>
                 <div className="mb-2">{p.serviceError.httpError.exceptionMessage}</div>
                 {p.serviceError.httpError.stackTrace && (
-                  <pre className="mb-0 text-muted" style={{ whiteSpace: 'pre-wrap', fontSize: '0.75rem' }}>
+                  <pre className="mb-0 text-muted" style={{ whiteSpace: 'pre-wrap', fontSize: 'max(0.75rem, var(--sf-small-text-min, 0rem))' }}>
                     {p.serviceError.httpError.stackTrace}
                   </pre>
                 )}
