@@ -120,6 +120,10 @@ export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null 
             // on the visible label either: react-widgets renames the id it is given to "<id>_input", so the
             // <label for> rendered by FormGroup points at nothing (WCAG 4.1.2).
             inputProps={{ ...htmlAttributes, ...ariaAtts } as any}
+            // ...except aria-describedby: react-widgets sets it on the input after spreading inputProps, from
+            // its own prop, so the one in inputProps was overwritten with undefined. An invalid date was then
+            // announced as invalid without its message, and the help text was lost the same way (WCAG 3.3.1).
+            aria-describedby={ariaAtts["aria-describedby"]}
             placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={p.minDate}
