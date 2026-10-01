@@ -32,6 +32,7 @@ function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
 
   // Unique per instance: this can be raised from a dialog that is itself open.
   const titleId = React.useId();
+  const messageId = React.useId();
 
   function handleCancelClicked() {
     setShow(false);
@@ -48,13 +49,16 @@ function SaveChangesModal(p: SaveChangesModalProps): React.ReactElement {
     <Modal show={show} onExited={handleOnExited}
       dialogClassName={classes("message-modal")}
       aria-labelledby={titleId}
+      // The message says what Save and Lose changes are about, but NVDA read only the title when the prompt
+      // opened (WCAG 4.1.2; NVDA check 2026-10-01). As the dialog's description it is read with the name.
+      aria-describedby={messageId}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", "dialog-header-wait")}>
         <h1 id={titleId} className="modal-title h5">
           {SaveChangesMessage.ThereAreChanges.niceToString()}
         </h1>
       </div>
-      <div className="modal-body">
+      <div className="modal-body" id={messageId}>
         {SaveChangesMessage.YoureTryingToCloseAnEntityWithChanges.niceToString()}
       </div>
       <div className="modal-footer">
