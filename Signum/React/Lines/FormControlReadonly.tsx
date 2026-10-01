@@ -15,7 +15,12 @@ export interface FormControlReadonlyProps {
 export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, innerRef, children, id }: FormControlReadonlyProps): React.ReactElement {
 
   const array = React.Children.toArray(children);
-  const onlyText = array.length == 1 && typeof array[0] == "string" ? array[0] as string : undefined;
+  // An empty field renders the input too, with no value. As the div below, role="group", it was read by NVDA as
+  // just "Domain, grouping" after a failed save: aria-invalid is not supported on a group and its description was
+  // not read, so a required read-only field that was empty never said it was invalid or why (WCAG 3.3.1; NVDA
+  // check 2026-10-01). An input is read as "edit, read only, invalid entry" with its message, as the Date field
+  // beside it is. Both look the same (Lines.css styles .readonly and [readonly] alike).
+  const onlyText = array.length == 1 && typeof array[0] == "string" ? array[0] as string : array.length == 0 ? "" : undefined;
 
   // FormGroup's <label for> points at this id, but a div is not labelable, so the label reached nobody: a
   // screen reader got the value without the field's name, and an empty field got nothing at all (WCAG 1.3.1,
@@ -23,7 +28,7 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
   const explicitName = attrs?.["aria-label"] || attrs?.["aria-labelledby"];
   const [labelId, setLabelId] = React.useState<string | undefined>(undefined);
   React.useLayoutEffect(() => {
-    if (onlyText || explicitName) {
+    if (onlyText != undefined || explicitName) {
       setLabelId(undefined);
       return;
     }
@@ -33,7 +38,7 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
     setLabelId(label?.id);
   }, [id, onlyText, explicitName]);
 
-  if (onlyText) { //Text is scrollable in inputs
+  if (onlyText != undefined) { //Text is scrollable in inputs
     if (ctx.readonlyAsPlainText) {
       return (
         <input id={id} {...attrs} readOnly className={classes(ctx.formControlPlainTextClass, attrs?.className, className)} tabIndex={0} value={onlyText} ref={innerRef as React.RefObject<HTMLInputElement>} />
