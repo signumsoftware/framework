@@ -197,6 +197,11 @@ export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: En
         inputAttrs={{
           className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass),
           placeholder: EntityControlMessage.Add.niceToString(),
+          // The visible label points at the strip's <ul>, which cannot be labelled, and the line's aria attributes
+          // were computed but never reached the input: NVDA read the task's labels field as "Add…, edit, blank",
+          // without the field's name, and a required or invalid strip said neither (WCAG 4.1.2, 3.3.1, 3.3.2).
+          "aria-label": typeof p.label == "string" ? p.label : p.ctx.propertyRoute?.member?.niceName,
+          ...ariaAtts,
           onPaste: p.paste == false ? undefined : handleOnPaste,
           ...p.inputAttributes
         }}
