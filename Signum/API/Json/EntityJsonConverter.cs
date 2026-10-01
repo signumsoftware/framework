@@ -505,6 +505,15 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             {
                 try
                 {
+                    // A required value type left empty on the client (an enum or bool the user has not picked yet)
+                    // arrives as null, which the converter below cannot read and which used to surface as
+                    // "Unexpected error in X". Report it like a missing reference instead.
+                    if (reader.TokenType == JsonTokenType.Null && pi.PropertyType.IsValueType && Nullable.GetUnderlyingType(pi.PropertyType) == null)
+                    {
+                        entity.SetTemporalError(pi, ValidationMessage._0IsNotSet.NiceToString(pi.NiceName()));
+                        return;
+                    }
+
                     object? newValue = options.GetConverter(pi.PropertyType) is IJsonConverterWithExisting converter ?
                         converter.Read(ref reader, pi.PropertyType, options, oldValue, null) :
                         JsonSerializer.Deserialize(ref reader, pi.PropertyType, options);
