@@ -55,8 +55,11 @@ export function FormControlReadonly({ ctx, htmlAttributes: attrs, className, inn
     // the name was dropped. aria-readonly only means something on a widget and goes; a named div becomes a
     // group, which may carry the name and announces it before the content.
     const { "aria-readonly": _readonly, ...labelledAttrs } = attrs ?? {};
-    // The label, then the value: the div's own content, which a name from aria-labelledby would otherwise replace.
-    const divAttrs = labelId ? { ...labelledAttrs, "aria-labelledby": `${labelId} ${id}` } : labelledAttrs;
+    // Named by the label only. It was the label and then the div's own content, so that a reader announcing only
+    // the name would get the value too - but NVDA reads the group's content after its name, so every such field
+    // was read twice: "Domain Project Durchführung … Project, grouping, Project Durchführung … Project" (NVDA
+    // check 2026-10-01). JAWS is still to be checked.
+    const divAttrs = labelId ? { ...labelledAttrs, "aria-labelledby": labelId } : labelledAttrs;
     const role = divAttrs.role ?? (divAttrs["aria-label"] || divAttrs["aria-labelledby"] ? "group" : undefined);
 
     if (ctx.readonlyAsPlainText) {
