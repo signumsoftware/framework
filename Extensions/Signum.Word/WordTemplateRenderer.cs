@@ -115,6 +115,6 @@ class WordTemplateRenderer
 
     internal string RenderFileName()
     {
-        return this.fileNameBlock!.Print(new TextTemplateParameters(this.entity, this.culture, this.queryContext));
+        return FileNameValidatorAttribute.ReplaceInvalidChars(this.fileNameBlock!.Print(new TextTemplateParameters(this.entity, this.culture, this.queryContext)));
     }
 }

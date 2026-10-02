@@ -30,7 +30,7 @@ public static class FileTokenAttachmentLogic
 
                 var files = qc.CurrentRows.Select(r => r[col]).Distinct().NotNull().Select(v => v is Lite<Entity> lite ? (IFile)lite.Retrieve() : (IFile)v!).ToList();
 
-                var overridenFileName = !a.FileName.HasText() ? null : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
+                var overridenFileName = !a.FileName.HasText() ? null : FileNameValidatorAttribute.ReplaceInvalidChars(GetTemplateString(a.FileName, ref a.FileNameNode, ctx));
 
                 return files.Select(f => new EmailAttachmentEmbedded
                 {

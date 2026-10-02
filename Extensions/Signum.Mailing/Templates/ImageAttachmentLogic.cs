@@ -23,7 +23,7 @@ public static class ImageAttachmentLogic
         {
             using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
             {
-                var fileName = !a.FileName.HasText() ? a.File.FileName : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
+                var fileName = !a.FileName.HasText() ? a.File.FileName : FileNameValidatorAttribute.ReplaceInvalidChars(GetTemplateString(a.FileName, ref a.FileNameNode, ctx));
 
                 return new List<EmailAttachmentEmbedded>
                 {

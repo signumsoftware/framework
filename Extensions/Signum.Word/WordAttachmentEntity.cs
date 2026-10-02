@@ -9,7 +9,7 @@ namespace Signum.Word;
 public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
 {
     string? fileName;
-    [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
+    [StringLengthValidator(Min = 3, Max = 100), FileNameValidator(allowPaths: true)]
     public string? FileName
     {
         get { return fileName; }

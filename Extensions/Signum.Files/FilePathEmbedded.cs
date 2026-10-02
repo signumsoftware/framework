@@ -46,7 +46,7 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     }
 
     string fileName;
-    [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
+    [StringLengthValidator(Min = 1, Max = 260), FileNameValidator(allowPaths: false)]
     public string FileName
     {
         get { return fileName; }

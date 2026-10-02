@@ -43,7 +43,7 @@ public class ExcelAttachmentLogic
                 QueryRequest request = UserQueryLogic.ToQueryRequest(ea.UserQuery.RetrieveAndRemember(), ignoreHidden: true);
 
                 var title = GetTemplateString(ea.Title, ref ea.TitleNode, ctx);
-                var fileName = GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx);
+                var fileName = FileNameValidatorAttribute.ReplaceInvalidChars(GetTemplateString(ea.FileName, ref ea.FileNameNode, ctx));
 
                 var bytes = ExcelLogic.ExecutePlainExcel(request, title);
 
