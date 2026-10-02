@@ -17,7 +17,13 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     protected override Type ToKey(TypeEntity resource) => resource.ToType();
     protected override TypeEntity ToEntity(Type key) => key.ToTypeEntity();
 
-    protected override WithConditions<TypeAllowed> GetRuleAllowed(RuleTypeEntity rule) => new WithConditions<TypeAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<TypeAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
+    protected override WithConditions<TypeAllowed> GetRuleAllowed(RuleTypeEntity rule) => new WithConditions<TypeAllowed>(rule.Fallback, rule.ConditionRules.Select(c =>
+    {
+        if (c.Conditions.Count == 0)
+            throw new InvalidOperationException($"{nameof(RuleTypeConditionEntity)} {c.Id} of '{rule}' has no type conditions. Delete it and import the AuthRules again.");
+
+        return new ConditionRule<TypeAllowed>(c.Conditions.ToFrozenSet(), c.Allowed);
+    }).ToReadOnly());
 
     protected override RuleTypeEntity SetRuleAllowed(RuleTypeEntity rule, WithConditions<TypeAllowed> allowed)
     {

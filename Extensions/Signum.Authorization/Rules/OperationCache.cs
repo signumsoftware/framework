@@ -16,7 +16,13 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
     protected override OperationTypeEmbedded ToEntity((OperationSymbol operation, Type type) key) => new OperationTypeEmbedded { Operation = key.operation, Type = key.type.ToTypeEntity() };
 
-    protected override WithConditions<OperationAllowed> GetRuleAllowed(RuleOperationEntity rule) => new WithConditions<OperationAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<OperationAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
+    protected override WithConditions<OperationAllowed> GetRuleAllowed(RuleOperationEntity rule) => new WithConditions<OperationAllowed>(rule.Fallback, rule.ConditionRules.Select(c =>
+    {
+        if (c.Conditions.Count == 0)
+            throw new InvalidOperationException($"{nameof(RuleOperationConditionEntity)} {c.Id} of '{rule}' has no type conditions. Delete it and import the AuthRules again.");
+
+        return new ConditionRule<OperationAllowed>(c.Conditions.ToFrozenSet(), c.Allowed);
+    }).ToReadOnly());
 
     protected override RuleOperationEntity SetRuleAllowed(RuleOperationEntity rule, WithConditions<OperationAllowed> allowed)
     {
