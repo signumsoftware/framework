@@ -16,7 +16,13 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
     protected override PropertyRouteEntity ToEntity(PropertyRoute key) => PropertyRouteLogic.ToPropertyRouteEntity(key);
 
-    protected override WithConditions<PropertyAllowed> GetRuleAllowed(RulePropertyEntity rule) => new WithConditions<PropertyAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
+    protected override WithConditions<PropertyAllowed> GetRuleAllowed(RulePropertyEntity rule) => new WithConditions<PropertyAllowed>(rule.Fallback, rule.ConditionRules.Select(c =>
+    {
+        if (c.Conditions.Count == 0)
+            throw new InvalidOperationException($"{nameof(RulePropertyConditionEntity)} {c.Id} of '{rule}' has no type conditions. Delete it and import the AuthRules again.");
+
+        return new ConditionRule<PropertyAllowed>(c.Conditions.ToFrozenSet(), c.Allowed);
+    }).ToReadOnly());
 
     protected override RulePropertyEntity SetRuleAllowed(RulePropertyEntity rule, WithConditions<PropertyAllowed> allowed)
     {
