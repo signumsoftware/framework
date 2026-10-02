@@ -40,9 +40,6 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
     protected override WithConditions<OperationAllowed> ToAllowed(WithConditionsModel<OperationAllowed> allowedModel) => allowedModel.ToImmutable();
     protected override WithConditionsModel<OperationAllowed> ToAllowedModel(WithConditions<OperationAllowed> allowed) => allowed.ToModel();
 
-    //static ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>> coerceCache =
-    //new ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>>();
-
     public override WithConditions<OperationAllowed> CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, WithConditions<OperationAllowed> allowed, bool manual = false)
     {
         var operation = OperationLogic.FindOperation(key.type, key.operation);
