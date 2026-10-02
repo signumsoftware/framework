@@ -58,10 +58,13 @@ function SearchPage(): React.ReactElement {
   if (!Finder.isFindable(fo.queryName, true))
     return (
       <div id="divSearchPage">
-        <h3>
+        {/* The page's title, so an h1 as on the page below: as an h3 a user without access to the query
+            got a page without any h1, and heading navigation started at level 3 (WCAG 1.3.1). The h3 class
+            keeps it looking as it did. */}
+        <h1 className="h3">
           <span className="display-6 sf-query-title">{getQueryNiceName(fo.queryName)}</span>
           <small>Error: Query not allowed {Finder.isFindable(fo.queryName, false) ? "in full screen" : ""}</small>
-        </h3>
+        </h1>
       </div>
     );
 

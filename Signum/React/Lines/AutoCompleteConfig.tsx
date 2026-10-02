@@ -427,12 +427,25 @@ export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }): React
     isLite(p.entity) ? p.entity.EntityType :
       null;
 
-  if (typeName == null)
+  const niceName = typeName == null ? null : getTypeInfo(typeName).niceName;
+
+  // An entity's own rendering can already name its type: a project is shown with an icon titled "Project". The
+  // badge after it then said it a second time, and NVDA read "Project graphic, <name>, Project" (NVDA check
+  // 2026-10-01). Kept visible, but hidden from assistive technology when an image in the same item already
+  // carries exactly its text. Without such an image, the badge is the only thing that names the type and stays.
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const [repeated, setRepeated] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const item = ref.current?.parentElement;
+    const imageNames = item == null ? [] : [...item.querySelectorAll("svg[role=img] > title, img[alt]")]
+      .map(e => e instanceof HTMLImageElement ? e.alt : e.textContent);
+    setRepeated(niceName != null && imageNames.some(n => n?.trim() == niceName));
+  });
+
+  if (niceName == null)
     return <span className="text-danger">Embedded?</span>;
 
-  const ti = getTypeInfo(typeName);
-
-  return <span className="sf-type-badge ms-1">{ti.niceName}</span>;
+  return <span ref={ref} className="sf-type-badge ms-1" aria-hidden={repeated ? true : undefined}>{niceName}</span>;
 }
 
 export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{

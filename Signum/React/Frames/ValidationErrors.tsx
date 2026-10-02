@@ -9,6 +9,11 @@ export interface ValidationErrorsHandle {
   forceUpdate() : void; 
 }
 
+const entryStyle: React.CSSProperties = {
+  cursor: "pointer", whiteSpace: "pre-wrap", textAlign: "start",
+  background: "none", border: 0, padding: 0, color: "inherit", font: "inherit",
+};
+
 export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, ref?: React.Ref<ValidationErrorsHandle> }): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
@@ -29,12 +34,16 @@ export function ValidationErrors(p: { entity: ModifiableEntity, prefix: string, 
   return (
     <div role="alert">
     <ul className="validaton-summary alert alert-danger">
+      {/* A button inside each entry, because the click on the <li> that jumps to the field could not be
+          reached from the keyboard (WCAG 2.1.1). Inside, not role="button" on the <li>: that would end the
+          list, as the role="alert" note above explains. It looks like the text it replaces - only the focus
+          ring shows. */}
       {Dic.map(modelState, (key, value) => <li
         key={key}
-        style={{ cursor: "pointer", whiteSpace: "pre-wrap" }}
-        onClick={() => handleOnClick(key)}
         title={key.after(p.prefix + ".")}>
-        {value.join("\n")}
+        <button type="button" style={entryStyle} onClick={() => handleOnClick(key)}>
+          {value.join("\n")}
+        </button>
       </li>)}
     </ul>
     </div>

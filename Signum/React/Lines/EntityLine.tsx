@@ -198,7 +198,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
       var ac = p.autocomplete;
 
       if (ac == null || ctx.readOnly) {
-        var fcr = <FormControlReadonly id={inputId} ctx={ctx} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
+        var fcr = <FormControlReadonly id={inputId} ctx={ctx} htmlAttributes={readonlyAriaAttributes()} className={classes(ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass)}>{ctx.value && Navigator.renderLiteOrEntity(ctx.value)}</FormControlReadonly>;
         return renderInput ? renderInput(fcr) : fcr;
       }
 
@@ -235,7 +235,7 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
             getToString(value);
 
       if (p.ctx.readOnly)
-        return <FormControlReadonly id={inputId} ctx={p.ctx}>{str}</FormControlReadonly>
+        return <FormControlReadonly id={inputId} ctx={p.ctx} htmlAttributes={readonlyAriaAttributes()}>{str}</FormControlReadonly>
 
       if (p.view && !p.avoidLink) {
         return (
@@ -253,6 +253,15 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
           </span>
         );
       }
+    }
+
+    // The read-only control got none of the line's aria attributes, so an invalid one - an empty required
+    // domain that the user cannot fill in on this form - showed the red border and the summary entry, but
+    // neither said it was invalid nor read the message when it had the focus (WCAG 3.3.1). The base set
+    // (aria-describedby to the message) plus aria-invalid, not the extended one: an empty value renders a
+    // div with role="group", on which aria-required is not allowed.
+    function readonlyAriaAttributes(): React.HTMLAttributes<any> {
+      return { ...c.baseAriaAttributes(), "aria-invalid": c.getError() ? true : undefined };
     }
 
     function setLinkOrSpan(linkOrSpan?: HTMLElement | null) {

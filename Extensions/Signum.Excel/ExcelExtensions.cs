@@ -36,7 +36,11 @@ public static class ExcelExtensions
     {
         var value = double.Parse(time, CultureInfo.InvariantCulture);
 
-        return TimeSpan.FromDays(value).ToTimeOnly();
+        //Excel stores times as fractions of a day, so 12:15 is 0.51041666666666663 (slightly below the exact value).
+        //TimeSpan.FromDays truncates to ticks, giving 12:14:59.9999999, so round to milliseconds (Excel's resolution) like DateTime.FromOADate does.
+        var milliseconds = Math.Round(value * TimeSpan.FromDays(1).TotalMilliseconds);
+
+        return TimeSpan.FromMilliseconds(milliseconds).ToTimeOnly();
     }
 
 

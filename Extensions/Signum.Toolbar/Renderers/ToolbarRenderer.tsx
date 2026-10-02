@@ -489,6 +489,30 @@ function ToolbarMenuItemsEntityType(p: { response: ToolbarResponse<ToolbarMenuEn
       });
   }, [selEntityRef.current]);
 
+  // The selected entity may be deleted while it is selected — from its own configuration page, typically.
+  // Keeping it left the switcher on "<type> <id> not found" and every entity-bound item pointing at it, so
+  // it is checked again whenever an entity of its type changes. A deleted one is unselected, and when the
+  // page shown is one of this menu's entity pages, the menu's page without an entity (its dashboard) is
+  // opened instead, the same as clearing the switcher by hand.
+  Navigator.useEntityChanged([entityType], () => {
+    const current = selEntityRef.current;
+    if (!current)
+      return;
+
+    const onEntityPage = active?.menuWithEntity && is(active.menuWithEntity.menu.content, p.response.content) &&
+      is(active.menuWithEntity.entity, current);
+
+    Finder.fetchLites({ queryName: entityType, filterOptions: [{ token: "Entity", operation: "EqualTo", value: current }], count: 1 })
+      .then(lites => {
+        if (lites.length > 0 || !is(selEntityRef.current, current))
+          return;
+
+        setSelectedEntity(null);
+        if (onEntityPage)
+          handleSelect(undefined);
+      });
+  }, [active, p.response]);
+
   function handleSelect(e: React.SyntheticEvent | undefined) {
 
     forceUpdate();
