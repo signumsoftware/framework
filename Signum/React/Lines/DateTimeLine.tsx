@@ -52,10 +52,16 @@ export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null 
 
   const isLabelVisible = !(p.ctx.formGroupStyle === "SrOnly" || "visually-hidden");
   var ariaAtts = p.ctx.readOnly ? c.baseAriaAttributes() : c.extendedAriaAttributes();
-  if (!isLabelVisible && p.label) {
+  var htmlAtts = c.props.valueHtmlAttributes;
+  // An aria-label the call site spelled out wins over the label: a visible label such as a bare "to" says
+  // nothing about which range it ends, and ariaAtts is spread after valueHtmlAttributes, so without this
+  // the label would silently replace the fuller name.
+  const explicitAriaLabel = htmlAtts?.["aria-label"];
+  if (explicitAriaLabel)
+    ariaAtts = { ...ariaAtts, "aria-label": explicitAriaLabel };
+  else if (!isLabelVisible && p.label) {
     ariaAtts = { ...ariaAtts, "aria-label": typeof p.label === "string" ? p.label : String(p.label) };
   }
-  var htmlAtts = c.props.valueHtmlAttributes;
   var mergedHtmlReadOnly = { ...htmlAtts, ...ariaAtts };
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
@@ -124,6 +130,8 @@ export const DateTimeLine: (props: DateTimeLineProps) => React.ReactNode | null 
             // its own prop, so the one in inputProps was overwritten with undefined. An invalid date was then
             // announced as invalid without its message, and the help text was lost the same way (WCAG 3.3.1).
             aria-describedby={ariaAtts["aria-describedby"]}
+            // The same for aria-labelledby: a field named by labels elsewhere on the page lost its name.
+            aria-labelledby={(htmlAttributes as React.AriaAttributes)["aria-labelledby"]}
             placeholder={htmlAttributes.placeholder}
             messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
             min={p.minDate}

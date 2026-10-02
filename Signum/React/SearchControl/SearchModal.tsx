@@ -173,11 +173,12 @@ function SearchModal(p: SearchModalProps): React.ReactElement {
     // announced only as "dialog". Pointing at the title heading below names it (WCAG 4.1.2).
     <Modal size={(p.size ?? qs?.modalSize ?? "lg") as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-search-modal"
       aria-labelledby={titleId}>
-      <ModalHeaderButtons titleId={titleId} onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
-        <span className="sf-entity-title">
-          {p.title}
-          &nbsp;
-        </span>
+      {/* The heading holds the title only: with the whole header in it, the fullscreen button's label was part of
+          the heading and of the dialog's name, read by NVDA as "Projects Fullscreen, dialog" (WCAG 4.1.2, 2.4.6).
+          The frame dialog has done this since 2026-09-29 (FrameModalTitle). */}
+      <ModalHeaderButtons headingInChildren onClose={p.findMode == "Explore" ? handleCancelClicked : undefined}>
+        <h1 className="sf-modal-heading" id={titleId}><span className="sf-entity-title">{p.title}</span></h1>
+        &nbsp;
         <LinkButton className="sf-popup-fullscreen"
           title={FrameMessage.Fullscreen.niceToString()}
           onClick={(e) => { searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); }}>

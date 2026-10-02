@@ -603,6 +603,7 @@ public enum NormalControlMessage
 public enum SaveChangesMessage
 {
     ThereAreChanges,
+    [Description("You're trying to close an entity with changes")]
     YoureTryingToCloseAnEntityWithChanges,
     LoseChanges,
 }

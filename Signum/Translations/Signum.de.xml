@@ -897,7 +897,7 @@
     <Member Name="_0IsNotAllowed" Description="{0} ist nicht zulässig" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} ist im Status {1} nicht zulässig" />
     <Member Name="_0IsNotCompatibleWith1" Description="{0} ist nicht mit {1} kompatibel" />
-    <Member Name="_0IsNotSet" Description="{0} ist nicht festgesetzt" />
+    <Member Name="_0IsNotSet" Description="{0} ist ein Pflichtfeld" />
     <Member Name="_0IsNotSetIn1" Description="{0} ist nicht in {1} festgelegt" />
     <Member Name="_0IsRepeated" Description="{0} ist wiederholt" />
     <Member Name="_0IsSet" Description="{0} wird gesetzt" />

@@ -47,6 +47,7 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
   // Unique per instance: confirmations are opened from inside other dialogs, so a fixed id would appear more
   // than once in the document.
   const titleId = React.useId();
+  const messageId = React.useId();
 
   const selectedValue = React.useRef<MessageModalResult | undefined>(undefined);
 
@@ -182,11 +183,14 @@ function MessageModal(p: MessageModalProps): React.ReactElement {
     <Modal show={show} onExited={handleOnExited} backdrop={p.shouldSelect ? 'static' : undefined}
       dialogClassName={classes("message-modal", p.size && "modal-" + p.size, p.additionalDialogClassName)}
       aria-labelledby={titleId}
+      // A text message is the dialog's description, read with its name when it opens; until now only the title
+      // was (NVDA check 2026-10-01). Not a message built from components, which can hold controls to fill in.
+      aria-describedby={typeof p.message == "string" ? messageId : undefined}
       onHide={handleCancelClicked} autoFocus={true}>
       <div className={classes("modal-header", dialogHeaderClass(p.style))}>
         {renderTitle()}
       </div>
-      <div className="modal-body">
+      <div className="modal-body" id={messageId}>
         {
           typeof p.message == "string" ? p.message.split("\n").map((line, i) => <p key={i}>{line}</p>) :
             typeof p.message == "function" ? p.message({ handleButtonClicked }) :
