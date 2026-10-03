@@ -34,6 +34,8 @@ export namespace AzureADAuthenticator {
     if (Reflection.isStarted())
       throw new Error("call AzureADClient.registerAzureADAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
 
+    handlePopupResponse();
+
     AuthClient.LoginOptions.customLoginButtons = ctx => {
 
       const config = Options.getAzureADConfig("default");
@@ -108,10 +110,9 @@ export namespace AzureADAuthenticator {
   }
 
   /* MSAL 5: loginPopup / logoutPopup land on redirectUri inside the popup, and this page has to send the response back to the main window, that closes the popup.
-     Call it in MainPublic.tsx before starting the app:
-        AzureADAuthenticator.handlePopupResponse().then(handled => { if (!handled) reload(); });
+     Called by registerAzureADAuthenticator, before the router has the chance to change the URL (the response is read and sent synchronously)
   */
-  export async function handlePopupResponse(): Promise<boolean> {
+  async function handlePopupResponse(): Promise<boolean> {
     const hasState = (str: string) => str.length > 1 && new URLSearchParams(str.substring(1)).has("state");
     if (!hasState(window.location.hash) && !hasState(window.location.search))
       return false;
