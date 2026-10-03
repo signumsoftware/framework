@@ -38,7 +38,7 @@ public class WordAttachmentLogic
             {
                 WordTemplateEntity template = WordTemplateLogic.GetFromCache(wa.WordTemplate);
 
-                var fileName = string.IsNullOrEmpty(wa.FileName) ? null : GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx);
+                var fileName = string.IsNullOrEmpty(wa.FileName) ? null : FileNameValidatorAttribute.ReplaceInvalidChars(GetTemplateString(wa.FileName, ref wa.FileNameNode, ctx));
 
                 var model = template.Model != null && !WordModelLogic.RequiresExtraParameters(template.Model) ?
                 WordModelLogic.CreateDefaultWordModel(template.Model, entity) : null;

@@ -450,12 +450,19 @@ public class AzureStorageCollectionNameValidationAttribute : RegexValidatorAttri
 
 public class FileNameValidatorAttribute : ValidatorAttribute
 {
-    public static char[] InvalidCharts = Path.GetInvalidPathChars();
+    //Windows chars are always included, so validation does not depend on the server OS (on Linux Path.GetInvalidFileNameChars() is only '\0' and '/') and files can be downloaded in any client
+    public static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars().Union("\"<>|:*?\\/").Union(Enumerable.Range(0, 32).Select(i => (char)i)).ToArray();
 
-    static Regex invalidChartsRegex = new Regex("[" + Regex.Escape(new string(Path.GetInvalidFileNameChars())) + "]");
+    public static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
 
-    public FileNameValidatorAttribute()
+    static Regex invalidFileNameCharsRegex = new Regex("[" + Regex.Escape(new string(InvalidFileNameChars)) + "]");
+
+    public bool AllowPaths { get; }
+
+    /// <param name="allowPaths">true for folders / paths and file name templates (only Path.GetInvalidPathChars() are invalid), false for plain file names (also '/', '\', ':', '*', '?', '"', '&lt;', '&gt;', '|' are invalid)</param>
+    public FileNameValidatorAttribute(bool allowPaths)
     {
+        AllowPaths = allowPaths;
     }
 
     public string FormatName => ValidationMessage.FileName.NiceToString();
@@ -469,15 +476,20 @@ public class FileNameValidatorAttribute : ValidatorAttribute
         if (str == null)
             return null;
 
-        if (str.IndexOfAny(InvalidCharts) == -1)
+        if (str.IndexOfAny(AllowPaths ? InvalidPathChars : InvalidFileNameChars) == -1)
             return null;
 
         return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString().FormatWith("{0}", FormatName);
     }
 
-    public static string RemoveInvalidCharts(string a)
+    public static string RemoveInvalidCharts(string fileName)
     {
-        return invalidChartsRegex.Replace(a, "");
+        return invalidFileNameCharsRegex.Replace(fileName, "");
+    }
+
+    public static string ReplaceInvalidChars(string fileName, string replacement = "_")
+    {
+        return invalidFileNameCharsRegex.Replace(fileName, replacement);
     }
 
     public override bool IsCompatibleWith(PropertyInfo pi)

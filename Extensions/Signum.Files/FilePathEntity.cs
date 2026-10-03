@@ -31,7 +31,7 @@ public class FilePathEntity : Entity, IFile, IFilePath
     public DateTime CreationDate { get; private set; } = Clock.Now;
 
     string fileName;
-    [StringLengthValidator(Min = 1, Max = 260), FileNameValidator]
+    [StringLengthValidator(Min = 1, Max = 260), FileNameValidator(allowPaths: false)]
     public string FileName
     {
         get { return fileName; }

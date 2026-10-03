@@ -13,7 +13,7 @@ public class ImageAttachmentEntity : Entity, IAttachmentGeneratorEntity
     internal object? FileNameNode;
 
     string? fileName;
-    [StringLengthValidator(Min = 3, Max = 100), FileNameValidator]
+    [StringLengthValidator(Min = 3, Max = 100), FileNameValidator(allowPaths: true)]
     public string? FileName
     {
         get { return fileName; }

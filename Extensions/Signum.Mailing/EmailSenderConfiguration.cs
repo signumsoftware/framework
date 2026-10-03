@@ -78,7 +78,7 @@ public class SmtpEmailServiceEntity : EmailServiceEntity
 
     public SmtpNetworkDeliveryEmbedded? Network { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 300), FileNameValidator]
+    [StringLengthValidator(Min = 3, Max = 300), FileNameValidator(allowPaths: true)]
     public string? PickupDirectoryLocation { get; set; }
 
     static StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod> stateValidator = new StateValidator<SmtpEmailServiceEntity, SmtpDeliveryMethod>(
