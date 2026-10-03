@@ -207,7 +207,9 @@ public static class PredictorLogic
     public static void IgnorePinned(SchemaBuilder sb)
     {
         sb.Settings.FieldAttributes((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned).Add(new IgnoreAttribute());
+        sb.Settings.FieldAttributes((PredictorEntity p) => p.MainQuery.Filters.Single().DashboardBehaviour).Add(new IgnoreAttribute());
         sb.Settings.FieldAttributes((PredictorSubQueryEntity p) => p.Filters.Single().Pinned).Add(new IgnoreAttribute());
+        sb.Settings.FieldAttributes((PredictorSubQueryEntity p) => p.Filters.Single().DashboardBehaviour).Add(new IgnoreAttribute());
     }
 
     static string? SubQueryColumns_StaticPropertyValidation(PredictorSubQueryEntity sq, PropertyInfo pi)
