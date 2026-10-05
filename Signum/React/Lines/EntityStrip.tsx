@@ -3,6 +3,7 @@ import { classes, Dic } from '../Globals'
 import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
+import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList, MList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
@@ -99,7 +100,10 @@ export function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: En
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       ariaAttributes={ariaAtts}>
       {inputId => <div className="sf-entity-strip sf-control-container">
-        {p.groupElementsBy == undefined ?
+        {/* A read-only strip has no input, so with no elements it rendered nothing below the label and the field
+            looked missing. The empty read-only box an EntityLine shows in the same case keeps it visible. */}
+        {readOnly && c.getMListItemContext(p.ctx).length == 0 ? <FormControlReadonly id={inputId} ctx={p.ctx} /> :
+        p.groupElementsBy == undefined ?
           <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
             {c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i))}
             {renderLastElement()}
