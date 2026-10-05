@@ -2,13 +2,16 @@
     --sidebar-principal: var(--bs-secondary-color);
     --sidebar-accent: var(--bs-emphasis-color);
     --sidebar-width: 250px;
-    --sidebar-highlight: var(--bs-secondary-bg);
 }
 
+/* A custom property holding var() is resolved where it is declared, so declared on :root alone it kept the light
+   theme's colours below the <body data-bs-theme="dark"> - the active row's background showed as a white box
+   behind its extra icon. Redeclared on every theme scope it resolves to that theme's colours. */
 :root,
-[data-bs-theme="dark"] {
+[data-bs-theme] {
   --sidebar-principal: var(--bs-secondary-color);
   --sidebar-accent: var(--bs-emphasis-color);
+  --sidebar-highlight: var(--bs-secondary-bg);
 }
 
 .sidebar-container {
