@@ -54,7 +54,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {() => query && (
           Finder.isFindable(query.key, true) ?
-            <a className="form-control-static" href={Finder.findOptionsPath({ queryName: query.key })}>{getQueryNiceName(query.key)}</a> :
+            <a className="form-control-static" href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: query.key }))}>{getQueryNiceName(query.key)}</a> :
             <span>{getQueryNiceName(query.key)}</span>)
         }
       </FormGroup>

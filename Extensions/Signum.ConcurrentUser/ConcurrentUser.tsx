@@ -100,7 +100,7 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
                   {ConcurrentUserMessage.WarningYouWillLostYourCurrentChanges.niceToString()}
                 </p>
                 <p>
-                  {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
+                  {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={AppContext.toAbsoluteUrl(Navigator.navigateRoute(p.entity))} target="_blank">{getToString(p.entity)}</a>)}
                 </p>
               </>
             }
@@ -142,7 +142,7 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
                 <div className="mt-3">
                   <small>
                     {ConcurrentUserMessage.YouHaveLocalChangesBut0HasAlreadyBeenSavedInTheDatabaseYouWillNotBeAbleToSaveChanges.niceToString().formatHtml(<strong>{getToString(p.entity)}</strong>)}
-                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={Navigator.navigateRoute(p.entity)} target="_blank">{getToString(p.entity)}</a>)}
+                    {ConcurrentUserMessage.ConsiderOpening0InANewTabAndApplyYourChangesManually.niceToString().formatHtml(<a href={AppContext.toAbsoluteUrl(Navigator.navigateRoute(p.entity))} target="_blank">{getToString(p.entity)}</a>)}
                   </small>
                 </div> :
                 otherUsers.some(u => u.isModified) && isModified.current ?

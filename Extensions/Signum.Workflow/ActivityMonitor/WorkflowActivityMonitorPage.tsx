@@ -4,6 +4,7 @@ import { Finder } from '@framework/Finder'
 import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Workflow'
 import { Navigator } from '@framework/Navigator'
+import { toAbsoluteUrl } from '@framework/AppContext'
 import { WorkflowClient } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, QueryDescription, ColumnRequest } from '@framework/FindOptions';
@@ -58,7 +59,7 @@ export default function WorkflowActivityMonitorPage(): React.JSX.Element {
       <h3 className="modal-title">
         {!config ? JavascriptMessage.loading.niceToString() : getToString(config.workflow)}
         {config && Navigator.isViewable(WorkflowEntity) &&
-          <small>&nbsp;<a href={Navigator.navigateRoute(config.workflow)} target="blank"><FontAwesomeIcon icon="pencil" title={WorkflowActivityMonitorMessage.OpenWorkflow.niceToString()}/></a></small>}
+          <small>&nbsp;<a href={toAbsoluteUrl(Navigator.navigateRoute(config.workflow))} target="blank"><FontAwesomeIcon icon="pencil" title={WorkflowActivityMonitorMessage.OpenWorkflow.niceToString()}/></a></small>}
         <br />
         <small>{WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString()}</small>
       </h3>
