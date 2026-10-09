@@ -3,6 +3,7 @@ import { Modal } from "react-bootstrap";
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from "@framework/Navigator";
+import { toAbsoluteUrl } from "@framework/AppContext";
 import { IModalProps, openModal } from "@framework/Modals";
 import { PredictorClient } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
@@ -56,8 +57,8 @@ export function PredictModal(p: PredictModalProps): React.JSX.Element {
     <Modal onHide={handleOnClose} onExited={handleOnExited} show={show} className="message-modal" size="lg">
       <ModalHeaderButtons onClose={handleOnClose}>
         {getToString(predict.predictor)}<br />
-        <small>{PredictorEntity.niceName()}&nbsp;{predict.predictor.id} (<a href={Navigator.navigateRoute(predict.predictor)} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
-        {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={Navigator.navigateRoute(e)} target="_blank">{getToString(e)}</a></span>}
+        <small>{PredictorEntity.niceName()}&nbsp;{predict.predictor.id} (<a href={toAbsoluteUrl(Navigator.navigateRoute(predict.predictor))} target="_blank">{EntityControlMessage.View.niceToString()}</a>)</small>
+        {e && <span><br />{getTypeInfo(e.EntityType).niceName}: <a href={toAbsoluteUrl(Navigator.navigateRoute(e))} target="_blank">{getToString(e)}</a></span>}
       </ModalHeaderButtons>
       <div className="modal-body">
         <div>

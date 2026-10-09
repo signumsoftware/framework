@@ -252,7 +252,7 @@ function SearchValue(p: SearchValueProps): React.ReactNode | null {
                   </span>;
 
                 var link = p.isLink && Navigator.isViewable(lite.EntityType) ?
-                  <a key={i} href={Navigator.navigateRoute(lite)}
+                  <a key={i} href={toAbsoluteUrl(Navigator.navigateRoute(lite))}
                     className="sf-entitStrip-link" onClick={e => onClickLite(e, lite)} {...p.htmlAttributes}>
                     {tag}
                   </a> :
