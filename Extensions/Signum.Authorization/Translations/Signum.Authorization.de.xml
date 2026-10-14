@@ -126,6 +126,7 @@
     <Member Name="AutomaticUpgradeOfOperations" Description="Automatische Aktualisierung der Operationen" />
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
+    <Member Name="ViewErrorDetails" Description="Fehlerdetails anzeigen" />
   </Type>
   <Type Name="ConditionRuleModel`1">
     <Member Name="Allowed" Description="Erlaubt" />

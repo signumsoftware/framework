@@ -6,6 +6,7 @@ using Signum.Authorization.Rules;
 using Signum.Authorization.AuthToken;
 using Signum.API;
 using Signum.API.Controllers;
+using Signum.API.Filters;
 using Signum.API.Json;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -47,6 +48,18 @@ public static class AuthServer
                     UserHolder.Current = new UserWithClaims(user);
                     user.Save();
                 }
+            }
+        };
+
+        HttpError.IncludeErrorDetails = e =>
+        {
+            try
+            {
+                return UserEntity.Current != null && BasicPermission.ViewErrorDetails.IsAuthorized();
+            }
+            catch
+            {
+                return false;
             }
         };
 

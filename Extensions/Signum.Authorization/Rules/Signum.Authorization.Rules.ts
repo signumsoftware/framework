@@ -89,6 +89,7 @@ export namespace BasicPermission {
   export const AutomaticUpgradeOfProperties : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
   export const AutomaticUpgradeOfQueries : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
   export const AutomaticUpgradeOfOperations : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
+  export const ViewErrorDetails : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.ViewErrorDetails");
 }
 
 export function ConditionRuleModel<A extends string>(a : EnumType<A>): Type<ConditionRuleModel<A>> {
