@@ -1439,8 +1439,21 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (var tr = new Transaction())
             {
                 int rows;
-                using (Schema.Current.OnPreUnsafeDelete<T>(query))
+                var postDelete = Schema.Current.OnPreUnsafeDelete<T>(query);
+                try
+                {
                     rows = DbQueryProvider.Single.Delete(query, sql => (int)sql.ExecuteScalar()!);
+                }
+                catch
+                {
+                    // The handlers still get disposed (some restore state), but a failure in them must not replace
+                    // the original one: on PostgreSQL a failed statement aborts the transaction, so WithDeletePart's
+                    // follow-up delete throws 25P02 and the ForeignKeyException the client's DeleteErrorModal
+                    // relies on never arrives.
+                    try { postDelete?.Dispose(); } catch { }
+                    throw;
+                }
+                postDelete?.Dispose();
 
                 return tr.Commit(rows);
             }
