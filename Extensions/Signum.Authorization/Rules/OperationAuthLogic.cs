@@ -95,6 +95,9 @@ public static class OperationAuthLogic
         if (WritesUnderGlobalReadOnly(operationKey, entityType))
             return false;
 
+        if (entity != null && WritesToReadOnlyEntity(operationKey, entity))
+            return false;
+
         var oa = GetOperationAllowed(operationKey, entityType);
 
         if (entity == null || entity.IsNew)
@@ -137,6 +140,21 @@ public static class OperationAuthLogic
             OperationType.ConstructorFromMany => returnsFrozen,
             _ => false,
         };
+    }
+
+    // Anything but a read-only execute counts as writing here, constructors from the entity included: what is built
+    // from a read-only record usually belongs to the same part of the data.
+    static bool WritesToReadOnlyEntity(OperationSymbol operationKey, Entity entity)
+    {
+        var isReadOnly = TypeAuthLogic.IsEntityReadOnly;
+        if (isReadOnly == null || !AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return false;
+
+        var operation = OperationLogic.TryFindOperation(entity.GetType(), operationKey);
+        if (operation == null || operation is IExecuteOperation { ForReadonlyEntity: true })
+            return false;
+
+        return isReadOnly(entity);
     }
 
     public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)

@@ -281,6 +281,13 @@ public static partial class TypeAuthLogic
     /// </summary>
     public static Func<Type, bool>? IsGloballyReadOnly;
 
+    /// <summary>
+    /// The per-record counterpart of <see cref="IsGloballyReadOnly"/>: when it returns true for an entity, every
+    /// operation on it is refused except read-only executes - for a freeze of part of the data, such as one
+    /// portfolio. It only decides what is offered; refusing the write itself is up to whoever sets it.
+    /// </summary>
+    public static Func<Entity, bool>? IsEntityReadOnly;
+
     static readonly ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> capAtReadCache = new();
 
     static TypeAllowed CapAtRead(TypeAllowed allowed) => TypeAllowedExtensions.Create(
