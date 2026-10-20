@@ -92,6 +92,9 @@ public static class OperationAuthLogic
 
     static bool OperationLogic_AllowOperation(OperationSymbol operationKey, Type entityType, bool inUserInterface, Entity? entity)
     {
+        if (WritesUnderGlobalReadOnly(operationKey, entityType))
+            return false;
+
         var oa = GetOperationAllowed(operationKey, entityType);
 
         if (entity == null || entity.IsNew)
@@ -107,6 +110,33 @@ public static class OperationAuthLogic
         }
 
         return giAllowOperation.GetInvoker(entity.GetType())(entity, oa, inUserInterface);
+    }
+
+    /// <summary>
+    /// Operation rules are independent of type rules, so <see cref="TypeAuthLogic.IsGloballyReadOnly"/> would leave
+    /// every write operation visible and failing only once it saves. Hide the ones that write to a frozen type up front.
+    /// </summary>
+    static bool WritesUnderGlobalReadOnly(OperationSymbol operationKey, Type entityType)
+    {
+        var isReadOnly = TypeAuthLogic.IsGloballyReadOnly;
+        if (isReadOnly == null || !AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return false;
+
+        var operation = OperationLogic.TryFindOperation(entityType, operationKey);
+        if (operation == null)
+            return false;
+
+        bool returnsFrozen = operation.ReturnType != null && isReadOnly(operation.ReturnType);
+
+        return operation.OperationType switch
+        {
+            OperationType.Constructor => isReadOnly(entityType),
+            OperationType.Execute => !((IExecuteOperation)operation).ForReadonlyEntity && isReadOnly(entityType),
+            OperationType.Delete => isReadOnly(entityType),
+            OperationType.ConstructorFrom => returnsFrozen || ((IConstructorFromOperation)operation).SourceEntityIsModified && isReadOnly(entityType),
+            OperationType.ConstructorFromMany => returnsFrozen,
+            _ => false,
+        };
     }
 
     public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)
