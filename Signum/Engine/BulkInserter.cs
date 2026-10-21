@@ -172,7 +172,7 @@ public static class BulkInserter
 
             using (var tr = new Transaction())
             {
-                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false);
+                Schema.Current.OnPreBulkInsert(typeof(T), inMListTable: false, list);
 
                 Executor.BulkCopy(dt, columns, t.Name, copyOptions, timeout);
 
@@ -340,7 +340,7 @@ public static class BulkInserter
 
             using (var tr = new Transaction())
             {
-                Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
+                Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true, list.Select(mle => mle.Parent).Distinct().ToList());
 
                 using (disableIdentityBehaviour ? Administrator.DisableIdentity(mlistTable) : null)
                 {

@@ -29,7 +29,7 @@ public static partial class TypeAuthLogic
     {
         var oldType = isWriting.Value;
         isWriting.Value = type;
-        return new Disposable(() => isWriting.Value = type);
+        return new Disposable(() => isWriting.Value = oldType);
     }
 
     const string CreatedKey = "Created";
