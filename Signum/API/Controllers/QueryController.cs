@@ -104,13 +104,15 @@ public class QueryController : ControllerBase
     [HttpPost("api/query/lites/{queryKey}"), ProfilerActionSplitter("queryKey")]
     public async Task<List<Lite<Entity>>> GetLites(string queryKey, [Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
+        using (ExecutionMode.UserInterface()) //because it returns IQueryable
+            return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
     [HttpPost("api/query/entities/{queryKey}"), ProfilerActionSplitter("queryKey")]
-    public async Task<List<Entity>> GetEntities(string queryKey, [Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+    public async Task<List<Entity>> GetEntities(string queryKey, [Required, FromBody] QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
+        using (ExecutionMode.UserInterface()) //because it returns IQueryable
+            return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
     [HttpPost("api/query/queryValue/{queryKey}"), ProfilerActionSplitter("queryKey"), EmbeddedPropertyRouteAttribute<QueryValueResolver>]

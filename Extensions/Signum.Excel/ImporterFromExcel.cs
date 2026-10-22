@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Authorization.Rules;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
+using Signum.Security;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.IO;
@@ -95,6 +96,7 @@ public class ImporterFromExcel
 
         using (var tr = model.Transactional ? new Transaction() : null)
         using (model.IdentityInsert && model.Transactional ? Administrator.DisableIdentity(table) : null)
+        using (ExecutionMode.UserInterface()) //because it returns IQueryable
         using (var ms = new MemoryStream(file.Bytes))
         using (var document = SpreadsheetDocument.Open(ms, false))
         {
@@ -136,6 +138,7 @@ public class ImporterFromExcel
                         if (rg.Key != null)
                         {
                             //Two is enough to tell "none", "one" and "ambiguous" apart.
+
                             var matches = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
                             {
                                 QueryName = request.QueryName,
