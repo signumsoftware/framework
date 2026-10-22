@@ -1,6 +1,7 @@
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Signum.Authorization;
@@ -264,10 +265,34 @@ public static partial class TypeAuthLogic
 
         var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
         if (overrideTypeAllowed != null)
-            return overrideTypeAllowed(allowed);
+            allowed = overrideTypeAllowed(allowed);
+
+        if (IsGloballyReadOnly != null && IsGloballyReadOnly(type))
+            return capAtReadCache.GetOrAdd(allowed, a => a.MapWithConditions(CapAtRead).Intern());
 
         return allowed;
     }
+
+    /// <summary>
+    /// Application-wide freeze: every type this returns true for is capped at <see cref="TypeAllowed.Read"/>,
+    /// whatever the role rules say. It applies to the current user's effective rights (<see cref="GetAllowed(Type)"/>),
+    /// not to the configured rules (<see cref="GetAllowed(Lite{RoleEntity}, Type)"/>), so the rules screen keeps
+    /// showing what is configured. Global execution mode and AuthLogic.Disable() are not affected.
+    /// </summary>
+    public static Func<Type, bool>? IsGloballyReadOnly;
+
+    /// <summary>
+    /// The per-record counterpart of <see cref="IsGloballyReadOnly"/>: when it returns true for an entity, every
+    /// operation on it is refused except read-only executes - for a freeze of part of the data, such as one
+    /// portfolio. It only decides what is offered; refusing the write itself is up to whoever sets it.
+    /// </summary>
+    public static Func<Entity, bool>? IsEntityReadOnly;
+
+    static readonly ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<TypeAllowed>> capAtReadCache = new();
+
+    static TypeAllowed CapAtRead(TypeAllowed allowed) => TypeAllowedExtensions.Create(
+        allowed.GetDB() < TypeAllowedBasic.Read ? allowed.GetDB() : TypeAllowedBasic.Read,
+        allowed.GetUI() < TypeAllowedBasic.Read ? allowed.GetUI() : TypeAllowedBasic.Read);
 
     public static WithConditions<TypeAllowed> GetAllowed(Lite<RoleEntity> role, Type type)
     {

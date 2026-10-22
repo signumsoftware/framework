@@ -85,6 +85,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 
   override overrideProps(p: P, overridenProps: P): void {
     super.overrideProps(p, overridenProps);
+    EntityBaseController.applyCreateVeto(p);
     if (p.type) {
       var avoidDuplicates = p.avoidDuplicates ?? p.ctx.propertyRoute?.member?.avoidDuplicates;
       if (avoidDuplicates) {
@@ -337,7 +338,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   
   async defaultCreate(pr: PropertyRoute): Promise<Aprox<V> | undefined> {
 
-    var typeName = await EntityBaseController.chooseType(this.props.type!, t => this.props.create /*Hack?*/ || Navigator.isCreable(t, { customComponent: !!this.props.getComponent || !!this.props.getViewPromise, isEmbedded: pr.member!.type.isEmbedded }));
+    var typeName = await EntityBaseController.chooseType(this.props.type!, t => this.props.create /*Hack?*/ || Navigator.isCreable(t, { customComponent: !!this.props.getComponent || !!this.props.getViewPromise, isEmbedded: pr.typeReference().isEmbedded }));
 
     if (typeName == null)
       return undefined;

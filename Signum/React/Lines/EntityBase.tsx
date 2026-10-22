@@ -105,6 +105,29 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return LineBaseController.propEquals(prevProps, nextProps);
   }
 
+  override overrideProps(p: P, overridenProps: P): void {
+    super.overrideProps(p, overridenProps);
+    EntityBaseController.applyCreateVeto(p);
+  }
+
+  /**
+   * A create veto (Navigator.createVetoEvent - a freeze, say) applies whether create is the default or set by the
+   * caller, and is told the control's own filters: they are where the new entity would belong. Shared with
+   * EntityListBaseController, which is not an EntityBaseController.
+   */
+  static applyCreateVeto(p: { create?: unknown, type?: TypeReference, findOptions?: FindOptions, findOptionsDictionary?: { [typeName: string]: FindOptions } }): void {
+    if (!p.create || !p.type || p.type.isEmbedded || p.type.name == IsByAll)
+      return;
+
+    const filters = [
+      ...(p.findOptions?.filterOptions ?? []),
+      ...Object.values(p.findOptionsDictionary ?? {}).flatMap(fo => fo?.filterOptions ?? []),
+    ];
+    const tis = tryGetTypeInfos(p.type).notNull();
+    if (tis.length > 0 && tis.every(ti => Navigator.isCreateVetoed(ti, { rawFilterOptions: filters })))
+      p.create = false;
+  }
+
   override getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
@@ -244,7 +267,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
 
   async defaultCreate(pr: PropertyRoute): Promise<Aprox<V> | undefined> {
 
-    var typeName = await EntityBaseController.chooseType(this.props.type!, t => this.props.create /*Hack?*/ || Navigator.isCreable(t, { customComponent: !!this.props.getComponent || !!this.props.getViewPromise, isEmbedded: pr.member!.type.isEmbedded }));
+    var typeName = await EntityBaseController.chooseType(this.props.type!, t => this.props.create /*Hack?*/ || Navigator.isCreable(t, { customComponent: !!this.props.getComponent || !!this.props.getViewPromise, isEmbedded: pr.typeReference().isEmbedded }));
 
     if (typeName == null)
       return undefined;

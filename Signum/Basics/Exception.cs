@@ -70,6 +70,7 @@ public class ExceptionEntity : Entity
         }
     }
 
+    [Index]
     public int StackTraceHash { get; private set; }
 
     public int ThreadId { get; set; }

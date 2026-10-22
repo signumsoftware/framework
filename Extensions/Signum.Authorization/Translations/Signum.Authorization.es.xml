@@ -53,6 +53,7 @@
     <Member Name="AutomaticUpgradeOfOperations" Description="Actualización automática de las operaciones" />
     <Member Name="AutomaticUpgradeOfProperties" Description="Actualización automática de propiedades" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Actualización automática de las consultas" />
+    <Member Name="ViewErrorDetails" Description="Ver detalles de errores" />
   </Type>
   <Type Name="LoginAuthMessage">
     <Member Name="_0HasBeenSucessfullyAssociatedWithUser1InThisDevice" Description="{0} se ha asociado correctamente con el usuario {1} en este dispositivo." />

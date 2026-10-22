@@ -10,7 +10,8 @@ import { EntityBaseController, FormGroup, TypeContext } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import { PropertyRouteEntity } from '@framework/Signum.Basics'
+import { ExceptionEntity, PropertyRouteEntity } from '@framework/Signum.Basics'
+import { ErrorModalOptions } from '@framework/Modals/ErrorModal'
 import {
   PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type,
   QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol, reloadTypesInDomains,
@@ -50,6 +51,9 @@ export namespace AuthAdminClient {
     Options.permissions = options.permissions;
   
     AppContext.clearSettingsActions.push(() => urlProviders.clear());
+
+    // After Navigator.start, which grants it to whoever may view ExceptionEntity.
+    ErrorModalOptions.isExceptionViewable = () => AppContext.isPermissionAuthorized(BasicPermission.ViewErrorDetails) && Navigator.isViewable(ExceptionEntity);
   
     Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
       renderLite: (lite, hl) => {

@@ -16,7 +16,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
     public static Func<Exception, bool> ShouldLogException = e => e is not OperationCanceledException;
 
-    public static Func<ResourceExecutedContext, HttpError> CustomHttpErrorFactory = rec => new HttpError(rec.Exception!);
+    public static Func<ResourceExecutedContext, HttpError> CustomHttpErrorFactory = rec => new HttpError(rec.Exception!, includeErrorDetails: null);
 
     public static Action<ActionContext, ExceptionEntity>? ApplyMixins = null;
 
