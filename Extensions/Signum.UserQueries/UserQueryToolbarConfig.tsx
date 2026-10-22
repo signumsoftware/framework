@@ -33,6 +33,14 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     return undefined;
   }
 
+  override getCountReporter(element: ToolbarResponse<UserQueryEntity>, entity: Lite<Entity> | null, onCount: (num: number | null | undefined) => void): React.ReactElement | undefined {
+    return <SearchUserQueryCount userQuery={element.content!}
+      entity={entity}
+      autoRefreshPeriod={element.autoRefreshPeriod}
+      showCount={element.showCount ?? "Always"}
+      onCount={onCount} />
+  }
+
   getDefaultIcon(): IconProp {
     return "rectangle-list";
   }
@@ -84,16 +92,17 @@ interface CountUserQueryIconProps {
   color?: string;
   autoRefreshPeriod?: number;
   showCount: ShowCount;
+  onCount?: (num: number | null | undefined) => void;
 }
 
 
-export function SearchUserQueryCount(p: CountUserQueryIconProps): React.JSX.Element {
+export function SearchUserQueryCount(p: CountUserQueryIconProps): React.JSX.Element | null {
 
   var userQuery = Navigator.useFetchInState(p.userQuery)
   var findOptions = useAPI(signal => userQuery && UserQueryClient.Converter.toFindOptions(userQuery, p.entity ?? undefined), [userQuery, p.entity]);
 
   if (findOptions == null)
-    return <ToolbarCount num={undefined} showCount={p.showCount} />;
+    return p.onCount ? null : <ToolbarCount num={undefined} showCount={p.showCount} />;
 
-  return <SearchToolbarCount findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} showCount={p.showCount} />
+  return <SearchToolbarCount findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} showCount={p.showCount} onCount={p.onCount} />
 }

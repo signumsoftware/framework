@@ -44,6 +44,11 @@ export abstract class ToolbarConfig<T extends Entity> {
     return undefined;
   }
 
+  /** Renders nothing, but loads the same count as getCounter and reports it, so a ToolbarMenu can show the sum of its elements. */
+  getCountReporter(element: ToolbarResponse<T>, entity: Lite<Entity> | null, onCount: (num: number | null | undefined) => void): React.ReactElement | undefined {
+    return undefined;
+  }
+
   abstract navigateTo(element: ToolbarResponse<T>, selectedEntity: Lite<Entity> | null): Promise<string | null>;
   abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any, entityType?: string): { prio: number, inferredEntity ?: Lite<Entity> } | null;
 
