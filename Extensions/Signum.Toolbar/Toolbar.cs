@@ -185,6 +185,9 @@ public enum ShowCount
     [Description("More than 0")]
     MoreThan0 = 1,
     Always,
+    /// <summary>Only a dot when there is more than 0, without the number.</summary>
+    [Description("Indicator only")]
+    Indicator,
 }
 
 public enum ToolbarElementType
@@ -283,6 +286,8 @@ public enum ToolbarMessage
     [Description("No {0} selected")]
     No0Selected,
     ShowTogether,
+    [Description("Has entries")]
+    HasEntries,
 
 }
 
