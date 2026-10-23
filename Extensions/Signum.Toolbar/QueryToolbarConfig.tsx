@@ -10,8 +10,8 @@ import { ToolbarConfig} from "./ToolbarConfig"
 import { SearchValue, FindOptions } from '@framework/Search';
 import { Navigator } from '@framework/Navigator';
 import { useAPI, useInterval } from '@framework/Hooks'
-import { classes } from '@framework/Globals'
 import { ShowCount } from './Signum.Toolbar'
+import { ToolbarCount } from './ToolbarCount'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -31,6 +31,16 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     }
 
     return undefined;
+  }
+
+  override getCountReporter(element: ToolbarResponse<QueryEntity>, entity: Lite<Entity> | null, onCount: (num: number | null | undefined) => void): React.ReactElement | undefined {
+    return (
+      <SearchToolbarCount
+        findOptions={{ queryName: getToString(element.content)! }}
+        autoRefreshPeriod={element.autoRefreshPeriod}
+        showCount={element.showCount ?? "Always"}
+        onCount={onCount} />
+    );
   }
 
   getDefaultIcon(): IconProp {
@@ -63,6 +73,8 @@ interface CountIconProps {
   findOptions: FindOptions;
   moreThanZero?: boolean;
   showCount: ShowCount;
+  /** Reports the count instead of rendering a badge (a ToolbarMenu adds up the counts of its elements). */
+  onCount?: (num: number | null | undefined) => void;
 }
 
 export function SearchToolbarCount(p: CountIconProps): React.JSX.Element {
@@ -81,22 +93,12 @@ export function SearchToolbarCount(p: CountIconProps): React.JSX.Element {
   return <SearchValue deps={[deps, invalidations]}
     findOptions={p.findOptions}
     avoidNotifyPendingRequest={true}
-    onRender={val => val == 0 && p.moreThanZero ? null :
+    onValueChange={p.onCount}
+    onRender={val => p.onCount ? null : val == 0 && p.moreThanZero ? null :
       <ToolbarCount num={val} showCount={p.showCount} />}
   />;
 }
 
-
-export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }): React.JSX.Element | null {
-
-  if (!p.num && p.showCount == "MoreThan0")
-    return null;
-
-  return (
-    <div className="sf-toolbar-count-container">
-      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "text-bg-tertiary" : "text-bg-danger")}>{p.num ?? "…"}</div>
-    </div>
-  );
-}
+export { ToolbarCount };
 
 

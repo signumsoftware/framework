@@ -255,6 +255,19 @@ public class Schema : IImplementationsFinder
             ee.OnPreBulkInsert(inMListTable);
     }
 
+    /// <summary>
+    /// Raised before a bulk insert with the rows being inserted - for an MList table, the distinct parents of its
+    /// elements. For checks that depend on the data and not only on the type, which the per-type PreBulkInsert
+    /// cannot answer.
+    /// </summary>
+    public event Action<Type, IReadOnlyList<Entity>>? PreBulkInsertEntities;
+
+    internal void OnPreBulkInsert(Type type, bool inMListTable, IReadOnlyList<Entity> entities)
+    {
+        OnPreBulkInsert(type, inMListTable);
+        PreBulkInsertEntities?.Invoke(type, entities);
+    }
+
     public ICacheController? CacheController(Type type)
     {
         IEntityEvents? ee = entityEvents.TryGetC(type);

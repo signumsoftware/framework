@@ -29,7 +29,7 @@ public static partial class TypeAuthLogic
     {
         var oldType = isWriting.Value;
         isWriting.Value = type;
-        return new Disposable(() => isWriting.Value = type);
+        return new Disposable(() => isWriting.Value = oldType);
     }
 
     const string CreatedKey = "Created";
@@ -231,6 +231,10 @@ public static partial class TypeAuthLogic
     {
         if (!AuthLogic.IsEnabled)
             return true;
+
+        // A record frozen on its own (IsEntityReadOnly) can be read but not written, whatever the type rules say.
+        if (allowed == TypeAllowedBasic.Write && !ExecutionMode.InGlobal && IsEntityReadOnly?.Invoke(entity) == true)
+            return false;
 
         var tac = GetAllowed(entity.GetType());
 

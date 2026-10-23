@@ -154,7 +154,12 @@ export default function SearchValueLine(p: SearchValueLineProps): React.JSX.Elem
       {EntityBaseController.getFindIcon()}
     </LinkButton>;
   
-  const create = !p.ctx.frame?.currentDate && (p.create == true || p.create == "ifNull" && value === null) &&
+  // Hidden on a read-only form like every other line's Create, and when a create veto applies (a freeze, say) to the
+  // types the query returns.
+  const queryTypes = tryGetTypeInfos(getQueryKey(fo.queryName)).notNull();
+  const createVetoed = queryTypes.length > 0 &&
+    queryTypes.every(ti => Navigator.isCreateVetoed(ti, { isSearch: true, rawFilterOptions: fo.filterOptions }));
+  const create = !p.ctx.frame?.currentDate && !p.ctx.readOnly && !createVetoed && (p.create == true || p.create == "ifNull" && value === null) &&
     <LinkButton style={{ display: "flex", alignItems: "center" }} className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() + " " + label : undefined}>

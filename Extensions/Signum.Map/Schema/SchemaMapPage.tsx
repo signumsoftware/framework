@@ -194,7 +194,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
       {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :
         <div ref={setContainer} style={{ display: "flex", flexGrow: 1 }}>
-          {size?.height && size?.width &&
+          {size && size.height > 0 && size.width > 0 &&
             <SchemaMapRenderer
               schemaMapInfo={schemaInfo}
               tables={tables!}

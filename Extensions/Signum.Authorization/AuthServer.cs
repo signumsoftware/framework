@@ -138,6 +138,9 @@ public static class AuthServer
                 TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, inUserInterface: true, args) ? TypeAllowedBasic.Read :
                 TypeAllowedBasic.None;
 
+                if (typeAllowed == TypeAllowedBasic.Write && UserEntity.Current != null && TypeAuthLogic.IsEntityReadOnly?.Invoke(ep.entity) == true)
+                    typeAllowed = TypeAllowedBasic.Read;
+
                 ep.extension.Add("typeAllowed", typeAllowed);
             };
 
