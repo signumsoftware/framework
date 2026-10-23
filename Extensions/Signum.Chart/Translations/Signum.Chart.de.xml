@@ -97,6 +97,7 @@
     <Member Name="_0ShouldBeNull" Description="{0} sollte null sein" />
     <Member Name="_0ShouldBeSet" Description="{0} sollte festgesetzt werden" />
     <Member Name="ApplyChanges" Description="Änderungen anwenden" />
+    <Member Name="Blank" Description="(leer)" />
     <Member Name="Chart" Description="Diagramm" />
     <Member Name="ChartFor" Description="Diagramm für" />
     <Member Name="ChartOf0" Description="Diagramm von {0}" />
@@ -118,8 +119,7 @@
     <Member Name="Maximize" Description="Maximieren" />
     <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
-	<Member Name="NewPalette" Description="Neue Palette" />
-	<Member Name="Blank" Description="(leer)" />
+    <Member Name="NewPalette" Description="Neue Palette" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht erlaubt" />
     <Member Name="QueryResultReachedMaxRows0" Description="Abfrageergebnis hat max. Zeilen erreicht ({0})" />
@@ -170,6 +170,7 @@
     <Member Name="LabelMargin" Description="Etikettenrand" />
     <Member Name="Labels" Description="Etiketten" />
     <Member Name="LabelsMargin" Description="Etikettenrand" />
+    <Member Name="Legend" Description="Legende" />
     <Member Name="LocationAttribute" Description="Standort-Attribut" />
     <Member Name="LocationMatch" Description="Standort-match" />
     <Member Name="LocationSelector" Description="Standort-Wähler" />
@@ -352,7 +353,6 @@
     <Member Name="DisplayName" Description="Angezeigter Name" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
-    <Member Name="Guid" Description="Guid" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
     <Member Name="MaxRows" Description="Max. Zeilen" />
