@@ -12,7 +12,7 @@ import * as Operations from './Operations';
 import { Constructor } from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
-import { FindOptions, FindOptionsParsed } from './FindOptions'
+import { FindOptions, FindOptionsParsed, FilterOption } from './FindOptions'
 import { ImportComponent } from './ImportComponent'
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
@@ -381,11 +381,25 @@ export namespace Navigator {
 
   export const isCreableEvent: Array<(typeName: string, options: IsCreableOptions | undefined) => boolean> = [];
 
+  /**
+   * Like isCreableEvent, but applied even where a component forces its Create button (SearchControl create={true},
+   * SearchValueLine create), which skips isCreable. For rules that hold whatever the component thinks, such as a
+   * freeze of the data.
+   */
+  export const createVetoEvent: Array<(typeName: string, options: IsCreableOptions | undefined) => boolean> = [];
+
+  export function isCreateVetoed(type: PseudoType, options?: IsCreableOptions): boolean {
+    const typeName = getTypeName(type);
+    return createVetoEvent.some(v => !v(typeName, options));
+  }
+
   export interface IsCreableOptions {
     customComponent?: boolean;
     isSearch?: boolean;
     isEmbedded?: boolean;
     fo?: FindOptionsParsed;
+    /** Filters not parsed yet, where only those are at hand (SearchValueLine renders before it has parsed them). */
+    rawFilterOptions?: (FilterOption | null | undefined)[];
   }
 
   export function isCreable(type: PseudoType, options?: IsCreableOptions): boolean {
@@ -407,7 +421,7 @@ export namespace Navigator {
     if (!hasAllowedConstructor(typeName))
       return false;
 
-    return isCreableEvent.every(c => c(typeName, options));
+    return isCreableEvent.every(c => c(typeName, options)) && !isCreateVetoed(typeName, options);
   }
 
   function hasAllowedConstructor(typeName: string) {

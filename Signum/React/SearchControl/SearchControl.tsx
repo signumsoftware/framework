@@ -230,7 +230,8 @@ function SearchControl(p: SearchControlProps): React.JSX.Element | null {
         showFooter={SearchControlOptions.showFooter(handler, p)}
         allowChangeColumns={SearchControlOptions.allowChangeColumns(handler, p)}
         allowChangeOrder={SearchControlOptions.allowOrderColumns(handler, p)}
-        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.notNull().some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
+        create={p.create == true ? (fop => tis.notNull().some(ti => !Navigator.isCreateVetoed(ti, { isSearch: true, fo: fop }))) :
+          p.create != null ? p.create : (qs?.allowCreate ?? true) && (fop => tis.notNull().some(ti => Navigator.isCreable(ti, {isSearch: true, fo: fop })))}
         createButtonClass={p.createButtonClass}
         createTitle={p.createTitle}
 

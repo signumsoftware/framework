@@ -22,6 +22,7 @@ import { EntityLine, TypeContext } from '../../../Signum/React/Lines'
 import { RightCaretDropdown } from './RightCaretDropdown'
 import { QueryEntity } from '@framework/Signum.Basics';
 import { ErrorBoundary } from '@framework/Components';
+import { ToolbarCount } from '../ToolbarCount';
 
 
 export default function ToolbarRenderer(p: {
@@ -384,6 +385,7 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
               </div>
               <div className="nav-icon-with-arrow">
                 {icon}
+                {p.response.showCount != null && <ToolbarMenuCount response={p.response} selectedEntity={p.selectedEntity} />}
               </div>
             </div>
           }
@@ -396,6 +398,39 @@ function ToolbarMenu(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: Too
       </ul>
     </li>
   );
+}
+
+/**
+ * The sum of the counts of every element in the menu (and its sub-menus) that shows a count. It is loaded
+ * whether the menu is expanded or not, since the elements themselves are only rendered when it is.
+ * Elements bound to an entity (withEntity) are left out: they depend on the entity chosen inside the menu.
+ */
+function ToolbarMenuCount(p: { response: ToolbarResponse<ToolbarMenuEntity>, selectedEntity: Lite<Entity> | null }): React.ReactElement {
+
+  const counted = React.useMemo(() => getCountedElements(p.response).map((e, i) => ({ key: e.guid ?? String(i), element: e })), [p.response]);
+  const [counts, setCounts] = React.useState<{ [key: string]: number | null }>({});
+
+  function handleCount(key: string, num: number | null | undefined) {
+    setCounts(c => c[key] === num ? c : { ...c, [key]: num ?? null });
+  }
+
+  // Only the elements still in the menu: the response is replaced when the toolbar reloads.
+  const loaded = counted.filter(c => c.key in counts).map(c => counts[c.key]);
+  const sum = loaded.length == 0 && counted.length > 0 ? undefined : loaded.reduce<number>((acc, n) => acc + (n ?? 0), 0);
+
+  return (
+    <>
+      {counted.map(c => <React.Fragment key={c.key}>{ToolbarClient.getConfig(c.element)!.getCountReporter(c.element, p.selectedEntity, num => handleCount(c.key, num))}</React.Fragment>)}
+      <ToolbarCount num={sum} showCount={p.response.showCount!} />
+    </>
+  );
+}
+
+function getCountedElements(r: ToolbarResponse<any>): ToolbarResponse<any>[] {
+  return (r.elements ?? []).filter(e => !e.withEntity).flatMap(e =>
+    ToolbarMenuEntity.isLite(e.content) ? getCountedElements(e) :
+      e.showCount != null && e.content != null && ToolbarClient.getConfig(e) != null ? [e] :
+        []);
 }
 
 export function ToolbarMenuItems(p: { response: ToolbarResponse<ToolbarMenuEntity>, ctx: ToolbarContext, selectedEntity: Lite<Entity> | null }): React.ReactNode {

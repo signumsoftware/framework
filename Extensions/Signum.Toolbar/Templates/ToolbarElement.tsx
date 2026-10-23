@@ -52,7 +52,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
           <div className="col-sm-5">
             <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"]} />
             <AutoLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
-            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <AutoLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
+            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query" || content.EntityType == "ToolbarMenu") && <AutoLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
           <div className="col-sm-1">
             {icon && <div style={{ marginTop: "17px" }}>

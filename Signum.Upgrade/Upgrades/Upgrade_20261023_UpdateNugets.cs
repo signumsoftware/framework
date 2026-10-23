@@ -20,6 +20,12 @@ class Upgrade_20261023_UpdateNugets : CodeUpgradeBase
                 <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
                 <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
                 """);
+
+            if (file.Content.Contains("\"SkiaSharp.NativeAssets.Linux\""))
+                file.UpdateNugetReference("SkiaSharp.NativeAssets.Linux", "4.153.1");
+
+            if (file.Content.Contains("\"SixLabors.ImageSharp.Drawing\""))
+                file.RemoveNugetReference("SixLabors.ImageSharp.Drawing");
         });
     }
 }
