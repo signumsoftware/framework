@@ -7,6 +7,7 @@
   </Type>
   <Type Name="ShowCount" Description="Anzahl anzeigen">
     <Member Name="Always" Description="Immer" />
+    <Member Name="Indicator" Description="Nur Hinweis" />
     <Member Name="MoreThan0" Description="Mehr als 0" />
   </Type>
   <Type Name="SubPageMessage">
@@ -63,6 +64,7 @@
     <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
     <Member Name="ExtraIconCanNotComeAfterDivider" Description="Zusätzliches Symbol kann nicht nach der Trennwand kommen" />
     <Member Name="FirstElementCanNotBeExtraIcon" Description="Das erste Element kann kein zusätzliches Symbol sein" />
+    <Member Name="HasEntries" Description="Einträge vorhanden" />
     <Member Name="If0Selected" Description="Wenn {0} ausgewählt" />
     <Member Name="No0Selected" Description="Keine {0} ausgewählt" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />

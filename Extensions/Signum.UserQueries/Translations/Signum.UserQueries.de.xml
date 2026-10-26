@@ -43,7 +43,6 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
-    <Member Name="Guid" Description="Guid" />
     <Member Name="HealthCheck" Description="Health check" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
@@ -56,6 +55,7 @@
     <Member Name="SystemTime" Description="Systemzeit" />
   </Type>
   <Type Name="UserQueryLiteModel" Description="Benutzerabfrage lite">
+    <Member Name="CreateTitle" Description="Titel erstellen" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="Query" Description="Abfrage" />

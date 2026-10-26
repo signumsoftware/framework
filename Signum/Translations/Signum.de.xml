@@ -176,9 +176,9 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
-    <Member Name="Actions" Description="Aktionen" />
     <Member Name="_0Characters" Description="{0} Charakter[e]" />
     <Member Name="_0CharactersRemaining" Description="{0} verbleibenden[n] Charakter(e)" />
+    <Member Name="Actions" Description="Aktionen" />
     <Member Name="Add" Description="hinzufügen..." />
     <Member Name="Added" Description="Hinzugefügt" />
     <Member Name="Changed" Description="Geändert" />
@@ -242,8 +242,8 @@
     <Member Name="Version" Description="Version" />
   </Type>
   <Type Name="ExceptionOrigin" Description="Ausnahme Ursprung">
-    <Member Name="Backend_DotNet" Description="Backend DotNet" />
-    <Member Name="Frontend_React" Description="Frontend React" />
+    <Member Name="Backend" Description="Backend" />
+    <Member Name="Frontend" Description="Frontend" />
   </Type>
   <Type Name="FieldExpressionMessage">
     <Member Name="_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate" Description="{0} und {1}, können Sie Teile des Datums extrahieren, indem Sie den Ausdruck mit {2} (Rückgabe einer Zahl) oder {3} (Rückgabe eines Datums) fortsetzen" />
@@ -868,7 +868,9 @@
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="CleanName" Description="Clean Name" />
     <Member Name="FullClassName" Description="Full Class Name" />
+    <Member Name="IsPart" Description="Ist Teil" />
     <Member Name="Namespace" Description="Namespace" />
+    <Member Name="Package" Description="Package" />
     <Member Name="TableName" Description="Tabellen Name" />
   </Type>
   <Type Name="ValidationMessage">
