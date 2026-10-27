@@ -1,6 +1,8 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using S = DocumentFormat.OpenXml.Spreadsheet;
+using X14 = DocumentFormat.OpenXml.Office2010.Excel;
+using XM = DocumentFormat.OpenXml.Office.Excel;
 using Signum.Templating;
 
 namespace Signum.Word.Spreedsheet;
@@ -171,8 +173,8 @@ public static class SpreadsheetUtils
     /// After the generic renderer cloned the body row(s) of each row-level @foreach, this renumbers all
     /// rows/cells and rewrites formula references so absolute anchors on the marker rows map to the real
     /// first/last data rows, relative references follow each clone, and formulas below the block shift.
-    /// Also drops data validations, remaps merges, fixes the dimension, clears the calc chain and forces
-    /// a full recalculation on load.
+    /// Also remaps merges, data validations and conditional formatting, fixes the dimension, clears the calc
+    /// chain and forces a full recalculation on load.
     /// </summary>
     public static void Finalize(WorkbookPart wb, List<SpreadsheetForeachBlock> blocks)
     {
@@ -201,7 +203,8 @@ public static class SpreadsheetUtils
                 RenumberRow(row, m.newRow, m.inBlock, plan);
 
         RemapMerges(wsPart, plan);
-        DropDataValidations(wsPart);
+        RemapDataValidations(wsPart, plan);
+        RemapConditionalFormatting(wsPart, plan);
         FixDimension(wsPart, sheetData);
     }
 
@@ -271,12 +274,129 @@ public static class SpreadsheetUtils
             merges.Count = (uint)merges.Elements<S.MergeCell>().Count();
     }
 
-    static void DropDataValidations(WorksheetPart wsPart)
+    /// <summary>
+    /// Keeps data validations alive: a validation on a @foreach body row expands to all the data rows, the
+    /// rest shift with their rows. Covers both the classic &lt;dataValidations&gt; and the x14 ones Excel
+    /// stores in the extLst (e.g. lists sourced from another sheet).
+    /// </summary>
+    static void RemapDataValidations(WorksheetPart wsPart, SpreadsheetBlockPlan plan)
     {
-        //A generated report is not a fill-in form; validations anchored to template rows would be stale.
-        foreach (var dv in wsPart.Worksheet!.Elements<S.DataValidations>().ToList())
-            dv.Remove();
+        var ws = wsPart.Worksheet!;
+
+        foreach (var dvs in ws.Elements<S.DataValidations>().ToList())
+        {
+            foreach (var dv in dvs.Elements<S.DataValidation>().ToList())
+            {
+                var sqref = RemapSqref(dv.SequenceOfReferences?.InnerText, plan, out int topShift);
+                if (sqref == null)
+                {
+                    dv.Remove();
+                    continue;
+                }
+
+                dv.SequenceOfReferences = new ListValue<StringValue>(sqref.Split(' ').Select(r => new StringValue(r)));
+                foreach (var f in new OpenXmlLeafTextElement?[] { dv.Formula1, dv.Formula2 }.NotNull())
+                    f.Text = RemapRelativeFormula(f.Text, topShift, plan);
+            }
+
+            if (!dvs.Elements<S.DataValidation>().Any())
+                dvs.Remove();
+            else
+                dvs.Count = (uint)dvs.Elements<S.DataValidation>().Count();
+        }
+
+        foreach (var dvs in ws.Descendants<X14.DataValidations>().ToList())
+        {
+            foreach (var dv in dvs.Elements<X14.DataValidation>().ToList())
+            {
+                var sqrefElement = dv.GetFirstChild<XM.ReferenceSequence>();
+                var sqref = RemapSqref(sqrefElement?.Text, plan, out int topShift);
+                if (sqref == null)
+                {
+                    dv.Remove();
+                    continue;
+                }
+
+                sqrefElement!.Text = sqref;
+                foreach (var f in dv.Descendants<XM.Formula>())
+                    f.Text = RemapRelativeFormula(f.Text, topShift, plan);
+            }
+
+            if (!dvs.Elements<X14.DataValidation>().Any())
+            {
+                var ext = dvs.Parent!;
+                var extList = ext.Parent!;
+                ext.Remove();
+                if (!extList.HasChildren)
+                    extList.Remove();
+            }
+            else
+                dvs.Count = (uint)dvs.Elements<X14.DataValidation>().Count();
+        }
     }
+
+    static void RemapConditionalFormatting(WorksheetPart wsPart, SpreadsheetBlockPlan plan)
+    {
+        foreach (var cf in wsPart.Worksheet!.Elements<S.ConditionalFormatting>().ToList())
+        {
+            var sqref = RemapSqref(cf.SequenceOfReferences?.InnerText, plan, out int topShift);
+            if (sqref == null)
+            {
+                cf.Remove();
+                continue;
+            }
+
+            cf.SequenceOfReferences = new ListValue<StringValue>(sqref.Split(' ').Select(r => new StringValue(r)));
+            foreach (var f in cf.Descendants<S.Formula>())
+                f.Text = RemapRelativeFormula(f.Text, topShift, plan);
+        }
+    }
+
+    /// <summary>
+    /// Remaps a space-separated list of ranges ("C4:I4 F13"). A range on body rows expands to the data rows;
+    /// a range only on marker rows, or on the body of an empty block, disappears. Returns null if nothing is left.
+    /// <paramref name="topShift"/> is how much the top-left cell moved, which is what relative references in
+    /// the validation / rule formula are relative to.
+    /// </summary>
+    static string? RemapSqref(string? sqref, SpreadsheetBlockPlan plan, out int topShift)
+    {
+        topShift = 0;
+        if (!sqref.HasText())
+            return null;
+
+        var result = new List<string>();
+        foreach (var range in sqref.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = range.Split(':');
+            int r1 = FormulaRewriter.RowDigits(parts[0]);
+            int r2 = FormulaRewriter.RowDigits(parts[^1]);
+
+            if (plan.IsMarkerRow(r1) && plan.IsMarkerRow(r2) && r1 == r2)
+                continue;
+
+            int n1 = plan.MapRow(r1);
+            int n2 = plan.MapRowEnd(r2);
+            if (n2 < n1)
+                continue;
+
+            if (result.IsEmpty())
+                topShift = n1 - r1;
+
+            string c1 = FormulaRewriter.ColumnLetters(parts[0]);
+            string c2 = FormulaRewriter.ColumnLetters(parts[^1]);
+            result.Add(c1 == c2 && n1 == n2 ? $"{c1}{n1}" : $"{c1}{n1}:{c2}{n2}");
+        }
+
+        return result.IsEmpty() ? null : result.ToString(" ");
+    }
+
+    //relative refs follow the top-left cell of the range, absolute ones remap by position
+    static string RemapRelativeFormula(string formula, int topShift, SpreadsheetBlockPlan plan) =>
+        FormulaRewriter.RewriteRefs(formula, r =>
+        {
+            r.Row = r.RowAbs ? plan.MapRow(r.Row) : r.Row + topShift;
+            return r;
+        });
 
     static void FixDimension(WorksheetPart wsPart, S.SheetData sheetData)
     {
