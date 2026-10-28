@@ -26,7 +26,7 @@ public class WorkflowActionEntity : Entity, IUserAssetEntity
              new XAttribute("Name", Name),
              new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
-                new XElement("Script", new XCData(Eval.Script))));
+                EvalXml.ToXml("Script", Eval)));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -39,7 +39,7 @@ public class WorkflowActionEntity : Entity, IUserAssetEntity
 
         var xEval = element.Element("Eval")!;
 
-        Eval.Script = xEval.Element("Script")!.Value;
+        EvalXml.FromXml(xEval, "Script", Eval);
     }
 }
 
@@ -56,7 +56,7 @@ public class WorkflowActionEval : EvalEmbedded<IWorkflowActionExecutor>
     protected override CompilationResult Compile()
     {
         var parent = this.GetParentEntity<WorkflowActionEntity>();
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
         return Compile(EvalLogic.GetCoreMetadataReferences()

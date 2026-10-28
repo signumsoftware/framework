@@ -1,6 +1,7 @@
 using Signum.UserAssets;
 using Signum.Files;
 using Signum.Templating;
+using Signum.Eval;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
 using System.Xml.Linq;
@@ -91,7 +92,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             new XAttribute("GroupResults", GroupResults),
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.SelectWithRowId((f, rowId) => f.ToXml(ctx, rowId)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script))),
+            Applicable?.Let(app => EvalXml.ToXml("Applicable", app)),
             ctx.RetrieveLite(Template).Let(t => t.ToXML("Template"))
         );
     }
@@ -115,7 +116,8 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         Filters.SynchronizeRowIds(element.Element("Filters")?.Elements().ToList(), (f, x, i) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
-        Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
+        Applicable = !EvalXml.HasScripts(element, "Applicable") ? null :
+            (Applicable ?? new TemplateApplicableEval()).Do(app => EvalXml.FromXml(element, "Applicable", app));
         if (Query != null)
             ParseData(ctx.GetQueryDescription(Query));
 

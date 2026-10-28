@@ -478,7 +478,7 @@ public static class WorkflowLogic
                e.Id,
                e.Name,
                e.MainEntityType,
-               e.Eval.Script
+               e.Eval.ScriptCS
            });
 
         new Graph<WorkflowTimerConditionEntity>.Execute(WorkflowTimerConditionOperation.Save)
@@ -515,7 +515,7 @@ public static class WorkflowLogic
                 return new WorkflowTimerConditionEntity
                 {
                     MainEntityType = e.MainEntityType,
-                    Eval = new WorkflowTimerConditionEval { Script = e.Eval.Script }
+                    Eval = new WorkflowTimerConditionEval { ScriptCS = e.Eval.ScriptCS, ScriptTS = e.Eval.ScriptTS }
                 };
             },
         }.Register();
@@ -544,7 +544,7 @@ public static class WorkflowLogic
                e.Id,
                e.Name,
                e.MainEntityType,
-               e.Eval.Script
+               e.Eval.ScriptCS
            });
 
         new Graph<WorkflowActionEntity>.Execute(WorkflowActionOperation.Save)
@@ -581,7 +581,7 @@ public static class WorkflowLogic
                 return new WorkflowActionEntity
                 {
                     MainEntityType = e.MainEntityType,
-                    Eval = new WorkflowActionEval { Script = e.Eval.Script }
+                    Eval = new WorkflowActionEval { ScriptCS = e.Eval.ScriptCS, ScriptTS = e.Eval.ScriptTS }
                 };
             },
         }.Register();
@@ -610,7 +610,7 @@ public static class WorkflowLogic
                e.Id,
                e.Name,
                e.MainEntityType,
-               e.Eval.Script
+               e.Eval.ScriptCS
            });
 
         new Graph<WorkflowConditionEntity>.Execute(WorkflowConditionOperation.Save)
@@ -647,7 +647,7 @@ public static class WorkflowLogic
                 return new WorkflowConditionEntity
                 {
                     MainEntityType = e.MainEntityType,
-                    Eval = new WorkflowConditionEval { Script = e.Eval.Script }
+                    Eval = new WorkflowConditionEval { ScriptCS = e.Eval.ScriptCS, ScriptTS = e.Eval.ScriptTS }
                 };
             },
         }.Register();
@@ -693,7 +693,7 @@ public static class WorkflowLogic
             Construct = (s, _) => new WorkflowScriptEntity()
             {
                 MainEntityType = s.MainEntityType,
-                Eval = new WorkflowScriptEval() { Script = s.Eval.Script }
+                Eval = new WorkflowScriptEval() { ScriptCS = s.Eval.ScriptCS, ScriptTS = s.Eval.ScriptTS, CustomTypesCS = s.Eval.CustomTypesCS, CustomTypesTS = s.Eval.CustomTypesTS }
             }
         }.Register();
 

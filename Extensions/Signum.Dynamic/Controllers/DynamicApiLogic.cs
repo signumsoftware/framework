@@ -20,7 +20,7 @@ public static class DynamicApiLogic
                 Entity = e,
                 e.Id,
                 e.Name,
-                Script = e.Eval.Script.Etc(50),
+                Script = e.Eval.ScriptCS.Etc(50),
             });
 
         new Graph<DynamicApiEntity>.ConstructFrom<DynamicApiEntity>(DynamicApiOperation.Clone)
@@ -30,7 +30,7 @@ public static class DynamicApiLogic
                 return new DynamicApiEntity
                 {
                     Name = e.Name + "_2",
-                    Eval = new DynamicApiEval() { Script = e.Eval.Script },
+                    Eval = new DynamicApiEval() { ScriptCS = e.Eval.ScriptCS, ScriptTS = e.Eval.ScriptTS },
                 };
             }
         }.Register();
@@ -106,7 +106,7 @@ public class DynamicApiCodeGenerator
         foreach (var c in DynamicApis)
         {
             sb.AppendLine();
-            sb.AppendLine(c.Eval.Script.Indent(4));
+            sb.AppendLine(c.Eval.ScriptCS.Indent(4));
             sb.AppendLine();
         }
 

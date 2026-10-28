@@ -4,6 +4,7 @@ import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Workflow'
 import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -25,14 +26,14 @@ export default function WorkflowConditionComponent(p: { ctx: TypeContext<Workflo
   const forceUpdate = useForceUpdate();
 
   function handleMainEntityTypeChange() {
-    p.ctx.value.eval!.script = "";
+    p.ctx.value.eval!.scriptCS = "";
     exampleEntityRef.current = null;
     forceUpdate();
   }
 
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval!;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
@@ -116,8 +117,9 @@ export default function WorkflowConditionComponent(p: { ctx: TypeContext<Workflo
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"bool Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)}/>
+                <CSharpCodeMirror script={ctx.value.eval!.scriptCS ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)}/>
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval!.scriptTS} onChange={v => { ctx.value.eval!.scriptTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
               {renderTest()}
             </div>

@@ -30,7 +30,7 @@ public static class DynamicTypeConditionLogic
                 e.Id,
                 e.SymbolName,
                 e.EntityType,
-                e.Eval.Script,
+                e.Eval.ScriptCS,
             });
 
         new Graph<DynamicTypeConditionEntity>.ConstructFrom<DynamicTypeConditionEntity>(DynamicTypeConditionOperation.Clone)
@@ -39,7 +39,7 @@ public static class DynamicTypeConditionLogic
             {
                 SymbolName = e.SymbolName,
                 EntityType = e.EntityType,
-                Eval = new DynamicTypeConditionEval() { Script = e.Eval.Script },
+                Eval = new DynamicTypeConditionEval() { ScriptCS = e.Eval.ScriptCS, ScriptTS = e.Eval.ScriptTS },
             }
         }.Register();
 
@@ -140,7 +140,7 @@ public class DynamicTypeConditionCodeGenerator
         sb.AppendLine("    {");
         foreach (var item in TypeConditions)
         {
-            sb.AppendLine($"TypeConditionLogic.Register<{item.EntityType.ClassName}>(CodeGenTypeCondition.{item.SymbolName.Name}, e => {item.Eval.Script});".Indent(8));
+            sb.AppendLine($"TypeConditionLogic.Register<{item.EntityType.ClassName}>(CodeGenTypeCondition.{item.SymbolName.Name}, e => {item.Eval.ScriptCS});".Indent(8));
         }
         sb.AppendLine("    }");
         sb.AppendLine("}");

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import { WorkflowScriptEntity } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
@@ -13,20 +14,20 @@ interface WorkflowScriptComponentProps {
 export default function WorkflowScriptComponent(p : WorkflowScriptComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
-    p.ctx.value.eval!.script = "";
+    p.ctx.value.eval!.scriptCS = "";
     forceUpdate();
   }
 
   function handleScriptChange(newScript: string) {
     const evalEntity = p.ctx.value.eval!;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
 
   function handleCustomTypesChange(newScript: string) {
     const scriptEval = p.ctx.value.eval!;
-    scriptEval.customTypes = newScript;
+    scriptEval.customTypesCS = newScript;
     scriptEval.modified = true;
     forceUpdate();
   }
@@ -112,13 +113,15 @@ catch (Exception e)
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`public static void ScriptCode(${ctx.value.mainEntityType.cleanName}Entity e, WorkflowScriptContext ctx)\n{`}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleScriptChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.scriptCS ?? ""} onChange={handleScriptChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval!.scriptTS} onChange={v => { ctx.value.eval!.scriptTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`namespace MyCustomTypes {`}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.customTypes ?? ""} onChange={handleCustomTypesChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.customTypesCS ?? ""} onChange={handleCustomTypesChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval!.customTypesTS} onChange={v => { ctx.value.eval!.customTypesTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
             </div>
             <div className="col-sm-5">

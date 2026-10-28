@@ -33,17 +33,30 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
         }
     }
 
-    [DbType(Size = int.MaxValue)]
-    string script;
+    //The C# script compiled here. Nullable in the database (ForceNullable) because an Altea application
+    //sharing it writes rows with ScriptTS only, but required by validation here.
+    [DbType(Size = int.MaxValue), ForceNullable]
+    string scriptCS;
     [StringLengthValidator(MultiLine = true)]
-    public string Script
+    public string ScriptCS
     {
-        get { return script; }
+        get { return scriptCS; }
         set
         {
-            if (Set(ref script, value))
+            if (Set(ref scriptCS, value))
                 Reset();
         }
+    }
+
+    //The TypeScript twin compiled by the Altea application sharing the database. Never compiled here.
+    [DbType(Size = int.MaxValue)]
+    [StringLengthValidator(MultiLine = true)]
+    public string? ScriptTS { get; set; }
+
+    public void CopyScriptsFrom(EvalEmbedded<T> other)
+    {
+        this.ScriptCS = other.ScriptCS;
+        this.ScriptTS = other.ScriptTS;
     }
 
     public void Reset()
@@ -137,7 +150,7 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(Script) && compilationResult != null)
+        if (pi.Name == nameof(ScriptCS) && compilationResult != null)
             return compilationResult.CompilationErrors;
 
         return null;
@@ -152,7 +165,7 @@ public abstract class EvalEmbedded<T> : EmbeddedEntity
 
     private void CompileIfNecessary()
     {
-        if (compilationResult == null && Script.HasText())
+        if (compilationResult == null && ScriptCS.HasText())
         {
             compilationResult = Compile();
             Notify(() => Compiled);

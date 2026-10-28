@@ -26,7 +26,7 @@ public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
              new XAttribute("Name", Name),
              new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
-               new XElement("Script", new XCData(Eval.Script))
+               EvalXml.ToXml("Script", Eval)
              )
         );
     }
@@ -41,7 +41,7 @@ public class WorkflowTimerConditionEntity : Entity, IUserAssetEntity
 
         var xEval = element.Element("Eval")!;
 
-        Eval.Script = xEval.Element("Script")!.Value;
+        EvalXml.FromXml(xEval, "Script", Eval);
     }
 
    
@@ -61,7 +61,7 @@ public class WorkflowTimerConditionEval : EvalEmbedded<IWorkflowTimerConditionEv
     {
         var parent = this.GetParentEntity<WorkflowTimerConditionEntity>();
 
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 

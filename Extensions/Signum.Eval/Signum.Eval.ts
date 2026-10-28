@@ -8,7 +8,8 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 
 
 export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {
-  script: string;
+  scriptCS: string;
+  scriptTS: string | null;
 }
 
 export namespace EvalPanelMessage {
