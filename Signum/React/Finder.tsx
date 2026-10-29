@@ -1116,12 +1116,20 @@ export namespace Finder {
       }
     }
 
-    if (isFilterGroup(fop))
+    if (isFilterGroup(fop)) {
+      const filters = toFilterRequests(fop.filters, overridenValue);
+
+      // Every child is inactive (e.g. unchecked or empty pinned filters): the group imposes no condition.
+      // Sent empty, an "Or" group would evaluate to false and hide every row.
+      if (filters.length == 0)
+        return undefined;
+
       return ({
         groupOperation: fop.groupOperation,
         token: fop.token && fop.token.fullKey,
-        filters: toFilterRequests(fop.filters, overridenValue)
+        filters: filters
       } as FilterGroupRequest);
+    }
     else {
       if (fop.token == null || fop.token.filterType == null || fop.operation == null)
         return undefined;
