@@ -1134,7 +1134,10 @@ export namespace Finder {
       if (fop.token == null || fop.token.filterType == null || fop.operation == null)
         return undefined;
 
-      if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
+      // A list operation (IsIn / IsNotIn) with nothing picked holds [] rather than null. Sent as "IsIn []" it
+      // matches no row, and inside an "Or" group with every other child inactive it hides everything.
+      if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" &&
+        (fop.value == null || fop.value === "" || Array.isArray(fop.value) && fop.value.length == 0))
         return undefined;
 
       const effectiveOp: FilterOperation = overridenValue?.convertListToScalar && isList(fop.operation)
