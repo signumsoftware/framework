@@ -263,7 +263,14 @@ public static class QueryFilterUtils
                 if (filter.Pinned?.Active == PinnedFilterActive.WhenHasValue /*TODO, works for empty groups */)
                     return null;
 
-                return (Filter)new FilterGroup(filter.GroupOperation!.Value, filter.Token?.Token, gr.ToFilterList(indent + 1).ToList());
+                var children = gr.ToFilterList(indent + 1);
+
+                // Every child is inactive (e.g. unchecked or empty pinned filters): the group imposes no condition.
+                // Kept empty, an "Or" group would evaluate to false and hide every row.
+                if (children.Count == 0)
+                    return null;
+
+                return (Filter)new FilterGroup(filter.GroupOperation!.Value, filter.Token?.Token, children);
             }
         }).NotNull().ToList();
     }

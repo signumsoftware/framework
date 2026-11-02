@@ -1116,17 +1116,28 @@ export namespace Finder {
       }
     }
 
-    if (isFilterGroup(fop))
+    if (isFilterGroup(fop)) {
+      const filters = toFilterRequests(fop.filters, overridenValue);
+
+      // Every child is inactive (e.g. unchecked or empty pinned filters): the group imposes no condition.
+      // Sent empty, an "Or" group would evaluate to false and hide every row.
+      if (filters.length == 0)
+        return undefined;
+
       return ({
         groupOperation: fop.groupOperation,
         token: fop.token && fop.token.fullKey,
-        filters: toFilterRequests(fop.filters, overridenValue)
+        filters: filters
       } as FilterGroupRequest);
+    }
     else {
       if (fop.token == null || fop.token.filterType == null || fop.operation == null)
         return undefined;
 
-      if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value === ""))
+      // A list operation (IsIn / IsNotIn) with nothing picked holds [] rather than null. Sent as "IsIn []" it
+      // matches no row, and inside an "Or" group with every other child inactive it hides everything.
+      if (overridenValue == null && fop.pinned && fop.pinned.active == "WhenHasValue" &&
+        (fop.value == null || fop.value === "" || Array.isArray(fop.value) && fop.value.length == 0))
         return undefined;
 
       const effectiveOp: FilterOperation = overridenValue?.convertListToScalar && isList(fop.operation)

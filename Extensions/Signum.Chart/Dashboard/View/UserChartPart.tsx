@@ -92,7 +92,8 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     if (chartRequest == null || p.dashboardController.isLoading)
       return Promise.resolve(undefined);
 
-    if (cachedQuery)
+    //An invalidation means another part changed the data, the cached result predates that change
+    if (cachedQuery && refreshKey == 0)
       return ChartClient.getChartScript(chartRequest!.chartScript)
         .then(cs => cachedQuery.then(cq => ChartClient.executeChartCached(chartRequest, cs, cq)))
         .then(result => ({ result }), error => ({ error }));
@@ -104,6 +105,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
   }, [
     chartRequest && ChartClient.Encoder.chartPath(ChartClient.Encoder.toChartOptions(chartRequest, null)),
     p.dashboardController.isLoading,
+    refreshKey,
     ...p.deps ?? []
   ], { avoidReset: true });
 

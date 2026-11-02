@@ -675,7 +675,7 @@ function isFilterActive(fo: FilterOptionParsed) {
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_Checked" ||
     fo.pinned.active == "NotCheckbox_Unchecked" ||
-    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value === "");
+    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value === "" || Array.isArray(fo.value) && fo.value.length == 0);
 }
 
 export interface FilterConditionComponentProps {
