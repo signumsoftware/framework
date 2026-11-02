@@ -2,6 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import { WorkflowTimerConditionEntity } from '../Signum.Workflow'
 import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -15,13 +16,13 @@ interface WorkflowTimerConditionComponentProps {
 export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
-    p.ctx.value.eval!.script = "";
+    p.ctx.value.eval!.scriptCS = "";
     forceUpdate();
   }
 
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval!;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
@@ -55,8 +56,9 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
             <div className="col-sm-7">
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(CaseActivityEntity ca, " + ctx.value.mainEntityType.cleanName + "Entity e, DateTime now)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.scriptCS ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval!.scriptTS} onChange={v => { ctx.value.eval!.scriptTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
             </div>
             <div className="col-sm-5">

@@ -86,8 +86,8 @@ public static class WorkflowEventTaskLogic
                 Suspended = schedule?.Suspended ?? true,
                 Rule = schedule?.Rule,
                 TriggeredOn = triggeredOn,
-                Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = task!.Condition!.Script },
-                Action = new WorkflowEventTaskActionEval() { Script = task?.Action!.Script ?? "" }
+                Condition = triggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { ScriptCS = task!.Condition!.ScriptCS, ScriptTS = task!.Condition!.ScriptTS },
+                Action = new WorkflowEventTaskActionEval() { ScriptCS = task?.Action!.ScriptCS ?? "", ScriptTS = task?.Action!.ScriptTS }
             };
         };
 
@@ -123,10 +123,12 @@ public static class WorkflowEventTaskLogic
                 {
                     if (task.Condition == null)
                         task.Condition = new WorkflowEventTaskConditionEval();
-                    task.Condition.Script = model.Condition!.Script;
+                    task.Condition.ScriptCS = model.Condition!.ScriptCS;
+                    task.Condition.ScriptTS = model.Condition!.ScriptTS;
                 };
 
-                task.Action!.Script = model.Action!.Script;
+                task.Action!.ScriptCS = model.Action!.ScriptCS;
+                task.Action!.ScriptTS = model.Action!.ScriptTS;
                 if (GraphExplorer.IsGraphModified(schedule))
                 {
                     task.Execute(WorkflowEventTaskOperation.Save);
@@ -140,8 +142,8 @@ public static class WorkflowEventTaskLogic
                     Workflow = @event.Lane.Pool.Workflow.ToLite(),
                     Event = @event.ToLite(),
                     TriggeredOn = model.TriggeredOn,
-                    Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { Script = model.Condition!.Script },
-                    Action = new WorkflowEventTaskActionEval() { Script = model.Action!.Script },
+                    Condition = model.TriggeredOn == TriggeredOn.Always ? null : new WorkflowEventTaskConditionEval() { ScriptCS = model.Condition!.ScriptCS, ScriptTS = model.Condition!.ScriptTS },
+                    Action = new WorkflowEventTaskActionEval() { ScriptCS = model.Action!.ScriptCS, ScriptTS = model.Action!.ScriptTS },
                 }.Execute(WorkflowEventTaskOperation.Save);
 
                 schedule = new ScheduledTaskEntity
@@ -171,8 +173,8 @@ public static class WorkflowEventTaskLogic
             fullWorkflow = newEvent.Lane.Pool.Workflow,
             Event = newEvent.ToLite(),
             TriggeredOn = task.TriggeredOn,
-            Condition = task.Condition != null ? new WorkflowEventTaskConditionEval() { Script = task.Condition.Script } : null,
-            Action = new WorkflowEventTaskActionEval() { Script = task.Action!.Script },
+            Condition = task.Condition != null ? new WorkflowEventTaskConditionEval() { ScriptCS = task.Condition.ScriptCS, ScriptTS = task.Condition.ScriptTS } : null,
+            Action = new WorkflowEventTaskActionEval() { ScriptCS = task.Action!.ScriptCS, ScriptTS = task.Action!.ScriptTS },
         }.Execute(WorkflowEventTaskOperation.Save);
 
         new ScheduledTaskEntity()

@@ -21,7 +21,8 @@ export namespace LayoutMessage {
 export const ShowCount: EnumType<ShowCount> = new EnumType<ShowCount>("ShowCount");
 export type ShowCount =
   "MoreThan0" |
-  "Always";
+  "Always" |
+  "Indicator";
 
 export namespace SubPageMessage {
   export const No0FoundIn1: MessageKey = new MessageKey("SubPageMessage", "No0FoundIn1");
@@ -93,6 +94,7 @@ export namespace ToolbarMessage {
   export const If0Selected: MessageKey = new MessageKey("ToolbarMessage", "If0Selected");
   export const No0Selected: MessageKey = new MessageKey("ToolbarMessage", "No0Selected");
   export const ShowTogether: MessageKey = new MessageKey("ToolbarMessage", "ShowTogether");
+  export const HasEntries: MessageKey = new MessageKey("ToolbarMessage", "HasEntries");
 }
 
 export namespace ToolbarOperation {

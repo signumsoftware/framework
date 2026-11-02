@@ -11,7 +11,7 @@ public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var parentEntity = this.TryGetParentEntity<Entity>()!;
         var query = parentEntity is IContainsQuery wt ? wt.Query :

@@ -28,7 +28,7 @@ export namespace DynamicTypeConditionClient {
     EvalClient.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
       { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
       { token: t.append(p => p.entity.symbolName.name), type: "Text" },
-      { token: t.append(p => p.entity.eval!.script), type: "Code" },
+      { token: t.append(p => p.entity.eval!.scriptCS), type: "Code" },
     ]);
   }
   

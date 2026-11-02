@@ -26,8 +26,8 @@ public class WorkflowScriptEntity : Entity, IUserAssetEntity
              new XAttribute("Name", Name),
              new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
-               new XElement("Script", new XCData(Eval.Script)),
-               string.IsNullOrEmpty(Eval.CustomTypes) ? null! : new XElement("CustomTypes", new XCData(Eval.Script)))
+               EvalXml.ToXml("Script", Eval),
+               EvalXml.ToXml("CustomTypes", Eval.CustomTypesCS.DefaultToNull(), Eval.CustomTypesTS))
              );
     }
 
@@ -41,8 +41,8 @@ public class WorkflowScriptEntity : Entity, IUserAssetEntity
 
         var xEval = element.Element("Eval")!;
 
-        Eval.Script = xEval.Element("Script")!.Value;
-        Eval.CustomTypes = xEval.Element("CustomTypes")?.Value;
+        EvalXml.FromXml(xEval, "Script", Eval);
+        EvalXml.FromXml(xEval, "CustomTypes", cs => Eval.CustomTypesCS = cs, ts => Eval.CustomTypesTS = ts);
     }
 }
 
@@ -58,13 +58,17 @@ public static class WorkflowScriptOperation
 public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
 {
     [StringLengthValidator(MultiLine = true)]
-    public string? CustomTypes { get; set; }
+    public string? CustomTypesCS { get; set; }
+
+    //The TypeScript twin, emitted by the Altea application sharing the database. Never compiled here.
+    [StringLengthValidator(MultiLine = true)]
+    public string? CustomTypesTS { get; set; }
 
     protected override CompilationResult Compile()
     {
         var parent = this.GetParentEntity<WorkflowScriptEntity>();
 
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 
         return Compile(EvalLogic.GetCoreMetadataReferences()
@@ -85,7 +89,7 @@ public class WorkflowScriptEval : EvalEmbedded<IWorkflowScriptExecutor>
                         }
                     }
 
-                    " + CustomTypes + @"
+                    " + CustomTypesCS + @"
                 }");
     }
 }

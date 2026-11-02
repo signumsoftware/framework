@@ -7,6 +7,7 @@ import { Entity } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import { DynamicValidationClient } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import AutoLineModal from '@framework/AutoLineModal'
@@ -40,7 +41,7 @@ export default function DynamicValidation(p: DynamicValidationProps): React.JSX.
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval;
     evalEntity.modified = true;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     forceUpdate();
   }
 
@@ -155,8 +156,9 @@ export default function DynamicValidation(p: DynamicValidationProps): React.JSX.
                   <PropertyIsHelpComponent route={getCurrentRoute(ctx.value.entityType.cleanName)} />
                 } />
                 <pre style={{ border: "0px", margin: "0px" }}>{"string PropertyValidate(" + (routeTypeName ?? "ModifiableEntity") + " e, PropertyInfo pi)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval.script ?? ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval.scriptCS ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval.scriptTS} onChange={v => { ctx.value.eval.scriptTS = v; ctx.value.eval.modified = true; forceUpdate(); }} />
               </div>
               {renderTest()}
             </div>

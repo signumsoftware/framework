@@ -157,7 +157,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
               <g key={slice.index} transform={translate(0, i * 20)}
                 cursor="pointer" opacity={active == false ? .5 : undefined}
                 onClick={e => onDrillDown(slice.data, e)}>
-                <rect width={12} height={12} y={2} rx={2} fill={swatch} />
+                <rect width={12} height={12} y={2} fill={swatch} />
                 <text x={18} y={12} className="sf-chart-strong"
                   fontWeight={active == true ? "bold" : undefined}>
                   {keyColumn.getValueNiceName(slice.data)}: {numFormat.format(valueColumn.getValue(slice.data))}

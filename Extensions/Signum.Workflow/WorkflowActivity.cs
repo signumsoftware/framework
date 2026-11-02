@@ -278,7 +278,7 @@ public class SubEntitiesEval : EvalEmbedded<ISubEntitiesEvaluator>
         var decomposition = this.GetParentEntity<SubWorkflowEmbedded>();
         var activity = decomposition.GetParentEntity<WorkflowActivityEntity>();
 
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var MainEntityTypeName = activity.Lane.Pool.Workflow.MainEntityType.ToType().FullName;
         var SubEntityTypeName = decomposition.Workflow.MainEntityType.ToType().FullName;
@@ -307,7 +307,8 @@ public class SubEntitiesEval : EvalEmbedded<ISubEntitiesEvaluator>
     {
         return new SubEntitiesEval()
         {
-            Script = this.Script
+            ScriptCS = this.ScriptCS,
+            ScriptTS = this.ScriptTS,
         };
     }
 }

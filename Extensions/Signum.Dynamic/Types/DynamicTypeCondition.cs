@@ -29,7 +29,7 @@ public class DynamicTypeConditionEval : EvalEmbedded<IDynamicTypeConditionEvalua
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : "return " + script + ";";
         var entityTypeName = this.GetParentEntity<DynamicTypeConditionEntity>().EntityType.ToType().FullName;
 

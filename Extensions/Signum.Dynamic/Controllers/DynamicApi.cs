@@ -29,7 +29,7 @@ public class DynamicApiEval : EvalEmbedded<IDynamicApiEvaluator>
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
 
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +

@@ -5,6 +5,7 @@ import AutoLineModal from '@framework/AutoLineModal';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicApiEntity } from '../Signum.Dynamic.Controllers'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TextArea from '@framework/Components/TextArea';
 
@@ -18,7 +19,7 @@ export default function DynamicApi(p: DynamicApiProps): React.JSX.Element {
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval;
     evalEntity.modified = true;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     forceUpdate();
   }
 
@@ -83,7 +84,8 @@ public class PizzaDTO
           </div>
           <div className="code-container">
             <pre style={{ border: "0px", margin: "0px" }} />
-            <CSharpCodeMirror script={ctx.value.eval.script ?? ""} onChange={handleCodeChange} />
+            <CSharpCodeMirror script={ctx.value.eval.scriptCS ?? ""} onChange={handleCodeChange} />
+            <EvalScriptTS value={ctx.value.eval.scriptTS} onChange={v => { ctx.value.eval.scriptTS = v; ctx.value.eval.modified = true; forceUpdate(); }} />
             <pre style={{ border: "0px", margin: "0px" }} />
           </div>
         </div>

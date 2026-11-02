@@ -208,7 +208,7 @@ public class WorkflowNodeGraph
                     issues.AddError(e, WorkflowValidationMessage._0IsTimerStartAndTaskIsMandatory.NiceToString(e));
                 else if (wet.TriggeredOn != TriggeredOn.Always)
                 {
-                    if (wet.Condition?.Script == null || !wet.Condition.Script.Trim().HasText())
+                    if (wet.Condition?.ScriptCS == null || !wet.Condition.ScriptCS.Trim().HasText())
                         issues.AddError(e, WorkflowValidationMessage._0IsConditionalStartAndTaskConditionIsMandatory.NiceToString(e));
                 }
             }
