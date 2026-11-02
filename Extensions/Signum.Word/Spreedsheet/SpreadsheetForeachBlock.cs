@@ -75,6 +75,9 @@ internal class SpreadsheetBlockPlan
     /// <summary>Maps an original row number to its new position after all block expansions.</summary>
     public int MapRow(int originalRow) => MapRow(plans, originalRow);
 
+    /// <summary>Like <see cref="MapRow"/>, but for the last row of a range: an interior body row maps to the last data row.</summary>
+    public int MapRowEnd(int originalRow) => plans.FirstOrDefault(p => p.Rf < originalRow && originalRow < p.Re) is { } b ? b.L : MapRow(plans, originalRow);
+
     public bool IsMarkerRow(int row) => plans.Any(p => p.Rf == row || p.Re == row);
 
     static int MapRow(List<Plan> plans, int rho)

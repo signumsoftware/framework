@@ -28,12 +28,15 @@ internal static class FormulaRewriter
     /// <summary>
     /// Rewrites every A1 cell reference in a formula (skipping quoted string literals and identifiers
     /// such as function names), applying <paramref name="transform"/> to each reference.
+    /// Sheet-qualified references (<c>Other!$A$1:$A$9</c>) are copied verbatim: they point to another sheet,
+    /// whose rows don't move.
     /// </summary>
     public static string RewriteRefs(string formula, Func<A1Ref, A1Ref> transform)
     {
         var sb = new StringBuilder(formula.Length + 8);
         int i = 0;
         char prev = '\0';
+        bool lastRefQualified = false;
 
         while (i < formula.Length)
         {
@@ -76,7 +79,11 @@ internal static class FormulaRewriter
                             RowAbs = m.Groups[3].Value == "$",
                             Row = int.Parse(m.Groups[4].Value),
                         };
-                        var text = transform(r).ToString();
+                        //Sheet!A1, and the end of a Sheet!A1:B2 range
+                        bool qualified = prev == '!' || (prev == ':' && lastRefQualified);
+                        lastRefQualified = qualified;
+
+                        var text = qualified ? m.Value : transform(r).ToString();
                         sb.Append(text);
                         i = after;
                         prev = text[text.Length - 1];
