@@ -35,7 +35,7 @@ public class AzureADConfigurationEmbedded : BaseADConfigurationEmbedded
     public string? ResetPassword_UserFlow { get; set; }
     //Only for Microsoft Graph / Sending Emails 
     //Your App Registration -> Certificates & secrets -> + New client secret
-    [StringLengthValidator(Max = 100), Description("Client Secret Value")]
+    [StringLengthValidator(Max = 100), Description("Client Secret Value"), Format(FormatAttribute.Password)]
     public string? ClientSecret { get; set; }
 
     public bool UseDelegatedPermission { get; set; }
