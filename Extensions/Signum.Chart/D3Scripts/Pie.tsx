@@ -6,7 +6,7 @@ import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Comp
 import InitialMessage from './Components/InitialMessage';
 import { TextRectangle } from './StackedLines';
 import TextEllipsis from './Components/TextEllipsis';
-import { getQueryNiceName, symbolNiceName, toNumberFormat } from '@framework/Reflection';
+import { getQueryNiceName, symbolNiceName, toNumberFormat, tryGetTypeInfo } from '@framework/Reflection';
 import { Color } from '../../../Signum/React/Basics/Color';
 import { ChartMessage, D3ChartScript } from '../Signum.Chart';
 
@@ -51,7 +51,12 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
-  var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
+  // An enum key follows the enum's declaration, the order its values are offered in everywhere else; its key is
+  // the member name, so sorting by key would put the slices and the legend in alphabetical order of the C# names.
+  var enumMembers = keyColumn.token?.filterType == "Enum" ? Object.keys(tryGetTypeInfo(keyColumn.token.type.name)?.members ?? {}) : null;
+  var orderedPie = enumMembers ?
+    pie(data.rows).orderBy(s => { var i = enumMembers!.indexOf(keyColumn.getValueKey(s.data)); return i == -1 ? enumMembers!.length : i; }) :
+    pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
   var numFormat = toNumberFormat('0.#K');
   const chartTitle = ChartMessage._0Of1_2.niceToString(symbolNiceName(D3ChartScript.Pie), getQueryNiceName(chartRequest.queryKey), [valueColumn.title, keyColumn.title].join(", "));
   return (
