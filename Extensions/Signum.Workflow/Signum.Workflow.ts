@@ -768,7 +768,8 @@ export interface WorkflowScriptEntity extends Entities.Entity, UserAssets.IUserA
 export const WorkflowScriptEval: Type<WorkflowScriptEval> = new Type<WorkflowScriptEval>("WorkflowScriptEval");
 export interface WorkflowScriptEval extends Eval.EvalEmbedded<IWorkflowScriptExecutor> {
   Type: "WorkflowScriptEval";
-  customTypes: string | null;
+  customTypesCS: string | null;
+  customTypesTS: string | null;
 }
 
 export namespace WorkflowScriptOperation {

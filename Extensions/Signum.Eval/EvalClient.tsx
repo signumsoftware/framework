@@ -5,7 +5,7 @@ import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { QueryEntitiesRequest } from "@framework/FindOptions";
-import { ajaxPost } from "@framework/Services";
+import { ajaxGet, ajaxPost } from "@framework/Services";
 import { Entity, Lite } from "@framework/Signum.Entities";
 import { StyleContext } from '@framework/TypeContext'
 import { FindOptions, FilterConditionOption, ColumnOption } from '@framework/FindOptions';
@@ -153,6 +153,12 @@ export namespace EvalClient {
   
     export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
       return ajaxPost({ url: `/api/eval/evalErrors` }, request);
+    }
+
+    let alteaMigrationPromise: Promise<boolean> | undefined;
+    //EvalLogic.AlteaMigration: whether the TypeScript twins (scriptTS) are shown. Asked once.
+    export function alteaMigration(): Promise<boolean> {
+      return alteaMigrationPromise ??= ajaxGet<boolean>({ url: `/api/eval/alteaMigration` });
     }
   
   }

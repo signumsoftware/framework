@@ -3,6 +3,7 @@ import { PropertyRoute } from '@framework/Reflection'
 import { TextAreaLine, TypeContext } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import AutoLineModal from '@framework/AutoLineModal'
 import { TemplateApplicableEval } from "../Signum.Templating";
 import TypeHelpButtonBarComponent from "../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent";
@@ -24,7 +25,7 @@ export default function TemplateApplicable(p: TemplateApplicableProps): React.JS
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value;
     evalEntity.modified = true;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     forceUpdate();
   }
 
@@ -56,8 +57,9 @@ export default function TemplateApplicable(p: TemplateApplicableProps): React.JS
             <div className="code-container">
               <TypeHelpButtonBarComponent typeName={typeName} mode="CSharp" ctx={p.ctx} />
               <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + (typeName ? (typeName + "Entity") : "Entity?") + " e)\n{"}</pre>
-              <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
+              <CSharpCodeMirror script={ctx.value.scriptCS ?? ""} onChange={handleCodeChange} />
               <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+              <EvalScriptTS value={ctx.value.scriptTS} onChange={v => { ctx.value.scriptTS = v; ctx.value.modified = true; forceUpdate(); }} />
             </div>
           </div>
           <div className="col-sm-5">

@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="EvalEmbedded`1">
-    <Member Name="Script" Description="Copione" />
+    <Member Name="ScriptCS" Description="Copione" />
+    <Member Name="ScriptTS" Description="Copione (TypeScript)" />
   </Type>
   <Type Name="EvalPanelMessage">
     <Member Name="OpenErrors" Description="Errori di apertura" />

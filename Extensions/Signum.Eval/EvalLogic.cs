@@ -97,6 +97,12 @@ public static class EvalLogic
 
     public static Func<string, List<CustomCompilerError>> GetCustomErrors;
 
+    /// <summary>
+    /// The database is shared with an Altea application: show and export EvalEmbedded.ScriptTS (and
+    /// WorkflowScriptEval.CustomTypesTS), the TypeScript twins Altea compiles, beside the C# compiled here.
+    /// </summary>
+    public static bool AlteaMigration { get; set; }
+
     public static Action OnInvalidated { get; internal set; }
 
     public static void AddFullAssembly(Type type)

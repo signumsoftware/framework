@@ -6,6 +6,7 @@ import { TypeContext, AutoLine, EntityLine, FormGroup, EntityRepeater, EntityTab
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import { Navigator } from '@framework/Navigator'
@@ -283,7 +284,7 @@ function DecompositionComponent(p : { ctx: TypeContext<SubWorkflowEmbedded>, mai
   const forceUpdate = useForceUpdate();
   function handleCodeChange(newScript: string) {
     const subEntitiesEval = p.ctx.value.subEntitiesEval!;
-    subEntitiesEval.script = newScript;
+    subEntitiesEval.scriptCS = newScript;
     subEntitiesEval.modified = true;
     forceUpdate();
   }
@@ -301,8 +302,9 @@ function DecompositionComponent(p : { ctx: TypeContext<SubWorkflowEmbedded>, mai
             <div className="col-sm-7">
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{`IEnumerable<${ctx.value.workflow.mainEntityType!.cleanName}Entity> SubEntities(${mainEntityName}Entity e, WorkflowTransitionContext ctx)\n{`}</pre>
-                <CSharpCodeMirror script={ctx.value.subEntitiesEval!.script ?? ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.subEntitiesEval!.scriptCS ?? ""} onChange={handleCodeChange} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.subEntitiesEval!.scriptTS} onChange={v => { ctx.value.subEntitiesEval!.scriptTS = v; ctx.value.subEntitiesEval!.modified = true; forceUpdate(); }} />
               </div>
             </div>
             <div className="col-sm-5">

@@ -90,7 +90,7 @@ export function CultureDropdownMenuItem(props: {
       <div style={{ display: show ? "block" : "none" }}>
         {Dic.map(cultures, (name, c, i) =>
           <NavDropdown.Item key={i} data-culture={name} {...dropdownActive(is(c, current))} onClick={() => handleSelect(c)}>
-            {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
+            <FontAwesomeIcon icon="chevron-right" aria-hidden={true} className="me-2"/> {props.fullName ? getToString(c) : simplifyName(getToString(c)!)}
           </NavDropdown.Item>
         )}
       </div>

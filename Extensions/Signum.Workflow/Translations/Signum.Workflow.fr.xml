@@ -549,7 +549,8 @@
     <Member Name="Name" Description="Nom" />
   </Type>
   <Type Name="WorkflowScriptEval" Description="Workflow script eval">
-    <Member Name="CustomTypes" Description="Types personnalisés" />
+    <Member Name="CustomTypesCS" Description="Types personnalisés" />
+    <Member Name="CustomTypesTS" Description="Types personnalisés (TypeScript)" />
   </Type>
   <Type Name="WorkflowScriptOperation">
     <Member Name="Clone" Description="Clone" />

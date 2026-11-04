@@ -2,6 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import { WorkflowActionEntity } from '../Signum.Workflow'
 import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
@@ -15,13 +16,13 @@ interface WorkflowConditionComponentProps {
 export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleMainEntityTypeChange() {
-    p.ctx.value.eval!.script = "";
+    p.ctx.value.eval!.scriptCS = "";
     forceUpdate();
   }
 
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval!;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
@@ -58,8 +59,9 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
                   <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => WorkflowClient.showWorkflowTransitionContextCodeHelp()} />
                 </div>
                 <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)} />
+                <CSharpCodeMirror script={ctx.value.eval!.scriptCS ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)} />
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+                <EvalScriptTS value={ctx.value.eval!.scriptTS} onChange={v => { ctx.value.eval!.scriptTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
             </div>
             <div className="col-sm-5">

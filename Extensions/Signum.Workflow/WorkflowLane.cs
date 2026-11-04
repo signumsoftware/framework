@@ -78,7 +78,7 @@ public class WorkflowLaneActorsEval : EvalEmbedded<IWorkflowLaneActorsEvaluator>
     {
         var parent = this.GetParentEntity<WorkflowLaneEntity>();
 
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var WorkflowEntityTypeName = parent.Pool.Workflow.MainEntityType.ToType().FullName;
 
@@ -104,7 +104,7 @@ public class WorkflowLaneActorsEval : EvalEmbedded<IWorkflowLaneActorsEvaluator>
 
     public WorkflowLaneActorsEval Clone()
     {
-        return new WorkflowLaneActorsEval() { Script = this.Script };
+        return new WorkflowLaneActorsEval() { ScriptCS = this.ScriptCS, ScriptTS = this.ScriptTS };
     }
 }
 

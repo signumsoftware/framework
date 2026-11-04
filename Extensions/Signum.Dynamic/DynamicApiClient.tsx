@@ -15,7 +15,7 @@ export namespace DynamicApiClient {
     EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={DynamicApiEntity.findOptions()} />);
     EvalClient.Options.registerDynamicPanelSearch(DynamicApiEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
-      { token: t.append(p => p.entity.eval!.script), type: "Code" },
+      { token: t.append(p => p.entity.eval!.scriptCS), type: "Code" },
     ]);
       
   }

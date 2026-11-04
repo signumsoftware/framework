@@ -22,7 +22,7 @@ export namespace DynamicValidationClient {
     EvalClient.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
       { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
       { token: t.append(p => p.entity.name), type: "Text" },
-      { token: t.append(p => p.entity.eval!.script), type: "Text" },
+      { token: t.append(p => p.entity.eval!.scriptCS), type: "Text" },
     ]);
   }
   

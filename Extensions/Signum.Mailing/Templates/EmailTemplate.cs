@@ -3,6 +3,7 @@ using System.Xml.Linq;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.Templating;
+using Signum.Eval;
 
 namespace Signum.Mailing.Templates;
 
@@ -162,7 +163,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
                     new XCData(x.Text)
                 ))),
 
-            this.Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script)))!
+            this.Applicable?.Let(app => EvalXml.ToXml("Applicable", app))!
         );
     }
 
@@ -214,7 +215,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
-        Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
+        Applicable = !EvalXml.HasScripts(element, "Applicable") ? null :
+            (Applicable ?? new TemplateApplicableEval()).Do(app => EvalXml.FromXml(element, "Applicable", app));
         if (Query != null)
             ParseData(ctx.GetQueryDescription(Query));
     }
