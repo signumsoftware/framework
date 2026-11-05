@@ -31,6 +31,20 @@ public class Schema : IImplementationsFinder
     }
 
     public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
+
+    /// <summary>
+    /// In TimeZoneMode.Local, DateTimes are stored in the host time zone. A UTC host (e.g. a container without TZ)
+    /// usually means a misconfiguration, so Initialize throws. Set to true for applications that really run in UTC local time.
+    /// </summary>
+    public bool AllowLocalTimeZoneModeOnUtcHost { get; set; }
+
+    void AssertHostTimeZone()
+    {
+        if (TimeZoneMode == TimeZoneMode.Local && !AllowLocalTimeZoneModeOnUtcHost && TimeZoneInfo.Local.HasSameRules(TimeZoneInfo.Utc))
+            throw new InvalidOperationException(
+                $"Schema.TimeZoneMode is Local but the host time zone ({TimeZoneInfo.Local.Id}) is UTC, so DateTimes would be stored in UTC. " +
+                $"Set the host time zone (e.g. TZ=Europe/Berlin), use TimeZoneMode.Utc, or set Schema.{nameof(AllowLocalTimeZoneModeOnUtcHost)} = true.");
+    }
     public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
 
     Version? version;
@@ -643,6 +657,8 @@ public class Schema : IImplementationsFinder
 
     public void Initialize()
     {
+        AssertHostTimeZone();
+
         OnBeforeDatabaseAccess();
 
         if (Initializing == null)

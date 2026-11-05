@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="EvalEmbedded`1">
-    <Member Name="Script" Description="Script" />
+    <Member Name="ScriptCS" Description="Script" />
+    <Member Name="ScriptTS" Description="Script (TypeScript)" />
   </Type>
 </Translations>

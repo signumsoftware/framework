@@ -9,6 +9,12 @@ namespace Signum.Eval;
 [ValidateModelFilter]
 public class EvalPanelController : ControllerBase
 {
+    [HttpGet("api/eval/alteaMigration")]
+    public bool AlteaMigration()
+    {
+        return EvalLogic.AlteaMigration;
+    }
+
     [HttpPost("api/eval/evalErrors")]
     public async Task<List<EvalEntityError>> GetEvalErrors([Required, FromBody] QueryEntitiesRequestTS request)
     {

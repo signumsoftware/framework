@@ -92,7 +92,7 @@ public class WorkflowEventTaskConditionEval : EvalEmbedded<IWorkflowEventTaskCon
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
 
         return Compile(EvalLogic.GetCoreMetadataReferences()
@@ -120,7 +120,7 @@ public class WorkflowEventTaskActionEval : EvalEmbedded<IWorkflowEventTaskAction
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
 
         return Compile(EvalLogic.GetCoreMetadataReferences()

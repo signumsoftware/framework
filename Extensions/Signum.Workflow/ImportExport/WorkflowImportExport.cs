@@ -3,6 +3,7 @@ using Signum.UserAssets;
 using System.Globalization;
 using Signum.Engine.Sync;
 using Signum.Scheduler;
+using Signum.Eval;
 
 namespace Signum.Workflow;
 
@@ -67,7 +68,7 @@ public class WorkflowImportExport
             new XAttribute("Name", la.Name),
             new XAttribute("Pool", la.Pool.BpmnElementId),
             la.Actors.IsEmpty() ? null! : new XElement("Actors", la.Actors.Select(a => new XElement("Actor", a.KeyLong()!))),
-            la.ActorsEval == null ? null! : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
+            la.ActorsEval == null ? null! : EvalXml.ToXml("ActorsEval", la.ActorsEval),
             la.UseActorEvalForStart == false ? null! : new XElement("UseActorEvalForStart", la.UseActorEvalForStart),
             la.CombineActorAndActorEvalWhenContinuing == false ? null! : new XElement("CombineActorAndActorEvalWhenContinuing", la.CombineActorAndActorEvalWhenContinuing),
             la.Xml.ToXml()))),
@@ -91,7 +92,7 @@ public class WorkflowImportExport
                 string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
                 a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
                     new XAttribute("Workflow", a.SubWorkflow.Workflow.Is(workflow) ? (Guid)a.SubWorkflow.Workflow.Id : ctx.Include(a.SubWorkflow.Workflow)),
-                    new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
+                    EvalXml.ToXml("SubEntitiesEval", a.SubWorkflow.SubEntitiesEval)
                 ),
                 a.Script == null ? null! : new XElement("Script",
                     new XAttribute("Script", ctx.Include(a.Script.Script)),
@@ -126,8 +127,8 @@ public class WorkflowImportExport
                     new XAttribute("Suspended", e.WorkflowEventTaskModel.Suspended),
                     new XAttribute("TriggeredOn", e.WorkflowEventTaskModel.TriggeredOn.ToString()),
                     e.WorkflowEventTaskModel.Rule == null ? null! : new XAttribute("Rule", ctx.Include(e.WorkflowEventTaskModel.Rule)),
-                    e.WorkflowEventTaskModel.Condition == null ? null! : new XElement("Condition", new XCData(e.WorkflowEventTaskModel.Condition.Script)),
-                    e.WorkflowEventTaskModel.Action == null ? null! : new XElement("Action", new XCData(e.WorkflowEventTaskModel.Action.Script)))
+                    e.WorkflowEventTaskModel.Condition == null ? null! : EvalXml.ToXml("Condition", e.WorkflowEventTaskModel.Condition),
+                    e.WorkflowEventTaskModel.Action == null ? null! : EvalXml.ToXml("Action", e.WorkflowEventTaskModel.Action))
             ))),
 
            this.connections.Values.Select(c => WithXmlMixin(c, ctx, new XElement("Connection",
@@ -325,7 +326,8 @@ public class WorkflowImportExport
                 lane.Pool = this.pools.GetOrThrow(xml.Attribute("Pool")!.Value);
 
                 lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => ctx.ParseLite(a.Value, this.workflow, actorsPr)).NotNull().ToMList());
-                lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
+                lane.ActorsEval = !EvalXml.HasScripts(xml, "ActorsEval") ? null :
+                    (lane.ActorsEval ?? new WorkflowLaneActorsEval()).Do(ae => EvalXml.FromXml(xml, "ActorsEval", ae));
                 lane.UseActorEvalForStart = xml.Element("UseActorEvalForStart")?.Value.ToBool() ?? false;
                 lane.CombineActorAndActorEvalWhenContinuing = xml.Element("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;
                 SetXmlDiagramAndMixins(lane, xml, ctx);
@@ -356,10 +358,7 @@ public class WorkflowImportExport
                     activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
                     {
                         swe.Workflow = (Guid)workflow.Id == (Guid)elem.Attribute("Workflow")! ? workflow : (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
-                        swe.SubEntitiesEval = swe.SubEntitiesEval.CreateOrAssignEmbedded(elem.Element("SubEntitiesEval"), (se, x) =>
-                        {
-                            se.Script = x.Value;
-                        })!;
+                        swe.SubEntitiesEval = (swe.SubEntitiesEval ?? new SubEntitiesEval()).Do(se => EvalXml.FromXml(elem, "SubEntitiesEval", se));
                     });
                     activity.Script = activity.Script.CreateOrAssignEmbedded(xml.Element("Script"), (swe, elem) =>
                     {
@@ -389,18 +388,16 @@ public class WorkflowImportExport
                         var wet = xml.Element("WorkflowEventTaskModel");
                         if (wet != null)
                         {
+                            //Seeded from the current task, so a script language missing in the file keeps its value
+                            var current = WorkflowEventTaskModel.GetModel(ev);
                             var model = new WorkflowEventTaskModel();
                             model.Suspended = wet.Attribute("Suspended")!.Let(a => bool.Parse(a.Value));
                             model.TriggeredOn = Enum.Parse<TriggeredOn>(wet.Attribute("TriggeredOn")!.Value);
                             model.Rule = wet.Attribute("Rule")?.Let(a => (IScheduleRuleEntity)ctx.GetEntity(Guid.Parse(a.Value)));
-                            model.Condition = model.Condition.CreateOrAssignEmbedded(wet.Element("Condition"), (c, x) =>
-                            {
-                                c.Script = x.Value;
-                            });
-                            model.Action = model.Action.CreateOrAssignEmbedded(wet.Element("Action"), (a, x) =>
-                            {
-                                a.Script = x.Value;
-                            });
+                            model.Condition = !EvalXml.HasScripts(wet, "Condition") ? null :
+                                (current?.Condition ?? new WorkflowEventTaskConditionEval()).Do(c => EvalXml.FromXml(wet, "Condition", c));
+                            model.Action = !EvalXml.HasScripts(wet, "Action") ? null :
+                                (current?.Action ?? new WorkflowEventTaskActionEval()).Do(a => EvalXml.FromXml(wet, "Action", a));
 
                             WorkflowEventTaskModel.ApplyModel.Invoke(ev, model);
                         }

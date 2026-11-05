@@ -320,7 +320,7 @@ public static class EmailTemplateLogic
                     {
                         Name = $"{e.Name} (Cloned)",
                         MasterTemplate = e.MasterTemplate,
-                        Applicable = e.Applicable == null ? null : new TemplateApplicableEval() { Script = e.Applicable.Script },
+                        Applicable = e.Applicable == null ? null : new TemplateApplicableEval() { ScriptCS = e.Applicable.ScriptCS, ScriptTS = e.Applicable.ScriptTS },
                         DisableAuthorization = e.DisableAuthorization,
                         EditableMessage = e.EditableMessage,
                         GroupResults = e.GroupResults,

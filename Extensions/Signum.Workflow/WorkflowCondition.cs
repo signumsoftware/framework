@@ -26,7 +26,7 @@ public class WorkflowConditionEntity : Entity, IUserAssetEntity
              new XAttribute("Name", Name),
              new XAttribute("MainEntityType", MainEntityType.CleanName),
              new XElement("Eval",
-                new XElement("Script", new XCData(Eval.Script))));
+                EvalXml.ToXml("Script", Eval)));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -39,7 +39,7 @@ public class WorkflowConditionEntity : Entity, IUserAssetEntity
 
         var xEval = element.Element("Eval")!;
 
-        Eval.Script = xEval.Element("Script")!.Value;
+        EvalXml.FromXml(xEval, "Script", Eval);
     }
 }
 
@@ -57,7 +57,7 @@ public class WorkflowConditionEval : EvalEmbedded<IWorkflowConditionEvaluator>
     {
         var parent = this.GetParentEntity<WorkflowConditionEntity>();
 
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : ("return " + script + ";");
         var WorkflowEntityTypeName = parent.MainEntityType.ToType().FullName;
 

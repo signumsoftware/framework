@@ -35,7 +35,7 @@ public class DynamicValidationEval : EvalEmbedded<IDynamicValidationEvaluator>
 {
     protected override CompilationResult Compile()
     {
-        var script = this.Script.Trim();
+        var script = this.ScriptCS.Trim();
         script = script.Contains(';') ? script : "return " + script + ";";
         var entityTypeName = DynamicValidationEntity.GetMainType(this.GetParentEntity<DynamicValidationEntity>()).FullName;
 

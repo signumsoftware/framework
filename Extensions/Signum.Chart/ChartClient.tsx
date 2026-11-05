@@ -7,7 +7,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
+import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes, Type } from '@framework/Reflection'
 import {
   FilterOption, OrderOption, QueryRequest, ResultTable, OrderRequest, OrderType, FilterOptionParsed,
   ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
@@ -836,6 +836,14 @@ export namespace ChartClient {
       return v => String(v);
     }
   
+    const liteColors: { [typeName: string]: (lite: Lite<Entity>) => string | null | undefined } = {};
+
+    // For entities that carry their own colour: the chart reads it from the lite (so it has to be in the
+    // lite model) before looking at the type's ColorPalette.
+    export function registerLiteColor<T extends Entity>(type: Type<T>, getColor: (lite: Lite<T>) => string | null | undefined): void {
+      liteColors[type.typeName] = getColor as (lite: Lite<Entity>) => string | null | undefined;
+    }
+
     export function getColor(token: QueryToken, palettes: { [type: string]: ColorPaletteClient.ColorPalette | null }): ((val: unknown) => string | null) {
   
       var tis = tryGetTypeInfos(token.type);
@@ -855,9 +863,15 @@ export namespace ChartClient {
         return v => {
           if (v == null)
             return "#555";
-  
+
           var lite = (v as Lite<Entity>);
-  
+
+          // The entity's own colour (e.g. a label's Color, carried in its lite model) wins over the palette,
+          // so editing it recolours every chart; a lite without one falls through to the palette as before.
+          var ownColor = liteColors[lite.EntityType]?.(lite);
+          if (ownColor)
+            return ownColor;
+
           var cp = palettes[lite.EntityType];
           return cp && cp.getColor(lite.id!.toString()) || null;
         };

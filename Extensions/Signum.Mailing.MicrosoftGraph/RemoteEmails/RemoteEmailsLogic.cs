@@ -13,7 +13,7 @@ namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 
 public static class RemoteEmailsLogic
 {
-    public static Func<List<string>>? HardCodedCategories; 
+    public static Func<Guid, List<string>>? HardCodedCategories; 
 
     public static Func<Guid, TokenCredential> GetTokenCredentials = (oid) => AzureADLogic.GetTokenCredential();
 

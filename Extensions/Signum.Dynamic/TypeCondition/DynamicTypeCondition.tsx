@@ -4,6 +4,7 @@ import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Line
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS'
 import { Entity } from '@framework/Signum.Entities'
 import { DynamicTypeConditionClient } from '../DynamicTypeConditionClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -32,7 +33,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
 
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value.eval!;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
@@ -66,7 +67,8 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
 
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"boolean Evaluate(" + ctx.value.entityType.cleanName + "Entity e) =>"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.scriptCS ?? ""} onChange={handleCodeChange} />
+                <EvalScriptTS value={ctx.value.eval!.scriptTS} onChange={v => { ctx.value.eval!.scriptTS = v; ctx.value.eval!.modified = true; forceUpdate(); }} />
               </div>
               {renderTest()}
             </div>

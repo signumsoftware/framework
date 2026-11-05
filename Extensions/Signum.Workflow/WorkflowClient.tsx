@@ -149,31 +149,31 @@ export namespace WorkflowClient {
     EvalClient.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
       { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-      { token: t.append(p => p.entity.eval.script), type: "Code" },
+      { token: t.append(p => p.entity.eval.scriptCS), type: "Code" },
     ]);
 
     EvalClient.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
       { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-      { token: t.append(p => p.entity.eval.script), type: "Code" },
+      { token: t.append(p => p.entity.eval.scriptCS), type: "Code" },
     ]);
 
     EvalClient.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
       { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-      { token: t.append(p => p.entity.eval.script), type: "Code" },
+      { token: t.append(p => p.entity.eval.scriptCS), type: "Code" },
     ]);
 
     EvalClient.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
       { token: t.append(p => p.name), type: "Text" },
       { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
-      { token: t.append(p => p.entity.eval.script), type: "Code" },
+      { token: t.append(p => p.entity.eval.scriptCS), type: "Code" },
     ]);
 
     EvalClient.Options.registerDynamicPanelSearch(WorkflowEventTaskEntity, t => [
       { token: t.append(p => p.entity.event.entity!.name), type: "Text" },
-      { token: t.append(p => p.entity.condition!.script), type: "Code" },
-      { token: t.append(p => p.entity.action!.script), type: "Code" },
+      { token: t.append(p => p.entity.condition!.scriptCS), type: "Code" },
+      { token: t.append(p => p.entity.action!.scriptCS), type: "Code" },
     ]);
 
     QuickLinkClient.registerQuickLink(CaseActivityEntity, new QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {

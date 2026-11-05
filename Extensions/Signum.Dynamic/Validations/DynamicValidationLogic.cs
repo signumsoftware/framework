@@ -34,7 +34,7 @@ public static class DynamicValidationLogic
                 e.Name,
                 e.EntityType,
                 e.SubEntity,
-                Script = e.Eval.Script.Etc(75),
+                Script = e.Eval.ScriptCS.Etc(75),
             });
 
         new Graph<DynamicValidationEntity>.ConstructFrom<DynamicValidationEntity>(DynamicValidationOperation.Clone)
@@ -44,7 +44,7 @@ public static class DynamicValidationLogic
                 Name = dv.Name,
                 EntityType = dv.EntityType,
                 SubEntity = dv.SubEntity,
-                Eval = new DynamicValidationEval() { Script = dv.Eval.Script },
+                Eval = new DynamicValidationEval() { ScriptCS = dv.Eval.ScriptCS, ScriptTS = dv.Eval.ScriptTS },
             }
         }.Register();
 

@@ -121,7 +121,7 @@ public class RemoteEmailController : ControllerBase
     {
         if(RemoteEmailsLogic.HardCodedCategories != null)
         {
-            return RemoteEmailsLogic.HardCodedCategories();
+            return RemoteEmailsLogic.HardCodedCategories(oid);
         }
 
         var tokenCredential = RemoteEmailsLogic.GetTokenCredentials(oid);

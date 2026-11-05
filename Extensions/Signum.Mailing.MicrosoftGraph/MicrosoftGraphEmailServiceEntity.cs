@@ -15,7 +15,7 @@ public class MicrosoftGraphEmailServiceEntity : EmailServiceEntity
     [Description("Azure Directory (tenant) ID")]
     public Guid? Azure_DirectoryID { get; set; }
 
-    [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
+    [StringLengthValidator(Max = 100), Description("Azure Client Secret Value"), Format(FormatAttribute.Password)]
     public string? Azure_ClientSecret { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)

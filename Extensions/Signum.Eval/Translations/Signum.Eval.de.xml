@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="EvalEmbedded`1">
-    <Member Name="Script" Description="Skript" />
+    <Member Name="ScriptCS" Description="Skript" />
+    <Member Name="ScriptTS" Description="Skript (TypeScript)" />
   </Type>
   <Type Name="EvalPanelMessage">
     <Member Name="_0Found" Description="{0} gefunden" />

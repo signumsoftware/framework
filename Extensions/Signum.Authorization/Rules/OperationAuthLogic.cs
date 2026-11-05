@@ -77,6 +77,11 @@ public static class OperationAuthLogic
         return operation;
     }
 
+    public static void SetMaxAutomaticUpgrade(IOperationSymbolContainer operationSymbol, OperationAllowed allowed) 
+    {
+        MaxAutomaticUpgrade.Add(operationSymbol.Symbol, allowed);
+    }
+
     static GenericInvoker<Func<Entity, WithConditions<OperationAllowed>, bool, bool>> giAllowOperation = new((e, ta, inUI) => AllowOperation<Entity>((Entity)e, ta, inUI));
     static bool AllowOperation<T>(T entity, WithConditions<OperationAllowed> ta, bool inUserInterface)
         where T : Entity

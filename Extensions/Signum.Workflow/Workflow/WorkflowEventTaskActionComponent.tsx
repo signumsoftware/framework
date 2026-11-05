@@ -4,7 +4,8 @@ import { TypeContext, PropertyRoute, TextAreaLine } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
-import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
+import EvalScriptTS from '../../Signum.Eval/EvalScriptTS';
 import { useForceUpdate } from '@framework/Hooks'
 
 export interface WorkflowEventTaskActionComponentProps {
@@ -17,7 +18,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
 
   function handleCodeChange(newScript: string) {
     const evalEntity = p.ctx.value;
-    evalEntity.script = newScript;
+    evalEntity.scriptCS = newScript;
     evalEntity.modified = true;
     forceUpdate();
   }
@@ -57,8 +58,9 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
               <input type="button" className="btn btn-success btn-sm sf-button" value="Create case" onClick={handleCreateCaseClick} />
             </div>
             <pre style={{ border: "0px", margin: "0px" }}>{"public void CustomAction() \n{"}</pre>
-            <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
+            <CSharpCodeMirror script={ctx.value.scriptCS ?? ""} onChange={handleCodeChange} />
             <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
+            <EvalScriptTS value={ctx.value.scriptTS} onChange={v => { ctx.value.scriptTS = v; ctx.value.modified = true; forceUpdate(); }} />
           </div>
         </div>
         <div className="col-sm-5">
