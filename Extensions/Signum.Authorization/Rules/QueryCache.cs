@@ -124,7 +124,7 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
             allKeys: exportAll ? QueryLogic.QueryNames.Values.ToList() : null);
     }
 
-    public override SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+    public override IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
     {
         string replacementKey = "AuthRules:" + typeof(QueryEntity).Name;
 
@@ -133,6 +133,7 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
             QueryLogic.QueryNames.Keys.ToHashSet(),
             replacementKey);
 
+        //No bulkInsertAction: a query rule is one row, so the default single bulk copy is enough
         return ImportXmlInternal(root, "Queries", "Query", roles,
             toResource: s =>
             {

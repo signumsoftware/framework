@@ -534,7 +534,7 @@ public static class AuthLogic
     }
 
     public static event Func<bool, XElement>? ExportToXml;
-    public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, SqlPreCommand?>? ImportFromXml;
+    public static event Func<XElement, Dictionary<string, Lite<RoleEntity>>, Replacements, IChangeTable?>? ImportFromXml;
 
     public static XDocument ExportRules(bool exportAll = false)
     {
@@ -555,7 +555,14 @@ public static class AuthLogic
                  ExportToXml?.GetInvocationListTyped().Select(a => a(exportAll)).NotNull().OrderBy(a => a.Name.ToString())!));
     }
 
-    public static SqlPreCommand? ImportRulesScript(XDocument doc, bool interactive)
+    public static SqlPreCommand? ImportRulesScript(XDocument doc, bool interactive) =>
+        ImportRulesChanges(doc, interactive).ToSqlCommand();
+
+    /// <summary>
+    /// What the file would change, before deciding whether to write it out as a script to review or to apply
+    /// it directly. Applying it is much faster, the rules go in with a bulk copy instead of one INSERT each.
+    /// </summary>
+    public static AuthImportChanges ImportRulesChanges(XDocument doc, bool interactive)
     {
         Replacements replacements = new Replacements { Interactive = interactive };
 
@@ -611,26 +618,20 @@ public static class AuthLogic
             throw new InvalidRoleGraphException("The role graph does not match:\n" + ex.Message);
         }
 
-        var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
+        var changes = new AuthImportChanges
+        {
+            Warnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
                 new SqlPreCommandSimple("-- Alien role {0} not configured!!".FormatWith(n))
-            ).Combine(Spacing.Simple);
+            ).Combine(Spacing.Simple),
+        };
 
-        SqlPreCommand? result = ImportFromXml.GetInvocationListTyped()
-            .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
+        changes.Tables.AddRange(ImportFromXml.GetInvocationListTyped()
+            .Select(inv => inv(doc.Root, rolesDic, replacements)).NotNull());
 
         if (replacements.Values.Any(a => a.Any()))
             SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script");
 
-        if (result == null && dbOnlyWarnings == null)
-            return null;
-
-
-        return SqlPreCommand.Combine(Spacing.Triple,
-            new SqlPreCommandSimple("-- BEGIN AUTH SYNC SCRIPT"),
-            Connector.Current.SqlBuilder.UseDatabase(),
-            dbOnlyWarnings,
-            result,
-            new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
+        return changes;
     }
 
 
@@ -880,21 +881,19 @@ public static class AuthLogic
     public static void ImportAuthRules(XDocument authRules, bool interactive)
     {
         Schema.Current.Initialize();
-        var script = AuthLogic.ImportRulesScript(authRules, interactive: false);
-        if (script == null)
+        var changes = AuthLogic.ImportRulesChanges(authRules, interactive: false);
+        if (changes.Count == 0)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Green, "AuthRules already synchronized");
             return;
         }
 
-        using (var tr = new Transaction())
-        {
-            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
-            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, script.PlainSql());
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Executing AuthRules changes...");
+        foreach (var t in changes.Tables)
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, $"{t.Count,6} changes in {t.Table.Name}");
 
-            script.PlainSqlCommand().ExecuteLeaves();
-            tr.Commit();
-        }
+        //Applied instead of scripted: thousands of rules one INSERT at a time was the bulk of the time here
+        changes.Apply();
 
         Schema.Current.InvalidateCache();
         SystemEventLogLogic.Log("Import AuthRules");

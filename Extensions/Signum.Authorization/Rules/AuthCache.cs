@@ -314,18 +314,24 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
     }
 
 
-    public abstract SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements);
+    public abstract IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements);
 
-    protected SqlPreCommand? ImportXmlInternal(XElement root, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
-        Func<string, R?> toResource, Func<XElement, R, A> parseAllowed)
+    /// <summary>
+    /// Collects what the import changes instead of writing it as SQL, so the caller can either review the
+    /// script or apply it with a bulk copy. The synchronization itself is unchanged.
+    /// </summary>
+    protected ChangeTable<RT>? ImportXmlInternal(XElement root, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
+        Func<string, R?> toResource, Func<XElement, R, A> parseAllowed, Action<List<RT>>? bulkInsertAction = null)
     {
+        var changes = new ChangeTable<RT>();
+        if (bulkInsertAction != null)
+            changes.BulkInsertAction = bulkInsertAction;
+
         var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
         var xRoles = (root.Element(rootName)?.Elements("Role")).EmptyIfNull();
         var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name")!.Value));
 
-        Table table = Schema.Current.Table(typeof(RT));
-
-        return Synchronizer.SynchronizeScript(Spacing.Double, should, current,
+        Synchronizer.Synchronize(should, current,
             createNew: (role, x) =>
             {
                 var dic = (from xr in x.Elements(elementName)
@@ -334,19 +340,17 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
                            select KeyValuePair.Create(r, parseAllowed(xr, r)))
                            .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(SetRuleAllowed(new RT
-                {
-                    Resource = kvp.Key,
-                    Role = role,
-                }, kvp.Value), comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
-
-                return restSql;
+                foreach (var kvp in dic)
+                    changes.Add(SetRuleAllowed(new RT { Resource = kvp.Key, Role = role }, kvp.Value),
+                        ChangeKind.Insert, role, Comment(role, kvp.Key, kvp.Value));
             },
-            removeOld: (role, list) => list.Select(rt => table.DeleteSqlSync(rt, null)).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true),
-            mergeBoth: (role, x, list) =>
+            removeOld: (role, list) =>
             {
-                var def = list.SingleOrDefaultEx(a => a.Resource == null);
-
+                foreach (var rt in list)
+                    changes.Add(rt, ChangeKind.Delete, role);
+            },
+            merge: (role, x, list) =>
+            {
                 var shouldResources = (from xr in x.Elements(elementName)
                                        let r = toResource(xr.Attribute("Resource")!.Value)
                                        where r != null
@@ -355,26 +359,26 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
 
                 var currentResources = list.Where(a => a.Resource != null).ToDictionary(a => ToKey(a.Resource));
 
-                SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
+                Synchronizer.Synchronize(shouldResources, currentResources,
                     (r, xr) =>
                     {
                         var resource = ToEntity(r);
                         var a = parseAllowed(xr, resource);
-                        return table.InsertSqlSync(SetRuleAllowed(new RT { Resource = resource, Role = role }, a), comment: Comment(role, ToEntity(r), a));
+                        changes.Add(SetRuleAllowed(new RT { Resource = resource, Role = role }, a),
+                            ChangeKind.Insert, role, Comment(role, resource, a));
                     },
-                    (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), GetRuleAllowed(rt))),
+                    (r, rt) => changes.Add(rt, ChangeKind.Delete, role, Comment(role, ToEntity(r), GetRuleAllowed(rt))),
                     (r, xr, rt) =>
                     {
                         var resource = ToEntity(r);
                         var oldA = GetRuleAllowed(rt);
                         SetRuleAllowed(rt, parseAllowed(xr, resource));
                         if (rt.IsGraphModified)
-                            return table.UpdateSqlSync(rt, null, comment: Comment(role, resource, oldA, GetRuleAllowed(rt)));
-                        return null;
-                    })?.Do(p => p.GoBefore = true);
-
-                return restSql;
+                            changes.Add(rt, ChangeKind.Update, role, Comment(role, resource, oldA, GetRuleAllowed(rt)));
+                    });
             });
+
+        return changes.Count == 0 ? null : changes;
     }
 
 

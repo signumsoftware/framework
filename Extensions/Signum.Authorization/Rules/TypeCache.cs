@@ -149,7 +149,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     internal static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
     internal static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
 
-    public override SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+    public override IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
     {
         var current = Database.RetrieveAll<RuleTypeEntity>().GroupToDictionary(a => a.Role);
         var xRoles = (root.Element("Types")?.Elements("Role")).EmptyIfNull();
@@ -196,6 +196,19 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
                                       .ToReadOnly();
 
                 return new WithConditions<TypeAllowed>(fallback: fallback, conditionRules: conditionRules);
+            },
+            bulkInsertAction: rules =>
+            {
+                //Role and Resource are unique together, so the ids come back and the condition rules can point at them
+                rules.BulkInsertQueryIdsIfAny(a => new { Role = a.Role.Id, Resource = a.Resource.Id });
+
+                //Their own Conditions MList needs their ids in turn, and RuleType and Order are unique together
+                rules.SelectMany(r => r.ConditionRules.Select((c, i) =>
+                {
+                    c.RuleType = r.ToLite();
+                    c.Order = i;
+                    return c;
+                })).ToList().BulkInsertQueryIdsIfAny(a => new { RuleType = a.RuleType.Id, a.Order });
             });
     }
 

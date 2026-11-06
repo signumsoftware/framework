@@ -777,6 +777,12 @@ END $$;"); ;
         }
         else
         {
+            //parentId is only read by the collections and the virtual MLists. Without them the declaration is
+            //dead weight, and so is its GO, which is only there because the same variable can not be declared
+            //twice in one batch. Keeping it would split a script of N inserts into N round trips.
+            if (collections == null && virtualMList == null)
+                return insert;
+
             return SqlPreCommand.Combine(Spacing.Simple,
                 new SqlPreCommandSimple($"DECLARE {parentId} {pkType};") { GoBefore = forceParentId == null },
                 insert,

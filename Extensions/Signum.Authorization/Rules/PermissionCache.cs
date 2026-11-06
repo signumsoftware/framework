@@ -42,7 +42,7 @@ class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, P
               exportAll ? PermissionLogic.RegisteredPermission.ToList() : null);
     }
 
-    public override SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+    public override IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
     {
         string replacementKey = "AuthRules:" + typeof(PermissionSymbol).Name;
 
@@ -51,6 +51,7 @@ class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, P
             SymbolLogic<PermissionSymbol>.Symbols.Select(s => s.Key).ToHashSet(),
             replacementKey);
 
+        //No bulkInsertAction: a permission rule is one row, so the default single bulk copy is enough
         return ImportXmlInternal(root, "Permissions", "Permission", roles,
             toResource: s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), 
             parseAllowed: (e, resource) => bool.Parse(e.Attribute("Allowed")!.Value));

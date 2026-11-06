@@ -273,7 +273,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         }
     }
 
-    public override SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+    public override IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
     {
         Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
 
@@ -298,6 +298,29 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         }
 
         var routes = Database.Query<PropertyRouteEntity>().ToDictionary(a => a.ToPropertyRoute());
+
+        //Importing a full AuthRules.xml into an empty database needs thousands of PropertyRouteEntity, and
+        //creating them one by one in toResource was a round trip each. Insert all the missing ones at once.
+        var missingRoutes = (from g in groups
+                             let type = TypeLogic.NameToType.TryGetC(replacements.Apply(TypeCache.typeReplacementKey, g.Key))
+                             where type != null
+                             from p in g.Value
+                             let route = routesDicCache.TryGetC(type)?.TryGetC(replacements.Apply(AuthPropertiesReplacementKey(type), p))
+                             where route != null && !routes.ContainsKey(route)
+                             select route!)
+                             .Distinct()
+                             .ToList();
+
+        if (missingRoutes.Count > 0)
+        {
+            missingRoutes.Select(route => new PropertyRouteEntity
+            {
+                RootType = TypeLogic.TypeToEntity[route.RootType],
+                Path = route.PropertyString()
+            }).BulkInsert();
+
+            routes = Database.Query<PropertyRouteEntity>().ToDictionary(a => a.ToPropertyRoute());
+        }
 
         return ImportXmlInternal(root, "Properties", "Property", roles,
             toResource: s =>
@@ -328,6 +351,19 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
                         typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
                         allowed: xc.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>()))
                     .ToReadOnly());
+            },
+            bulkInsertAction: rules =>
+            {
+                //Role and Resource are unique together, so the ids come back and the condition rules can point at them
+                rules.BulkInsertQueryIdsIfAny(a => new { Role = a.Role.Id, Resource = a.Resource.Id });
+
+                //Their own Conditions MList needs their ids in turn, and RuleProperty and Order are unique together
+                rules.SelectMany(r => r.ConditionRules.Select((c, i) =>
+                {
+                    c.RuleProperty = r.ToLite();
+                    c.Order = i;
+                    return c;
+                })).ToList().BulkInsertQueryIdsIfAny(a => new { RuleProperty = a.RuleProperty.Id, a.Order });
             });
     }
 
