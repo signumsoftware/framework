@@ -23,7 +23,12 @@ export interface HtmlEditorControllerProps {
 export class HtmlEditorController {
   editor!: LexicalEditor;
   editableElement: HTMLDivElement | null = null;
-  editorState!: EditorState;
+
+  //Read from the editor instead of a field: nothing assigned the field since the move to Lexical, so
+  //isEmpty(editorState) was always false and an editor emptied by the user saved "<p><br></p>" instead of null
+  get editorState(): EditorState | undefined {
+    return this.editor?.getEditorState();
+  }
 
   overrideToolbar!: React.ReactElement | undefined;
   setOverrideToolbar!: (newState: React.ReactElement | undefined) => void;
