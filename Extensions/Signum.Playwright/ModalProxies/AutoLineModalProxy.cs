@@ -29,13 +29,10 @@ public class AutoLineModalProxy : ModalProxy
         return formGroup;
     }
 
-    public async Task SetValueOk(string kommentar)
+    public async Task SetValueOk(object? value)
     {
-        using (this)
-        {
-            await this.SetValueAsync(kommentar);
-            await this.OkWaitClosedAsync();
-        }
+        await this.SetValueAsync(value);
+        await this.OkWaitClosedAsync();
     }
 
     public async Task SetValueAsync(object? value)
