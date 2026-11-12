@@ -215,23 +215,26 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             ).Intern();
     }
 
+    /// <summary>
+    /// How far the role's own default lets a PropertyRoute that no rule overrides go. A role that grants nothing
+    /// by default keeps them all at None, however much the type allows, unless AutomaticUpgradeOfProperties lifts
+    /// them to whatever <see cref="PropertyAuthLogic.MaxAutomaticUpgrade"/> allows for the route.
+    /// Pass <paramref name="pr"/> null for the cap shared by every route MaxAutomaticUpgrade says nothing about.
+    /// </summary>
+    public static PropertyAllowed DefaultCap(Lite<RoleEntity> role, PropertyRoute? pr)
+    {
+        if (AuthLogic.GetDefaultAllowed(role))
+            return PropertyAllowed.Write;
+
+        if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
+            return PropertyAllowed.None;
+
+        return (pr == null ? null : PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr)) ?? PropertyAllowed.Write;
+    }
+
     protected override Func<PropertyRoute, WithConditions<PropertyAllowed>> GetDefaultValue(Lite<RoleEntity> role)
     {
-        return pr =>
-        {
-            var typeAllowed = TypeAuthLogic.GetAllowed(role, pr.RootType).ToPropertyAllowed();
-            if (AuthLogic.GetDefaultAllowed(role))
-                return typeAllowed;
-
-            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
-                return CoerceSimple(typeAllowed, PropertyAllowed.None);
-
-            var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
-            if (maxUp == null)
-                return typeAllowed;
-
-            return CoerceSimple(typeAllowed, maxUp.Value);
-        };
+        return pr => CoerceSimple(TypeAuthLogic.GetAllowed(role, pr.RootType).ToPropertyAllowed(), DefaultCap(role, pr));
     }
 
     WithConditions<PropertyAllowed> GetDefaultFromType(PropertyRoute key, Lite<RoleEntity> role)
