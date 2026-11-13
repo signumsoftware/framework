@@ -120,12 +120,24 @@ public static partial class TextTemplateParser
         {
             var obj = ValueProvider!.GetValue(p);
 
-            var text = obj is Enum ? ((Enum)obj).NiceToString() :
-                   obj is TimeSpan ts ? ts.ToString((Format ?? ValueProvider.Format)?.Replace(":", @"\:"), p.Culture) :
-                   obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? ValueProvider.Format, p.Culture) :
-                   TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
+            var text = ToText(obj, p);
 
             p.StringBuilder.Append(p.IsHtml && !IsRaw && !(obj is HtmlString )? HttpUtility.HtmlEncode(text) : text);
+        }
+
+        /// <summary>
+        /// A collection is joined by comma, so an in-memory collection reads like the SeparatedByComma of a
+        /// query token instead of falling through to MList.ToString().
+        /// </summary>
+        string? ToText(object? obj, TextTemplateParameters p)
+        {
+            if (obj is not string && obj is System.Collections.IEnumerable ie)
+                return ie.Cast<object?>().ToString(e => ToText(e, p), ", ");
+
+            return obj is Enum en ? en.NiceToString() :
+                   obj is TimeSpan ts ? ts.ToString((Format ?? ValueProvider!.Format)?.Replace(":", @"\:"), p.Culture) :
+                   obj is IFormattable f ? f.ToString(Format ?? ValueProvider!.Format, p.Culture) :
+                   TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider!.Format, p.Culture);
         }
 
         public override void FillQueryTokens(List<QueryToken> list)

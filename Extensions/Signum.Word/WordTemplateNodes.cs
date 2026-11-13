@@ -411,11 +411,7 @@ public class TokenNode : BaseNode
         }
         else
         {
-            string? text = obj is Enum en ? en.NiceToString() :
-                obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
-                obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
-                obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
-                TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
+            string? text = ToText(obj, p);
 
             if (text != null && text.Contains('\n'))
             {
@@ -463,6 +459,23 @@ public class TokenNode : BaseNode
         cell.DataType = null; //numeric cell; keeps its StyleIndex (date/number format)
         cell.Append(new S.CellValue(numeric));
         return true;
+    }
+
+    /// <summary>
+    /// A value as it is written into the document. A collection is joined by comma, so that an in-memory
+    /// collection (@[m:Entity.Products]) reads like the SeparatedByComma of a query token instead of
+    /// falling through to MList.ToString(); use @foreach to lay one out per line.
+    /// </summary>
+    string? ToText(object? obj, WordTemplateParameters p)
+    {
+        if (obj is not string && obj is System.Collections.IEnumerable ie)
+            return ie.Cast<object?>().ToString(e => ToText(e, p), ", ");
+
+        return obj is Enum en ? en.NiceToString() :
+            obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
+            obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
+            obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
+            TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
     }
 
     static string SafeFormat(IFormattable fo, string? format, IFormatProvider provider)

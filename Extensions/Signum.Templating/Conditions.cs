@@ -287,10 +287,38 @@ public class ConditionCompare : ConditionBase
         }
         else
         {
-            var collection = (IEnumerable)this.ValueProvider!.GetValue(p)!;
+            var collection = (IEnumerable?)this.ValueProvider!.GetValue(p);
 
-            return collection.Cast<object>();
+            if (collection == null)
+                return Enumerable.Empty<object>();
+
+            var elements = collection.Cast<object>();
+
+            //Without an operation the question is only whether the collection has anything in it. With one,
+            //every element is compared, so @any over an in-memory collection asks the same as it does over
+            //the rows of the query, without the element join that would multiply them.
+            return Operation == null ? elements.ToList() : elements.Where(GetElementPredicate()).ToList();
         }
+    }
+
+    Func<object?, bool>? elementPredicate;
+
+    Func<object?, bool> GetElementPredicate()
+    {
+        if (elementPredicate != null)
+            return elementPredicate;
+
+        var elementType = ValueProviderBase.CollectionElementTypeOrNull(this.ValueProvider!.Type!)
+            ?? throw new InvalidOperationException($"{this.ValueProvider.Type} is not a collection");
+
+        var param = Expression.Parameter(typeof(object), "e");
+
+        var token = Expression.Convert(param, elementType);
+        var value = Expression.Constant(FilterValueConverter.Parse(Value, elementType, Operation!.Value.IsList()), elementType);
+
+        var body = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
+
+        return elementPredicate = Expression.Lambda<Func<object?, bool>>(body, param).Compile();
     }
 
     public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)

@@ -179,11 +179,21 @@ public abstract class ValueProviderBase
         if (Type == null)
             return;
 
-        var result = FilterValueConverter.IsValidExpression(valueString, Type, Operation!.Value.IsListOrPair(), null);
+        //A condition over an in-memory collection (@any[m:Entity.Products.Element...]) compares each element,
+        //so the value is of the element type, not of the collection.
+        var type = CollectionElementTypeOrNull(Type) ?? Type;
+
+        var result = FilterValueConverter.IsValidExpression(valueString, type, Operation!.Value.IsListOrPair(), null);
 
         if (result is Result<Type>.Error e)
-            addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, Type.TypeName(), e.ErrorText));
+            addError(false, "Impossible to convert '{0}' to {1}: {2}".FormatWith(valueString, type.TypeName(), e.ErrorText));
     }
+
+    /// <summary>
+    /// The element type when this provider returns a collection, excluding string, which enumerates chars.
+    /// </summary>
+    public static Type? CollectionElementTypeOrNull(Type type) =>
+        type == typeof(string) ? null : type.ElementType();
 }
 
 public class QueryContext
