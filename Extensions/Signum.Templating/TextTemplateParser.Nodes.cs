@@ -232,9 +232,6 @@ public static partial class TextTemplateParser
             if (type == typeof(IfNode))
                 return "if";
 
-            if (type == typeof(AnyNode))
-                return "any";
-
             return "block";
         }
 
@@ -310,100 +307,7 @@ public static partial class TextTemplateParser
         }
     }
 
-    public class AnyNode : TextNode
-    {
-        public ConditionBase Condition;
-
-        public readonly BlockNode AnyBlock;
-        public BlockNode? NotAnyBlock;
-
-        internal AnyNode(ConditionBase condition)
-        {
-            this.Condition = condition;
-            AnyBlock = new BlockNode(this);
-        }
-
-        public BlockNode CreateNotAny()
-        {
-            NotAnyBlock = new BlockNode(this);
-            return NotAnyBlock;
-        }
-
-        public override void PrintList(TextTemplateParameters p)
-        {
-            var filtered = this.Condition.GetFilteredRows(p);
-
-            using (filtered is IEnumerable<ResultRow> rr ? p.QueryContext!.OverrideRows(rr) : null)
-            {
-                p.StringBuilder.Append(EmptyPlaceholder);
-                if (filtered.Any())
-                {
-                    AnyBlock.PrintList(p);
-                }
-                else if (NotAnyBlock != null)
-                {
-                    NotAnyBlock.PrintList(p);
-                }
-            }
-        }
-
-        public override void FillQueryTokens(List<QueryToken> list)
-        {
-            Condition.FillQueryTokens(list);
-            AnyBlock.FillQueryTokens(list);
-            if (NotAnyBlock != null)
-                NotAnyBlock.FillQueryTokens(list);
-        }
-
-
-        public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)
-        {
-            sb.Append("@any");
-            Condition.ToStringBrackets(sb, variables);
-            {
-                var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                Condition.Declare(newVars);
-                AnyBlock.ToString(sb, newVars);
-            }
-            
-            if (NotAnyBlock != null)
-            {
-                sb.Append("@notany");
-                var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-                Condition.Declare(newVars);
-                NotAnyBlock.ToString(sb, newVars);
-            }
-
-            sb.Append("@endany");
-        }
-
-        public override void Synchronize(TemplateSynchronizationContext sc)
-        {
-            using (sc.NewScope())
-            {
-                Condition.Synchronize(sc, "@any[]");
-
-                using (sc.NewScope())
-                {
-                    Condition.Declare(sc.Variables);
-
-                    AnyBlock.Synchronize(sc);
-                }
-
-                if (NotAnyBlock != null)
-                {
-                    using (sc.NewScope())
-                    {
-                        Condition.Declare(sc.Variables);
-
-                        NotAnyBlock.Synchronize(sc);
-                    }
-                }
-            }
-        }
-    }
-
-    public class IfNode : TextNode
+        public class IfNode : TextNode
     {
         public readonly ConditionBase Condition;
         public readonly BlockNode IfBlock;

@@ -37,16 +37,6 @@ public abstract class ConditionBase
 
     public abstract void ToStringInternal(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables);
 
-    public virtual IEnumerable<object> GetFilteredRows(TemplateParameters p)
-    {
-        var filter = this.GetResultFilter(p);
-
-        var filtered = p.QueryContext!.CurrentRows.Where(filter).ToList();
-
-        return filtered;
-    }
-
-    public abstract Func<ResultRow, bool> GetResultFilter(TemplateParameters p);
 }
 
 public enum QuantifierKind
@@ -244,12 +234,6 @@ public class ConditionQuantifier : ConditionBase
         sb.Append(')');
     }
 
-    public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)
-    {
-        //A quantifier answers about a collection, not about a row, so it is the same answer for every row
-        var result = Evaluate(p);
-        return _ => result;
-    }
 }
 
 public class ConditionAnd : ConditionBase
@@ -294,13 +278,6 @@ public class ConditionAnd : ConditionBase
         this.RightNode.ToStringInternal(sb, variables);
     }
 
-    public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)
-    {
-        var left = LeftNode.GetResultFilter(p);
-        var right = RightNode.GetResultFilter(p);
-
-        return rr => left(rr) && right(rr);
-    }
 }
 
 public class ConditionOr : ConditionBase
@@ -344,13 +321,6 @@ public class ConditionOr : ConditionBase
         this.RightNode.ToStringInternal(sb, variables);
     }
 
-    public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)
-    {
-        var left = LeftNode.GetResultFilter(p);
-        var right = RightNode.GetResultFilter(p);
-
-        return rr => left(rr) || right(rr);
-    }
 }
 
 public class ConditionCompare : ConditionBase
@@ -483,28 +453,6 @@ public class ConditionCompare : ConditionBase
         if (this.ValueProvider!.Variable.HasText())
             sb.Append(" as " + this.ValueProvider.Variable);
     }
-    public override IEnumerable<object> GetFilteredRows(TemplateParameters p)
-    {
-        if (this.ValueProvider is TokenValueProvider)
-        {
-            return base.GetFilteredRows(p);
-        }
-        else
-        {
-            var collection = (IEnumerable?)this.ValueProvider!.GetValue(p);
-
-            if (collection == null)
-                return Enumerable.Empty<object>();
-
-            var elements = collection.Cast<object>();
-
-            //Without an operation the question is only whether the collection has anything in it. With one,
-            //every element is compared, so @any over an in-memory collection asks the same as it does over
-            //the rows of the query, without the element join that would multiply them.
-            return Operation == null ? elements.ToList() : elements.Where(GetElementPredicate()).ToList();
-        }
-    }
-
     Func<object?, bool>? elementPredicate;
 
     Func<object?, bool> GetElementPredicate()
@@ -525,32 +473,4 @@ public class ConditionCompare : ConditionBase
         return elementPredicate = Expression.Lambda<Func<object?, bool>>(body, param).Compile();
     }
 
-    public override Func<ResultRow, bool> GetResultFilter(TemplateParameters p)
-    {
-        var tvp = (TokenValueProvider)ValueProvider!;
-
-        if (Operation == null)
-        {
-            var column = p.QueryContext!.ResultColumns[tvp.ParsedToken.QueryToken!];
-
-            return r => ToBool(r[column]);
-        }
-        else
-        {
-            var type = this.ValueProvider!.Type!;
-
-            object? val = FilterValueConverter.Parse(Value, type, Operation.Value.IsList());
-
-            Expression value = Expression.Constant(val, type);
-
-            ResultColumn col = p.QueryContext!.ResultColumns[tvp.ParsedToken.QueryToken!];
-
-            var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
-
-            Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, type), value, inMemory: true);
-            var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
-
-            return lambda;
-        }
-    }
 }

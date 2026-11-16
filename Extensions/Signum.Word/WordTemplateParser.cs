@@ -364,7 +364,6 @@ public class WordTemplateParser : ITemplateParser
             if (!stack.IsEmpty())
                 AddError(true, "Missing {0}".FormatWith(stack.ToString(a =>
                 a is IfNode ? "@endif" :
-                a is AnyNode ? "@endany" :
                 a is ForeachNode ? "@endforeach" :
                 throw new UnexpectedValueException(a), ", ")));
         });
