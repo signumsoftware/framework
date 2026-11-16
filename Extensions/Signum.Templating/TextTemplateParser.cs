@@ -23,6 +23,13 @@ public static partial class TextTemplateParser
         BlockNode mainBlock = null!;
         Stack<BlockNode> stack = null!;
         public ScopedDictionary<string, ValueProviderBase> Variables { get; set; } = null!;
+
+        public IDisposable NewVariableScope()
+        {
+            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
+            return new Disposable(() => Variables = Variables.Previous!);
+        }
+
         List<TemplateError> errors = null!;
 
         public Type? ModelType { get; private set; }
@@ -160,24 +167,13 @@ public static partial class TextTemplateParser
                             break;
                         case "any":
                             {
-                                ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
-                                AnyNode any = new AnyNode(cond);
-                                stack.Peek().Nodes.Add(any);
-                                PushBlock(any.AnyBlock);
-                                if (cond is ConditionCompare cc)
-                                    DeclareVariable(cc.ValueProvider);
+                                AddError(true, TemplateUtils.QuantifierInsteadOfAnyMessage("any", expr));
                                 break;
                             }
                         case "notany":
-                            {
-                                var an = (AnyNode?)PopBlock(typeof(AnyNode))?.owner;
-                                if (an != null)
-                                    PushBlock(an.CreateNotAny());
-                                break;
-                            }
                         case "endany":
                             {
-                                PopBlock(typeof(AnyNode));
+                                //The error on @any already said what to do
                                 break;
                             }
                         case "foreach":

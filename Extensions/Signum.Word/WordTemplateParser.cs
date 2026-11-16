@@ -18,6 +18,12 @@ public class WordTemplateParser : ITemplateParser
     public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = null!;
     public Type? ModelType { get; private set; }
 
+    public IDisposable NewVariableScope()
+    {
+        Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
+        return new Disposable(() => Variables = Variables.Previous!);
+    }
+
     // Row-level @foreach blocks found in spreadsheets, captured before the block is collapsed so the
     // finalizer can renumber rows and fix formula ranges. Each block remembers its worksheet.
     public List<SpreadsheetForeachBlock> SpreadsheetForeachBlocks = new();
@@ -248,35 +254,14 @@ public class WordTemplateParser : ITemplateParser
                             break;
                         case "any":
                             {
-                                ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
-                                AnyNode any = new AnyNode(matchNode.NodeProvider, cond)
-                                {
-                                    AnyToken = matchNode
-                                };
-                                PushBlock(any);
-
-                                if (cond is ConditionCompare cc)
-                                    DeclareVariable(cc.ValueProvider);
+                                AddError(true, TemplateUtils.QuantifierInsteadOfAnyMessage("any", expr));
                                 break;
                             }
                         case "notany":
-                            {
-                                var an = PeekBlock<AnyNode>();
-                                if (an != null)
-                                {
-                                    an.NotAnyToken = matchNode;
-                                }
-                                break;
-                            }
                         case "endany":
                             {
-                                var an = PopBlock<AnyNode>();
-                                if (an != null)
-                                {
-                                    an.EndAnyToken = matchNode;
-
-                                    an.ReplaceBlock();
-                                }
+                                //The error on @any already said what to do; saying it again for every part
+                                //of the block only buries it.
                                 break;
                             }
                         case "if":
@@ -379,7 +364,6 @@ public class WordTemplateParser : ITemplateParser
             if (!stack.IsEmpty())
                 AddError(true, "Missing {0}".FormatWith(stack.ToString(a =>
                 a is IfNode ? "@endif" :
-                a is AnyNode ? "@endany" :
                 a is ForeachNode ? "@endforeach" :
                 throw new UnexpectedValueException(a), ", ")));
         });

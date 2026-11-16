@@ -411,24 +411,41 @@ public static class PropertyAuthLogic
         where T : Entity
     {
         var type = entity.GetType();
+        var role = RoleEntity.Current;
         var taac = TypeAuthLogic.GetAllowed(entity.GetType());
         var paacDic = PropertyAuthLogic.OverridenProperties(type);
 
-        if (entity.IsNew)
+        //The property rules have a default of their own (PropertyCache.GetDefaultValue) and it is not the type's
+        //allowed: a role that grants nothing by default leaves every route no rule overrides at None. Only the
+        //rules that were saved are in paacDic, so the default taken from the type has to be capped the same way;
+        //otherwise every property without a rule of its own is serialized as if the type allowed it.
+        var cap = PropertyCache.DefaultCap(role, null);
+
+        //MaxAutomaticUpgrade caps single routes below that cap. They are not overrides either, so paacDic does
+        //not have them and each one needs an entry of its own.
+        var capped = cap == PropertyAllowed.None ? null :
+            MaxAutomaticUpgrade.Keys.Where(pr => pr.RootType == type && paacDic?.ContainsKey(pr) != true).ToList();
+
+        AuthSerializationMetadata Build(PropertyAllowed fromType, Func<WithConditions<PropertyAllowed>, PropertyAllowed> collapse)
         {
-            return new AuthSerializationMetadata(typeof(T),
-                taac.ToPropertyAllowed().Max(),
-                paacDic?.ToDictionary(a => a.Key, a => a.Value.Max())
-            );
+            var properties =
+                paacDic != null ? paacDic.ToDictionary(a => a.Key, a => collapse(a.Value)) :
+                capped is { Count: > 0 } ? new Dictionary<PropertyRoute, PropertyAllowed>() :
+                null;
+
+            if (properties != null && capped != null)
+                foreach (var pr in capped)
+                    properties[pr] = Min(fromType, PropertyCache.DefaultCap(role, pr));
+
+            return new AuthSerializationMetadata(typeof(T), Min(fromType, cap), properties);
         }
 
+        if (entity.IsNew)
+            return Build(taac.ToPropertyAllowed().Max(), a => a.Max());
+
         var trivial = TypeAuthLogic.TrivialTypeGetUI(taac);
-        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(RoleEntity.Current, type))
-        {
-            return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
-                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())
-                );
-        }
+        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(role, type))
+            return Build(trivial.Value.ToPropertyAllowed(), a => a.CandidatesAssuming(taac).Distinct().SingleEx());
 
         for (int i = taac.ConditionRules.Count - 1; i >= 0; i--)
         {
@@ -437,19 +454,17 @@ public static class PropertyAuthLogic
             if (rule.Allowed != TypeAllowed.None || entity.Modified == ModifiedState.Sealed)
             {
                 if (rule.TypeConditions.All(tc => entity.InTypeCondition(tc)))
-                    return new AuthSerializationMetadata(typeof(T),
-                        rule.Allowed.GetUI().ToPropertyAllowed(),
-                        paacDic?.ToDictionary(a => a.Key, a => a.Value.ConditionRules[i].Allowed)
-                    );
-
+                {
+                    var index = i;
+                    return Build(rule.Allowed.GetUI().ToPropertyAllowed(), a => a.ConditionRules[index].Allowed);
+                }
             }
         }
 
-        return new AuthSerializationMetadata(typeof(T), 
-            taac.Fallback.GetUI().ToPropertyAllowed(),
-            paacDic?.ToDictionary(a => a.Key, a => a.Value.Fallback)
-        );
+        return Build(taac.Fallback.GetUI().ToPropertyAllowed(), a => a.Fallback);
     }
+
+    static PropertyAllowed Min(PropertyAllowed a, PropertyAllowed b) => a < b ? a : b;
 }
 
 

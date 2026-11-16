@@ -14,6 +14,7 @@ public class EnumLineProxy : BaseLineProxy
 
     protected ILocator SelectLocator => Element.Locator("select.form-select, .form-control, .form-control-plaintext");
     protected ILocator WidgetLocator => Element.Locator("div.rw-dropdown-list");
+    protected ILocator RadioLocator => Element.Locator("input[type=radio]");
 
     public override async Task SetValueUntypedAsync(object? value)
     {
@@ -25,12 +26,15 @@ public class EnumLineProxy : BaseLineProxy
             value is Enum e ? e.ToString() :
             throw new UnexpectedValueException(value);
 
-        var rw = WidgetLocator.First;
-        var rwCount = await rw.CountAsync();
-
-        if (rwCount > 0)
+        if (await RadioLocator.CountAsync() > 0)
+        {
+            // Handle lineType="RadioGroup"
+            await Element.Locator($"input[type=radio][value='{strValue}' i]").First.CheckAsync();
+        }
+        else if (await WidgetLocator.CountAsync() > 0)
         {
             // Handle React Widget dropdown
+            var rw = WidgetLocator.First;
             var popup = rw.Locator(".rw-popup-container");
 
             if (!await popup.IsVisibleAsync())
@@ -51,14 +55,19 @@ public class EnumLineProxy : BaseLineProxy
 
     public override async Task<object?> GetValueUntypedAsync()
     {
-        var rw = WidgetLocator.First;
-        var rwCount = await rw.CountAsync();
         string? strValue = null;
 
-        if (rwCount > 0)
+        if (await RadioLocator.CountAsync() > 0)
+        {
+            // Handle lineType="RadioGroup"
+            var checkedRadio = Element.Locator("input[type=radio]:checked");
+
+            strValue = await checkedRadio.CountAsync() == 0 ? null : await checkedRadio.First.GetAttributeAsync("value");
+        }
+        else if (await WidgetLocator.CountAsync() > 0)
         {
             // Handle React Widget dropdown
-            strValue = await rw.Locator("[data-value]").GetAttributeAsync("data-value");
+            strValue = await WidgetLocator.First.Locator("[data-value]").GetAttributeAsync("data-value");
         }
         else
         {

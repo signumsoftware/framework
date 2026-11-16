@@ -411,11 +411,7 @@ public class TokenNode : BaseNode
         }
         else
         {
-            string? text = obj is Enum en ? en.NiceToString() :
-                obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
-                obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
-                obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
-                TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
+            string? text = ToText(obj, p);
 
             if (text != null && text.Contains('\n'))
             {
@@ -463,6 +459,23 @@ public class TokenNode : BaseNode
         cell.DataType = null; //numeric cell; keeps its StyleIndex (date/number format)
         cell.Append(new S.CellValue(numeric));
         return true;
+    }
+
+    /// <summary>
+    /// A value as it is written into the document. A collection is joined by comma, so that an in-memory
+    /// collection (@[m:Entity.Products]) reads like the SeparatedByComma of a query token instead of
+    /// falling through to MList.ToString(); use @foreach to lay one out per line.
+    /// </summary>
+    string? ToText(object? obj, WordTemplateParameters p)
+    {
+        if (obj is not string && obj is System.Collections.IEnumerable ie)
+            return ie.Cast<object?>().ToString(e => ToText(e, p), ", ");
+
+        return obj is Enum en ? en.NiceToString() :
+            obj is bool b ? (b ? BooleanEnum.True.NiceToString() : BooleanEnum.False.NiceToString()) :
+            obj is TimeSpan ts ? ts.ToString(Format?.Replace(":", @"\:") ?? ValueProvider.Format, p.Culture) :
+            obj is IFormattable fo ? SafeFormat(fo, Format ?? ValueProvider.Format, p.Culture) :
+            TemplateUtils.ApplyCaseFormat(obj?.ToString(), Format ?? ValueProvider.Format, p.Culture);
     }
 
     static string SafeFormat(IFormattable fo, string? format, IFormatProvider provider)
@@ -639,9 +652,6 @@ public abstract class BlockContainerNode : BaseNode
 
         if (type == typeof(IfNode))
             return "if";
-
-        if (type == typeof(AnyNode))
-            return "any";
 
         return "block";
     }
@@ -859,171 +869,6 @@ public class ForeachNode : BlockContainerNode
     }
 
     public override string InnerText => $@"{ForeachToken.InnerText}{ForeachBlock!.InnerText}{EndForeachToken.InnerText}";
-}
-
-
-public class AnyNode : BlockContainerNode
-{
-    public readonly ConditionBase Condition;
-
-    public MatchNode AnyToken = null!;
-    public MatchNode? NotAnyToken;
-    public MatchNode EndAnyToken = null!;
-
-    public BlockNode? AnyBlock;
-    public BlockNode? NotAnyBlock;
-
-    public AnyNode(INodeProvider nodeProvider, ConditionBase condition) : base(nodeProvider)
-    {
-        this.Condition = condition;
-    }
-
-    public AnyNode(AnyNode original)
-        : base(original)
-    {
-        this.Condition = original.Condition.Clone();
-
-        this.AnyToken = CloneToken(original.AnyToken);
-        this.NotAnyToken = CloneOptionalToken(original.NotAnyToken);
-        this.EndAnyToken = CloneToken(original.EndAnyToken);
-
-        this.AnyBlock = (BlockNode?)original.AnyBlock?.Let(a => a.CloneNode(true));
-        this.NotAnyBlock = (BlockNode?)original.NotAnyBlock?.Let(a => a.CloneNode(true));
-    }
-
-    public override OpenXmlElement CloneNode(bool deep)
-    {
-        return new AnyNode(this);
-    }
-
-    public override void WriteTo(System.Xml.XmlWriter xmlWriter)
-    {
-        this.AppendChild(this.AnyBlock);
-
-        if (this.NotAnyBlock != null)
-            this.AppendChild(this.NotAnyBlock);
-
-        base.WriteTo(xmlWriter);
-
-        if (this.NotAnyBlock != null)
-            this.RemoveChild(this.NotAnyBlock);
-
-        this.RemoveChild(this.AnyBlock!);
-    }
-
-    protected internal override void ReplaceBlock()
-    {
-        if (this.NotAnyToken == null)
-        {
-            CommonAncestor = FindCommonAncestor(AnyToken, AnyToken, EndAnyToken);
-
-            this.AnyBlock = new BlockNode(this.NodeProvider);
-            this.AnyBlock.MoveChilds(NodesBetween(AnyToken, EndAnyToken));
-
-            ChildOfAncestor(AnyToken).ReplaceBy(this);
-            ChildOfAncestor(EndAnyToken).Remove();
-        }
-        else
-        {
-            CommonAncestor = FindCommonAncestor(AnyToken, AnyToken, NotAnyToken, EndAnyToken);
-
-            this.AnyBlock = new BlockNode(this.NodeProvider);
-            this.AnyBlock.MoveChilds(NodesBetween(AnyToken, NotAnyToken));
-
-            this.NotAnyBlock = new BlockNode(this.NodeProvider);
-            this.NotAnyBlock.MoveChilds(NodesBetween(NotAnyToken, EndAnyToken));
-
-            ChildOfAncestor(AnyToken).ReplaceBy(this);
-            ChildOfAncestor(NotAnyToken).Remove();
-            ChildOfAncestor(EndAnyToken).Remove();
-        }
-    }
-
-    public override void FillTokens(List<QueryToken> tokens)
-    {
-        this.Condition.FillQueryTokens(tokens);
-
-        this.AnyBlock!.FillTokens(tokens);
-        if (this.NotAnyBlock != null)
-            this.NotAnyBlock.FillTokens(tokens);
-    }
-
-    protected internal override void RenderNode(WordTemplateParameters p)
-    {
-        var filtered = this.Condition.GetFilteredRows(p);
-
-        using (filtered is IEnumerable<ResultRow> rr ? p.QueryContext!.OverrideRows(rr) : null)
-        {
-            if (filtered.Any())
-            {
-                this.ReplaceBy(this.AnyBlock!);
-                this.AnyBlock!.RenderNode(p);
-            }
-            else if (NotAnyBlock != null)
-            {
-                this.ReplaceBy(this.NotAnyBlock);
-                this.NotAnyBlock.RenderNode(p);
-            }
-            else
-                this.Parent!.RemoveChild(this);
-        }
-    }
-
-    public override void Synchronize(TemplateSynchronizationContext sc)
-    {
-        using (sc.NewScope())
-        {
-            this.Condition.Synchronize(sc, "@any");
-
-            using (sc.NewScope())
-            {
-                this.Condition.Declare(sc.Variables);
-
-                AnyBlock!.Synchronize(sc);
-            }
-
-            if (NotAnyBlock != null)
-            {
-                using (sc.NewScope())
-                {
-                    this.Condition.Declare(sc.Variables);
-
-                    NotAnyBlock.Synchronize(sc);
-                }
-            }
-        }
-    }
-
-    protected internal override void RenderTemplate(ScopedDictionary<string, ValueProviderBase> variables)
-    {
-        var parent = this.Parent!;
-        int index = parent.ChildElements.IndexOf(this);
-        this.Remove();
-
-        string str = "@any" + this.Condition.ToString(variables);
-
-        parent.InsertAt(ReplaceMatchNode(this.AnyToken, str)!, index++);
-        {
-            var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-            Condition.Declare(newVars);
-            this.AnyBlock!.RenderTemplate(newVars);
-            parent.MoveChildsAt(ref index, this.AnyBlock.ChildElements);
-        }
-
-        if (this.NotAnyToken != null)
-        {
-            parent.InsertAt(ReplaceMatchNode(this.NotAnyToken, "@notany")!, index++);
-
-            var newVars = new ScopedDictionary<string, ValueProviderBase>(variables);
-            Condition.Declare(newVars);
-            this.NotAnyBlock!.RenderTemplate(newVars);
-            parent.MoveChildsAt(ref index, this.NotAnyBlock.ChildElements);
-        }
-
-        parent.InsertAt(ReplaceMatchNode(this.EndAnyToken, "@endany")!, index++);
-    }
-
-    public override string InnerText => $@"{this.AnyToken.InnerText}{this.AnyBlock!.InnerText}{this.NotAnyToken?.InnerText}{this.NotAnyBlock?.InnerText}{this.EndAnyToken.InnerText}";
 }
 
 

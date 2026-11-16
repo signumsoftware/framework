@@ -272,7 +272,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
     internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
 
-    public override SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
+    public override IChangeTable? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements)
     {
         var allResources = root.Element("Operations")!.Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource")!.Value).ToHashSet();
 
@@ -287,7 +287,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
            TypeLogic.NameToType.Keys.ToHashSet(),
            TypeCache.typeReplacementKey);
 
-        return ImportXmlInternal(root, "Operations", "Operation", roles, 
+        return ImportXmlInternal(root, "Operations", "Operation", roles,
             toResource: s => {
                 var operation = SymbolLogic<OperationSymbol>.TryToSymbol(replacements.Apply(operationReplacementKey, s.Before("/")));
                 var type = TypeLogic.TryGetType(replacements.Apply(TypeCache.typeReplacementKey, s.After("/")));
@@ -304,6 +304,19 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
                         typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
                         allowed: xc.Attribute("Allowed")!.Value.ToEnum<OperationAllowed>()))
                     .ToReadOnly());
+            },
+            bulkInsertAction: rules =>
+            {
+                //Resource is an embedded, so the unique key is the Role plus the two columns it is made of
+                rules.BulkInsertQueryIdsIfAny(a => new { Role = a.Role.Id, Operation = a.Resource.Operation.Id, Type = a.Resource.Type.Id });
+
+                //Their own Conditions MList needs their ids in turn, and RuleOperation and Order are unique together
+                rules.SelectMany(r => r.ConditionRules.Select((c, i) =>
+                {
+                    c.RuleOperation = r.ToLite();
+                    c.Order = i;
+                    return c;
+                })).ToList().BulkInsertQueryIdsIfAny(a => new { RuleOperation = a.RuleOperation.Id, a.Order });
             });
     }
 

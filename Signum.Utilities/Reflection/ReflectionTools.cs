@@ -464,6 +464,9 @@ public static class ReflectionTools
         if (utype == typeof(Guid))
             return (T)(object)Guid.Parse(value);
 
+        if (utype == typeof(DateTimeOffset))
+            return (T)(object)DateTimeOffset.Parse(value);
+
         return (T)Convert.ChangeType(value, utype, culture)!;
     }
 
