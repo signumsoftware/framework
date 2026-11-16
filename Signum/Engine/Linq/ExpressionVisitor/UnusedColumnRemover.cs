@@ -78,11 +78,22 @@ internal class UnusedColumnRemover : DbExpressionVisitor
     {
         HashSet<string?> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
+        // UNION / INTERSECT / EXCEPT compare whole rows: removing a column would change the result
+        if (set.Operator != SetOperator.UnionAll)
+            columnsUsed.AddRange(ColumnNames(set.Left));
+
         allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
         allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);
 
         return base.VisitSetOperator(set);
     }
+
+    static IEnumerable<string?> ColumnNames(SourceWithAliasExpression source) => source switch
+    {
+        SelectExpression s => s.Columns.Select(c => (string?)c.Name),
+        SetOperatorExpression so => ColumnNames(so.Left),
+        _ => throw new UnexpectedValueException(source)
+    };
 
     protected internal override Expression VisitProjection(ProjectionExpression projection)
     {

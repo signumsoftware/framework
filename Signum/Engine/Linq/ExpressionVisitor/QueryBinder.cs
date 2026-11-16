@@ -130,7 +130,22 @@ internal class QueryBinder : ExpressionVisitor
                     return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
                        m.GetArgument("collection"), m.TryGetArgument("predicate")?.StripQuotes(), m == root);
                 case "Distinct":
+                    if (m.Arguments.Count > 1)
+                        throw new NotSupportedException($"{m.Method.Name} with IEqualityComparer is not supported in queries");
                     return BindDistinct(m.Type, m.GetArgument("source"));
+                case "Concat":
+                    return BindSetOperator(m, SetOperator.UnionAll);
+                case "Union":
+                    return BindSetOperator(m, SetOperator.Union);
+                case "Intersect":
+                    return BindSetOperator(m, SetOperator.Intersect);
+                case "Except":
+                    return BindSetOperator(m, SetOperator.Except);
+                case "UnionBy":
+                case "IntersectBy":
+                case "ExceptBy":
+                case "DistinctBy":
+                    throw new NotSupportedException($"{m.Method.Name} is not supported in queries");
                 case "Reverse":
                     return BindReverse(m.Type, m.GetArgument("source"));
                 case "Take":
@@ -665,6 +680,48 @@ internal class QueryBinder : ExpressionVisitor
         return new ProjectionExpression(
             new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
             pc.Projector, null, resultType);
+    }
+
+    private Expression BindSetOperator(MethodCallExpression m, SetOperator op)
+    {
+        if (m.Arguments.Count > 2)
+            throw new NotSupportedException($"{m.Method.Name} with IEqualityComparer is not supported in queries");
+
+        var source1 = m.Arguments[0]; //Queryable: source1, Enumerable: first
+        var source2 = m.Arguments[1]; //Queryable: source2, Enumerable: second
+
+        AssertNotInMemory(source1, m.Method.Name);
+        AssertNotInMemory(source2, m.Method.Name);
+
+        ProjectionExpression left = this.VisitCastProjection(source1);
+        ProjectionExpression right = this.VisitCastProjection(source2);
+
+        Alias setAlias = NextSelectAlias();
+
+        var (projector, leftColumns, rightColumns) = SetOperatorZipper.Zip(left.Projector, right.Projector, setAlias, m.Method.Name);
+
+        if (leftColumns.Count == 0)
+            throw new InvalidOperationException($"{m.Method.Name} requires at least one column");
+
+        var leftSelect = new SelectExpression(NextSelectAlias(), false, null, leftColumns, left.Select, null, null, null, 0);
+        var rightSelect = new SelectExpression(NextSelectAlias(), false, null, rightColumns, right.Select, null, null, null, 0);
+
+        var set = new SetOperatorExpression(op, leftSelect, rightSelect, setAlias);
+
+        Alias alias = NextSelectAlias();
+        ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, alias, selectTrivialColumns: true);
+
+        return new ProjectionExpression(
+            new SelectExpression(alias, false, null, pc.Columns, set, null, null, null, 0),
+            pc.Projector, null, m.Type);
+    }
+
+    static void AssertNotInMemory(Expression source, string methodName)
+    {
+        var clean = RemoveProjectionConvert(source);
+
+        if (clean is ConstantExpression ce && ce.Value is not IQueryable)
+            throw new NotSupportedException($"{methodName} between a query and an in-memory collection is not supported. Materialize the query first (ToList) or use Contains instead.");
     }
 
     private Expression BindReverse(Type resultType, Expression source)

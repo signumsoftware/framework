@@ -308,8 +308,18 @@ internal class OrderByRewriter : DbExpressionVisitor
 
     protected internal override Expression VisitSetOperator(SetOperatorExpression set)
     {
+        //Each part has its own orderings (only meaningful with TOP) that should not leak to the other part or outside
+        SourceWithAliasExpression left, right;
         using (Scope())
-            return base.VisitSetOperator(set);
+            left = (SourceWithAliasExpression)this.VisitSource(set.Left);
+
+        using (Scope())
+            right = (SourceWithAliasExpression)this.VisitSource(set.Right);
+
+        if (left != set.Left || right != set.Right)
+            return new SetOperatorExpression(set.Operator, left, right, set.Alias);
+
+        return set;
     }
 
     protected internal override Expression VisitTable(TableExpression table)

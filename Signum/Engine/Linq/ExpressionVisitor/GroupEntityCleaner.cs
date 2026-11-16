@@ -116,7 +116,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
         return new EntityExpression(type, new PrimaryKeyExpression(combiner(a.ExternalId.Value, b.ExternalId.Value)), null, null, null, null, null, a.AvoidExpandOnRetrieving || b.AvoidExpandOnRetrieving);
     }
 
-    static ImplementedByAllExpression ToIBA(Expression node, Type type)
+    internal static ImplementedByAllExpression ToIBA(Expression node, Type type)
     {
         var types = Schema.Current.Settings.TypeValues.Keys.ToList();
 
@@ -132,7 +132,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
 
         if (node is ImplementedByExpression ib)
             return new ImplementedByAllExpression(type,
-                types.ToDictionary(t => t, t => QueryBinder.Coalesce(t, ib.Implementations.Values.Where(e => PrimaryKey.Type(e.Type) == t))),
+                types.ToDictionary(t => t, t => QueryBinder.Coalesce(t.Nullify(), ib.Implementations.Values.Where(e => PrimaryKey.Type(e.Type) == t).Select(e => e.ExternalId.Value.Nullify()))),
                 new TypeImplementedByAllExpression(new PrimaryKeyExpression(
                  ib.Implementations.Select(imp => new When(imp.Value.ExternalId.NotEqualsNulll(), QueryBinder.TypeConstant(imp.Key))).ToList()
                  .ToCondition(PrimaryKey.Type(typeof(TypeEntity)).Nullify()))), null);
@@ -143,7 +143,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
         throw new UnexpectedValueException(node);
     }
 
-    static ImplementedByExpression ToIB(Expression node, Type type)
+    internal static ImplementedByExpression ToIB(Expression node, Type type)
     {
         if (node.IsNull())
             return new ImplementedByExpression(type, CombineStrategy.Case, new Dictionary<Type, EntityExpression>());
@@ -168,7 +168,7 @@ internal class GroupEntityCleaner : DbExpressionVisitor
         throw new UnexpectedValueException(node);
     }
 
-    private static EntityExpression NullEntity(Type type)
+    internal static EntityExpression NullEntity(Type type)
     {
         return new EntityExpression(type, new PrimaryKeyExpression(Expression.Constant(null, PrimaryKey.Type(type).Nullify())), null, null, null, null, null, false);
     }

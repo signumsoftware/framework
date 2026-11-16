@@ -61,6 +61,12 @@ public interface IAuthorEntity : IEntity
     bool Lonely();
 }
 
+public enum AuthorQuery
+{
+    AuthorsManual,
+    AuthorsConcat,
+}
+
 [EntityKind(EntityKind.Shared, EntityData.Transactional)]
 public class ArtistEntity : Entity, IAuthorEntity
 {
