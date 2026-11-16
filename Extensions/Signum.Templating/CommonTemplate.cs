@@ -39,41 +39,86 @@ public static class TemplateUtils
         };
     }
 
+    /// <summary>
+    /// @any was a block, so its answer could not be combined with anything else. The quantifiers say the same
+    /// thing as an ordinary condition, which @if can combine.
+    /// </summary>
+    public static string QuantifierInsteadOfAnyMessage(string keyword, string expr) =>
+        $"@{keyword}[{expr}] is no longer supported. Ask the same question inside @if, with a quantifier: " +
+        $"@if[Collection.AnyElement($x => $x.Something = Value)] to join the collection into the query, " +
+        $"@if[Collection.AnyNested($x => $x.Something = Value)] for a correlated sub-query, or " +
+        $"@if[m:Model.Collection.Any($x => $x.Something = Value)] for a collection already in memory. All and Not variants read the same way.";
+
+    static readonly (string separator, bool isOr)[] ConditionSeparators =
+    [
+        ("||", true),
+        (" OR ", true),
+        ("&&", false),
+        (" AND ", false),
+    ];
+
+    /// <summary>
+    /// The first occurrence of the separator that is not inside brackets or parentheses.
+    /// </summary>
+    public static int IndexOfTopLevel(string expr, string separator)
+    {
+        var depth = 0;
+
+        for (var i = 0; i < expr.Length; i++)
+        {
+            var c = expr[i];
+
+            if (c is '(' or '[')
+                depth++;
+            else if (c is ')' or ']')
+                depth--;
+            else if (depth == 0 && i + separator.Length <= expr.Length && string.CompareOrdinal(expr, i, separator, 0, separator.Length) == 0)
+                return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>
+    /// The index of the parenthesis closing the one at <paramref name="open"/>, or -1.
+    /// </summary>
+    public static int IndexOfClosingParenthesis(string expr, int open)
+    {
+        var depth = 0;
+
+        for (var i = open; i < expr.Length; i++)
+        {
+            if (expr[i] == '(')
+                depth++;
+            else if (expr[i] == ')' && --depth == 0)
+                return i;
+        }
+
+        return -1;
+    }
+
     public static ConditionBase ParseCondition(string expr, string variable, ITemplateParser parser)
     {
         expr = expr.Trim();
 
-        var left = expr.TryBefore("||");
-        if (left != null)
+        //A separator only separates outside parentheses: a quantifier carries its own condition inside them,
+        //and that condition can use the same separators.
+        foreach (var (separator, isOr) in ConditionSeparators)
         {
-            return new ConditionOr(
-                ParseCondition(left, variable, parser),
-                ParseCondition(expr.After("||"), variable, parser));
+            var index = IndexOfTopLevel(expr, separator);
+            if (index >= 0)
+            {
+                var leftCondition = ParseCondition(expr.Substring(0, index), variable, parser);
+                var rightCondition = ParseCondition(expr.Substring(index + separator.Length), variable, parser);
+
+                return isOr ? new ConditionOr(leftCondition, rightCondition) : new ConditionAnd(leftCondition, rightCondition);
+            }
         }
 
-        left = expr.TryBefore(" OR ");
-        if (left != null)
-        {
-            return new ConditionOr(
-                ParseCondition(left, variable, parser),
-                ParseCondition(expr.After(" OR "), variable, parser));
-        }
-
-        left = expr.TryBefore("&&");
-        if (left != null)
-        {
-            return new ConditionAnd(
-                ParseCondition(left, variable, parser),
-                ParseCondition(expr.After("&&"), variable, parser));
-        }
-
-        left = expr.TryBefore(" AND ");
-        if (left != null)
-        {
-            return new ConditionAnd(
-                ParseCondition(left, variable, parser),
-                ParseCondition(expr.After(" AND "), variable, parser));
-        }
+        //Before the comparison, because the body of a quantifier usually contains one
+        var quantifier = ConditionQuantifier.TryParse(expr, parser);
+        if (quantifier != null)
+            return quantifier;
 
         var filter = TemplateUtils.TokenOperationValueRegex.Match(expr);
         if (!filter.Success)

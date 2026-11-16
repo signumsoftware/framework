@@ -13,6 +13,8 @@ public interface ITemplateParser
     QueryDescription AssertQueryDescription(string action);
     QueryDescription? QueryDescription { get; }
     ScopedDictionary<string, ValueProviderBase> Variables { get; }
+    //A quantifier declares its lambda parameter for the length of its body only
+    IDisposable NewVariableScope();
     void AddError(bool fatal, string error);
 }
 
