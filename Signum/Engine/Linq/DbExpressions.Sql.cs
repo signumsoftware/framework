@@ -1363,16 +1363,18 @@ internal class AggregateRequestsExpression : DbExpression
 internal class RowNumberExpression : DbExpression
 {
     public readonly ReadOnlyCollection<OrderExpression> OrderBy;
+    public readonly ReadOnlyCollection<Expression> PartitionBy;
 
-    public RowNumberExpression(IEnumerable<OrderExpression>? orderBy)
+    public RowNumberExpression(IEnumerable<OrderExpression>? orderBy, IEnumerable<Expression>? partitionBy = null)
         : base(DbExpressionType.RowNumber, typeof(int))
     {
         this.OrderBy = orderBy.ToReadOnly();
+        this.PartitionBy = partitionBy.ToReadOnly();
     }
 
     public override string ToString()
     {
-        return "ROW_NUMBER()";
+        return PartitionBy.Any() ? "ROW_NUMBER() OVER (PARTITION BY {0})".FormatWith(PartitionBy.ToString(", ")) : "ROW_NUMBER()";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)

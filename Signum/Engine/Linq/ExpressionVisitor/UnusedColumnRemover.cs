@@ -78,11 +78,22 @@ internal class UnusedColumnRemover : DbExpressionVisitor
     {
         HashSet<string?> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
+        // UNION / INTERSECT / EXCEPT compare whole rows: removing a column would change the result
+        if (set.Operator != SetOperator.UnionAll)
+            columnsUsed.AddRange(ColumnNames(set.Left));
+
         allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
         allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);
 
         return base.VisitSetOperator(set);
     }
+
+    static IEnumerable<string?> ColumnNames(SourceWithAliasExpression source) => source switch
+    {
+        SelectExpression s => s.Columns.Select(c => (string?)c.Name),
+        SetOperatorExpression so => ColumnNames(so.Left),
+        _ => throw new UnexpectedValueException(source)
+    };
 
     protected internal override Expression VisitProjection(ProjectionExpression projection)
     {
@@ -161,8 +172,9 @@ internal class UnusedColumnRemover : DbExpressionVisitor
     protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
     {
         var orderBys = Visit(rowNumber.OrderBy, o => IsConstant(o.Expression) ? null! : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
-        if (orderBys != rowNumber.OrderBy)
-            return new RowNumberExpression(orderBys);
+        var partitionBy = Visit(rowNumber.PartitionBy);
+        if (orderBys != rowNumber.OrderBy || partitionBy != rowNumber.PartitionBy)
+            return new RowNumberExpression(orderBys, partitionBy);
         return rowNumber;
     }
 

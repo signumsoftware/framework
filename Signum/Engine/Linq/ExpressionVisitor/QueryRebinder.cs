@@ -220,8 +220,9 @@ internal class QueryRebinder : DbExpressionVisitor
     protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
     {
         var orderBys = RemoveDuplicates(Visit(rowNumber.OrderBy, VisitOrderBy));
-        if (orderBys != rowNumber.OrderBy)
-            return new RowNumberExpression(orderBys);
+        var partitionBy = Visit(rowNumber.PartitionBy);
+        if (orderBys != rowNumber.OrderBy || partitionBy != rowNumber.PartitionBy)
+            return new RowNumberExpression(orderBys, partitionBy);
         return rowNumber;
     }
 

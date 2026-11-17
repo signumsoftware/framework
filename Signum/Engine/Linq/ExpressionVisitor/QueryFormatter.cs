@@ -233,7 +233,29 @@ internal class QueryFormatter : DbExpressionVisitor
 
     protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
     {
-        sb.Append("ROW_NUMBER() OVER(ORDER BY ");
+        sb.Append("ROW_NUMBER() OVER(");
+
+        if (rowNumber.PartitionBy.Count > 0)
+        {
+            sb.Append("PARTITION BY ");
+            for (int i = 0, n = rowNumber.PartitionBy.Count; i < n; i++)
+            {
+                if (i > 0)
+                    sb.Append(", ");
+                this.Visit(rowNumber.PartitionBy[i]);
+            }
+        }
+
+        if (rowNumber.OrderBy.Count == 0)
+        {
+            if (!isPostgres) //SQL Server requires ORDER BY in ROW_NUMBER
+                sb.Append(rowNumber.PartitionBy.Count > 0 ? " ORDER BY (SELECT NULL)" : "ORDER BY (SELECT NULL)");
+
+            sb.Append(')');
+            return rowNumber;
+        }
+
+        sb.Append(rowNumber.PartitionBy.Count > 0 ? " ORDER BY " : "ORDER BY ");
         for (int i = 0, n = rowNumber.OrderBy.Count; i < n; i++)
         {
             OrderExpression exp = rowNumber.OrderBy[i];

@@ -172,7 +172,7 @@ public static class MusicLogic
 
         RegisterAwards(sb);
 
-        QueryLogic.Queries.Register(typeof(IAuthorEntity), () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
+        QueryLogic.Queries.Register(AuthorQuery.AuthorsManual, () => DynamicQueryCore.Manual(async (request, description, cancellationToken) =>
         {
             var one = await (from a in Database.Query<ArtistEntity>()
                              select new
@@ -203,6 +203,32 @@ public static class MusicLogic
             return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
         })
+            .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
+            .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
+            entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
+
+        QueryLogic.Queries.Register(AuthorQuery.AuthorsConcat, () => DynamicQueryCore.Auto(
+            (from a in Database.Query<ArtistEntity>()
+             select new
+             {
+                 Entity = (IAuthorEntity)a,
+                 a.Id,
+                 Type = "Artist",
+                 a.Name,
+                 Lonely = a.Lonely(),
+                 a.LastAward
+             })
+            .Concat(
+             from b in Database.Query<BandEntity>()
+             select new
+             {
+                 Entity = (IAuthorEntity)b,
+                 b.Id,
+                 Type = "Band",
+                 b.Name,
+                 Lonely = b.Lonely(),
+                 b.LastAward
+             }))
             .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll)
             .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
             entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));

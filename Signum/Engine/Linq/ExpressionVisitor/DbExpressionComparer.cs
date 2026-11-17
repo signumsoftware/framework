@@ -313,7 +313,8 @@ internal class DbExpressionComparer : ExpressionComparer
 
     protected virtual bool CompareRowNumber(RowNumberExpression a, RowNumberExpression b)
     {
-        return CompareList(a.OrderBy, b.OrderBy, CompareOrder);
+        return CompareList(a.OrderBy, b.OrderBy, CompareOrder)
+            && CompareList(a.PartitionBy, b.PartitionBy, Compare);
     }
 
     protected virtual bool CompareLike(LikeExpression a, LikeExpression b)

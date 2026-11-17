@@ -130,7 +130,26 @@ internal class QueryBinder : ExpressionVisitor
                     return BindUniqueRow(m.Type, m.Method.Name.RemoveEnd(2).ToEnum<UniqueFunction>(),
                        m.GetArgument("collection"), m.TryGetArgument("predicate")?.StripQuotes(), m == root);
                 case "Distinct":
+                    if (m.Arguments.Count > 1)
+                        throw new NotSupportedException($"{m.Method.Name} with IEqualityComparer is not supported in queries");
                     return BindDistinct(m.Type, m.GetArgument("source"));
+                case "Concat":
+                    return BindSetOperator(m, SetOperator.UnionAll);
+                case "Union":
+                    return BindSetOperator(m, SetOperator.Union);
+                case "Intersect":
+                    return BindSetOperator(m, SetOperator.Intersect);
+                case "Except":
+                    return BindSetOperator(m, SetOperator.Except);
+                case "DistinctBy":
+                    AssertNoComparer(m, 2);
+                    return BindDistinctBy(m.Type, VisitCastProjection(m.Arguments[0]), m.GetArgument("keySelector").StripQuotes(), null);
+                case "UnionBy":
+                    return BindUnionBy(m);
+                case "IntersectBy":
+                    return BindIntersectExceptBy(m, isExcept: false);
+                case "ExceptBy":
+                    return BindIntersectExceptBy(m, isExcept: true);
                 case "Reverse":
                     return BindReverse(m.Type, m.GetArgument("source"));
                 case "Take":
@@ -665,6 +684,140 @@ internal class QueryBinder : ExpressionVisitor
         return new ProjectionExpression(
             new SelectExpression(alias, true, null, pc.Columns, projection.Select, null, null, null, 0),
             pc.Projector, null, resultType);
+    }
+
+    static void AssertNoComparer(MethodCallExpression m, int expectedArguments)
+    {
+        if (m.Arguments.Count > expectedArguments)
+            throw new NotSupportedException($"{m.Method.Name} with IEqualityComparer is not supported in queries");
+    }
+
+    private Expression BindSetOperator(MethodCallExpression m, SetOperator op)
+    {
+        AssertNoComparer(m, 2);
+
+        return BindSetOperator(m.Type, m.Arguments[0], m.Arguments[1], op, m.Method.Name, withSide: false, out _);
+    }
+
+    /// <param name="side">When withSide, a column with 0 for the rows of source1 and 1 for the rows of source2 (used by UnionBy)</param>
+    private ProjectionExpression BindSetOperator(Type resultType, Expression source1, Expression source2, SetOperator op, string methodName, bool withSide, out ColumnExpression? side)
+    {
+        AssertNotInMemory(source1, methodName);
+        AssertNotInMemory(source2, methodName);
+
+        ProjectionExpression left = this.VisitCastProjection(source1);
+        ProjectionExpression right = this.VisitCastProjection(source2);
+
+        Alias setAlias = NextSelectAlias();
+
+        var (projector, leftColumns, rightColumns) = SetOperatorZipper.Zip(left.Projector, right.Projector, setAlias, methodName);
+
+        if (withSide)
+        {
+            leftColumns.Add(new ColumnDeclaration(SideColumnName, new SqlConstantExpression(0)));
+            rightColumns.Add(new ColumnDeclaration(SideColumnName, new SqlConstantExpression(1)));
+        }
+
+        if (leftColumns.Count == 0)
+            throw new InvalidOperationException($"{methodName} requires at least one column");
+
+        var leftSelect = new SelectExpression(NextSelectAlias(), false, null, leftColumns, left.Select, null, null, null, 0);
+        var rightSelect = new SelectExpression(NextSelectAlias(), false, null, rightColumns, right.Select, null, null, null, 0);
+
+        var set = new SetOperatorExpression(op, leftSelect, rightSelect, setAlias);
+
+        Alias alias = NextSelectAlias();
+        ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, alias, selectTrivialColumns: true);
+
+        var columns = pc.Columns.ToList();
+        side = null;
+        if (withSide)
+        {
+            columns.Add(new ColumnDeclaration(SideColumnName, new ColumnExpression(typeof(int), setAlias, SideColumnName)));
+            side = new ColumnExpression(typeof(int), alias, SideColumnName);
+        }
+
+        return new ProjectionExpression(
+            new SelectExpression(alias, false, null, columns, set, null, null, null, 0),
+            pc.Projector, null, resultType);
+    }
+
+    const string SideColumnName = "_side";
+
+    /// <summary>
+    /// First element of each key:
+    /// SELECT ... FROM (SELECT ..., ROW_NUMBER() OVER(PARTITION BY key ORDER BY explicitOrder, source orderings) AS _rowNum FROM source) WHERE _rowNum = 1
+    /// </summary>
+    private ProjectionExpression BindDistinctBy(Type resultType, ProjectionExpression projection, LambdaExpression keySelector, IEnumerable<OrderExpression>? explicitOrder)
+    {
+        Expression key = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, projection));
+        ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, aliasGenerator.Raw("basura"), isGroupKey: true, selectTrivialColumns: true);
+        var partitionBy = keyPC.Columns.Select(c => c.Expression).Where(e => !IsTrivialGroupKey(e)).ToList();
+
+        Alias rnAlias = NextSelectAlias();
+        ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, rnAlias);
+        var rowNumber = new ColumnDeclaration("_rowNum", new RowNumberExpression(explicitOrder, partitionBy));
+        var rnSelect = new SelectExpression(rnAlias, false, null, pc.Columns.PreAnd(rowNumber), projection.Select, null, null, null, 0);
+
+        Alias alias = NextSelectAlias();
+        ProjectedColumns pc2 = ColumnProjector.ProjectColumns(pc.Projector, alias);
+        var where = Expression.Equal(new ColumnExpression(typeof(int), rnAlias, rowNumber.Name), new SqlConstantExpression(1));
+
+        return new ProjectionExpression(
+            new SelectExpression(alias, false, null, pc2.Columns, rnSelect, where, null, null, 0),
+            pc2.Projector, null, resultType);
+    }
+
+    private Expression BindUnionBy(MethodCallExpression m)
+    {
+        AssertNoComparer(m, 3);
+
+        var keySelector = (LambdaExpression)m.GetArgument("keySelector").StripQuotes();
+
+        // first rows win: ROW_NUMBER() OVER(PARTITION BY key ORDER BY _side)
+        var concat = BindSetOperator(m.Type, m.Arguments[0], m.Arguments[1], SetOperator.UnionAll, m.Method.Name, withSide: true, out var side);
+
+        return BindDistinctBy(m.Type, concat, keySelector, new[] { new OrderExpression(OrderType.Ascending, side!) });
+    }
+
+    static readonly MethodInfo miEnumerableContains = ReflectionTools.GetMethodInfo(() => Enumerable.Contains<int>(null!, 0)).GetGenericMethodDefinition();
+    static readonly MethodInfo miQueryableWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<int>(null!, a => true)).GetGenericMethodDefinition();
+    static readonly MethodInfo miEnumerableWhere = ReflectionTools.GetMethodInfo(() => Enumerable.Where<int>(null!, a => true)).GetGenericMethodDefinition();
+
+    // first.Where(x => (!)second.Contains(keySelector(x))).DistinctBy(keySelector)
+    private Expression BindIntersectExceptBy(MethodCallExpression m, bool isExcept)
+    {
+        AssertNoComparer(m, 3);
+
+        var first = m.Arguments[0];
+        var second = m.Arguments[1];
+        var keySelector = (LambdaExpression)m.GetArgument("keySelector").StripQuotes();
+
+        AssertNotInMemory(second, m.Method.Name);
+
+        var sourceType = keySelector.Parameters[0].Type;
+        var keyType = keySelector.ReturnType;
+
+        var p = Expression.Parameter(sourceType, "x");
+        Expression condition = Expression.Call(miEnumerableContains.MakeGenericMethod(keyType), second, ExpressionReplacer.Replace(Expression.Invoke(keySelector, p)));
+        if (isExcept)
+            condition = Expression.Not(condition);
+
+        var predicate = Expression.Lambda(condition, p);
+
+        var where = m.Method.DeclaringType == typeof(Queryable) ?
+            Expression.Call(miQueryableWhere.MakeGenericMethod(sourceType), first, Expression.Quote(predicate)) :
+            Expression.Call(miEnumerableWhere.MakeGenericMethod(sourceType), first, predicate);
+
+        return BindDistinctBy(m.Type, VisitCastProjection(where), keySelector, null);
+    }
+
+    static void AssertNotInMemory(Expression source, string methodName)
+    {
+        var clean = RemoveProjectionConvert(source);
+
+        if (clean is ConstantExpression ce && ce.Value is not IQueryable)
+            throw new NotSupportedException($"{methodName} between a query and an in-memory collection is not supported. Materialize the query first (ToList) or use Contains instead.");
     }
 
     private Expression BindReverse(Type resultType, Expression source)

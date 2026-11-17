@@ -151,6 +151,16 @@ internal class MetadataVisitor : ExpressionVisitor
                     return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 case "Skip":
                     return BindSkip(m.Type, m.GetArgument("source"), m.GetArgument("count"));
+                case "Concat":
+                case "Union":
+                case "Intersect":
+                case "Except":
+                case "UnionBy":
+                    return BindSetOperator(m.Type, m.Arguments[0], m.Arguments[1]);
+                case "DistinctBy":
+                case "IntersectBy":
+                case "ExceptBy":
+                    return AsProjection(Visit(m.Arguments[0]));
             }
         }
 
@@ -272,6 +282,48 @@ internal class MetadataVisitor : ExpressionVisitor
     private Expression BindDistinct(Type resultType, Expression source)
     {
         return AsProjection(Visit(source));
+    }
+
+    private Expression BindSetOperator(Type resultType, Expression left, Expression right)
+    {
+        var l = AsProjection(Visit(left));
+        var r = AsProjection(Visit(right));
+
+        return new MetaProjectorExpression(resultType, CombineSetOperatorMeta(l.Projector, r.Projector));
+    }
+
+    static Expression CombineSetOperatorMeta(Expression l, Expression r)
+    {
+        if (l is NewExpression ln && r is NewExpression rn && ln.Constructor == rn.Constructor)
+        {
+            var args = ln.Arguments.Zip(rn.Arguments, CombineSetOperatorMeta).ToList();
+            return ln.Members != null ? Expression.New(ln.Constructor!, args, ln.Members) : Expression.New(ln.Constructor!, args);
+        }
+
+        if (l is MemberInitExpression lm && r is MemberInitExpression rm && lm.NewExpression.Constructor == rm.NewExpression.Constructor)
+        {
+            var rDic = rm.Bindings.OfType<MemberAssignment>().ToDictionary(a => a.Member);
+
+            var newExpr = (NewExpression)CombineSetOperatorMeta(lm.NewExpression, rm.NewExpression);
+            var bindings = lm.Bindings.OfType<MemberAssignment>()
+                .Select(lb => Expression.Bind(lb.Member, rDic.TryGetValue(lb.Member, out var rb) ? CombineSetOperatorMeta(lb.Expression, rb.Expression) : MakeVoidMeta(lb.Expression.Type)));
+
+            return Expression.MemberInit(newExpr, bindings);
+        }
+
+        if (l is MetaExpression lme && r is MetaExpression rme)
+        {
+            Implementations? imps = lme.Meta.Implementations != null && rme.Meta.Implementations != null ?
+                AggregateImplementations(new[] { lme.Meta.Implementations.Value, rme.Meta.Implementations.Value }) :
+                (Implementations?)null;
+
+            if (lme.Meta is CleanMeta lc && rme.Meta is CleanMeta rc)
+                return new MetaExpression(l.Type, new CleanMeta(imps, lc.PropertyRoutes.Concat(rc.PropertyRoutes).Distinct().ToArray()));
+
+            return MakeDirtyMeta(l.Type, imps, l, r);
+        }
+
+        return MakeVoidMeta(l.Type);
     }
 
     private Expression BindCount(Type resultType, Expression source)

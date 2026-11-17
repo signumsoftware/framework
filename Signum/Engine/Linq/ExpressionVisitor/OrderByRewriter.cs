@@ -175,7 +175,10 @@ internal class OrderByRewriter : DbExpressionVisitor
     {
         AppendKeys();
 
-        return new RowNumberExpression(gatheredOrderings);
+        //Explicit orderings (e.g. the side of UnionBy) go first, then the ones gathered from the source
+        var orderings = rowNumber.OrderBy.Concat(gatheredOrderings.EmptyIfNull()).ToList();
+
+        return new RowNumberExpression(orderings, rowNumber.PartitionBy);
     }
 
 
@@ -308,8 +311,18 @@ internal class OrderByRewriter : DbExpressionVisitor
 
     protected internal override Expression VisitSetOperator(SetOperatorExpression set)
     {
+        //Each part has its own orderings (only meaningful with TOP) that should not leak to the other part or outside
+        SourceWithAliasExpression left, right;
         using (Scope())
-            return base.VisitSetOperator(set);
+            left = (SourceWithAliasExpression)this.VisitSource(set.Left);
+
+        using (Scope())
+            right = (SourceWithAliasExpression)this.VisitSource(set.Right);
+
+        if (left != set.Left || right != set.Right)
+            return new SetOperatorExpression(set.Operator, left, right, set.Alias);
+
+        return set;
     }
 
     protected internal override Expression VisitTable(TableExpression table)
