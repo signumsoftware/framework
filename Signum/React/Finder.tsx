@@ -2561,11 +2561,12 @@ export namespace Finder {
 
   /**
    * Restricts the entities offered when this type is used as a filter value.
-   * @param getDomainField the field the candidates have to share with the query being filtered.
+   * @param getDomainField the field the candidates have to share with the query being filtered. Either a
+   * reference or a simple value like an enum.
    * @param extraFilters further restrictions, by the key of that query. Unlike the domain they
    * apply even when the query carries no domain filter.
    */
-  export function registerDomainForTokens<T extends Entity, D extends Entity>(type: Type<T>, getDomainField: (a: T) => Lite<D>,
+  export function registerDomainForTokens<T extends Entity, D extends Entity = Entity>(type: Type<T>, getDomainField: (a: T) => Lite<D> | string | number | null | undefined,
     extraFilters?: (queryKey: string) => (FilterOption | null | undefined)[] | undefined): void {
     domainRegistry.set(type.typeName, { type, getDomainField, extraFilters });
   }

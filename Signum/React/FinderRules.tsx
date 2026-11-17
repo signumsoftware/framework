@@ -9,7 +9,7 @@ import {
 } from './FindOptions';
 import { hasToArray, QueryToken } from './QueryToken';
 import { FilterOperation } from './Signum.DynamicQuery';
-import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement, liteKey } from './Signum.Entities';
+import { Entity, Lite, SearchMessage, JavascriptMessage, getToString, MList, newMListElement, liteKey, isLite } from './Signum.Entities';
 import { CollectionMessage } from './Signum.External';
 import {
   TypeReference,
@@ -630,7 +630,8 @@ function getDomainFindOptions(filterToken: QueryToken, ffc: Finder.FilterFormatt
   if (allDomains.length == 0 && extraFilters.length == 0)
     return undefined;
 
-  var distinctDomains = allDomains.distinctBy(liteKey);
+  //A domain value is a reference or a simple value like an enum, and only the first has a key of its own.
+  var distinctDomains = allDomains.distinctBy(d => isLite(d) ? liteKey(d) : d);
 
   return {
     queryName: entry.type,
