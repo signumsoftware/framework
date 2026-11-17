@@ -29,7 +29,7 @@ public class FilesController : ControllerBase
     }
 
     [HttpGet("api/files/downloadEmbeddedFilePath/{rootType}/{id}")]
-    public FileStreamResult? DownloadFilePathEmbedded(string rootType, string id, string route, string? rowId)
+    public IActionResult DownloadFilePathEmbedded(string rootType, string id, string route, string? rowId)
     {
         var type = TypeLogic.GetType(rootType);
 
@@ -50,7 +50,7 @@ public class FilesController : ControllerBase
 
         var fpe = makeQuery(primaryKey, rowId);
         if (fpe == null)
-            return null;
+            return NotFound(); //Entity / MList row deleted, not visible for the current user, or file not set
 
         Response.GetTypedHeaders().CacheControl = FilesCacheControl(fpe);
 
@@ -78,7 +78,7 @@ public class FilesController : ControllerBase
             return Database.Query<T>()
             .Where(a => a.Id == pk)
             .Select(selector)
-            .SingleEx();
+            .SingleOrDefaultEx();
         };
     }
 
@@ -97,7 +97,7 @@ public class FilesController : ControllerBase
             return Database.MListQuery(mlistExpression)
             .Where(mle => mle.Parent.Id == pk && mle.RowId == rowIdPk)
             .Select(mle => elementExpression.Evaluate(mle.Element))
-            .SingleEx();
+            .SingleOrDefaultEx();
         };
     }
 
