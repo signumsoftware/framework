@@ -201,7 +201,7 @@ internal class OrderByColumnPromoter : DbExpressionVisitor
 
             var newOrderBy = PromoteOrderings(rowNumber.OrderBy, ref from);
 
-            return newOrderBy == rowNumber.OrderBy ? rowNumber : new RowNumberExpression(newOrderBy);
+            return newOrderBy == rowNumber.OrderBy ? rowNumber : new RowNumberExpression(newOrderBy, rowNumber.PartitionBy);
         }
 
         //Sub-queries have their own scope, and are already visited by the OrderByColumnPromoter itself

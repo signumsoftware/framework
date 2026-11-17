@@ -172,8 +172,9 @@ internal class UnusedColumnRemover : DbExpressionVisitor
     protected internal override Expression VisitRowNumber(RowNumberExpression rowNumber)
     {
         var orderBys = Visit(rowNumber.OrderBy, o => IsConstant(o.Expression) ? null! : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;
-        if (orderBys != rowNumber.OrderBy)
-            return new RowNumberExpression(orderBys);
+        var partitionBy = Visit(rowNumber.PartitionBy);
+        if (orderBys != rowNumber.OrderBy || partitionBy != rowNumber.PartitionBy)
+            return new RowNumberExpression(orderBys, partitionBy);
         return rowNumber;
     }
 

@@ -367,6 +367,136 @@ public class SetOperatorsTest
     }
     #endregion
 
+    #region By operators
+    [Fact]
+    public void DistinctByScalar()
+    {
+        var artists = Database.Query<ArtistEntity>().DistinctBy(a => a.Sex).ToList();
+
+        var expected = Database.Query<ArtistEntity>().Select(a => a.Sex).ToList().Distinct().Count();
+        Assert.Equal(expected, artists.Count);
+        Assert.Equal(expected, artists.Select(a => a.Sex).Distinct().Count());
+        Assert.All(artists, a => Assert.NotNull(a.Name));
+    }
+
+    [Fact]
+    public void DistinctByRespectsOrder()
+    {
+        var artists = Database.Query<ArtistEntity>().OrderBy(a => a.Id).DistinctBy(a => a.Sex).ToList();
+        var expected = Database.Query<ArtistEntity>().ToList().OrderBy(a => a.Id).DistinctBy(a => a.Sex).ToList();
+        Assert.Equal(expected.Select(a => a.Id).Order(), artists.Select(a => a.Id).Order());
+
+        var artistsDesc = Database.Query<ArtistEntity>().OrderByDescending(a => a.Id).DistinctBy(a => a.Sex).ToList();
+        var expectedDesc = Database.Query<ArtistEntity>().ToList().OrderByDescending(a => a.Id).DistinctBy(a => a.Sex).ToList();
+        Assert.Equal(expectedDesc.Select(a => a.Id).Order(), artistsDesc.Select(a => a.Id).Order());
+        Assert.Equal(artistsDesc.Select(a => a.Id), artistsDesc.Select(a => a.Id).OrderDescending()); //Order kept after DistinctBy
+    }
+
+    [Fact]
+    public void DistinctByEntityKey()
+    {
+        var albums = Database.Query<AlbumEntity>().DistinctBy(a => a.Author).ToList();
+
+        var expected = Database.Query<AlbumEntity>().Select(a => a.Author.ToLite()).ToList().Distinct().Count();
+        Assert.Equal(expected, albums.Count);
+        Assert.Equal(expected, albums.Select(a => a.Author.ToLite()).Distinct().Count());
+    }
+
+    [Fact]
+    public void DistinctByLiteKeyWithNulls()
+    {
+        var nominations = Database.Query<AwardNominationEntity>().DistinctBy(a => a.Award).ToList();
+
+        var expected = Database.Query<AwardNominationEntity>().Select(a => a.Award).ToList().Distinct().Count();
+        Assert.Equal(expected, nominations.Count);
+    }
+
+    [Fact]
+    public void DistinctByAnonymousKey()
+    {
+        var albums = Database.Query<AlbumEntity>().DistinctBy(a => new { a.Year, a.Label }).Select(a => a.ToLite()).ToList();
+
+        var expected = Database.Query<AlbumEntity>().Select(a => new { a.Year, Label = a.Label.ToLite() }).ToList().Distinct().Count();
+        Assert.Equal(expected, albums.Count);
+    }
+
+    [Fact]
+    public void DistinctByInSubquery()
+    {
+        var bands = Database.Query<BandEntity>().Select(b => new { b.Name, Count = b.Members.DistinctBy(m => m.Sex).Count() }).ToList();
+
+        var expected = Database.Query<BandEntity>().ToList().Select(b => new { b.Name, Count = b.Members.DistinctBy(m => m.Sex).Count() }).ToList();
+        Assert.Equal(expected.OrderBy(a => a.Name), bands.OrderBy(a => a.Name));
+    }
+
+    [Fact]
+    public void UnionByFirstWins()
+    {
+        var list = Database.Query<ArtistEntity>().Select(a => new { a.Name, Side = "A" })
+            .UnionBy(Database.Query<ArtistEntity>().Select(a => new { a.Name, Side = "B" }), x => x.Name)
+            .ToList();
+
+        Assert.Equal(Database.Query<ArtistEntity>().Select(a => a.Name).ToList().Distinct().Count(), list.Count);
+        Assert.All(list, a => Assert.Equal("A", a.Side));
+    }
+
+    [Fact]
+    public void UnionByImplementedBy()
+    {
+        var authors = Database.Query<ArtistEntity>().Select(a => (IAuthorEntity)a)
+            .UnionBy(Database.Query<BandEntity>().Select(b => (IAuthorEntity)b), a => a.Name)
+            .ToList();
+
+        var expected = Database.Query<ArtistEntity>().Select(a => (IAuthorEntity)a).ToList()
+            .UnionBy(Database.Query<BandEntity>().Select(b => (IAuthorEntity)b).ToList(), a => a.Name)
+            .Select(a => a.ToLite()).ToList();
+
+        Assert.Equal(expected.ToHashSet(), authors.Select(a => a.ToLite()).ToHashSet());
+    }
+
+    [Fact]
+    public void IntersectByEntityKey()
+    {
+        var albums = Database.Query<AlbumEntity>()
+            .IntersectBy(Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => (IAuthorEntity)a), al => al.Author)
+            .ToList();
+
+        var dead = Database.Query<ArtistEntity>().Where(a => a.Dead).Select(a => a.ToLite<IAuthorEntity>()).ToList();
+        var expected = Database.Query<AlbumEntity>().ToList().IntersectBy(dead, al => al.Author.ToLite()).Count();
+
+        Assert.Equal(expected, albums.Count);
+        Assert.All(albums, al => Assert.Contains(al.Author.ToLite(), dead));
+    }
+
+    [Fact]
+    public void ExceptByEntityKey()
+    {
+        var artists = Database.Query<ArtistEntity>()
+            .ExceptBy(Database.Query<AlbumEntity>().Select(al => al.Author), a => (IAuthorEntity)a)
+            .ToList();
+
+        var authors = Database.Query<AlbumEntity>().Select(al => al.Author.ToLite()).ToList();
+        var expected = Database.Query<ArtistEntity>().ToList().ExceptBy(authors, a => a.ToLite<IAuthorEntity>()).Count();
+
+        Assert.Equal(expected, artists.Count);
+    }
+
+    [Fact]
+    public void ExceptByScalarKeyDistinct()
+    {
+        var albums = Database.Query<AlbumEntity>()
+            .ExceptBy(Database.Query<AlbumEntity>().Where(a => a.Year < 2000).Select(a => a.Year), a => a.Year)
+            .ToList();
+
+        var expected = Database.Query<AlbumEntity>().ToList()
+            .ExceptBy(Database.Query<AlbumEntity>().Where(a => a.Year < 2000).Select(a => a.Year).ToList(), a => a.Year)
+            .Count();
+
+        Assert.Equal(expected, albums.Count);
+        Assert.Equal(albums.Count, albums.Select(a => a.Year).Distinct().Count());
+    }
+    #endregion
+
     #region Not supported
     [Fact]
     public void InMemoryNotSupported()
@@ -384,13 +514,16 @@ public class SetOperatorsTest
     }
 
     [Fact]
-    public void ByOperatorsNotSupported()
+    public void ByOperatorsComparerAndInMemoryNotSupported()
     {
         Assert.Throws<NotSupportedException>(() => Database.Query<ArtistEntity>()
-            .UnionBy(Database.Query<ArtistEntity>(), a => a.Name).ToList());
+            .DistinctBy(a => a.Name, StringComparer.OrdinalIgnoreCase).ToList());
 
         Assert.Throws<NotSupportedException>(() => Database.Query<ArtistEntity>()
-            .DistinctBy(a => a.Name).ToList());
+            .ExceptBy(new List<string> { "Michael Jackson" }, a => a.Name).ToList());
+
+        Assert.Throws<NotSupportedException>(() => Database.Query<ArtistEntity>()
+            .UnionBy(new List<ArtistEntity>(), a => a.Name).ToList());
     }
 
     [Fact]

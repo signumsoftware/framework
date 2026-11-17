@@ -175,7 +175,10 @@ internal class OrderByRewriter : DbExpressionVisitor
     {
         AppendKeys();
 
-        return new RowNumberExpression(gatheredOrderings);
+        //Explicit orderings (e.g. the side of UnionBy) go first, then the ones gathered from the source
+        var orderings = rowNumber.OrderBy.Concat(gatheredOrderings.EmptyIfNull()).ToList();
+
+        return new RowNumberExpression(orderings, rowNumber.PartitionBy);
     }
 
 

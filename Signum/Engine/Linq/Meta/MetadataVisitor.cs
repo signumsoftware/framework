@@ -155,7 +155,12 @@ internal class MetadataVisitor : ExpressionVisitor
                 case "Union":
                 case "Intersect":
                 case "Except":
+                case "UnionBy":
                     return BindSetOperator(m.Type, m.Arguments[0], m.Arguments[1]);
+                case "DistinctBy":
+                case "IntersectBy":
+                case "ExceptBy":
+                    return AsProjection(Visit(m.Arguments[0]));
             }
         }
 
