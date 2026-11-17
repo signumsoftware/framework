@@ -95,7 +95,7 @@
     position: absolute;
     top: 52px;
     right: 5px;
-    z-index: 100;
+    z-index: 1000;
     min-width: 350px;
     background-color: var(--bs-body-bg);
     border: 1px solid var(--bs-border-color);
