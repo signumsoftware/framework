@@ -30,7 +30,14 @@ export function FileImage(p: FileImageProps): React.JSX.Element {
 
       Services.ajaxGetRaw({ url: url, cache: 'default' as RequestCache, ...ajaxOptions })
         .then(resp => resp.blob())
-        .then(blob => setObjectUrl(URL.createObjectURL(blob)));
+        .then(blob => setObjectUrl(URL.createObjectURL(blob)))
+        .catch(e => {
+          // The file no longer exists (or is not visible): show the broken image instead of an error modal
+          if (e instanceof Services.ServiceError && e.httpError.exceptionType == "Status 404")
+            return;
+
+          throw e;
+        });
 
     }
     return () => { objectUrl && URL.revokeObjectURL(objectUrl) };
