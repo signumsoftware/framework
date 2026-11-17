@@ -28,8 +28,18 @@ public static class MimeMapping
         var mime = MimeMapping.GetMimeType(fileName);
         return new FileStreamResult(stream, mime)
         {
-            FileDownloadName = forDownload ? Path.GetFileName(fileName) : null
+            FileDownloadName = forDownload ? SanitizeFileName(fileName) : null
         };
+    }
+
+    /// <summary>
+    /// Replaces characters that are invalid in a file name (e.g. '/', '\', ':', '*', '?', '"', '&lt;', '&gt;', '|') with '_', keeping the whole name.
+    /// Path.GetFileName is not used because it would cut everything before a '/' or '\'.
+    /// </summary>
+    public static string SanitizeFileName(string fileName, char replacement = '_')
+    {
+        var invalid = FileNameValidatorAttribute.InvalidFileNameChars;
+        return new string(fileName.Select(c => invalid.Contains(c) ? replacement : c).ToArray()).Trim();
     }
 
     public static FileStreamResult GetFileStreamResult(FileContent file, bool forDownload = true)

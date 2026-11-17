@@ -301,12 +301,18 @@ export function getFileName(response: Response): string {
     return decodeURIComponent(fileNamePartUTF8.trim().after("UTF-8''"));
 
   if (fileNamePartAscii)
-    return fileNamePartAscii.trim().after("filename=").replace("\"", "");
+    return fileNamePartAscii.trim().after("filename=").replaceAll("\"", "");
   else
     return "file.dat";
 }
 
+// Replaces characters invalid in a file name (/ \ : * ? " < > | and control chars) so the browser keeps the whole name
+export function sanitizeFileName(fileName: string, replacement: string = "_"): string {
+  return fileName.replace(/[\\/:*?"<>|\u0000-\u001F]/g, replacement).trim();
+}
+
 export function saveFileBlob(blob: Blob, fileName: string): void {
+  fileName = sanitizeFileName(fileName);
   if ((window.navigator as any).msSaveBlob)
     (window.navigator as any).msSaveBlob(blob, fileName);
   else {
