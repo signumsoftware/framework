@@ -27,6 +27,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 	</ItemGroup>
