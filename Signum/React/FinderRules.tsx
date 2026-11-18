@@ -616,6 +616,11 @@ function getAllSubConditions(fg: FilterGroupOptionParsed): FilterConditionOption
 function getDomainFindOptions(filterToken: QueryToken, ffc: Finder.FilterFormatterContext): FindOptions | undefined {
   const entry = Finder.domainRegistry.get(filterToken.type.name)!;
   const parents = findParentTokensInRegistry(filterToken, ffc.queryDescription, Finder.domainRegistry);
+
+  //The query may filter the domain field through this very reference (Type.Kind while filtering by Type),
+  //and not only on a parent that happens to share it, so this token counts as a source of domain as well.
+  parents.push({ tokenStr: new QueryTokenString(filterToken.fullKey), typeName: filterToken.type.name });
+
   const allDomains: any[] = [];
   for (const parent of parents) {
     const parentEntry = Finder.domainRegistry.get(parent.typeName)!;
@@ -721,7 +726,11 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[] {
       name: "Lite_LowPopulation",
       applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Lite" && tryGetTypeInfos(f.token!.type).every(ti => ti == null || ti.isLowPopulation),
       renderValue: (f, ffc) => {
-        return <EntityCombo ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        //A combo shows the whole domain at once, so narrowing it matters here even more than in the EntityLine.
+        const fo = Finder.domainRegistry.has(f.token!.type.name) ? getDomainFindOptions(f.token!, ffc) : undefined;
+        return <EntityCombo ctx={ffc.ctx} type={f.token!.type} create={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory}
+          findOptions={fo}
+        />;
       }
     },
     {
