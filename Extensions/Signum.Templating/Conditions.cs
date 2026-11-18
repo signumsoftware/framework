@@ -367,9 +367,19 @@ public class ConditionCompare : ConditionBase
         {
             var type = this.ValueProvider.Type!;
 
+            var parsed = FilterValueConverter.Parse(Value, type, Operation.Value.IsList());
+
+            //null can not be written in a condition, only nothing (@if[Name!=]), so for a string nothing
+            //has to mean both: a name that is null is as empty as one that is "".
+            if (type == typeof(string))
+            {
+                obj ??= "";
+                parsed ??= "";
+            }
+
             Expression token = Expression.Constant(obj, type);
 
-            Expression value = Expression.Constant(FilterValueConverter.Parse(Value, type, Operation.Value.IsList()), type);
+            Expression value = Expression.Constant(parsed, type);
 
             Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, token, value, inMemory: true);
             var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
