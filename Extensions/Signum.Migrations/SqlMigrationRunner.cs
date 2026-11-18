@@ -195,7 +195,9 @@ public class SqlMigrationRunner
             }
         }
 
-        Regex regex = new Regex(@"(?<version>\d{4}\.\d{2}\.\d{2}\-\d{2}\.\d{2}\.\d{2})(_(?<comment>.+))?\.sql");
+        // Files ending in ".force.sql" are allowed to be executed out of order (e.g. hotfixes applied in live
+        // and later merged with normal development) without requiring 'force'.
+        Regex regex = new Regex(@"(?<version>\d{4}\.\d{2}\.\d{2}\-\d{2}\.\d{2}\.\d{2})(_(?<comment>.+?))?(?<force>\.force)?\.sql$", RegexOptions.IgnoreCase);
 
         var matches =  Directory.EnumerateFiles(MigrationsDirectory, "*.sql")
             .Select(fileName => new { fileName, match = regex.Match(Path.GetFileName(fileName)) }).ToList();
@@ -203,7 +205,7 @@ public class SqlMigrationRunner
         var errors = matches.Where(a => !a.match!.Success);
 
         if (errors.Any())
-            throw new InvalidOperationException("Some scripts in the migrations directory have an invalid format (yyyy.MM.dd-HH.mm.ss_OptionalComment.sql) " +
+            throw new InvalidOperationException("Some scripts in the migrations directory have an invalid format (yyyy.MM.dd-HH.mm.ss_OptionalComment.sql or yyyy.MM.dd-HH.mm.ss_OptionalComment.force.sql) " +
                 errors.ToString(a => Path.GetFileName(a.fileName), "\n"));
 
         var list = matches.Select(a => new MigrationInfo
@@ -211,6 +213,7 @@ public class SqlMigrationRunner
             FileName = a.fileName,
             Version = a.match!.Groups["version"].Value,
             Comment = a.match!.Groups["comment"].Value,
+            AllowOutOfOrder = a.match!.Groups["force"].Success,
         }).OrderBy(a => a.Version).ToList();
         
         return list;
@@ -233,7 +236,15 @@ public class SqlMigrationRunner
             return PromptResult.Skip;
         }
 
-        if (migrations.SkipWhile(a => a.IsExecuted).Any(a => a.IsExecuted))
+        var lastExecuted = migrations.LastOrDefault(a => a.IsExecuted);
+        var outOfOrder = lastExecuted == null ? new List<MigrationInfo>() :
+            migrations.TakeWhile(a => a != lastExecuted).Where(a => !a.IsExecuted).ToList();
+
+        if (outOfOrder.Any(a => a.AllowOutOfOrder))
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Old migrations marked as .force.sql will be executed out of order: " + outOfOrder.Where(a => a.AllowOutOfOrder).ToString(a => a.Version, ", "));
+
+        var conflicts = outOfOrder.Where(a => !a.AllowOutOfOrder).ToList();
+        if (conflicts.Any())
         {
             if (force)
             {
@@ -241,10 +252,12 @@ public class SqlMigrationRunner
             }
             else
             {
-                var str = "Possible merge conflict. There are old migrations in the folder that have not been executed!. You need to manually discard one migration branch.";
+                var str = "Possible merge conflict. There are old migrations in the folder that have not been executed!: " + conflicts.ToString(a => Path.GetFileName(a.FileName!), ", ") + ". " +
+                    "You need to manually discard one migration branch, " +
+                    "or rename the migration as 'yyyy.MM.dd-HH.mm.ss_Comment.force.sql' if it is safe to execute it out of order (e.g. a hotfix applied in live and merged back).";
                 if (autoRun)
                     throw new InvalidOperationException(str);
-             
+
                 SafeConsole.WriteLineColor(ConsoleColor.Red, str);
                 Console.WriteLine();
                 Console.Write("Write '");
@@ -381,7 +394,8 @@ public class SqlMigrationRunner
                                 "  ");
             
             SafeConsole.WriteColor(color, mi.Version);
-            SafeConsole.WriteLineColor(mi.FileName == null ? ConsoleColor.Red: ConsoleColor.Gray, " " + mi.Comment);
+            SafeConsole.WriteColor(mi.FileName == null ? ConsoleColor.Red: ConsoleColor.Gray, " " + mi.Comment);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, mi.AllowOutOfOrder ? " (force)" : "");
         }
 
         Console.WriteLine();
@@ -462,6 +476,9 @@ public class SqlMigrationRunner
         public required string Comment;
 
         public bool IsExecuted;
+
+        /// <summary>File name ends with ".force.sql": safe to execute out of order without requiring 'force'.</summary>
+        public bool AllowOutOfOrder;
 
         public override string ToString()
         {
