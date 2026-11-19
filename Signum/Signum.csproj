@@ -33,8 +33,8 @@
 		<PackageReference Include="Npgsql" Version="10.0.3" />
 		<PackageReference Include="Pgvector" Version="0.3.2" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="10.0.0" />
-		<PackageReference Include="Signum.TSGenerator" Version="10.0.3" />
+		<PackageReference Include="Signum.MSBuildTask" Version="11.0.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="11.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
